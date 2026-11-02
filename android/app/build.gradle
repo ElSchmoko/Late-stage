@@ -14,8 +14,8 @@ android {
         targetSdk 34
         versionCode buildNumber
         versionName "0.1." + buildNumber
-        buildConfigField "String", "GAME_URL", "\"https://elschmoko.github.io/late-stage/\""
-        buildConfigField "String", "RELEASES_API", "\"https://api.github.com/repos/ElSchmoko/late-stage/releases/latest\""
+        buildConfigField "String", "GAME_URL", "\"https://elschmoko.github.io/Late-stage/\""
+        buildConfigField "String", "RELEASES_API", "\"https://api.github.com/repos/ElSchmoko/Late-stage/releases/latest\""
     }
 
     signingConfigs {

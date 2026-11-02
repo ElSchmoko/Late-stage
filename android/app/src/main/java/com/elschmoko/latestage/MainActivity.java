@@ -83,6 +83,12 @@ public class MainActivity extends Activity {
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (request.isForMainFrame() && !showingOffline) loadOffline();
             }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
+                // e.g. Pages not deployed yet (404) or GitHub having a bad day: play the bundled copy
+                if (request.isForMainFrame() && response.getStatusCode() >= 400 && !showingOffline) loadOffline();
+            }
         });
         setContentView(web);
         hideSystemUi();

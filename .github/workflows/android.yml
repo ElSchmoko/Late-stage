@@ -59,7 +59,7 @@ jobs:
           tag_name: build-${{ github.run_number }}
           name: Late Stage app, build ${{ github.run_number }}
           body: |
-            Android app shell for Late Stage. It plays the live game from https://elschmoko.github.io/late-stage/ (updated on every push to `game/`), and falls back to the bundled copy when offline.
+            Android app shell for Late Stage. It plays the live game from https://elschmoko.github.io/Late-stage/ (updated on every push to `game/`), and falls back to the bundled copy when offline.
             Install: download the APK below on your phone and open it (allow installs from your browser).
           files: late-stage-build-*.apk
           make_latest: true

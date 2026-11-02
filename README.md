@@ -2,8 +2,8 @@
 
 A satirical autobattler about modern life, inspired by Hearthstone Battlegrounds. Offline, single-player against 7 bots, built for phones in landscape.
 
-**Play in the browser:** https://elschmoko.github.io/late-stage/
-**Android app:** download the latest APK from [Releases](https://github.com/ElSchmoko/late-stage/releases/latest).
+**Play in the browser:** https://elschmoko.github.io/Late-stage/
+**Android app:** download the latest APK from [Releases](https://github.com/ElSchmoko/Late-stage/releases/latest).
 
 ## How the pieces fit
 
