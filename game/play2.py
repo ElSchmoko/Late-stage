@@ -9,7 +9,7 @@ with sync_playwright() as p:
     pg = b.new_page(viewport={'width': 844, 'height': 390})
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
-    pg.goto(f'file://{D}/late-stage-local.html'); pg.wait_for_timeout(800)
+    pg.goto(f'file://{D.parent}/dist/index.html'); pg.wait_for_timeout(800)
     pg.click('text=New run', force=True); pg.wait_for_timeout(700)
     pg.locator('#stage button.ab').nth(1).click(force=True); pg.click('text=Start', force=True); pg.wait_for_timeout(1300)
     FEEDTOK = "[...document.querySelectorAll('.tok')].find(t=>Math.abs(parseFloat(t.style.top)-74)<2)"
@@ -40,7 +40,7 @@ with sync_playwright() as p:
             for _ in range(3):
                 h = tokcenter(pg, "document.querySelector('.hc')")
                 if not h or pg.evaluate(f'{me}.board.length') >= 7: break
-                pg.mouse.click(h[0], h[1] - 20); pg.wait_for_timeout(700)
+                pg.mouse.click(h[0], h[1] - 20); pg.wait_for_timeout(500); pg.click('text=Play', force=True) if pg.locator('.acts .btn').count() else None; pg.wait_for_timeout(700)
                 if pg.evaluate('LSUI.G.mode') == 'target':
                     t = tokcenter(pg, "document.querySelector('.tok.target-ok')"); pg.mouse.click(*t); pg.wait_for_timeout(700)
                 if pg.locator('text=/^Discover|^Triple!/').count():

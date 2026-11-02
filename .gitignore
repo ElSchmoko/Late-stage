@@ -11,3 +11,4 @@ tools/_render.html
 tools/_fit.html
 *.jks
 !android/signing/latestage.jks
+game/power_v*.tsv

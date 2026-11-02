@@ -170,3 +170,96 @@ STYLES = {  # style code -> (tribe, display name)
 }
 COPIES = {1: 16, 2: 15, 3: 13, 4: 11, 5: 9, 6: 7}
 ALL = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
+
+
+# ======================================================================== v5 rework (Nov 2026)
+# Goals: higher tiers are clearly stronger than lower tiers of the same tribe, low-tier scalers grow slower,
+# and more varied mechanics borrowed from Battlegrounds: Likes (a buff resource, like Blood Gems),
+# Clock In (Rally), Grievance (Avenge), Side Gig (Activate), Acquire (consume a Feed minion), Cleave,
+# and "this game" Feed and tribe buffs. Engine: game/engine.js. The Python sim.py predates v5.
+V5 = {
+    # Hustlers
+    'Grindset Guru': (2, 2, 'After you hire another Hustler, gain +1/+1.'),
+    'Sneaker Reseller': (3, 3, 'Once per turn, after you sell a minion: give your Hustlers +2/+2.'),
+    'Side Hustle': (2, 3, 'Side Gig (1): give a minion +2/+2.'),
+    'Thought Leader': (3, 4, 'Every 4 gold you spend: give your other Hustlers +2/+1.'),
+    'Crypto Bro': (4, 4, 'Sells for 1 more gold for each turn on your board (max 6). Crashes to 0 after 5 turns.'),
+    'Venture Capitalist': (4, 5, 'First Impression: invest up to 4 of your gold: give a minion +3/+3 per gold invested.'),
+    'Corporate Raider': (5, 5, 'Start of combat: deal 6 damage to the enemy minion with the lowest Health.'),
+    'Consultant': (5, 6, 'Your "every 4 gold you spend" effects trigger every 3 gold instead.'),
+    'Private Equity': (6, 6, 'End of turn: Acquire the highest-Attack minion in the Feed: gain half its stats and it leaves the Feed.'),
+    'Unicorn Startup': (6, 8, 'End of turn: give your other Hustlers +1/+1 for every 2 gold you spent this turn.'),
+    'Too Big to Fail': (8, 8, 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +3/+3.'),
+    # Influencers
+    'Stan Account': (1, 2, 'End of turn: get 2 Likes.'),
+    'Hype Man': (3, 3, 'Clock In: get 2 Likes.'),
+    'Unboxing Streamer': (3, 3, 'First Impression: get 2 Likes. Legacy: summon a Follower.'),
+    'Personal Brand': (3, 4, 'First Impression: your Likes give +1/+1 more this game.'),
+    'Engagement Farmer': (4, 5, 'After you summon a Follower, give it +5/+5.'),
+    'Paparazzi': (3, 6, 'Start of combat: give your highest-Attack minion Out of Office.'),
+    'Brand Ambassador': (5, 6, 'Start of combat: summon two Followers. They get +3/+3 for each Influencer you have.'),
+    'Ring Light Studio': (3, 8, 'End of turn: get 2 Likes for each other Influencer you have.'),
+    'Blue Checkmark': (6, 8, 'Start of combat: your Followers get Out of Office. They attack twice.'),
+    'Main Character': (7, 9, 'Attention Seeker. Likes you give this minion count triple.'),
+    # Ferals
+    'City Pigeon': (2, 2, 'Attention Seeker. Legacy: summon a 1/1 Pigeon with Attention Seeker.'),
+    'Monstera': (2, 3, 'End of turn: gain +1/+1.'),
+    'Compost Heap': (1, 4, 'Legacy: Ferals in the Feed get +2/+2 this game.'),
+    'Plant Parent': (2, 4, 'End of turn: give your other Ferals +1/+1.'),
+    'Urban Fox': (3, 3, 'Out of Office. Clock In: give another Feral +2/+2 permanently.'),
+    'Rooftop Beehive': (3, 6, 'End of turn: give the minions next to it +2/+2.'),
+    'Guerrilla Gardener': (4, 5, 'End of turn: Ferals in the Feed get +1/+1 this game.'),
+    'Ancient Oak': (3, 8, 'Your end-of-turn effects give Ferals twice as much.'),
+    'Human Chain': (4, 7, 'Attention Seeker. Start of combat: give the minions next to it Out of Office.'),
+    'World Tree': (5, 9, 'End of turn: give your other Ferals +1/+1 for each turn this has been on your board (max +4).'),
+    'Old-Growth Blockade': (5, 9, 'Attention Seeker. Start of combat: give your other minions +1/+1 for each Attention Seeker you have.'),
+    # Creatives
+    'Busker': (2, 2, 'After you play a Creative, gain +1/+1.'),
+    'Memorial Mural': (2, 5, 'Grievance (2): your Creatives get +1 Attack this game, wherever they are.'),
+    'Indie Band': (3, 4, 'After you play a Creative, give it +3/+3 and this +1/+1.'),
+    'Art Critic': (4, 5, 'After a friendly minion dies, gain +1/+1 permanently (3 times per combat).'),
+    'Record Label': (4, 4, 'After you play a Creative, give it +3/+3 for each Creative you played this turn.'),
+    'Festival Headliner': (5, 6, 'After you play a Creative, give your other Creatives +3/+3.'),
+    'Museum Retrospective': (4, 8, 'Grievance (2): give your other Creatives +3/+3 permanently.'),
+    'Dead Rock Star': (7, 7, 'Legacy: give your other Creatives +4/+4 permanently.'),
+    'World Tour': (6, 8, 'After you play a minion, give your Creatives +2/+2.'),
+    # Techies
+    'Speedrunner': (1, 2, 'After this kills a minion, gain +1/+1 permanently (once per combat).'),
+    'Smart Plug': (2, 2, 'Collab. End of turn: the minion it sticks to gains +1 Health.'),
+    'Rage Quitter': (5, 3, 'Legacy: deal 5 damage to the minion that killed it.'),
+    'Leaderboard': (4, 6, 'Clock In: give your other Techies +2/+1 permanently.'),
+    'E-Sports Coach': (4, 5, 'Start of combat: give the minions next to it Toxic.'),
+    'Smart Home Hub': (4, 7, 'Your Collabs stick to two minions instead of one.'),
+    'Pro Gamer': (6, 6, 'Attacks twice. After this kills a minion, gain +4/+4 permanently (once per combat).'),
+    'Quantum Computer': (6, 6, 'Collab. Out of Office. Rebrand.'),
+    'World Record': (6, 7, 'Start of combat: give your two left-most other Techies Toxic.'),
+    # Punks
+    'Zine Maker': (2, 2, 'When sold: give the minion to its right +3/+3.'),
+    'Sellout Frontman': (3, 3, 'When sold: give your other Punks +2/+2. Punks in the Feed get +1/+1 this game.'),
+    'Mosh Pit': (6, 6, 'Cleave: its attacks also hit the minions next to its target.'),
+    'Energy-Drink Sponsor': (4, 5, 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +8).'),
+    'Reunion Tour': (4, 8, 'Your "When sold" effects trigger twice.'),
+    'Stage Diver': (6, 6, "Start of combat: deal damage equal to this minion's Attack to the left-most enemy minion, then gain +3 Attack permanently."),
+    'Greatest Hits': (6, 7, 'After you sell a Punk, put a copy of it in the Feed. It costs 2 gold.'),
+    'General Strike': (6, 7, 'Start of combat: deal 1 damage to all enemy minions for each Punk you have. Then give your Punks +1/+1 permanently for each enemy minion that died.'),
+    # Philosophers
+    'Giveaway Host': (2, 3, 'End of turn: your Followers get +3/+3 this game.'),
+    'Protest Camp': (2, 5, 'Attention Seeker. End of turn: give your other Feral Attention Seekers +2/+2.'),
+    'Heckler': (3, 3, 'Start of combat: deal 4 damage to the enemy minion with the highest Attack.'),
+    'Shower Thinker': (1, 2, 'End of turn: give the minion to its right +3/+3 for the next combat.'),
+    'Pub Philosopher': (3, 2, 'End of turn: give the minion to its left +4/+2 for the next combat.'),
+    'Nihilist': (2, 2, 'Legacy: give your minions +1 Attack.'),
+    'Utilitarian': (3, 5, 'End of turn: give your three lowest-Attack other Philosophers +2/+2.'),
+    'The Cynic': (4, 9, 'Attention Seeker. After this takes damage, give your other Philosophers +1/+1.'),
+    'Bestselling Author': (4, 7, 'End of turn: make the next-combat buffs on your Philosophers permanent.'),
+    'Grand Unified Theory': (5, 9, 'End of turn: double the next-combat buffs on your minions.'),
+    'Enlightened Guru': (3, 9, 'Attention Seeker. Your other Attention Seekers take at most 3 damage at a time.'),
+    'Desert Hermit': (3, 7, 'Attention Seeker. After this survives damage, give your other Philosophers +3/+3 permanently (once per combat).'),
+}
+for _c in ALL:
+    if _c.name in V5:
+        _c.atk, _c.hp, _c.text = V5[_c.name]
+        if _c.name == 'Mosh Pit':
+            _c.style = 'SA'
+TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat'),
+          Card('Pigeon', F, 1, 1, 1, '-', 'Attention Seeker.', 'There are always more pigeons.', taunt=True, kind='stat')]

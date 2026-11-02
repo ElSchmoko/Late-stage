@@ -12,7 +12,8 @@ A satirical autobattler about modern life, inspired by Hearthstone Battlegrounds
 | `game/` | The web game: `engine.js` (rules, a port of the balance simulator), `lobby.js` (8-player lobby), `ui.js` (shop, drag and drop, animated combat), `style.css`, `data.js` (generated card data and art). `build.py` bundles everything into one `index.html` with embedded fonts. |
 | `android/` | A thin Android app. It loads the GitHub Pages build, so the game updates on its own whenever `game/` changes. Offline, it plays a copy bundled into the APK. It also checks GitHub Releases and offers newer APKs. |
 | `art/` | Every card and hero portrait as an SVG, drawn by `tools/artkit.py` and the `tools/p_*.py` specs. |
-| `sim/` | The Python balance simulator the card set was tuned with (`python3 sim/lobby.py 1500`). |
+| `sim/` | `cards.py` is the card list (names, stats, text); the rest is the original Python simulator, which predates the v5 rework. Balance is now tested with the game engine itself (`node game/simtest.js`, `node game/power.js`). |
+| `docs/` | Battlegrounds research, the v5 rework notes and the per-card strength tables. |
 | `tools/` | Generators for the art, the card data export and the design boards. |
 
 ## Automatic builds
@@ -27,6 +28,6 @@ The APK is signed with the committed key in `android/signing/` (see the README t
 ```bash
 python3 tools/export_game.py      # cards.py + art/ -> game/data.js
 python3 game/build.py             # -> dist/index.html (open it in a browser)
-node game/simtest.js 300          # bot-only lobbies, sanity check of the engine
-python3 sim/lobby.py 1500         # the original Python simulator
+node game/simtest.js 1600         # bot-only lobbies: average placement per playstyle
+node game/power.js 600            # per-card strength table
 ```

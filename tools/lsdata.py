@@ -103,8 +103,10 @@ def fmt(text):
     for k in ('Out of Office', 'Toxic', 'Collab', 'Rebrand', 'Attention Seeker', 'Legacy', 'First Impression'):
         t = re.sub(rf'(?<![>\w]){re.escape(k)}s?(?=[ .,"]|$)', lambda m, k=k: kw_chip(k, label=m.group(0)), t)
     t = re.sub(r'Discover (a|an) ', lambda m: kw_chip('Discover') + f' {m.group(1)} ', t)
-    for trig in ('Start of combat:', 'End of turn:', 'When sold:', 'Every second end of turn:', 'Once per turn,', 'Twice per combat,', 'Once per combat,'):
+    for trig in ('Start of combat:', 'End of turn:', 'When sold:', 'Every second end of turn:', 'Once per turn,', 'Twice per combat,', 'Once per combat,', 'Clock In:', 'Cleave:', 'First Impression and end of turn:'):
         t = t.replace(trig, f'<b class="tg">{trig}</b>')
+    t = re.sub(r'(Grievance \(\d\):|Side Gig \(\d\):)', r'<b class="tg">\1</b>', t)
+    t = re.sub(r'(?<![\w>])(Acquire|Likes?)(?=[ .,])', r'<b class="kw">\1</b>', t)
     t = re.sub(r'(\+\d+/\+\d+) next combat', r'<b class="v tmp">\1</b> next combat', t)
     t = re.sub(r'(?<!>)(\+\d+/\+\d+|\+\d+ gold|\+\d+ (?:Attack|Health)|\d+ (?:extra )?gold|\d+ damage|twice|half its Attack and Health|\d+ times)',
                r'<b class="v">\1</b>', t)
@@ -191,39 +193,38 @@ class Component extends DCLogic {{
 # Card-face wording: the same rule in fewer words. The full rules text lives in the long-press detail view.
 SHORT = {
     'Middle Manager': 'Attention Seeker. End of turn: take +1/+1 from the minion on its left. If it dies, +1 gold next turn.',
-    'Crypto Bro': 'Sells for +1 gold per turn on board (max 5). Crashes to 0 after 4 turns.',
-    'Venture Capitalist': 'First Impression: invest up to 4 gold. A minion gets +2/+2 per gold.',
-    'Private Equity': 'After you sell a minion, your highest-Attack Hustler gains half its stats permanently.',
+    'Crypto Bro': 'Sells for +1 gold per turn on board (max 6). Crashes to 0 after 5 turns.',
+    'Venture Capitalist': 'First Impression: invest up to 4 gold. A minion gets +3/+3 per gold.',
+    'Private Equity': 'End of turn: Acquire the highest-Attack Feed minion: gain half its stats.',
     'Unicorn Startup': 'End of turn: other Hustlers get +1/+1 per 2 gold you spent.',
     'Too Big to Fail': 'Attention Seeker. Survives its first death each combat at 1 Health. Other Hustlers get +3/+3.',
-    'Hype Man': 'End of turn: your highest-Attack minion gets +1/+1 per Influencer.',
-    'Personal Brand': 'First Impression: give a minion +3/+3, or +4/+4 if it has your highest Attack.',
-    'Brand Ambassador': 'Start of combat: summon a Follower in each empty space (up to 4).',
-    'Ring Light Studio': 'End of turn: your highest-Attack minion gets +2/+2 per other Influencer.',
-    'Main Character': 'Attention Seeker. End of turn: gain +4/+4 per other minion buffed this turn.',
-    'World Tree': 'End of turn: other Ferals get +1/+1 per turn this has been on board (max +3).',
-    'Old-Growth Blockade': 'Attention Seeker. Start of combat: others get +1/+2 per Attention Seeker you have.',
-    'Museum Retrospective': 'Twice per combat, after a friendly minion dies: other Creatives get +3/+3 permanently.',
+    'Brand Ambassador': 'Start of combat: summon two Followers with +3/+3 per Influencer you have.',
+    'Ring Light Studio': 'End of turn: get 2 Likes per other Influencer.',
+    'Blue Checkmark': 'Start of combat: your Followers get Out of Office. They attack twice.',
+    'World Tree': 'End of turn: other Ferals get +1/+1 per turn this has been on board (max +4).',
+    'Old-Growth Blockade': 'Attention Seeker. Start of combat: others get +1/+1 per Attention Seeker you have.',
+    'Museum Retrospective': 'Grievance (2): other Creatives get +3/+3 permanently.',
+    'Memorial Mural': 'Grievance (2): your Creatives get +1 Attack this game.',
+    'Record Label': 'After you play a Creative, give it +3/+3 per Creative played this turn.',
     'Robot Vacuum': 'Collab. Start of combat: deal 1 damage to the lowest-Health enemy.',
-    'Leaderboard': 'End of turn: other Techies get +1/+1 per kill your Techies made last combat (max +3).',
     'Pro Gamer': 'Attacks twice. Once per combat, after it kills: gain +4/+4 permanently.',
     'Graffiti Kid': 'Start of combat: deal 1 damage per Punk to the left-most enemy.',
     'Feedback Loop': 'Start of combat: deal 1 damage to all enemies. If any die, Punks get +3/+2 permanently.',
-    'Mosh Pit': 'Start of combat: strip Out of Office from the top enemy and hit it for this Attack. If it dies, steal its Attack.',
-    'Energy-Drink Sponsor': 'When sold: other Punks get +1/+1 per Punk sold this game (max +6).',
-    'Stage Diver': 'Start of combat: hit the left-most enemy for this Attack, then gain +2 Attack permanently.',
+    'Energy-Drink Sponsor': 'When sold: other Punks get +1/+1 per Punk sold this game (max +8).',
+    'Stage Diver': 'Start of combat: hit the left-most enemy for this Attack, then gain +3 Attack permanently.',
     'General Strike': 'Start of combat: deal 1 damage per Punk to all enemies. Punks get +1/+1 permanently per kill.',
     'Stoicism Podcaster': 'Attention Seeker. Once per combat, after it survives damage: gain +1 Health permanently.',
     'Cold-Plunge Stoic': 'Attention Seeker. Once per combat, after it survives damage: gain +1/+1 permanently.',
     'Marathon Monk': 'Attention Seeker. Once per combat, after it survives damage: the minion on its right gets +2/+2 permanently.',
     'Desert Hermit': 'Attention Seeker. Once per combat, after it survives damage: other Philosophers get +3/+3 permanently.',
-    'Shower Thinker': 'End of turn: the minion on its right gets +2/+2 next combat.',
-    'Pub Philosopher': 'End of turn: the minion on its left gets +3/+1 next combat.',
+    'Shower Thinker': 'End of turn: the minion on its right gets +3/+3 next combat.',
+    'Pub Philosopher': 'End of turn: the minion on its left gets +4/+2 next combat.',
     'Thought Experiment': 'End of turn: the minions next to it get +3/+3 next combat.',
     'Bestselling Author': 'End of turn: make next-combat buffs on your Philosophers permanent.',
     'Grand Unified Theory': 'End of turn: double the next-combat buffs on your minions.',
-    'The Cynic': 'Attention Seeker. After it takes damage, other Philosophers get +1 Attack.',
+    'The Cynic': 'Attention Seeker. After it takes damage, other Philosophers get +1/+1.',
     'Enlightened Guru': 'Attention Seeker. Your other Attention Seekers take at most 3 damage per hit.',
+    'Utilitarian': 'End of turn: your three lowest-Attack other Philosophers get +2/+2.',
 }
 
 

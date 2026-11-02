@@ -1,0 +1,117 @@
+tribe	tier	name	turns	self	given/turn	lateSelf	win%
+Creative	1	Busker	4195	25.0	0.1	55.4	42
+Creative	1	Open Mic Poet	2251	11.5	0.0	33.1	41
+Creative	1	Art Student	3677	10.0	0.4	33.1	36
+Creative	2	Struggling Artist	2165	14.9	0.0	27.5	46
+Creative	2	Merch Stand	2692	17.5	0.0	32.0	47
+Creative	2	Method Actor	2598	16.8	0.0	30.0	50
+Creative	3	Memorial Mural	2308	20.3	0.0	31.1	49
+Creative	3	Indie Band	2673	28.4	4.2	42.0	52
+Creative	3	Conceptual Artist	1541	20.1	0.0	33.5	58
+Creative	4	Art Critic	1923	38.7	0.0	46.5	51
+Creative	4	Record Label	1094	17.5	9.2	23.9	53
+Creative	5	Festival Headliner	1302	25.3	11.9	26.7	53
+Creative	5	Museum Retrospective	1792	23.4	0.0	24.8	57
+Creative	6	Dead Rock Star	747	28.8	0.0	28.9	51
+Creative	6	World Tour	755	35.5	9.6	35.7	50
+Feral	1	Windowsill Succulent	2767	26.2	0.2	53.7	45
+Feral	1	City Pigeon	3017	22.6	0.1	63.2	43
+Feral	1	Trash Panda	1432	14.8	0.0	36.7	51
+Feral	2	Monstera	3158	34.5	0.0	52.4	49
+Feral	2	Tree Hugger	2833	28.8	0.0	50.4	52
+Feral	2	Compost Heap	2583	14.9	4.2	24.7	51
+Feral	3	Plant Parent	1609	14.2	18.8	21.1	63
+Feral	3	Protest Camp	2460	24.3	11.1	34.2	53
+Feral	3	Urban Fox	1420	17.2	0.0	30.5	50
+Feral	4	Rooftop Beehive	1572	15.7	4.6	18.2	48
+Feral	4	Guerrilla Gardener	1380	16.2	0.0	18.9	49
+Feral	5	Ancient Oak	1331	21.3	0.0	22.4	47
+Feral	5	Human Chain	1450	25.2	0.0	26.9	48
+Feral	6	World Tree	810	17.9	16.2	18.0	45
+Feral	6	Old-Growth Blockade	1010	34.0	0.0	34.4	54
+Hustler	1	Dropshipper	3843	22.1	0.1	66.8	39
+Hustler	1	Unpaid Intern	2464	9.8	0.0	69.6	28
+Hustler	1	Grindset Guru	4231	40.6	0.0	91.5	45
+Hustler	2	Middle Manager	3399	35.3	0.0	59.2	49
+Hustler	2	Sneaker Reseller	3451	29.9	6.8	53.4	49
+Hustler	2	Side Hustle	2419	26.6	0.0	51.8	47
+Hustler	3	Thought Leader	2109	24.8	32.7	39.5	66
+Hustler	3	Crypto Bro	1353	11.7	0.0	19.6	42
+Hustler	3	Golden Parachute Exec	2394	32.1	0.0	49.0	55
+Hustler	4	Venture Capitalist	1363	24.0	4.5	32.5	51
+Hustler	4	Corporate Raider	1742	29.8	0.0	38.1	51
+Hustler	5	Consultant	1089	27.8	0.0	29.8	50
+Hustler	5	Private Equity	1315	29.3	3.5	31.6	55
+Hustler	6	Unicorn Startup	622	23.3	42.6	23.4	63
+Hustler	6	Too Big to Fail	903	28.5	0.0	28.8	58
+Influencer	1	Reply Guy	2130	5.6	0.0	15.7	46
+Influencer	1	Engagement Bot	2116	11.7	0.0	97.2	38
+Influencer	1	Stan Account	2686	36.4	1.4	93.9	56
+Influencer	2	Giveaway Host	2662	11.0	1.0	18.4	58
+Influencer	2	Comment Section	2063	6.2	0.0	8.6	50
+Influencer	2	Hype Man	2832	25.5	7.0	46.9	56
+Influencer	3	Unboxing Streamer	2217	12.0	0.0	16.1	52
+Influencer	3	Viral Video	2356	10.3	0.0	13.0	55
+Influencer	3	Personal Brand	1449	6.5	3.7	7.0	50
+Influencer	4	Engagement Farmer	1858	8.2	0.0	8.5	46
+Influencer	4	Paparazzi	1654	7.1	0.0	7.4	44
+Influencer	5	Brand Ambassador	1362	9.9	0.0	10.0	40
+Influencer	5	Ring Light Studio	1427	10.4	17.0	10.4	44
+Influencer	6	Blue Checkmark	795	11.0	0.0	11.0	34
+Influencer	6	Main Character	1256	58.5	0.0	59.0	47
+Neutral	1	Nosy Neighbour	1895	7.1	0.2	43.1	31
+Neutral	1	Wi-Fi Leech	3865	6.2	0.3	38.8	33
+Neutral	2	Package Hoarder	1688	6.1	0.0	10.5	40
+Neutral	2	Quiet-Hours Enforcer	1240	7.6	0.0	14.4	45
+Neutral	3	Caretaker	2650	7.7	3.9	8.4	47
+Neutral	3	Helpful Neighbour	1554	6.2	1.7	6.7	43
+Neutral	4	Leaf Blower Guy	1568	9.5	0.0	9.7	41
+Neutral	5	Wedding DJ	581	7.4	0.0	7.5	38
+Neutral	5	Estate Lawyer	530	8.1	0.0	8.2	35
+Neutral	5	The Landlord	1678	19.4	0.0	20.3	40
+Neutral	6	Block Party Host	1066	12.7	6.7	12.7	46
+Philosopher	1	Shower Thinker	2482	10.3	1.7	27.8	40
+Philosopher	1	Stoicism Podcaster	4082	14.3	0.0	29.7	44
+Philosopher	1	Nihilist	2417	9.1	0.1	29.5	37
+Philosopher	2	Cold-Plunge Stoic	3866	20.6	0.0	32.8	51
+Philosopher	2	Pub Philosopher	2617	12.2	2.0	21.2	47
+Philosopher	2	Marathon Monk	3322	14.5	0.0	24.3	47
+Philosopher	3	Thought Experiment	2408	14.7	5.7	21.4	55
+Philosopher	3	Keynote Speaker	1508	13.9	0.0	24.6	53
+Philosopher	3	Book-Club Stoic	1570	12.7	0.0	21.4	48
+Philosopher	4	Utilitarian	1342	17.6	16.9	22.2	62
+Philosopher	4	Desert Hermit	1788	18.6	0.0	22.4	57
+Philosopher	5	The Cynic	1498	19.4	0.0	20.2	47
+Philosopher	5	Bestselling Author	1025	18.8	0.0	19.9	51
+Philosopher	6	Grand Unified Theory	572	17.6	0.0	17.6	51
+Philosopher	6	Enlightened Guru	1035	20.2	0.0	20.4	69
+Punk	1	Graffiti Kid	5873	12.8	0.1	31.5	51
+Punk	1	Anarchist Barista	2552	6.3	0.0	28.9	32
+Punk	1	Zine Maker	2926	7.8	0.2	43.5	32
+Punk	2	Sellout Frontman	1800	7.5	0.0	12.6	37
+Punk	2	Heckler	3422	14.4	0.0	24.1	50
+Punk	2	Crust Punk	3749	17.6	0.0	30.2	50
+Punk	3	Squat Collective	2906	15.9	0.0	23.0	47
+Punk	3	Feedback Loop	3475	26.1	0.0	35.3	61
+Punk	3	Pirate Radio	1753	17.9	0.0	29.2	60
+Punk	4	Mosh Pit	2149	166.5	0.0	227.1	56
+Punk	4	Energy-Drink Sponsor	456	6.4	0.0	6.6	40
+Punk	5	Reunion Tour	1123	17.7	0.0	18.9	43
+Punk	5	Stage Diver	1390	19.6	0.0	21.1	49
+Punk	6	Greatest Hits	628	18.4	0.0	18.5	48
+Punk	6	General Strike	769	26.0	0.0	26.2	59
+Techie	1	Speedrunner	5819	46.4	3.0	82.1	62
+Techie	1	Smart Plug	2595	14.4	1.0	57.3	31
+Techie	1	Loot Box	4184	27.5	2.7	56.6	61
+Techie	2	Robot Vacuum	0
+Techie	2	Toxic Teammate	1940	26.4	0.9	45.6	55
+Techie	2	Firmware Update	3498	33.0	10.3	54.1	52
+Techie	3	Rage Quitter	2445	26.4	0.2	40.6	47
+Techie	3	Smart Fridge	0
+Techie	3	E-Sports Coach	2791	25.7	0.8	39.2	51
+Techie	4	Noise-Cancelling Headphones	0
+Techie	4	Leaderboard	1844	28.7	24.3	34.3	64
+Techie	5	Smart Home Hub	1081	38.4	0.6	40.5	64
+Techie	5	Pro Gamer	1480	39.4	0.6	42.1	55
+Techie	6	Quantum Computer	0
+Techie	6	World Record	658	35.9	0.1	36.0	69

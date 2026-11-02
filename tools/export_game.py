@@ -2,12 +2,14 @@
 import json, pathlib
 from lsdata import *
 from heroes import HEROES
+from cards import TOKENS
 cards = []
-for c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS:
+SLUG['Pigeon'] = 'pigeon'; SLUG['Follower'] = 'follower'
+for c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS + TOKENS:
     cards.append(dict(name=c.name, tribe=c.tribe, tier=c.tier, atk=c.atk, hp=c.hp, style=c.style, text=text_of(c), face=face_text(c),
                       flavour=flavour_of(c), taunt=c.taunt, shield=c.shield, toxic=c.toxic, rebrand=c.rebrand, collab=c.collab,
                       kind=c.kind, sellbait=c.sellbait, discover=c.discover, twice=c.twice, art=SLUG[c.name], fit=FIT.get(c.name, 13),
-                      html=fmt(face_text(c)), full_html=fmt(text_of(c))))
+                      html=fmt(face_text(c)), full_html=fmt(text_of(c)), token=c in TOKENS))
 heroes = [dict(slug=h[0], name=h[1], power=h[2], cost=h[3], effect=h[4], effect_html=fmt(h[4]), push=h[5], boundaries=h[6], unlock=h[7], col=h[8]) for h in HEROES]
 art = {}
 A = S / 'art'

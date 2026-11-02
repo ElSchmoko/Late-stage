@@ -212,7 +212,8 @@ function drawFeed(keep) {
   const me = G.me;
   if (keep && G.feed.length) {
     if (G.heroSlug === 'remote') for (const f of G.feed) { f.a += 1; f.h += 1; }
-  } else G.feed = me.drawFeed().map(c => ({card: c, a: 0, h: 0, key: Math.random()}));
+  } else G.feed = me.drawFeed().map(c => ({card: c, a: me.feedBonus(c).a, h: me.feedBonus(c).h, key: Math.random()}));
+  me.getFeed = () => G.feed;
 }
 function newTurn() {
   const me = G.me, L = G.lobby;
@@ -234,14 +235,22 @@ function buildShop() {
   clear(); G.screen = 'shop'; bg(false);
   S = {tok: new Map(), feedTok: new Map(), handEl: new Map()};
   S.lobby = el('div', 'ab', '', stage); css(S.lobby, {left: 114, top: 8, display: 'flex', gap: '5px'});
-  S.feedSurf = el('div', 'surf', '<div class="tag" style="background:#ff8ab8">THE FEED · 3 GOLD EACH</div>', stage); css(S.feedSurf, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', background: '#fff'});
-  S.boardSurf = el('div', 'surf', '<div class="tag" style="background:#fff">YOUR BOARD</div>', stage); css(S.boardSurf, {left: 114, top: 166, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
+  S.feedSurf = el('div', 'surf', '<span class="coin price-coin" style="left:-12px;top:-12px;width:26px;height:26px;font-size:14px">3</span>', stage); css(S.feedSurf, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', background: '#fff'});
+  S.boardSurf = el('div', 'surf', '', stage); css(S.boardSurf, {left: 114, top: 166, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
+  S.slots = el('div', 'ab', '', S.boardSurf); css(S.slots, {left: 0, top: 0, width: 610, height: 90, pointerEvents: 'none'});
+  for (let i = 0; i < 7; i++) { const sl = el('div', 'slot', '', S.slots); css(sl, {left: (616 - (7 * 68 + 6 * 20)) / 2 + i * 88 - 3, top: 11}); }
   S.sellZone = el('div', 'ab bd', '', stage); css(S.sellZone, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', border: '3px dashed #2b2140', background: 'rgba(255,201,40,.92)', display: 'none', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '26px', zIndex: 5});
   S.handZone = el('div', 'ab', '', stage); css(S.handZone, {left: 200, top: 268, width: 530, height: 122});
   // left column
   S.shield = el('button', 'sb', '', stage); css(S.shield, {left: 10, top: 10, width: 92, height: 112}); S.shield.onclick = levelUp;
-  S.tribes = el('div', 'ab', `<p class="bd" style="margin:0 0 4px;font-size:10px;letter-spacing:.12em;color:#5a5270">IN THIS LOBBY</p>` + G.lobby.tribes.map(t => `<div class="bd" style="display:flex;align-items:center;gap:5px;font-size:11px;line-height:1.5"><i style="width:10px;height:10px;border-radius:3px;border:2px solid #2b2140;background:${TC[t]};display:block"></i>${TP[t]}</div>`).join(''), stage);
-  css(S.tribes, {left: 10, top: 146, width: 96, background: '#fff', border: '2.5px solid #2b2140', borderRadius: '14px', padding: '6px 6px 7px', boxShadow: '0 0 0 3px #fff'});
+  S.tribes = el('button', 'tribebtn', G.lobby.tribes.map(t => `<i style="background:${TC[t]}"></i>`).join(''), stage);
+  css(S.tribes, {left: 30, top: 140}); S.tribes.setAttribute('aria-label', 'Tribes in this lobby');
+  S.tribePop = el('div', 'tribepop', G.lobby.tribes.map(t => `<div><i style="background:${TC[t]}"></i>${TP[t]}</div>`).join(''), stage);
+  css(S.tribePop, {left: 74, top: 128}); S.tribePop.hidden = true;
+  const showT = v => { S.tribePop.hidden = !v; if (v) anim(S.tribePop, [{transform: 'scale(.8)', opacity: 0}, {transform: 'scale(1)', opacity: 1}], {duration: 160, raw: true}); };
+  S.tribes.onpointerenter = () => showT(true); S.tribes.onpointerleave = () => showT(false);
+  S.tribes.onclick = () => { showT(S.tribePop.hidden); clearTimeout(S.tribeT); S.tribeT = setTimeout(() => showT(false), 2500); };
+  S.likes = el('button', 'likes', '', stage); css(S.likes, {left: 212, top: 318}); S.likes.onclick = useLikes; S.likes.hidden = true;
   S.heroAv = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(S.heroAv, {left: 16, top: 290, width: 88, height: 88});
   S.heroAv.onclick = () => showHeroDetail();
   S.hp = el('div', 'badge', '', stage); css(S.hp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
@@ -256,7 +265,7 @@ function buildShop() {
   S.ready = el('button', 'sb', `<svg width="88" height="110" viewBox="0 0 88 110" aria-hidden="true"><rect x="6" y="12" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="6" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="12" width="76" height="90" rx="38" fill="#2b2140" stroke="#2b2140" stroke-width="3"></rect><g class="face"><rect x="6" y="6" width="76" height="90" rx="38" fill="#2ecb6e" stroke="#2b2140" stroke-width="3"></rect><path d="M22 30Q26 18 40 15" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".7"></path></g></svg><span class="ab" style="left:0;right:0;top:45px;text-align:center;font-size:22px;pointer-events:none">Ready</span>`, stage);
   css(S.ready, {left: 746, top: 246, width: 88, height: 110}); S.ready.onclick = ready;
   S.layer = el('div', 'ab', '', stage); css(S.layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
-  S.hint = el('div', 'ab', '', stage); css(S.hint, {left: 220, top: 300, width: 500, textAlign: 'center', fontSize: '13px', fontWeight: 800, color: '#5a5270', pointerEvents: 'none'});
+
   renderChrome(); renderAll(false);
 }
 function shieldSVG(fill) { const d = 'M15 6H77Q86 6 86 15V56Q86 82 46 102Q6 82 6 56V15Q6 6 15 6Z'; return `<svg width="92" height="112" viewBox="0 0 92 112" aria-hidden="true"><g stroke-linejoin="round"><path d="${d}" transform="translate(0 5)" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="${d}" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="${d}" transform="translate(0 5)" fill="#2b2140" stroke="#2b2140" stroke-width="3"></path><path class="face" d="${d}" fill="${fill}" stroke="#2b2140" stroke-width="3"></path></g></svg>`; }
@@ -288,9 +297,9 @@ function renderChrome() {
   const usable = !passive && !G.heroUsed && me.gold[0] >= +h.cost;
   S.power.innerHTML = `<svg width="70" height="76" viewBox="0 0 70 76" aria-hidden="true"><g stroke-linejoin="round"><path d="M35 6L62 21V52L35 67L8 52V21Z" transform="translate(0 5)" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M35 6L62 21V52L35 67L8 52V21Z" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M35 6L62 21V52L35 67L8 52V21Z" transform="translate(0 5)" fill="#2b2140" stroke="#2b2140" stroke-width="3"></path><path class="face" d="M35 6L62 21V52L35 67L8 52V21Z" fill="${passive || usable ? '#2fd0d0' : '#c9c2d6'}" stroke="#2b2140" stroke-width="3"></path></g><g transform="translate(20 20) scale(1.25)" fill="none" stroke="#2b2140" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" fill="#fff"></path></g></svg>` +
     (passive ? '' : `<span class="coin" style="left:50px;top:-2px;width:24px;height:24px;font-size:13px">${h.cost}</span>`) +
-    `<span class="ab" style="left:-20px;right:-20px;top:76px;text-align:center;font-size:11px;line-height:1.1;white-space:nowrap;pointer-events:none">${h.power} <span style="font-family:Nunito,sans-serif;font-size:10px;opacity:.75">· ${passive ? 'Passive' : G.heroUsed ? 'Used' : 'Once per turn'}</span></span>`;
-  S.boardSurf.querySelector('.tag').textContent = `YOUR BOARD · ${me.board.length}/7`;
-  S.feedSurf.querySelector('.tag').textContent = `THE FEED · ${G.heroSlug === 'h_bargainhunter' ? 2 : 3} GOLD EACH`;
+    '';
+  S.feedSurf.querySelector('.price-coin').textContent = G.heroSlug === 'h_bargainhunter' ? 2 : 3;
+  S.likes.hidden = !me.likes; S.likes.innerHTML = `<svg width="34" height="32" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 20C4 14 1.5 10 1.5 6.5 1.5 3.5 4 1.5 6.5 1.5c2.2 0 4 1.2 5.5 3.2 1.5-2 3.3-3.2 5.5-3.2 2.5 0 5 2 5 5 0 3.5-2.5 7.5-10.5 13.5Z" fill="#ff6b9a" stroke="#2b2140" stroke-width="2" stroke-linejoin="round"></path></svg><span>${me.likes}</span>`; S.likes.setAttribute('aria-label', `${me.likes} Likes. Tap to give them out`);
 }
 function copiesOf(name) { return G.me.board.filter(m => m.name === name && !m.golden).length + G.hand.filter(h => h.card.name === name).length; }
 function shownStats(m) { return {atk: m.atk + m.ta, hp: m.hp + m.th, tmp: !!(m.ta || m.th), upA: G.me.buffed.has(m.id), upH: G.me.buffed.has(m.id)}; }
@@ -334,9 +343,7 @@ function renderAll(animateNew = true, gapAt = null) {
     e._h = hc; hseen.add(hc.key);
   });
   for (const [k, e] of S.handEl) if (!hseen.has(k)) { if (!e._leaving) e.remove(); S.handEl.delete(k); }
-  S.hint.textContent = G.firstTurn && !me.board.length ? (G.hand.length ? 'Drag the card onto your board, or tap it to play it.' : 'Tap a minion in the Feed to hire it for 3 gold.') : '';
-  S.hint.style.display = G.hand.length ? 'none' : 'block';
-  if (G.hand.length && G.firstTurn && !me.board.length) { S.hint.style.display = 'block'; S.hint.style.top = '248px'; } else S.hint.style.top = '300px';
+
   renderChrome();
 }
 
@@ -362,6 +369,12 @@ async function playLog() {
       toast('Triple! Golden minion', 1400);
     } else if (e.type === 'collab') {
       if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#8fd4ff', 80); floatText(c[0], c[1] - 34, e.name, ''); }
+    } else if (e.type === 'acquire') {
+      if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#ffc928', 100); floatText(c[0], c[1] - 34, `Acquired ${e.name}`, 'gold'); }
+    } else if (e.type === 'likes') {
+      const c = center(rectOf(S.heroAv)); for (let k = 0; k < Math.min(e.n, 5); k++) setTimeout(() => floatText(c[0] + 20 + k * 8, c[1] - 30, '♥', 'red'), k * 90);
+    } else if (e.type === 'feedbuff') {
+      for (const tt of S.feedTok.values()) if (tt._f && tt._f.card.tribe === e.tribe) { const c = center(rectOf(tt)); floatText(c[0], c[1] - 30, `+${e.a}/+${e.h}`); }
     } else if (e.type === 'drain') {
       if (t) anim(t, [{transform: 'translateX(0)'}, {transform: 'translateX(-4px)'}, {transform: 'translateX(4px)'}, {transform: 'translateX(0)'}], {duration: 220});
     }
@@ -443,7 +456,7 @@ async function scroll() {
   anim(S.scroll.querySelector('.spin'), [{transform: 'translate(18px,17px) scale(1.34) rotate(0)'}, {transform: 'translate(18px,17px) scale(1.34) rotate(360deg)'}], {duration: 420, raw: true});
   const old = [...S.feedTok.values()]; S.feedTok.clear();
   old.forEach((t, i) => { t._leaving = true; t.style.transition = 'none'; anim(t, [{transform: 'translateY(0) rotate(0)'}, {transform: `translateY(-90px) rotate(${i % 2 ? 15 : -15}deg)`, opacity: 0}], {duration: 220, delay: i * 25, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); });
-  G.feed = me.drawFeed().map(c => ({card: c, a: 0, h: 0, key: Math.random()}));
+  G.feed = me.drawFeed().map(c => ({card: c, a: me.feedBonus(c).a, h: me.feedBonus(c).h, key: Math.random()}));
   await sleep(120);
   renderAll();
   [...S.feedTok.values()].forEach((t, i) => anim(t, [{transform: 'translateY(-70px)', opacity: 0}, {transform: 'translateY(6px)', opacity: 1, offset: .7}, {transform: 'translateY(0)'}], {duration: 340, delay: i * 50, easing: 'ease-out', fill: 'backwards'}));
@@ -466,6 +479,11 @@ async function levelUp() {
   if (stars) anim(stars, [{transform: 'scale(3) rotate(-90deg)', opacity: 0}, {transform: 'scale(1) rotate(0)', opacity: 1}], {duration: 450, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
   toast(`Tier ${me.tier}! The Feed now shows ${E.FEED_SIZE[me.tier]} minions`, 1500);
   await playLog();
+}
+async function useLikes() {
+  const me = G.me; if (!me.likes || !me.board.length) { toast(me.likes ? 'Play a minion first' : 'No Likes yet'); return; }
+  const go = async t => { me.giveLike(t); renderAll(); await playLog(); if (me.likes > 0) useLikes(); };
+  await chooseTarget(me.board.slice(), `Give a Like (+${1 + me.likeBonus}/+${1 + me.likeBonus}) · ${me.likes} left`, go, () => {});
 }
 async function usePower() {
   const h = HERO[G.heroSlug];
@@ -528,21 +546,27 @@ function handlePending() {
     });
   });
 }
-function showDetail(card, inst) {
+function showDetail(card, inst, actions = []) {
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 95});
-  el('div', 'dim', '', ov);
-  const ex = inst && inst.extras && inst.extras.length ? `<p style="margin:10px 0 0;font-size:12.5px;font-weight:800">Collabs: ${inst.extras.join(', ')}</p>` : '';
-  const c = el('div', 'ab', cardHTML(card, inst ? {atk: inst.atk, hp: inst.hp, golden: inst.golden} : {}), ov); css(c, {left: 92, top: 22});
-  const kws = ['Attention Seeker', 'Out of Office', 'Toxic', 'First Impression', 'Legacy', 'Rebrand', 'Collab', 'Discover'].filter(k => card.text.includes(k));
-  const KD = {'Attention Seeker': 'Enemies must attack it first.', 'Out of Office': 'Ignores the first damage it would take.', 'Toxic': 'Destroys any minion it damages.', 'First Impression': 'Happens when you play it from your hand.', 'Legacy': 'Happens when it dies.', 'Rebrand': 'Comes back once with 1 Health after it dies.', 'Collab': 'Sticks to a minion: adds its stats and effect, and makes it a Techie too.', 'Discover': 'Pick 1 of 3 cards to add to your hand.'};
-  const pnl = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">FULL RULES</p><p style="margin:6px 0 0;font-size:15px;font-weight:700;line-height:1.5">${card.full_html}</p>
-    ${kws.map(k => `<p style="margin:8px 0 0;font-size:12.5px;font-weight:700;line-height:1.4"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}
-    ${inst && (inst.ta || inst.th) ? `<p style="margin:8px 0 0;font-size:12.5px;font-weight:800">Next combat only: +${inst.ta}/+${inst.th}</p>` : ''}
-    <p style="margin:14px 0 0;font-size:13px;font-style:italic;font-weight:700;color:#5a5270">${card.flavour}</p><p style="position:absolute;left:22px;bottom:12px;margin:0;font-size:11.5px;font-weight:800;color:#5a5270">Tap anywhere to close.</p>`, ov);
-  css(pnl, {left: 370, top: 26, width: 440, height: 336, padding: '18px 22px'});
+  el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
+  const c = el('div', 'ab', cardHTML(card, inst ? {atk: inst.atk + (inst.ta || 0), hp: inst.hp + (inst.th || 0), golden: inst.golden} : {}), ov); css(c, {left: 70, top: 22});
+  const kws = ['Attention Seeker', 'Out of Office', 'Toxic', 'First Impression', 'Legacy', 'Rebrand', 'Collab', 'Discover', 'Clock In', 'Grievance', 'Side Gig', 'Like', 'Acquire', 'Cleave'].filter(k => card.text.includes(k));
+  const KD = {'Attention Seeker': 'Enemies must attack it first.', 'Out of Office': 'Ignores the first damage it would take.', 'Toxic': 'Destroys any minion it damages.', 'First Impression': 'Happens when you play it from your hand.', 'Legacy': 'Happens when it dies.', 'Rebrand': 'Comes back once with 1 Health after it dies.', 'Collab': 'Sticks to a minion: adds its stats and effect, and makes it a Techie too.', 'Discover': 'Pick 1 of 3 cards to add to your hand.',
+    'Clock In': 'Happens every time it attacks.', 'Grievance': 'Happens every time that many friendly minions have died this combat.', 'Side Gig': 'Pay the gold in the shop to use it, once per turn.', 'Like': 'Give a Like to a minion for +1/+1. Tap the heart next to your hero.', 'Acquire': 'Take a minion out of the Feed.', 'Cleave': 'Also damages the minions next to its target.'};
+  const ex = inst && inst.extras && inst.extras.length ? `<p class="kwl">Collabs: ${inst.extras.join(', ')}</p>` : '';
+  const tmp = inst && (inst.ta || inst.th) ? `<p class="kwl">Includes +${inst.ta}/+${inst.th} for the next combat only.</p>` : '';
+  const t = el('div', 'detail-txt', `<p class="rules">${card.full_html}</p>${kws.map(k => `<p class="kwl"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}${tmp}<p class="fl">${card.flavour || ''}</p><div class="acts"></div>`, ov);
+  css(t, {left: 360, top: 34, width: 440});
+  const acts = t.querySelector('.acts');
+  const close = () => { ov.remove(); };
+  for (const act of actions) {
+    const b = el('button', 'btn', act.label + (act.cost != null ? ` <span class="coin" style="position:static;width:24px;height:24px;font-size:13px;box-shadow:none">${act.cost}</span>` : ''), acts);
+    b.style.background = act.color || '#2ecb6e'; if (act.disabled) b.disabled = true;
+    b.onclick = e => { e.stopPropagation(); close(); act.fn(); };
+  }
   anim(c, [{transform: 'scale(.4) rotate(-8deg)', opacity: 0}, {transform: 'scale(1.04) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1)'}], {duration: 300, easing: 'ease-out', raw: true});
-  anim(pnl, [{transform: 'translateX(40px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 260, easing: 'ease-out', raw: true});
-  ov.onpointerup = () => ov.remove();
+  anim(t, [{transform: 'translateX(40px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 260, easing: 'ease-out', raw: true});
+  ov.onpointerup = e => { if (!e.target.closest('.btn')) close(); };
 }
 function showHeroDetail() {
   const h = HERO[G.heroSlug];
@@ -560,7 +584,7 @@ function bindToken(e, kind, obj) {
     if (G.mode === 'target') { if (kind === 'board' && S.pickHandler) S.pickHandler(e._m); return; }
     const [sx, sy] = toStage(ev.clientX, ev.clientY);
     const r = {x: parseFloat(e.style.left), y: parseFloat(e.style.top)};
-    let dragging = false, longT = setTimeout(() => { if (!dragging) { longT = null; done = true; cleanup(); showDetailFor(kind, e); } }, 420), done = false;
+    let dragging = false, longT = null, done = false;
     e.setPointerCapture(ev.pointerId);
     const move = mv => {
       const [x, y] = toStage(mv.clientX, mv.clientY);
@@ -584,10 +608,16 @@ function bindToken(e, kind, obj) {
     e.addEventListener('pointermove', move); e.addEventListener('pointerup', up); e.addEventListener('pointercancel', up);
   });
 }
+const FOLLOWER = () => CARD['Follower'] || {name: 'Follower', tribe: 'Influencer', tier: 1, atk: 1, hp: 1, art: 'follower', fit: 13, html: 'A loyal fan.', full_html: 'A loyal fan.', text: '', flavour: ''};
 function showDetailFor(kind, e) {
-  if (kind === 'feed') showDetail(e._f.card, {atk: e._f.card.atk + e._f.a, hp: e._f.card.hp + e._f.h});
-  else if (kind === 'hand') showDetail(e._h.card, {atk: e._h.card.atk + e._h.a, hp: e._h.card.hp + e._h.h, golden: e._h.golden});
-  else { const m = e._m; if (m.follower) showDetail({name: 'Follower', tribe: 'Influencer', tier: 1, atk: 1, hp: 1, art: 'follower', fit: 13, html: 'A loyal 1/1 fan. Summoned by Influencers.', full_html: 'A loyal fan. Summoned by Influencers.', text: '', flavour: 'Liked. Shared. Forgot.'}, m); else showDetail(CARD[m.name], m); }
+  const me = G.me;
+  if (kind === 'feed') { const f = e._f; return showDetail(f.card, {atk: f.card.atk + f.a, hp: f.card.hp + f.h}, [{label: 'Hire', cost: costOf(f), fn: () => buy(f), disabled: me.gold[0] < costOf(f) || G.hand.length >= 10}]); }
+  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk + h.a, hp: h.card.hp + h.h, golden: h.golden}, [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7}]); }
+  const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
+  const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
+  if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.slice(), 'Side Gig: choose a minion for +2/+2', async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
+  if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); renderAll(); await playLog(); }});
+  showDetail(card, m, acts);
 }
 function boardIndexAt(x) { const n = G.me.board.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } return best; }
 let lastGap = null;
@@ -601,11 +631,7 @@ function renderBoardOnly(gap) {
   const me = G.me, n = me.board.length + (gap !== null ? 1 : 0);
   me.board.forEach((m, i) => { const t = S.tok.get(m.id); if (t && !t.classList.contains('drag')) { t.style.transition = 'left .2s cubic-bezier(.22,1,.36,1)'; css(t, {left: boardX(gap !== null && i >= gap ? i + 1 : i, n)}); } });
 }
-async function onTap(kind, e) {
-  if (kind === 'feed') return buy(e._f);
-  if (kind === 'hand') return playCard(e._h, null);
-  if (kind === 'board') return showDetailFor(kind, e);
-}
+async function onTap(kind, e) { return showDetailFor(kind, e); }
 async function onDrop(kind, e, x, y) {
   const overBoard = y > 150 && y < 270 && x > 100 && x < 740;
   const overFeed = y < 160 && x > 100 && x < 740;
@@ -670,12 +696,11 @@ async function playCombat(rec) {
   const f = rec.fight, opp = rec.b || rec.ghost, oppHero = opp.hero;
   const Cm = {els: new Map(), side: new Map()};
   _ce = Cm.els;
-  const surfE = el('div', 'surf', '<div class="tag" style="background:#fff">THEIR BOARD</div>', stage); css(surfE, {left: 114, top: 72, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
-  const surfM = el('div', 'surf', '<div class="tag" style="background:#ffc928">YOUR BOARD</div>', stage); css(surfM, {left: 114, top: 200, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
+  const surfE = el('div', 'surf', '', stage); css(surfE, {left: 114, top: 72, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
+  const surfM = el('div', 'surf', '', stage); css(surfM, {left: 114, top: 200, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
   const oav = el('div', 'av-big', `<img src="${ART[oppHero] || ART.follower}" alt="">`, stage); css(oav, {left: 16, top: 12, width: 70, height: 70});
   const ohp = el('div', 'badge', `${opp.ghost ? '—' : opp.health + opp.boundaries}`, stage); css(ohp, {left: 60, top: 56, width: 40, height: 30, fontSize: '17px'});
-  const oname = el('div', 'ab bd', `${opp.ghost ? 'Ghost of ' : ''}${HERO[oppHero] ? HERO[oppHero].name : opp.name} <span style="font-family:Nunito,sans-serif;font-size:11px;color:#5a5270">· ${'★'.repeat(opp.tier)}</span>`, stage);
-  css(oname, {left: 96, top: 22, fontSize: '15px', background: '#fff', border: '2.5px solid #2b2140', borderRadius: '999px', padding: '4px 10px 1px'});
+  oav.title = (opp.ghost ? 'Ghost of ' : '') + (HERO[oppHero] ? HERO[oppHero].name : opp.name);
   const mav = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(mav, {left: 16, top: 290, width: 88, height: 88});
   const mhp = el('div', 'badge', `${G.me.health + (rec.loser === G.me ? 0 : 0)}`, stage); css(mhp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
   const preHealth = G.me.health + (rec.loser === G.me ? rec.dmg : 0) + G.me.boundaries;
@@ -685,8 +710,7 @@ async function playCombat(rec) {
   spd.onclick = () => { SP.v = SP.v === 1 ? 2 : 1; spd.textContent = SP.v === 1 ? '1×' : '2×'; };
   let skip = false;
   const sk = el('button', 'btn', 'Skip', stage); css(sk, {left: 750, top: 72, width: 76, height: 40, fontSize: '15px'}); sk.onclick = () => { skip = true; };
-  const logBox = el('div', 'log', '', stage);
-  const say = (t, hl) => { const d = el('div', '', t, logBox); if (hl) d.style.background = '#ffe9a8'; while (logBox.children.length > 2) logBox.firstChild.remove(); anim(d, [{transform: 'translateY(10px)', opacity: 0}, {transform: 'translateY(0)', opacity: 1}], {duration: 200}); };
+  const say = () => {};
   const layer = el('div', 'ab', '', stage); css(layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
   const sideOf = k => k === 0 ? 1 : 0;  // fight side 0 = me (row 1)
   const nameOf = id => { for (const b of cur) { const m = b.find(x => x.id === id); if (m) return m.name; } return ''; };
@@ -707,7 +731,7 @@ async function playCombat(rec) {
           const [da, dh] = updateToken(t, m);
           if (opts.floats !== false && (da > 0 || dh > 0)) { const c = center(rectOf(t)); floatText(c[0], c[1] - 30, `+${Math.max(0, da)}/+${Math.max(0, dh)}`); }
         }
-        t.style.transition = `left ${260 / SP.v}ms cubic-bezier(.22,1,.36,1), top ${260 / SP.v}ms`;
+        t.style.transition = `left ${380 / SP.v}ms cubic-bezier(.22,1,.36,1), top ${380 / SP.v}ms`;
         css(t, {left: cX(i, b.length), top: CY[row]});
       });
     });
@@ -722,27 +746,30 @@ async function playCombat(rec) {
     if (skip) { continue; }
     if (fr.type === 'soc') {
       const s = Cm.els.get(fr.src);
-      if (s) { await anim(s, [{transform: 'scale(1)', filter: 'brightness(1)'}, {transform: 'scale(1.2)', filter: 'brightness(1.35)'}, {transform: 'scale(1)', filter: 'brightness(1)'}], {duration: 260});
+      if (s) { await anim(s, [{transform: 'scale(1)', filter: 'brightness(1)'}, {transform: 'scale(1.22)', filter: 'brightness(1.35)'}, {transform: 'scale(1)', filter: 'brightness(1)'}], {duration: 420});
         say(`Start of combat · ${nameOf(fr.src)}`);
         const sc = center(rectOf(s));
-        await Promise.all((fr.tgts || []).map(id => { const t = Cm.els.get(id); return t ? streak(sc, center(rectOf(t)), fr.kind === 'give' ? '#2ecb6e' : '#ff6b5e', 260) : null; }));
+        await Promise.all((fr.tgts || []).map(id => { const t = Cm.els.get(id); return t ? streak(sc, center(rectOf(t)), fr.kind === 'give' ? '#2ecb6e' : '#ff6b5e', 420) : null; }));
       }
-      diffBursts(cur, fr.boards); place(fr.boards); await sleep(260);
+      diffBursts(cur, fr.boards); place(fr.boards); await sleep(480);
     } else if (fr.type === 'attack') {
       const a = Cm.els.get(fr.att), t = Cm.els.get(fr.tgt);
       say(`${nameOf(fr.att)} attacks ${nameOf(fr.tgt)}`, true);
       if (a && t) {
         const ra = rectOf(a), rt = rectOf(t), dx = rt.x - ra.x, dy = rt.y - ra.y;
         a.style.zIndex = 20;
-        await anim(a, [{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${-dx * .06}px,${-dy * .1}px) scale(.94) rotate(-4deg)`}], {duration: 120, easing: 'ease-out', fill: 'forwards'});
-        await anim(a, [{transform: `translate(${-dx * .06}px,${-dy * .1}px) scale(.94)`}, {transform: `translate(${dx * .82}px,${dy * .78}px) scale(1.1) rotate(6deg)`}], {duration: 150, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards'});
-        anim(t, [{transform: 'translate(0,0)'}, {transform: 'translate(-5px,3px) rotate(-4deg)'}, {transform: 'translate(4px,-2px) rotate(3deg)'}, {transform: 'translate(0,0)'}], {duration: 220});
-        anim(stage, [{transform: `scale(${SCALE}) translate(0,0)`}, {transform: `scale(${SCALE}) translate(2px,-2px)`}, {transform: `scale(${SCALE}) translate(-2px,1px)`}, {transform: `scale(${SCALE}) translate(0,0)`}], {duration: 180});
+        a.getAnimations().forEach(x => x.cancel());
+        const lunge = `translate(${dx * .82}px,${dy * .78}px) scale(1.1) rotate(6deg)`;
+        const A = a.animate([{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${-dx * .06}px,${-dy * .12}px) scale(.92) rotate(-5deg)`, offset: .3},
+          {transform: lunge, offset: .55, easing: 'cubic-bezier(.34,1.3,.64,1)'}, {transform: lunge, offset: .62}, {transform: 'translate(0,0) scale(1)'}], {duration: 1000 / SP.v, easing: 'ease-in-out'});
+        await sleep(550);
+        anim(t, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,3px) rotate(-5deg)'}, {transform: 'translate(5px,-2px) rotate(4deg)'}, {transform: 'translate(0,0)'}], {duration: 320});
+        anim(stage, [{transform: `scale(${SCALE}) translate(0,0)`}, {transform: `scale(${SCALE}) translate(2px,-2px)`}, {transform: `scale(${SCALE}) translate(-2px,1px)`}, {transform: `scale(${SCALE}) translate(0,0)`}], {duration: 220});
         diffBursts(cur, fr.boards);
         place(fr.boards, {floats: false});
-        await anim(a, [{transform: `translate(${dx * .82}px,${dy * .78}px) scale(1.1)`}, {transform: 'translate(0,0) scale(1)'}], {duration: 200, easing: 'cubic-bezier(.34,1.3,.64,1)'});
+        await A.finished.catch(() => {});
         a.style.zIndex = '';
-        await sleep(90);
+        await sleep(260);
       } else place(fr.boards);
     } else if (fr.type === 'death') {
       const t = Cm.els.get(fr.id);
@@ -751,7 +778,7 @@ async function playCombat(rec) {
         const c = center(rectOf(t)); for (let i = 0; i < 5; i++) { const p = el('div', '', '', stage); css(p, {position: 'absolute', left: c[0], top: c[1] + 20, width: 12, height: 12, borderRadius: '50%', background: '#e6dccb', border: '2px solid #2b2140', zIndex: 83, pointerEvents: 'none'}); anim(p, [{transform: 'translate(0,0) scale(1)', opacity: 1}, {transform: `translate(${(i - 2) * 16}px,${-10 - Math.random() * 14}px) scale(.3)`, opacity: 0}], {duration: 420}).then(() => p.remove()); }
       }
       cur = cur.map(b => b.filter(x => x.id !== fr.id));
-      await sleep(200); place(fr.boards);
+      await sleep(420); place(fr.boards); await sleep(200);
     } else if (fr.type === 'legacy') {
       say(`Legacy · ${fr.name}`);
       const row = sideOf(fr.side), g = el('img', '', null, layer); g.src = artOf(fr.name);
@@ -761,10 +788,10 @@ async function playCombat(rec) {
     } else if (fr.type === 'summon' || fr.type === 'rebrand' || fr.type === 'trigger') {
       if (fr.type === 'trigger') { const s = Cm.els.get(fr.src); if (s) { const c = center(rectOf(s)); ring(c[0], c[1], '#4fd1c5', 90); say(`${nameOf(fr.src)} triggers`); } }
       if (fr.type === 'rebrand') say('Rebrand!');
-      place(fr.boards); await sleep(260);
+      place(fr.boards); await sleep(420);
     } else if (fr.type === 'first') {
-      say(fr.side === 0 ? 'You attack first' : 'They attack first', true);
-      await sleep(350);
+      toast(fr.side === 0 ? 'You attack first' : 'They attack first', 1000);
+      await sleep(700);
     } else if (fr.type === 'end') { place(fr.boards); }
   }
   if (skip) { place(f.frames[f.frames.length - 1].boards, {floats: false}); for (const [id, t] of Cm.els) if (!f.frames[f.frames.length - 1].boards.some(b => b.some(m => m.id === id))) { t.remove(); Cm.els.delete(id); } }
@@ -776,11 +803,12 @@ async function playCombat(rec) {
     const sv = [...Cm.els.values()].filter(t => Math.abs(parseFloat(t.style.top) - CY[survRow]) < 5);
     const tc = center(rectOf(targetAv));
     for (const t of sv) {
-      const r = rectOf(t);
-      await anim(t, [{transform: 'translate(0,0)'}, {transform: `translate(${tc[0] - r.x - 34}px,${tc[1] - r.y - 34}px) scale(.8) rotate(-10deg)`}], {duration: 220, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards'});
-      anim(targetAv, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,4px)'}, {transform: 'translate(0,0)'}], {duration: 160});
-      anim(t, [{transform: `translate(${tc[0] - r.x - 34}px,${tc[1] - r.y - 34}px) scale(.8)`}, {transform: 'translate(0,0)'}], {duration: 240, fill: 'forwards'});
-      await sleep(90);
+      const r = rectOf(t), to = `translate(${tc[0] - r.x - 34}px,${tc[1] - r.y - 34}px) scale(.8) rotate(-10deg)`;
+      t.getAnimations().forEach(x => x.cancel());
+      t.animate([{transform: 'translate(0,0)'}, {transform: to, offset: .45, easing: 'cubic-bezier(.5,0,.75,0)'}, {transform: 'translate(0,0)'}], {duration: 700 / SP.v});
+      await sleep(260);
+      anim(targetAv, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,4px)'}, {transform: 'translate(0,0)'}], {duration: 200});
+      await sleep(200);
     }
     burstAt(tc[0] + 20, tc[1] - 20, `−${rec.dmg}`);
     if (lost) mhp.textContent = G.me.health + G.me.boundaries; else ohp.textContent = opp.ghost ? '—' : opp.health + opp.boundaries;
@@ -809,23 +837,14 @@ async function showResult(rec) {
   const opp = rec.b || rec.ghost, oppName = (opp.ghost ? 'Ghost of ' : '') + (HERO[opp.hero] ? HERO[opp.hero].name : opp.name);
   const surv = rec.fight.survivors;
   const title = won ? 'Won the round' : lost ? 'Lost the round' : 'Draw';
-  let rows = '';
-  if (rec.dmg) {
-    const tierW = won ? me.tier : opp.tier;
-    rows = `<div style="display:flex;justify-content:space-between"><span>${won ? 'Your' : 'Their'} tier ${'★'.repeat(tierW)}</span><span>${tierW}</span></div>
-      <div style="display:flex;justify-content:space-between"><span>${surv.length} surviving minion${surv.length === 1 ? '' : 's'} (tiers)</span><span>${surv.reduce((s, m) => s + m.tier, 0)}</span></div>
-      <div style="display:flex;justify-content:space-between;color:#5a5270"><span>Damage cap this round</span><span>${E.damageCap(G.lobby.turn)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-family:'Baloo 2',sans-serif;font-size:22px;border-top:2.5px dashed #2b2140;padding-top:6px"><span>${won ? 'Damage dealt' : 'Damage taken'}</span><span style="color:${won ? '#2ecb6e' : '#ff6b5e'}">${rec.dmg}</span></div>`;
-    if (lost && me.lastDamage && me.lastDamage.armor) rows += `<div style="display:flex;justify-content:space-between;color:#5a5270"><span>Boundaries absorbed</span><span>${me.lastDamage.armor}</span></div>`;
-  }
-  const tip = lost ? tipFor(rec) : won ? 'Nice. Keep building: every turn the Feed gets stronger.' : 'Nobody was left standing. No damage either way.';
-  const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:36px">${title}</p><p style="margin:6px 0 0;font-size:13px;font-weight:700;color:#5a5270">vs ${oppName}</p>
-    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:800">${rows}</div>
-    <div style="margin-top:10px;background:#ffe9a8;border:2.5px solid #2b2140;border-radius:12px;padding:6px 10px 4px;font-size:12.5px;font-weight:800;line-height:1.35">${tip}</div>`, ov);
-  css(p, {left: 222, top: 30, width: 400, height: 300, padding: '16px 22px'});
+  const tierW = won ? me.tier : opp.tier, sv = surv.reduce((x, m) => x + m.tier, 0);
+  const big = rec.dmg ? `<p class="bd" style="margin:14px 0 0;font-size:56px;color:${won ? '#2ecb6e' : '#ff6b5e'}">${won ? '' : '−'}${rec.dmg}</p>
+    <p style="margin:4px 0 0;font-size:13px;font-weight:800;color:#5a5270">${'★'.repeat(tierW)} tier ${tierW} + survivors ${sv}${tierW + sv > rec.dmg ? ` · capped at ${rec.dmg}` : ''}${lost && me.lastDamage && me.lastDamage.armor ? ` · ${me.lastDamage.armor} blocked by Boundaries` : ''}</p>` : '';
+  const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:34px">${title}</p>${big}${lost ? `<p style="margin:14px 0 0;font-size:12.5px;font-weight:800;line-height:1.35;color:#5a5270">${tipFor(rec)}</p>` : ''}`, ov);
+  css(p, {left: 262, top: 60, width: 320, padding: '18px 22px 20px', textAlign: 'center'});
   anim(p, [{transform: 'translateY(60px) scale(.9)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 360, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
   if (won) confetti(422, 60, 26);
-  const b = el('button', 'btn', G.lobby.over() ? 'See results' : 'Back to shop', ov); css(b, {left: 334, top: 338, width: 176, height: 42, background: '#2ecb6e', fontSize: '20px'});
+  const b = el('button', 'btn', G.lobby.over() ? 'See results' : 'Back to shop', ov); css(b, {left: 334, top: 318, width: 176, height: 44, background: '#2ecb6e', fontSize: '20px'});
   await new Promise(r => b.onclick = r);
 }
 function tipFor(rec) {

@@ -40,4 +40,9 @@ for s in (192, 512):
     if src.exists():
         (OUT / src.name).write_bytes(src.read_bytes())
 (OUT / '.nojekyll').write_text('')
+if '--artifact' in sys.argv:
+    frag = html.split('<body>', 1)[1].rsplit('</body>', 1)[0]
+    head = f'<title>Late Stage</title><meta name="theme-color" content="#2b2140"><style>{fonts}{js("style.css")}</style>'
+    frag = frag.replace("<script>if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>", '')
+    (OUT / 'artifact.html').write_text(head + frag)
 print('built', OUT / 'index.html', len(html), build)
