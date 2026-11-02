@@ -1,4 +1,4 @@
-import html
+import html, pathlib
 from lsdata import *
 
 STYLE_BLURB = {
@@ -65,7 +65,8 @@ def board(tribe):
 
 if __name__ == '__main__':
     import sys
-    out = S / 'cards/project'
+    out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1]) if '--out' in sys.argv else S / 'cards/project'
+    out.mkdir(parents=True, exist_ok=True)
     for t in TRIBES + ['Neutral']:
         h, H = board(t)
         (out / f'Set{TRIBE_PLURAL[t]}.dc.html').write_text(h)
