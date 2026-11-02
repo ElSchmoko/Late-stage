@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M166.0 124.0 L155.1 138.8 L157.2 157.0 L140.3 164.3 L133.0 181.2 L114.8 179.1 L100.0 190.0 L85.2 179.1 L67.0 181.2 L59.7 164.3 L42.8 157.0 L44.9 138.8 L34.0 124.0 L44.9 109.2 L42.8 91.0 L59.7 83.7 L67.0 66.8 L85.2 68.9 L100.0 58.0 L114.8 68.9 L133.0 66.8 L140.3 83.7 L157.2 91.0 L155.1 109.2 Z" fill="#3aa0ff"/>
+<path d="M70.3 100.8 L129.7 100.8 L127.0 113.4 Q116.2 119.7 104.5 112.5 L95.5 112.5 Q83.8 119.7 73.0 113.4 Z" fill="#2b2140"/>
+<path d="M78.4 105.3 L84.7 105.3 M110.8 105.3 L117.1 105.3" fill="none" stroke="#ffffff" stroke-width="2.25"/>
+<path d="M91.9 128.70000000000002 Q101.8 130.5 109.0 123.30000000000001" fill="none"/>
+<path d="M76 150 L94 164 L126 134" fill="none" stroke="#ffffff" stroke-width="9"/>
+<path d="M76 150 L94 164 L126 134" fill="none"/>
+<path d="M178 51 Q179.8 58.2 187 60 Q179.8 61.8 178 69 Q176.2 61.8 169 60 Q176.2 58.2 178 51 Z" fill="#ffc928"/>
+<path d="M24 78 Q25.2 82.8 30 84 Q25.2 85.2 24 90 Q22.8 85.2 18 84 Q22.8 82.8 24 78 Z" fill="#ffffff"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

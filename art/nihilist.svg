@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#2b2140"/>
+<rect x="82" y="126" width="36" height="22" rx="10" fill="#2b2140"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#f7d9a4"/>
+<rect x="82" y="128" width="36" height="20" rx="10" fill="#2b2140"/>
+<circle cx="62" cy="92" r="9" fill="#f7d9a4"/>
+<circle cx="138" cy="92" r="9" fill="#f7d9a4"/>
+<circle cx="100" cy="86" r="38" fill="#f7d9a4"/>
+<path d="M60 84 Q56 42 100 42 Q144 42 140 84 Q136 60 104 56 Q76 56 60 84 Z" fill="#2b2140"/><path d="M84 50 Q100 46 124 54" fill="none"/>
+<circle cx="85" cy="92" r="11.5" fill="#ffffff"/>
+<circle cx="115" cy="92" r="11.5" fill="#ffffff"/>
+<circle cx="86" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
+<circle cx="116" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
+<path d="M73.5 92 Q85 75.9 96.5 92 Z" fill="#f7d9a4"/>
+<path d="M103.5 92 Q115 75.9 126.5 92 Z" fill="#f7d9a4"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<path d="M92 114 L108 114" fill="none"/>
+<path d="M76 103 Q85 107 94 103 M106 103 Q115 107 124 103" fill="none"/>
+<ellipse cx="94" cy="52" rx="42" ry="14" fill="#2b2140" transform="rotate(-12 94 52)"/>
+<path d="M92 40 L94 32" fill="none"/>
+<path d="M142 50 L182 50 Q192 50 192 60 L192 76 Q192 86 182 86 L154 86 L136 96 L146 86 L142 86 Q132 86 132 76 L132 60 Q132 50 142 50 Z" fill="#ffffff"/>
+<circle cx="150" cy="68" r="3.5" fill="#2b2140" stroke="none"/>
+<circle cx="162" cy="68" r="3.5" fill="#2b2140" stroke="none"/>
+<circle cx="174" cy="68" r="3.5" fill="#2b2140" stroke="none"/>
+<path d="M30 150 Q20 130 34 120 Q48 110 38 90" fill="none" stroke="#c9c2d6" stroke-width="5"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

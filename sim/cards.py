@@ -1,0 +1,172 @@
+"""Card pool for the Modern Life sim: all seven tribes plus the neutral Neighbours.
+kind: 'eng' = keeps doing something while on the board, 'fi' = value comes once (when played),
+'stat' = mostly a body. sellbait = meant to be sold for its effect."""
+
+class Card:
+    def __init__(self, name, tribe, tier, atk, hp, style='-', text='', flavour='', taunt=False, shield=False,
+                 toxic=False, rebrand=False, collab=False, kind='eng', sellbait=False, discover=None, twice=False):
+        self.name, self.tribe, self.tier, self.atk, self.hp = name, tribe, tier, atk, hp
+        self.style, self.text, self.flavour = style, text, flavour
+        self.taunt, self.shield, self.toxic, self.rebrand = taunt, shield, toxic, rebrand
+        self.collab, self.kind, self.sellbait, self.discover, self.twice = collab, kind, sellbait, discover, twice
+
+H, I, F, C, T, P, PH, N = 'Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'
+TRIBES = [H, I, F, C, T, P, PH]
+
+HUSTLERS = [
+    Card('Dropshipper', H, 1, 2, 2, 'PI', 'First Impression: next turn, gain 1 extra gold.', kind='fi'),
+    Card('Unpaid Intern', H, 1, 2, 2, 'EX', 'Sells for 2 gold instead of 1.', kind='stat', sellbait=True),
+    Card('Grindset Guru', H, 1, 2, 2, 'PI', 'After you hire another Hustler, gain +2/+1.'),
+    Card('Middle Manager', H, 2, 2, 4, 'EX', 'Attention Seeker. End of turn: take +1/+1 from the minion to its left. If that kills it, gain 1 extra gold next turn.', taunt=True),
+    Card('Sneaker Reseller', H, 2, 3, 3, 'EX', 'Once per turn, after you sell a minion: give your Hustlers +3/+3.'),
+    Card('Side Hustle', H, 2, 2, 3, 'PI', 'Once per turn, after you hire another Hustler, gain 1 gold.', 'Drives for three apps between meetings.'),
+    Card('Thought Leader', H, 3, 3, 3, 'PI', 'Every 4 gold you spend: give your other Hustlers +2/+2.'),
+    Card('Crypto Bro', H, 3, 3, 3, 'EX', 'Sells for 1 more gold for each turn on your board (max 5). Crashes to 0 after 4 turns.'),
+    Card('Golden Parachute Exec', H, 3, 4, 3, 'EX', 'Legacy: next turn, gain 2 extra gold.'),
+    Card('Venture Capitalist', H, 4, 3, 4, 'PI', 'First Impression: invest up to 4 of your gold: give a minion +2/+2 per gold invested.', kind='fi'),
+    Card('Corporate Raider', H, 4, 4, 4, '-', 'Start of combat: deal 5 damage to the enemy minion with the lowest Health.'),
+    Card('Consultant', H, 5, 4, 5, 'PI', 'Your "every 4 gold you spend" effects trigger every 3 gold instead.'),
+    Card('Private Equity', H, 5, 4, 5, 'EX', 'After you sell a minion, your highest-Attack Hustler gains half its Attack and Health permanently.'),
+    Card('Unicorn Startup', H, 6, 5, 6, 'PI', 'End of turn: give your other Hustlers +1/+1 for every 2 gold you spent this turn.'),
+    Card('Too Big to Fail', H, 6, 6, 6, 'EX', 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +3/+3.', taunt=True),
+]
+
+INFLUENCERS = [
+    Card('Reply Guy', I, 1, 1, 2, 'FO', 'Legacy: summon a 1/1 Follower.'),
+    Card('Engagement Bot', I, 1, 1, 1, 'FO', 'First Impression: summon a 1/1 Follower.', kind='fi'),
+    Card('Stan Account', I, 1, 1, 2, 'MC', 'End of turn: give your highest-Attack minion +2/+1.'),
+    Card('Giveaway Host', I, 2, 2, 3, 'FO', 'End of turn: your Followers get +2/+2 for the rest of the game.'),
+    Card('Comment Section', I, 2, 2, 2, 'FO', 'Legacy: summon two 1/1 Followers.', 'First.'),
+    Card('Hype Man', I, 2, 2, 3, 'MC', 'End of turn: give your highest-Attack minion +1/+1 for each Influencer you have.'),
+    Card('Unboxing Streamer', I, 3, 3, 3, 'FO', 'Legacy: summon two Followers.'),
+    Card('Viral Video', I, 3, 3, 3, 'FO', 'After a friendly minion dies, summon a Follower (3 times per combat).'),
+    Card('Personal Brand', I, 3, 3, 3, 'MC', 'First Impression: give a minion +3/+3. If it is your highest-Attack minion, +4/+4 instead.', kind='fi'),
+    Card('Engagement Farmer', I, 4, 3, 4, 'FO', 'After you summon a Follower, give it +5/+5.'),
+    Card('Paparazzi', I, 4, 2, 4, 'MC', 'Start of combat: give your highest-Attack minion Out of Office.'),
+    Card('Brand Ambassador', I, 5, 4, 5, 'FO', 'Start of combat: summon a Follower for each empty space on your board (up to 4).'),
+    Card('Ring Light Studio', I, 5, 3, 6, 'MC', 'End of turn: give your highest-Attack minion +2/+2 for each other Influencer you have.'),
+    Card('Blue Checkmark', I, 6, 4, 6, 'FO', 'Your Followers attack twice.'),
+    Card('Main Character', I, 6, 5, 7, 'MC', 'Attention Seeker. End of turn: gain +4/+4 for each other minion that was buffed this turn.', taunt=True),
+]
+
+# ---------------------------------------------------------------- Ferals: Overgrowth (OG) / Tree Huggers (TH)
+FERALS = [
+    Card('Windowsill Succulent', F, 1, 1, 2, 'OG', 'Every second end of turn: gain +2/+2.', 'Watered once. In March.'),
+    Card('City Pigeon', F, 1, 1, 3, 'TH', 'Attention Seeker.', 'Will not move for your bike.', taunt=True, kind='stat'),
+    Card('Trash Panda', F, 1, 2, 1, '-', 'Rebrand.', 'Evicted from the bin. Moved back in.', rebrand=True, kind='stat'),
+    Card('Monstera', F, 2, 2, 3, 'OG', 'End of turn: gain +2/+1.', 'Named Gerald. Has its own account.'),
+    Card('Tree Hugger', F, 2, 1, 4, 'TH', 'Attention Seeker. Start of combat: give the minions next to it +1/+2.', 'Not moving until you listen.', taunt=True),
+    Card('Compost Heap', F, 2, 1, 4, 'OG', 'End of turn: give the Feral that has been on your board the longest +2/+2.', 'Smells like progress.'),
+    Card('Plant Parent', F, 3, 2, 3, 'OG', 'End of turn: give your other Ferals +2/+2.', 'Talks to them. They don\'t answer.'),
+    Card('Protest Camp', F, 3, 2, 5, 'TH', 'Attention Seeker. End of turn: give your other Feral Attention Seekers +3/+3.', 'Day 41. There\'s a kombucha rota.', taunt=True),
+    Card('Urban Fox', F, 3, 3, 3, '-', 'Out of Office.', 'Screams at 3 a.m. Unbothered by day.', shield=True, kind='stat'),
+    Card('Rooftop Beehive', F, 4, 3, 5, 'OG', 'End of turn: give the minions next to it +1/+1.', 'Organic, local, slightly angry.'),
+    Card('Guerrilla Gardener', F, 4, 2, 5, 'TH', 'Start of combat: give your lowest-Health minion Out of Office.', 'Planted it at 3 a.m. You\'re welcome.'),
+    Card('Ancient Oak', F, 5, 3, 7, 'OG', 'Your end-of-turn effects give Ferals twice as much.', 'Older than the city. Still not a listed building.'),
+    Card('Human Chain', F, 5, 4, 6, 'TH', 'Attention Seeker. Start of combat: give the minions next to it Out of Office.', 'Arms linked. Phones out.', taunt=True),
+    Card('World Tree', F, 6, 4, 8, 'OG', 'End of turn: give your other Ferals +1/+1 for each turn this has been on your board (max +3).', 'Was here first. Will be here last.'),
+    Card('Old-Growth Blockade', F, 6, 4, 8, 'TH', 'Attention Seeker. Start of combat: give your other minions +1/+2 for each Attention Seeker you have.', 'The bulldozers left. The tents stayed.', taunt=True),
+]
+
+# ---------------------------------------------------------------- Creatives: Posthumous Fame (PF) / Performers (PE)
+CREATIVES = [
+    Card('Busker', C, 1, 2, 2, 'PE', 'After you play a Creative, gain +2/+1.', 'Knows four chords. Uses all of them.'),
+    Card('Open Mic Poet', C, 1, 1, 2, 'PF', 'Legacy: give the minions next to it +2/+2.', 'Snaps only, please.'),
+    Card('Art Student', C, 1, 2, 2, 'PE', 'First Impression: give another Creative +2/+2.', 'Year three of a four-year course. Year seven.', kind='fi'),
+    Card('Struggling Artist', C, 2, 2, 2, 'PF', 'Legacy: give your other minions +1/+1.', 'Famous, eventually.'),
+    Card('Merch Stand', C, 2, 2, 3, 'PE', 'After you play a Creative, gain 1 extra gold next turn (once per turn).', 'Tote bags. Only tote bags.'),
+    Card('Method Actor', C, 2, 3, 2, 'PF', 'Rebrand.', 'Died for the role. Twice.', rebrand=True),
+    Card('Memorial Mural', C, 3, 2, 4, 'PF', 'After a friendly minion dies, give your other Creatives +1 Attack.', 'Painted the day after. Signed very large.'),
+    Card('Indie Band', C, 3, 3, 3, 'PE', 'After you play a Creative, give it +3/+3 and this +1/+1.', 'You won\'t have heard of them. Neither have they.'),
+    Card('Conceptual Artist', C, 3, 2, 3, '-', 'First Impression: Discover a Creative.', 'It\'s a banana. It\'s also a statement.', kind='fi', discover=C),
+    Card('Art Critic', C, 4, 3, 4, 'PF', 'After a friendly minion dies, gain +1/+1 permanently (3 times per combat).', 'Always preferred their early work.'),
+    Card('Record Label', C, 4, 3, 4, 'PE', 'First Impression: give your other Creatives +3/+3.', 'Owns your masters. And you.', kind='fi'),
+    Card('Festival Headliner', C, 5, 4, 5, 'PE', 'After you play a Creative, give your other Creatives +3/+3.', 'Ninety-minute soundcheck.'),
+    Card('Museum Retrospective', C, 5, 4, 6, 'PF', 'Twice per combat, after a friendly minion dies: give your other Creatives +3/+3 permanently.', 'Finally appreciated. Finally dead.'),
+    Card('Dead Rock Star', C, 6, 5, 6, 'PF', 'Legacy: give your other Creatives +3/+3 permanently.', 'Sales tripled overnight.'),
+    Card('World Tour', C, 6, 5, 6, 'PE', 'After you play a minion, give your Creatives +2/+2.', 'Same set, 140 cities.'),
+]
+
+# ---------------------------------------------------------------- Techies: Gadgets (GA) / Gamers (GM)
+TECHIES = [
+    Card('Speedrunner', T, 1, 2, 2, 'GM', 'After this kills a minion, gain +2/+1 permanently (twice per combat).', 'Skips every cutscene, including dinner.'),
+    Card('Smart Plug', T, 1, 2, 2, 'GA', 'Collab. (The minion it sticks to becomes a Techie too.)', 'Turns the lights on. Sometimes.', collab=True, kind='fi'),
+    Card('Loot Box', T, 1, 1, 1, '-', 'First Impression: Discover a Techie.', 'Contents may vary.', kind='fi', discover=T),
+    Card('Robot Vacuum', T, 2, 2, 2, 'GA', 'Collab. Start of combat: deal 1 damage to the enemy minion with the lowest Health.', 'Stuck under the sofa again.', collab=True),
+    Card('Toxic Teammate', T, 2, 1, 3, 'GM', 'Toxic.', 'gg ez', toxic=True, kind='stat'),
+    Card('Firmware Update', T, 2, 2, 3, 'GA', 'After you Collab, give your Techies +2/+1.', 'Restart required. Again.'),
+    Card('Rage Quitter', T, 3, 4, 2, 'GM', 'Legacy: deal 3 damage to the minion that killed it.', 'Uninstalled. Reinstalled by dinner.'),
+    Card('Smart Fridge', T, 3, 2, 2, 'GA', 'Collab. End of turn: give your Techies +1/+1.', 'Orders oat milk at 2 a.m.', collab=True),
+    Card('E-Sports Coach', T, 3, 3, 4, 'GM', 'Start of combat: give the minion to its left Toxic.', 'Has never played. Knows exactly what you did wrong.'),
+    Card('Noise-Cancelling Headphones', T, 4, 2, 4, 'GA', 'Collab. Out of Office.', 'Can\'t hear you. On purpose.', collab=True, shield=True),
+    Card('Leaderboard', T, 4, 2, 5, 'GM', 'End of turn: give your other Techies +1/+1 for each enemy minion your Techies killed last combat (max +3).', 'Your name, spelled wrong, at #3.'),
+    Card('Smart Home Hub', T, 5, 3, 5, 'GA', 'Your Collabs stick to two minions instead of one.', 'Hey Hub, turn off. Hey Hub. HUB.'),
+    Card('Pro Gamer', T, 5, 5, 5, 'GM', 'Attacks twice. After this kills a minion, gain +4/+4 permanently (once per combat).', 'Sponsored by an energy drink and a chair.', twice=True),
+    Card('Quantum Computer', T, 6, 5, 5, 'GA', 'Collab. Out of Office. Rebrand.', 'Nobody knows what it does. It does it very fast.', collab=True, shield=True, rebrand=True),
+    Card('World Record', T, 6, 5, 6, 'GM', 'Start of combat: give your other Techies Toxic.', 'Frame-perfect. Unverified.'),
+]
+
+# ---------------------------------------------------------------- Punks: Sabotage (SA) / Sellouts (SO)
+PUNKS = [
+    Card('Graffiti Kid', P, 1, 2, 3, 'SA', 'Start of combat: deal 1 damage to the left-most enemy minion for each Punk you have.', 'It\'s a statement.'),
+    Card('Anarchist Barista', P, 1, 2, 2, 'SO', 'When sold: next turn, gain 1 extra gold.', 'Refuses tips. Takes them anyway.', kind='stat', sellbait=True),
+    Card('Zine Maker', P, 1, 2, 2, 'SO', 'When sold: give the minion to its right +3/+3.', 'Issue #1 of 1.', kind='stat', sellbait=True),
+    Card('Sellout Frontman', P, 2, 3, 3, 'SO', 'When sold: give your other Punks +2/+2.', 'Signed to a major label. Still punk, though.', kind='stat', sellbait=True),
+    Card('Heckler', P, 2, 3, 3, 'SA', 'Start of combat: deal 3 damage to the enemy minion with the highest Attack.', 'Boo. Encore. Boo.'),
+    Card('Crust Punk', P, 2, 3, 3, 'SA', 'Your Punks\' start-of-combat damage is increased by 2.', 'Hasn\'t washed the jacket since 1998.'),
+    Card('Squat Collective', P, 3, 3, 4, 'SO', 'Your Punks\' "When sold" effects also trigger when they die.', 'Consensus reached in nine hours.'),
+    Card('Feedback Loop', P, 3, 3, 4, 'SA', 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +3/+2 permanently.', 'Turned it up. Kept going.'),
+    Card('Pirate Radio', P, 3, 2, 3, '-', 'First Impression: Discover a Punk.', 'Broadcasting from a van.', kind='fi', discover=P),
+    Card('Mosh Pit', P, 4, 4, 4, 'SA', 'Start of combat: remove Out of Office from the enemy minion with the highest Attack, then deal damage equal to this minion\'s Attack to it. If it dies, gain its Attack permanently.', 'Personal space is a social construct.'),
+    Card('Energy-Drink Sponsor', P, 4, 3, 3, 'SO', 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +6).', 'Extreme. Sugar-free.', kind='stat', sellbait=True),
+    Card('Reunion Tour', P, 5, 3, 6, 'SO', 'Your "When sold" effects trigger twice.', 'Only doing it for the fans.'),
+    Card('Stage Diver', P, 5, 5, 5, 'SA', 'Start of combat: deal damage equal to this minion\'s Attack to the left-most enemy minion, then gain +2 Attack permanently.', 'Trust fall. No trust.'),
+    Card('Greatest Hits', P, 6, 5, 6, 'SO', 'After you sell a Punk, put a copy of it in the Feed. It costs 2 gold.', 'Contains one new song. Nobody listens to it.'),
+    Card('General Strike', P, 6, 5, 6, 'SA', 'Start of combat: deal 1 damage to all enemy minions for each Punk you have. Then give your Punks +1/+1 permanently for each enemy minion that died.', 'Nobody works. Everybody wins.'),
+]
+
+# ---------------------------------------------------------------- Philosophers: Big Ideas (BI) / Stoics (ST)
+PHILOSOPHERS = [
+    Card('Shower Thinker', PH, 1, 1, 2, 'BI', 'End of turn: give the minion to its right +2/+2 for the next combat.', 'What if Mondays are a construct?'),
+    Card('Stoicism Podcaster', PH, 1, 1, 3, 'ST', 'Attention Seeker. After this survives damage, gain +1 Health permanently (once per combat).', 'Episode 400: Discomfort.', taunt=True),
+    Card('Nihilist', PH, 1, 2, 2, '-', 'Legacy: give the minions next to it +1 Attack.', 'Nothing matters. Except this.', kind='stat'),
+    Card('Cold-Plunge Stoic', PH, 2, 2, 4, 'ST', 'Attention Seeker. After this survives damage, gain +1/+1 permanently (once per combat).', 'Up at 4 a.m. Tells everyone.', taunt=True),
+    Card('Pub Philosopher', PH, 2, 3, 2, 'BI', 'End of turn: give the minion to its left +3/+1 for the next combat.', 'Three pints in, solved free will.'),
+    Card('Marathon Monk', PH, 2, 1, 5, 'ST', 'Attention Seeker. After this survives damage, give the minion to its right +2/+2 permanently (once per combat).', 'Runs to clear the mind. Talks the whole way.', taunt=True),
+    Card('Thought Experiment', PH, 3, 3, 3, 'BI', 'End of turn: give the minions next to it +3/+3 for the next combat.', 'Imagine a trolley…'),
+    Card('Keynote Speaker', PH, 3, 2, 3, '-', 'First Impression: Discover a Philosopher.', 'Disrupting thought itself.', kind='fi', discover=PH),
+    Card('Book-Club Stoic', PH, 3, 2, 4, 'ST', 'Attention Seeker. Out of Office.', 'Read one book. Quotes it daily.', taunt=True, shield=True, kind='stat'),
+    Card('Utilitarian', PH, 4, 2, 4, 'BI', 'End of turn: give your three lowest-Attack other Philosophers +3/+3.', 'Did the maths. Greatest good, greatest number.'),
+    Card('Desert Hermit', PH, 4, 2, 6, 'ST', 'Attention Seeker. After this survives damage, give your other Philosophers +3/+3 permanently (once per combat).', 'Moved off-grid. Posts about it.', taunt=True),
+    Card('The Cynic', PH, 5, 3, 9, 'ST', 'Attention Seeker. After this takes damage, give your other Philosophers +1 Attack.', 'Lives in a barrel. Has opinions.', taunt=True),
+    Card('Bestselling Author', PH, 5, 3, 6, 'BI', 'End of turn: make the next-combat buffs on your Philosophers permanent.', 'Wrote down your idea. Kept the royalties.'),
+    Card('Grand Unified Theory', PH, 6, 4, 7, 'BI', 'End of turn: double the next-combat buffs on your minions.', 'Explains everything. Predicts nothing.'),
+    Card('Enlightened Guru', PH, 6, 3, 10, 'ST', 'Attention Seeker. Your other Attention Seekers take at most 3 damage at a time.', 'At peace. Charges €900 a weekend.', taunt=True),
+]
+
+NEIGHBOURS = [
+    Card('Nosy Neighbour', N, 1, 2, 2, taunt=True, kind='stat'),
+    Card('Wi-Fi Leech', N, 1, 1, 2),
+    Card('Package Hoarder', N, 2, 1, 4),
+    Card('Quiet-Hours Enforcer', N, 2, 3, 3),
+    Card('Caretaker', N, 3, 2, 5),
+    Card('Helpful Neighbour', N, 3, 3, 3, kind='fi'),
+    Card('Leaf Blower Guy', N, 4, 4, 5),
+    Card('Wedding DJ', N, 5, 2, 5),
+    Card('Estate Lawyer', N, 5, 1, 7),
+    Card('The Landlord', N, 5, 5, 5),
+    Card('Block Party Host', N, 6, 6, 6, text='End of turn: give the minions next to it +2/+2.'),
+]
+
+BY_TRIBE = {H: HUSTLERS, I: INFLUENCERS, F: FERALS, C: CREATIVES, T: TECHIES, P: PUNKS, PH: PHILOSOPHERS}
+STYLES = {  # style code -> (tribe, display name)
+    'PI': (H, 'Passive Income'), 'EX': (H, 'Exploitation'),
+    'FO': (I, 'Followers'), 'MC': (I, 'Main Character'),
+    'OG': (F, 'Overgrowth'), 'TH': (F, 'Tree Huggers'),
+    'PF': (C, 'Posthumous Fame'), 'PE': (C, 'Performers'),
+    'GA': (T, 'Gadgets'), 'GM': (T, 'Gamers'),
+    'SA': (P, 'Sabotage'), 'SO': (P, 'Sellouts'),
+    'BI': (PH, 'Big Ideas'), 'ST': (PH, 'Stoics'),
+}
+COPIES = {1: 16, 2: 15, 3: 13, 4: 11, 5: 9, 6: 7}
+ALL = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS

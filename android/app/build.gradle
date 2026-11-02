@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.application'
+}
+
+def buildNumber = (System.getenv("BUILD_NUMBER") ?: System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+
+android {
+    namespace 'com.elschmoko.latestage'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.elschmoko.latestage'
+        minSdk 24
+        targetSdk 34
+        versionCode buildNumber
+        versionName "0.1." + buildNumber
+        buildConfigField "String", "GAME_URL", "\"https://elschmoko.github.io/late-stage/\""
+        buildConfigField "String", "RELEASES_API", "\"https://api.github.com/repos/ElSchmoko/late-stage/releases/latest\""
+    }
+
+    signingConfigs {
+        release {
+            // CI secrets win; otherwise use the committed hobby key (see android/signing/README.md)
+            def ks = System.getenv("KEYSTORE_FILE")
+            if (ks != null && new File(ks).exists()) {
+                storeFile file(ks)
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            } else {
+                storeFile rootProject.file("signing/latestage.jks")
+                storePassword "yvpwYG2z5Xdqnhwgm4tRiJRU"
+                keyAlias "latestage"
+                keyPassword "yvpwYG2z5Xdqnhwgm4tRiJRU"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.11.0'
+}

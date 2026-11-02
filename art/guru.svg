@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<circle cx="100" cy="110" r="88" fill="#fff2b0" stroke-width="0"/>
+<circle cx="100" cy="110" r="88" fill="none" stroke-dasharray="2 12"/>
+<circle cx="100" cy="110" r="74" fill="none" stroke-dasharray="2 12"/>
+<circle cx="100" cy="38" r="12" fill="#2b2140"/>
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#ffffff"/>
+<path d="M72 142 Q96 170 118 206 L138 206 Q120 170 96 140 Z" fill="#ff8a3d"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#c98a5e"/>
+<circle cx="62" cy="92" r="9" fill="#c98a5e"/>
+<circle cx="138" cy="92" r="9" fill="#c98a5e"/>
+<circle cx="100" cy="86" r="38" fill="#c98a5e"/>
+<path d="M62 80 Q60 48 100 48 Q140 48 138 80 Q120 62 100 62 Q80 62 62 80 Z" fill="#2b2140"/>
+<path d="M64 96 Q66 134 100 136 Q134 134 136 96 Q130 116 116 112 Q100 118 84 112 Q70 116 64 96 Z" fill="#2b2140"/>
+<path d="M78 92 Q85 98 92 92" fill="none"/>
+<path d="M108 92 Q115 98 122 92" fill="none"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<path d="M90 111 Q100 121 110 111" fill="none"/>
+<path d="M92 168 L100 146 L108 168 Z" fill="#c98a5e"/>
+<path d="M82 150 Q100 186 118 150" fill="none"/>
+<circle cx="118.0" cy="162.0" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="116.57909789205193" cy="167.4518567923211" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="112.54072076824897" cy="172.0429852725933" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="106.52243958058013" cy="175.04854720354118" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="99.4744085985768" cy="175.99403044258108" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="92.50935694215144" cy="174.73016397555955" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="86.72691312025758" cy="171.4564845277161" r="3" fill="#ff6b5e" stroke="none"/>
+<circle cx="83.03999786796416" cy="166.68983410218266" r="3" fill="#ff6b5e" stroke="none"/>
+<ellipse cx="100" cy="202" rx="70" ry="10" fill="#cfe6f7"/>
+<path d="M30 63 Q31.4 68.6 37 70 Q31.4 71.4 30 77 Q28.6 71.4 23 70 Q28.6 68.6 30 63 Z" fill="#ffffff"/>
+<path d="M170 57 Q171.4 62.6 177 64 Q171.4 65.4 170 71 Q168.6 65.4 163 64 Q168.6 62.6 170 57 Z" fill="#ffffff"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

@@ -1,0 +1,13 @@
+dist/
+__pycache__/
+*.pyc
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/www/index.html
+game/shots/
+tools/_render.html
+tools/_fit.html
+*.jks
+!android/signing/latestage.jks

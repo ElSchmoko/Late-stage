@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M40 206 Q42 150 66 144 L134 144 Q158 150 160 206 Z" fill="#c9c2d6"/>
+<rect x="78" y="160" width="44" height="30" rx="8" fill="#8fd4ff"/>
+<path d="M100 183.1 Q89.2 175 91.0 169.6 Q93.7 164.2 100 169.6 Q106.3 164.2 109.0 169.6 Q110.8 175 100 183.1 Z" fill="#ff6b5e"/>
+<rect x="88" y="122" width="24" height="24" rx="4" fill="#6b6182"/>
+<path d="M100 60 L100 46" fill="none"/>
+<path d="M100 57.2 Q90.4 50 92.0 45.2 Q94.4 40.4 100 45.2 Q105.6 40.4 108.0 45.2 Q109.6 50 100 57.2 Z" fill="#ff8ab8"/>
+<rect x="54" y="56" width="92" height="74" rx="24" fill="#c9c2d6"/>
+<rect x="64" y="68" width="72" height="48" rx="14" fill="#2b2140"/>
+<circle cx="84" cy="88" r="9" fill="#4fd1c5"/>
+<circle cx="116" cy="88" r="9" fill="#4fd1c5"/>
+<path d="M90 104 Q100 110 110 104" fill="none" stroke="#4fd1c5"/>
+<rect x="42" y="78" width="12" height="26" rx="5" fill="#6b6182"/>
+<rect x="146" y="78" width="12" height="26" rx="5" fill="#6b6182"/>
+<path d="M156 150 L156 128 Q156 118 164 118 L166 134 L180 134 Q188 134 186 142 L182 162 Q180 168 172 168 L156 168 Z" fill="#c9c2d6"/>
+<path d="M30 32 Q31.6 38.4 38 40 Q31.6 41.6 30 48 Q28.4 41.6 22 40 Q28.4 38.4 30 32 Z" fill="#ffffff"/>
+<path d="M176 86 Q177.2 90.8 182 92 Q177.2 93.2 176 98 Q174.8 93.2 170 92 Q174.8 90.8 176 86 Z" fill="#ffffff"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

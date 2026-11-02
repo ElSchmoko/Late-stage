@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#ff8a3d"/>
+<path d="M84 140 Q100 154 116 140" fill="none"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#e8b48a"/>
+<circle cx="62" cy="92" r="9" fill="#e8b48a"/>
+<circle cx="138" cy="92" r="9" fill="#e8b48a"/>
+<circle cx="100" cy="86" r="38" fill="#e8b48a"/>
+<path d="M62 84 Q58 46 100 44 Q142 46 138 84 Q130 64 100 66 Q72 66 62 84 Z" fill="#8a5a3a"/>
+<path d="M78 92 Q85 98 92 92" fill="none"/>
+<path d="M108 92 Q115 98 122 92" fill="none"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="100" cy="115" rx="7" ry="8" fill="#2b2140"/><ellipse cx="100" cy="119" rx="4" ry="2.6" fill="#ff6b5e" stroke="none"/>
+<circle cx="80" cy="122" r="1.3" fill="#2b2140" stroke="none"/>
+<circle cx="88" cy="126" r="1.3" fill="#2b2140" stroke="none"/>
+<circle cx="96" cy="128" r="1.3" fill="#2b2140" stroke="none"/>
+<circle cx="104" cy="128" r="1.3" fill="#2b2140" stroke="none"/>
+<circle cx="112" cy="126" r="1.3" fill="#2b2140" stroke="none"/>
+<circle cx="120" cy="122" r="1.3" fill="#2b2140" stroke="none"/>
+<path d="M60 78 Q60 34 100 34 Q140 34 140 78 Z" fill="#4fd1c5"/>
+<rect x="56" y="66" width="88" height="16" rx="8" fill="#4fd1c5"/>
+<circle cx="100" cy="30" r="8" fill="#ffffff"/>
+<g transform="rotate(-36 150 168)"><rect x="147" y="104" width="6" height="52" rx="2" fill="#c98a4a"/>
+<rect x="145" y="94" width="10" height="12" rx="3" fill="#2b2140"/>
+<path d="M150 154 Q168 150 166 168 Q172 184 150 190 Q128 184 134 168 Q132 150 150 154 Z" fill="#ffc928"/>
+<circle cx="150" cy="170" r="5" fill="#2b2140"/>
+<path d="M142 182 L158 182" fill="none"/></g>
+<circle cx="132" cy="150" r="10" fill="#e8b48a"/>
+<circle cx="170" cy="176" r="10" fill="#e8b48a"/>
+<path d="M22 56 L22 76 Q16 76 16 82 Q16 88 22 88 Q28 88 28 82 L28 64 L38 60" fill="none"/>
+<path d="M30 96 L30 112 Q24 112 24 118 Q24 124 30 124 Q36 124 36 118 L36 100 L44 98" fill="none"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

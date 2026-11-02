@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<ellipse cx="100" cy="176" rx="82" ry="26" fill="#6b6182"/>
+<ellipse cx="100" cy="164" rx="82" ry="26" fill="#c9c2d6"/>
+<ellipse cx="100" cy="160" rx="30" ry="10" fill="#2b2140"/>
+<circle cx="130" cy="170" r="4" fill="#2ecb6e" stroke="none"/>
+<g transform="translate(10 -14) scale(.9)"><path vector-effect="non-scaling-stroke" d="M60 120 L54 82 L78 100 Z" fill="#ff8a3d"/>
+<path vector-effect="non-scaling-stroke" d="M140 120 L146 82 L122 100 Z" fill="#ff8a3d"/>
+<ellipse vector-effect="non-scaling-stroke" cx="100" cy="128" rx="48" ry="36" fill="#ff8a3d"/>
+<ellipse vector-effect="non-scaling-stroke" cx="100" cy="150" rx="50" ry="22" fill="#ff8a3d"/>
+<path vector-effect="non-scaling-stroke" d="M82.4 126.4 Q88.0 118.4 93.6 126.4" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M106.4 126.4 Q112.0 118.4 117.6 126.4" fill="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="78.4" cy="135.2" rx="4.800000000000001" ry="2.8000000000000003" fill="#ff9a8a" stroke="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="121.6" cy="135.2" rx="4.800000000000001" ry="2.8000000000000003" fill="#ff9a8a" stroke="none"/>
+<path vector-effect="non-scaling-stroke" d="M92.8 140.0 Q96.8 144.8 100 140.8 Q103.2 144.8 107.2 140.0" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M60 128 L40 124 M60 136 L40 140 M140 128 L160 124 M140 136 L160 140" fill="none"/></g>
+<path d="M150 150 Q190 140 186 108 Q182 98 176 106" fill="none" stroke-width="0"/>
+<path d="M4 160 L24 160 M4 174 L20 174 M4 188 L16 188" fill="none"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

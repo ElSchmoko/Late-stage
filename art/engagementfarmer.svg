@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#ffe08a"/>
+<path d="M84 140 Q100 154 116 140" fill="none"/>
+<path d="M74 166 L126 166 L130 206 L70 206 Z" fill="#8fd4ff"/>
+<path d="M76 166 L78 140 M124 166 L122 140" fill="none"/>
+<circle cx="80" cy="172" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="120" cy="172" r="3" fill="#2b2140" stroke="none"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#f2c39a"/>
+<circle cx="62" cy="92" r="9" fill="#f2c39a"/>
+<circle cx="138" cy="92" r="9" fill="#f2c39a"/>
+<circle cx="100" cy="86" r="38" fill="#f2c39a"/>
+<path d="M62 84 Q58 46 100 44 Q142 46 138 84 Q130 64 100 66 Q72 66 62 84 Z" fill="#ffd36b"/>
+<path d="M78 95 Q85 85 92 95" fill="none"/>
+<path d="M108 95 Q115 85 122 95" fill="none"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<path d="M90 111 Q100 121 110 111" fill="none"/>
+<ellipse cx="100" cy="64" rx="62" ry="13" fill="#ffe08a"/>
+<path d="M70 64 Q70 30 100 30 Q130 30 130 64 Z" fill="#ffe08a"/>
+<path d="M70 56 Q100 62 130 56 L130 62 Q100 68 70 62 Z" fill="#ff6b5e"/>
+<path d="M140 168 L184 168 L179 194 L145 194 Z" fill="#ff8a3d"/>
+<rect x="137" y="162" width="50" height="10" rx="3" fill="#ff8a3d"/>
+<path d="M162 168 L162 120" fill="none"/>
+<path d="M146 137 Q134 128 136 122 Q139 116 146 122 Q153 116 156 122 Q158 128 146 137 Z" fill="#ff8ab8"/>
+<path d="M178 126.1 Q167.2 118 169.0 112.6 Q171.7 107.2 178 112.6 Q184.3 107.2 187.0 112.6 Q188.8 118 178 126.1 Z" fill="#ff6b5e"/>
+<path d="M162 140 Q150 134 146 128 M162 128 Q172 122 178 118" fill="none"/>
+<g transform="translate(120 90) rotate(20)"><path d="M0 0 L30 0 L26 24 L4 24 Z" fill="#8fd4ff"/>
+<path d="M30 6 L48 -6" fill="none" stroke-width="6"/>
+<path d="M2 4 Q-10 4 -10 14 Q-8 22 4 20" fill="none"/></g>
+<path d="M172 92 L174 100 M178 94 L182 102" fill="none"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

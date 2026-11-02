@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="14" y="60" width="172" height="150" rx="10" fill="#8fd4ff"/>
+<path d="M100 60 L100 206 M14 132 L186 132" fill="none"/>
+<rect x="4" y="176" width="192" height="24" rx="6" fill="#ffffff"/>
+<path d="M62 146 L138 146 L133 182 L67 182 Z" fill="#ff8a3d"/>
+<rect x="59" y="140" width="82" height="10" rx="3" fill="#ff8a3d"/>
+<ellipse cx="70" cy="120" rx="14" ry="26" fill="#7fd6a0" transform="rotate(-40 70 120)"/>
+<ellipse cx="130" cy="120" rx="14" ry="26" fill="#7fd6a0" transform="rotate(40 130 120)"/>
+<ellipse cx="84" cy="110" rx="13" ry="28" fill="#7fd6a0" transform="rotate(-16 84 110)"/>
+<ellipse cx="116" cy="110" rx="13" ry="28" fill="#7fd6a0" transform="rotate(16 116 110)"/>
+<ellipse cx="100" cy="120" rx="30" ry="26" fill="#9ce3b4"/>
+<path d="M87.9 117.65 Q91.75 112.15 95.6 117.65" fill="none"/>
+<path d="M104.4 117.65 Q108.25 112.15 112.1 117.65" fill="none"/>
+<ellipse cx="85.15" cy="123.7" rx="3.3000000000000003" ry="1.9250000000000003" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="114.85" cy="123.7" rx="3.3000000000000003" ry="1.9250000000000003" fill="#ff9a8a" stroke="none"/>
+<path d="M96.7 127.55 Q100 130.3 103.3 127.55" fill="none"/>
+<path d="M160 72 Q161.6 78.4 168 80 Q161.6 81.6 160 88 Q158.4 81.6 152 80 Q158.4 78.4 160 72 Z" fill="#ffc928"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>
