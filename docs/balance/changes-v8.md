@@ -75,3 +75,20 @@ Each change is listed with the flag it answered. Before: `report-v7-before.md`. 
 | --- | --- |
 | Enlightened Guru: the cap of 3 damage applies only to the first two hits each of your other Attention Seekers takes in a combat | **Build-around ceiling:** worth +1.15 places in a Stoics build, against a tier-6 median of about +0.27. The old version made a board of Attention Seekers nearly unkillable. |
 | Bots now favour cards of their own style | The suite couldn't see build-around combos because no bot built around anything. |
+
+## Player card review (Nov 3)
+
+Each changed card was re-measured (200 paired lobbies, `--card=` filter). Effect is places gained against a plain body of the tier; the tier medians are from the full v8 run.
+
+| Change | Why | Effect before → after (tier median) |
+| --- | --- | --- |
+| Middle Manager: killing the drained minion gives 2 extra gold (was 1) | Player review | +0.42 → +0.51 (0.66) |
+| Brand Ambassador: the Follower summon moves from start of combat to Legacy (two Followers) | On a full board the start-of-combat summon did nothing. A Legacy summon happens after a death, so there is always room. | −0.05 → +0.19 (0.30) |
+| Ring Light Studio: end of turn, get 2 Likes; while it's on your board, Likes count double (was 3 Likes per other Influencer) | Too many Likes to hand out one by one. Fewer Likes, each worth more. | +0.86 → +0.62 (0.30) |
+| City Pigeon 1/3 (was 1/1-ish body) | Player review | +0.40 → +0.41 (0.40) |
+| Windowsill Succulent 2/2 | Player review | +0.54 → +0.74 (0.40) |
+| World Tree: end of turn, other Ferals +2/+2 | It arrives at tier 6, too late for a slow effect. | +0.02 → +0.25 (0.23) |
+| Merch Stand: twice per turn | Player review | +0.92 → +1.04 (0.66) |
+| Method Actor 4/1; Zine Maker 2/1 | Player review | +0.72 → +0.66; +0.34 → +0.37 |
+
+All are within the power band (−0.40…+0.45 of the tier median). Style placements after the change (1,400 lobbies, skill 0): 4.24–4.72, all at or ahead of the big-stats bot (4.73).

@@ -612,7 +612,7 @@ async function levelUp() {
 async function useLikes() {
   const me = G.me; if (!me.likes || !me.board.length) { toast(me.likes ? 'Play a minion first' : 'No Likes yet'); return; }
   const go = async t => { me.giveLike(t); sfx('like'); renderAll(); await playLog(); if (me.likes > 0) useLikes(); };
-  await chooseTarget(me.board.slice(), `Give a Like (+${1 + me.likeBonus}/+${1 + me.likeBonus}) · ${me.likes} left`, go, () => {});
+  await chooseTarget(me.board.slice(), `Give a Like (+${me.likeValue(null)}/+${me.likeValue(null)}) · ${me.likes} left`, go, () => {});
 }
 async function usePower() {
   if (G.busy) return;

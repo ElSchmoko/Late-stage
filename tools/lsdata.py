@@ -194,16 +194,16 @@ class Component extends DCLogic {{
 
 # Card-face wording: the same rule in fewer words. The full rules text lives in the long-press detail view.
 SHORT = {
-    'Middle Manager': 'Attention Seeker. End of turn: take +1/+1 from the minion on its left. If it dies, +1 gold next turn.',
+    'Middle Manager': 'Attention Seeker. End of turn: take +1/+1 from the minion on its left. If it dies, +2 gold next turn.',
     'Crypto Bro': 'Sells for +1 gold per turn on board (max 7). Crashes to 0 after 6 turns.',
     'Venture Capitalist': 'First Impression: invest up to 4 gold. A minion gets +3/+3 per gold.',
     'Private Equity': 'End of turn: Acquire the highest-Attack Feed minion: gain half its stats.',
     'Unicorn Startup': 'End of turn: other Hustlers get +1/+1 per 2 gold you spent.',
     'Too Big to Fail': 'Attention Seeker. Survives its first death each combat at 1 Health. Other Hustlers get +4/+4.',
-    'Brand Ambassador': 'Start of combat: summon a Follower. Followers get +1/+1 per Influencer you have.',
-    'Ring Light Studio': 'End of turn: get 3 Likes per other Influencer.',
+    'Brand Ambassador': 'Start of combat: Followers get +1/+1 per Influencer you have. Legacy: summon two Followers.',
+    'Ring Light Studio': 'End of turn: get 2 Likes. While this is on your board, Likes count double.',
     'Blue Checkmark': 'Start of combat: your Followers get Out of Office and +2/+2. They attack twice.',
-    'World Tree': 'End of turn: other Ferals get +1/+1 per turn this has been on board (max +4).',
+    'World Tree': 'End of turn: give your other Ferals +2/+2.',
     'Old-Growth Blockade': 'Attention Seeker. Start of combat: others get +1/+1 per Attention Seeker you have.',
     'Museum Retrospective': 'Grievance (2): other Creatives get +3/+3 permanently.',
     'Memorial Mural': 'Grievance (2): your Creatives get +1 Attack this game.',

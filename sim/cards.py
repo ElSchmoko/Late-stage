@@ -373,6 +373,14 @@ V6 = {
     'Consultant': (5, 6, 7, 'Your "every 4 gold you spend" effects trigger every 3 gold instead.'),
     'Thought Leader': (4, 4, 5, 'Every 4 gold you spend: give your other Hustlers +1/+1.'),
     'Enlightened Guru': (6, 3, 9, 'Attention Seeker. The first two times each of your other Attention Seekers takes damage each combat, it takes at most 3.'),
+    # player review, Nov 3
+    'Middle Manager': (2, 3, 4, 'Attention Seeker. End of turn: take +1/+1 from the minion to its left. If that kills it, gain 2 extra gold next turn.'),
+    'Brand Ambassador': (5, 5, 6, 'Start of combat: give your Followers +1/+1 for each Influencer you have. Legacy: summon two Followers.'),
+    'Ring Light Studio': (5, 4, 8, 'End of turn: get 2 Likes. Likes you give count double while this is on your board.'),
+    'City Pigeon': (1, 1, 3, None), 'Windowsill Succulent': (1, 2, 2, None),
+    'World Tree': (6, 5, 9, 'End of turn: give your other Ferals +2/+2.'),
+    'Merch Stand': (2, 2, 3, 'After you play a Creative, gain 1 extra gold next turn (twice per turn).'),
+    'Method Actor': (2, 4, 1, None), 'Zine Maker': (1, 2, 1, None),
 }
 STYLE_V8 = {'Corporate Raider': 'EX'}
 for _c in ALL:

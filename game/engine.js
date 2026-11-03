@@ -91,7 +91,7 @@ class Player {
     this.sold_hustle = false; this.punks_sold = 0; this.kills_last = 0; this.techie_kills = 0; this.spent_this_turn = 0;
     this.human = !!opts.human; this.hero = opts.hero || null; this.name = opts.name || style;
     this.hand = []; this.feed = []; this.saved = false; this.gold = [0]; this.log = []; this.pending = []; this.lostLast = false;
-    this.skill = opts.skill ?? 0; this.monsteraUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = new Set(); this.resellUsed = new Set();
+    this.skill = opts.skill ?? 0; this.monsteraUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
     this.likes = 0; this.likeBonus = 0; this.likesSpent = 0; this.feedBuff = {}; this.creativeAtk = 0; this.creativesThisTurn = 0; this.gigUsed = new Set(); this.feedRef = null; this.getFeed = null;
   }
   has(n) { return this.board.some(m => m.is_(n)); }
@@ -122,10 +122,15 @@ class Player {
     return v + 1.5 * m.extras.length;
   }
   addLikes(n, src) { if (n > 0) { this.likes += n; this.note('likes', {n, src: src ? src.id : null}); } }
+  /** Stats one Like gives this minion (Personal Brand, Main Character and Ring Light Studio raise it). */
+  likeValue(m) {
+    const rl = this.board.filter(o => o.is_('Ring Light Studio')), ring = rl.length ? (rl.some(o => o.golden) ? 3 : 2) : 1;
+    return (1 + this.likeBonus) * (m && m.is_('Main Character') ? (m.golden ? 6 : 3) : 1) * ring;
+  }
   giveLike(m) {
     if (this.likes <= 0 || !this.board.includes(m)) return false;
     this.likes -= 1; this.likesSpent += 1;
-    const k = (1 + this.likeBonus) * (m.is_('Main Character') ? (m.golden ? 6 : 3) : 1);
+    const k = this.likeValue(m);
     this.buff(m, k, k); return true;
   }
   spendLikes() { while (this.likes > 0 && this.board.length) { const mc = this.board.find(m => m.is_('Main Character')); this.giveLike(mc || this.carry()); } }
@@ -208,7 +213,7 @@ class Player {
   }
   afterPlay(card, played, gold) {
     if (card.tribe === C) this.creativesThisTurn += 1;
-    if (card.tribe === C) for (const x of this.board) if (x.is_('Merch Stand') && x !== played && !this.merchUsed.has(x.id)) { this.merchUsed.add(x.id); this.bonus_next += x.g; this.note('gold_next', {id: x.id, n: x.g}); }
+    if (card.tribe === C) for (const x of this.board) if (x.is_('Merch Stand') && x !== played && (this.merchUsed[x.id] || 0) < 2) { this.merchUsed[x.id] = (this.merchUsed[x.id] || 0) + 1; this.bonus_next += x.g; this.note('gold_next', {id: x.id, n: x.g}); }
     for (const x of doubled(this.board.slice())) {
       if (x === played && !card.collab) continue;
       if (x.is_('Grindset Guru') && card.tribe === H && x !== played) this.buff(x, 1, 1, x);
@@ -305,9 +310,9 @@ class Player {
       if (n === 'Middle Manager') {
         const left = leftOf(b, m);
         if (left) { const v = left; v.atk -= Math.min(1, v.atk); v.hp -= 1; this.note('drain', {id: v.id, src: m.id}); this.buff(m, 1, 1, m);
-          if (v.hp <= 0) { b.splice(b.indexOf(v), 1); this.bonus_next += 1; this.note('shopdeath', {id: v.id}); this.onShopDeath(v); } }
+          if (v.hp <= 0) { b.splice(b.indexOf(v), 1); this.bonus_next += 2; this.note('shopdeath', {id: v.id}); this.onShopDeath(v); } }
       } else if (n === 'Stan Account') this.addLikes(2, m);
-      else if (n === 'Ring Light Studio') this.addLikes(3 * b.filter(o => o.tribe === I && o !== m).length, m);
+      else if (n === 'Ring Light Studio') this.addLikes(2, m);
       else if (n === 'Guerrilla Gardener') this.addFeedBuff(F, 2, 2);
       else if (n === 'Private Equity') {
         const feed = this.getFeed ? this.getFeed() : this.feedRef;
@@ -325,7 +330,7 @@ class Player {
       else if (n === 'Record Label') { const k = 3 * this.creativesThisTurn, cr = b.filter(o => o !== m && o.tribe === C); if (k && cr.length) this.buff(this.rng.choice(cr), k, k, m); }
       else if (n === 'Plant Parent') { const fs = this.rng.shuffle(b.filter(o => o !== m && o.tribe === F)).slice(0, 2); for (const o of fs) this.buff(o, 1, 1, m); }
       else if (n === 'Rooftop Beehive') { for (const o of neighbours(b, m)) if (isTribe(o, F)) this.buff(o, 2, 2, m); }
-      else if (n === 'World Tree') { const k = Math.min(4, m.turns_on_board); if (k) for (const o of b) if (o !== m && o.tribe === F) this.buff(o, k, k, m); }
+      else if (n === 'World Tree') { for (const o of b) if (o !== m && o.tribe === F) this.buff(o, 2, 2, m); }
       else if (n === 'Shower Thinker') { const o = rightOf(b, m); if (o) this.tbuff(o, 3, 3, m); }
       else if (n === 'Pub Philosopher') { const o = leftOf(b, m); if (o) this.tbuff(o, 4, 2, m); }
       else if (n === 'Thought Experiment') { for (const o of neighbours(b, m)) if (isTribe(o, PH)) this.tbuff(o, 3, 3, m); }
@@ -400,7 +405,7 @@ class Player {
   // ---- turn structure (shared)
   beginTurn() {
     this.turn += 1; this.kills_last = this.techie_kills; this.techie_kills = 0; this.buffed = new Set();
-    this.merch_used = this.side_used = this.sold_hustle = false; this.merchUsed = new Set(); this.resellUsed = new Set(); this.creativesThisTurn = 0; this.gigUsed = new Set(); this.rerelease = []; this.discounts = {}; this.in_eot = this.oak = false;
+    this.merch_used = this.side_used = this.sold_hustle = false; this.merchUsed = {}; this.resellUsed = new Set(); this.creativesThisTurn = 0; this.gigUsed = new Set(); this.rerelease = []; this.discounts = {}; this.in_eot = this.oak = false;
     this.powerUsed = false; this.scrollsThisTurn = 0; this.monsteraUses = {};
     for (const m of this.board) { m.turns_on_board += 1; m.ta = m.th = 0; }
     const carry = this.hero === 'h_procrastinator' ? Math.min(3, this.gold[0]) : 0;
@@ -578,7 +583,7 @@ class Fight {
     if (hero === 'remote' && b.length) { b[0].shield = true; this.frame({type: 'hero', side: k, hero, tgts: [b[0].id]}); }
     if (hero === 'h_minimalist' && b.length <= MINI_MAX) { const e2 = MINI_BUFF; for (const o of b) { o.atk += e2; o.hp += e2; } this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
     const reach = (m, r) => { const i = b.indexOf(m); return b.filter((o, j) => o !== m && Math.abs(j - i) <= r); };
-    for (const m of b.slice()) if (m.name === 'Brand Ambassador') { for (let i = 0; i < m.g; i++) combatFollower(me, b.indexOf(m) + 1); const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); for (const f of fs) { f.atk += kk; f.hp += kk; } if (fs.length) ev(m, 'give', fs); }
+    for (const m of b.slice()) if (m.name === 'Brand Ambassador') { const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); for (const f of fs) { f.atk += kk; f.hp += kk; } if (fs.length) ev(m, 'give', fs); }
     const bc = b.filter(m => m.is_('Blue Checkmark'));
     if (bc.length) { const plus = bc.some(m => m.golden) ? 6 : 2; for (const o of b) if (o.follower) { o.twice = true; o.shield = true; o.atk += plus; o.hp += plus; } ev(bc[0], 'give', b.filter(o => o.follower)); }
     const gurus = b.filter(m => m.is_('Enlightened Guru'));
@@ -661,6 +666,7 @@ class Fight {
           const n = m.name;
           if (n === 'Reply Guy') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'Comment Section') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
+          else if (n === 'Brand Ambassador') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'City Pigeon') { for (let i = 0; i < g; i++) combatToken(side, idx, 'Pigeon'); legacy = true; }
           else if (n === 'Compost Heap') { if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(F, g, g); legacy = true; }
           else if (n === 'Package Hoarder' || n === 'Open Mic Poet') { const k = n === 'Package Hoarder' ? 3 : 2; for (const o of nbs) { o.atk += k * g; o.hp += k * g; } legacy = true; }
