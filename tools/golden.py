@@ -102,7 +102,7 @@ GOLD = {
     'The Cynic': 'Attention Seeker. After this takes damage, give your other Philosophers +2/+2.',
     'Bestselling Author': 'End of turn: your minions also gain their next-combat buffs permanently.',
     'Grand Unified Theory': 'End of turn: give your minions +2/+2 for the next combat, then triple all next-combat buffs.',
-    'Enlightened Guru': 'Attention Seeker. Your other Attention Seekers take at most 2 damage at a time.',
+    'Enlightened Guru': 'Attention Seeker. The first four times each of your other Attention Seekers takes damage each combat, it takes at most 3.',
     # Neighbours
     'Wi-Fi Leech': 'Start of combat: gain +2/+2 for each minion next to it.',
     'Package Hoarder': 'Legacy: give the minions next to it +6/+6.',

@@ -17,7 +17,7 @@ const T = {   // targets
   generic: 0.35,                          // a tribe card this good outside its tribe (and not better inside) is generic power
   triggerShare: 0.40, dupMax: 2,          // variety inside a tribe
   band: 0.60, phaseDev: 0.10, firstLo: 0.09, firstHi: 0.17, eighthHi: 0.17,
-  buyLow: 0.35, buyHigh: 2.5};
+  buyLow: 0.35, buyHigh: 2.5, ceilingHigh: 0.60};
 // Flags accepted on purpose, with the reason. They are listed separately instead of counted.
 const ACCEPT = {
   'Timing|Loot Box': 'Discover offers cards up to your tier, so it is meant to get better later.',
@@ -51,6 +51,9 @@ for (const tr of TRIBES) for (let t = 1; t <= 6; t++) {
   const v = cs.map(n => CARDS[n].rate), hi = cs[v.indexOf(Math.max(...v))], lo = cs[v.indexOf(Math.min(...v))];
   if (Math.max(...v) - Math.min(...v) > T.parity) flag('Inner-tribe parity', `${tr} tier ${t}`, `${hi} ${f2(CARDS[hi].rate)} vs ${lo} ${f2(CARDS[lo].rate)}`);
 }
+// ---------- 13 · build-around ceiling: the card in the style that fits it best (needs a --ceiling run)
+for (const n of names) { const c = CARDS[n]; if (!c || c.ceiling == null) continue;
+  if (c.ceiling > tierMed[c.tier] + T.ceilingHigh) flag('Build-around ceiling', n, `worth ${f2(c.ceiling)} in its best style vs tier ${c.tier} median ${f2(tierMed[c.tier])}`); }
 // ---------- 3 · dominance and redundancy (static)
 for (const a of names) for (const b of names) if (dominates(ms[a], ms[b])) flag('Dominance', `${a} > ${b}`, `same effect, same or lower tier, at least as big in every number`);
 for (const tr of TRIBES) {
@@ -114,7 +117,7 @@ if (STY && STY.uptake) {
 }
 
 // ---------- write
-const dims = ['Power for tier', 'Inner-tribe parity', 'Dominance', 'Redundancy', 'Variety', 'Tribe curve', 'Style coverage', 'Timing', 'Cohesion', 'Archetypes', 'Variance', 'Uptake'];
+const dims = ['Power for tier', 'Build-around ceiling', 'Inner-tribe parity', 'Dominance', 'Redundancy', 'Variety', 'Tribe curve', 'Style coverage', 'Timing', 'Cohesion', 'Archetypes', 'Variance', 'Uptake'];
 P('# Balance report\n');
 P(`Generated from \`${process.argv[2].split('/').pop()}\`${STY ? ` and \`${process.argv[3].split('/').pop()}\`` : ''}. Method: \`docs/balance-method.md\`.\n`);
 P('| Dimension | Flags |\n| --- | --- |');

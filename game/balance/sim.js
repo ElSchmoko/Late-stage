@@ -10,7 +10,7 @@ const TURN = {1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11}, LATE = 3;
 const mode = process.argv[2];
 
 function stylesOf(t) { return Object.keys(STY).filter(s => STY[s][0] === t); }
-function setup(seed, cardTribe, own) {
+function setup(seed, cardTribe, own, forceStyle) {
   // the card's tribe is always in the lobby; "own" puts the test bot on that tribe, "off" on another tribe
   const r = E.RNG(seed * 31 + 7);
   const others = TRIBES.filter(t => t !== cardTribe);
@@ -18,12 +18,12 @@ function setup(seed, cardTribe, own) {
   const botTribe = cardTribe === 'Neutral' ? others[(seed >> 1) % others.length] : own ? cardTribe : off;
   const tribes = [...new Set([cardTribe === 'Neutral' ? botTribe : cardTribe, botTribe].concat(r.shuffle(others.slice())))].slice(0, 5);
   const L = new LSLobby(seed, {tribes, skill: 0});
-  const p = L.players[0], sts = stylesOf(botTribe), st = sts[seed % sts.length];
+  const p = L.players[0], sts = stylesOf(botTribe), st = forceStyle || sts[seed % sts.length];
   p.style_code = st; p.style = st; p.tribe = STY[st][0];
   return {L, p};
 }
-function run(seed, cardTribe, own, card, turn) {
-  const {L, p} = setup(seed, cardTribe, own);
+function run(seed, cardTribe, own, card, turn, forceStyle) {
+  const {L, p} = setup(seed, cardTribe, own, forceStyle);
   // the card arrives at the start of the bot's turn, played with the bot's real gold (Venture Capitalist invests it)
   let at = turn;   // a Collab needs a minion to stick to: if the board is empty it arrives a turn later
   if (card) p.onBegin = q => { if (q.turn !== at) return; if (card.collab && !q.board.length) { at++; return; }
@@ -40,8 +40,8 @@ const plainOf = (tribe, tier) => {
 };
 
 if (mode === 'cards') {
-  const N = +process.argv[3] || 200, only = process.argv[4] ? process.argv[4].split(',') : null;
-  const cards = LS_CARDS.filter(c => !c.token && (!only || only.includes(c.tribe)));
+  const N = +process.argv[3] || 200, only = process.argv[4] ? process.argv[4].split(',') : null, CEIL = process.argv.includes('--ceiling'), ONLYCARD = (process.argv.find(a => a.startsWith('--card=')) || '').slice(7);
+  const cards = LS_CARDS.filter(c => !c.token && (!only || only.includes(c.tribe)) && (!ONLYCARD || ONLYCARD.split('|').includes(c.name)));
   const tribes = [...new Set(cards.map(c => c.tribe))];
   const out = {};
   const seeds = Array.from({length: N}, (_, i) => 200000 + i);
@@ -59,7 +59,15 @@ if (mode === 'cards') {
     }
     for (const c of cards.filter(c => c.tribe === tribe)) {
       const g0 = gain(true, c, TURN[c.tier]), gl = gain(true, c, TURN[c.tier] + LATE), go = tribe === 'Neutral' ? null : gain(false, c, TURN[c.tier]);
-      out[c.name] = {tribe, tier: c.tier, style: c.style, raw: mean(g0), rawSE: se(g0), rate: mean(g0) - plain[c.tier].own,
+      // build-around ceiling: the card in each style of its tribe separately (the best fit shows what a player building around it gets)
+      let byStyle = null;
+      if (CEIL && tribe !== 'Neutral') { byStyle = {};
+        for (const st of stylesOf(tribe)) {
+          const bs = seeds.map(s => run(s, tribe, true, null, 0, st)), pc = plainOf(tribe, c.tier);
+          const g = (card) => { const r = []; seeds.forEach((s, i) => { if (bs[i].reached >= TURN[c.tier]) r.push(bs[i].place - run(s, tribe, true, card, TURN[c.tier], st).place); }); return mean(r); };
+          byStyle[st] = g(c) - g(pc);
+        } }
+      out[c.name] = {tribe, tier: c.tier, style: c.style, byStyle, ceiling: byStyle ? Math.max(...Object.values(byStyle)) : null, raw: mean(g0), rawSE: se(g0), rate: mean(g0) - plain[c.tier].own,
         late: mean(gl) - plain[c.tier].late, off: go ? mean(go) - plain[c.tier].off : null, synergy: go ? (mean(g0) - plain[c.tier].own) - (mean(go) - plain[c.tier].off) : null};
       process.stderr.write('.');
     }

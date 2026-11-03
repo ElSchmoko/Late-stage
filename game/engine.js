@@ -111,6 +111,7 @@ class Player {
     const c = m.c;
     if (c.tribe === this.tribe || m.tribe2 === this.tribe) {
       v += 2.5 * this.commit();
+      if (this.style && c.style === this.style) v += STYLE_PULL * this.commit();   // bots build toward their own style
       if (c.kind === 'eng') { const decay = Math.max(.25, 1 - .25 * Math.max(0, this.tier - c.tier - 1)); v += 1.5 * (1 + c.tier) * decay * this.commit(); }
     }
     if ((SELL_STYLES.includes(this.style) || [H, P].includes(this.tribe)) && c.sellbait) v += 1;
@@ -522,7 +523,7 @@ class Player {
 }
 
 const HERO_POWERS = {boomer: {cost: 1, target: true}, h_serial: {cost: 1, target: true}, h_overthinker: {cost: 2}, h_lifecoach: {cost: 1, target: true}};
-let DOOM_EVERY = 5, COACH = 2, GYM_LIKES = 1, COMPLAIN_EVERY = 2, MINI_MAX = 4, MINI_BUFF = 2, GYM_EVERY = 2;
+let STYLE_PULL = 2.0, DOOM_EVERY = 5, COACH = 2, GYM_LIKES = 1, COMPLAIN_EVERY = 2, MINI_MAX = 4, MINI_BUFF = 2, GYM_EVERY = 2;
 
 // ======================================================================== combat
 function snap(side) {
@@ -533,7 +534,7 @@ function perm(m, a, h) { m.atk += a; m.hp += h; if (m.orig) { m.orig.atk += a; m
 function hit(t, n, src) {
   if (n <= 0 || t.hp <= 0) return 0;
   if (t.shield) { t.shield = false; t.popped = true; return 0; }
-  if (t.cap && n > t.cap) n = t.cap;
+  if (t.cap && t.capLeft > 0) { if (n > t.cap) n = t.cap; t.capLeft--; }   // Enlightened Guru: the first hit(s) each combat
   if (src && src.toxic) { t.hp = Math.min(t.hp - n, 0); src.toxic = false; t.toxicked = true; } else t.hp -= n;
   t.hits = (t.hits || 0) + 1;
   return n;
@@ -581,7 +582,7 @@ class Fight {
     const bc = b.filter(m => m.is_('Blue Checkmark'));
     if (bc.length) { const plus = bc.some(m => m.golden) ? 6 : 2; for (const o of b) if (o.follower) { o.twice = true; o.shield = true; o.atk += plus; o.hp += plus; } ev(bc[0], 'give', b.filter(o => o.follower)); }
     const gurus = b.filter(m => m.is_('Enlightened Guru'));
-    if (gurus.length) { const cap = gurus.some(m => m.golden) ? 2 : 3; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) o.cap = cap; }
+    if (gurus.length) { const left = gurus.some(m => m.golden) ? 4 : 2; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) { o.cap = 3; o.capLeft = left; } }
     for (const m of b.slice()) {
       const n = m.name, g = m.g;
       if (m.n('Robot Vacuum') && e.length) for (let i = 0; i < m.n('Robot Vacuum'); i++) { const live = e.filter(x => x.hp > 0); if (live.length) { const t = minBy(live, x => x.hp); hit(t, 2); ev(m, 'shot', [t]); } }
@@ -743,6 +744,6 @@ class Fight {
 
 const damageCap = turn => turn <= 3 ? 5 : turn <= 7 ? 10 : 15;
 
-root.LSEngine = {H, I, F, C, T, P, PH, N, TRIBES, FEED_SIZE, LEVEL_COST, CURVE, TARGETED_FI, HERO_POWERS, skillOf, tune: o => { ({DOOM_EVERY = DOOM_EVERY, COACH = COACH, GYM_LIKES = GYM_LIKES, COMPLAIN_EVERY = COMPLAIN_EVERY, MINI_MAX = MINI_MAX, MINI_BUFF = MINI_BUFF, GYM_EVERY = GYM_EVERY} = o); if (o.costs) for (const k in o.costs) HERO_POWERS[k].cost = o.costs[k]; }, tuning: () => ({DOOM_EVERY, COACH, GYM_LIKES, COMPLAIN_EVERY, MINI_MAX, MINI_BUFF, GYM_EVERY}), load, RNG, M, Player, Fight, buildPool, damageCap,
+root.LSEngine = {H, I, F, C, T, P, PH, N, TRIBES, FEED_SIZE, LEVEL_COST, CURVE, TARGETED_FI, HERO_POWERS, skillOf, tune: o => { if ('STYLE_PULL' in o) STYLE_PULL = o.STYLE_PULL; ({DOOM_EVERY = DOOM_EVERY, COACH = COACH, GYM_LIKES = GYM_LIKES, COMPLAIN_EVERY = COMPLAIN_EVERY, MINI_MAX = MINI_MAX, MINI_BUFF = MINI_BUFF, GYM_EVERY = GYM_EVERY} = o); if (o.costs) for (const k in o.costs) HERO_POWERS[k].cost = o.costs[k]; }, tuning: () => ({DOOM_EVERY, COACH, GYM_LIKES, COMPLAIN_EVERY, MINI_MAX, MINI_BUFF, GYM_EVERY}), load, RNG, M, Player, Fight, buildPool, damageCap,
   byName: n => BY_NAME[n], byTribe: t => BY_TRIBE[t], styles: () => STYLES};
 })(typeof window !== 'undefined' ? window : globalThis);

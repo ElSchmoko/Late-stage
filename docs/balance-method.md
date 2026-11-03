@@ -41,6 +41,29 @@ This method checks twelve dimensions. Some are static checks on the card text; t
 
 **Style placements are noisier than they look.** Players in one lobby share its mix of tribes, so their results are correlated. In testing, the same build gave the Followers style 4.41 on one set of 1,400 lobbies and 4.79 on another. The style run therefore uses 3,200 lobbies, split into two halves, and the report states how far the halves disagree. Differences between styles smaller than about half that gap are noise.
 
+## 13 · Build-around ceiling (added after Enlightened Guru)
+
+A player found that Enlightened Guru ("your other Attention Seekers take at most 3 damage at a time") won lobbies almost on its own when built around. The suite had flagged it as the strongest tier-6 card by a factor of four, but it wasn't fixed, and two blind spots made it look smaller than it was:
+
+1. **Bots didn't play their style.** A bot's buying followed its tribe; the style label barely changed anything. So no bot ever stacked Attention Seekers the way a Stoics player does. Bots now value their own style's cards more (`STYLE_PULL`), which makes the two styles of a tribe real archetypes.
+2. **Averages hide combos.** "Power for tier" averages a card over both styles of its tribe. A card that is broken in one build and useless in the other looks fine.
+
+| # | Dimension | Question | Measured by | Target |
+| --- | --- | --- | --- | --- |
+| 13 | Build-around ceiling | How strong is the card in the build that fits it best? | Effect measured separately in each style of its tribe (`--ceiling`); the best one counts. | ≤ tier median + 0.60. |
+
+Bots still play a build-around less sharply than a person who skips buys to protect it, so treat a ceiling near the limit as a warning, and do a hands-on test.
+
+Run it for a tribe or single cards: `node game/balance/sim.js cards 300 Philosopher --ceiling "--card=Enlightened Guru"`.
+
+| Version | Average | Stoics (best) |
+| --- | --- | --- |
+| Old Guru (cap on every hit) | +1.12 | +1.15 |
+| Cap on the first hit each combat | +0.13 | +0.13 |
+| **Cap on the first two hits each combat (shipped)** | **+0.36** | **+0.40** |
+
+The tier-6 median is about +0.25–0.30.
+
 The thresholds come from the noise level. With 250 paired lobbies, a card's Effect has a standard error of about ±0.10–0.12, so a ±0.4 gap from the median is about 3–4 standard errors. Bot uptake reflects the bots' buying rules, not human taste, so it only flags extremes.
 
 ## Running it

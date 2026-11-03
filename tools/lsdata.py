@@ -225,7 +225,7 @@ SHORT = {
     'Bestselling Author': 'End of turn: make next-combat buffs on your minions permanent.',
     'Grand Unified Theory': 'End of turn: your minions get +1/+1 next combat, then double all next-combat buffs.',
     'The Cynic': 'Attention Seeker. After it takes damage, other Philosophers get +1/+1.',
-    'Enlightened Guru': 'Attention Seeker. Your other Attention Seekers take at most 3 damage per hit.',
+    'Enlightened Guru': 'Attention Seeker. Each other Attention Seeker takes at most 3 damage from its first two hits each combat.',
     'Utilitarian': 'Start of combat: your three lowest-Attack other Philosophers get +3/+3.',
 }
 

@@ -728,8 +728,8 @@ function bindToken(e, kind, obj) {
     e.setPointerCapture(ev.pointerId);
     const move = mv => {
       const [x, y] = toStage(mv.clientX, mv.clientY);
-      if (!dragging && Math.hypot(x - sx, y - sy) > 7) { dragging = true; clearTimeout(longT); startDrag(); }
-      if (dragging) { css(e, {left: r.x + x - sx, top: r.y + y - sy}); dragOver(kind, x, y); }
+      if (!dragging && Math.hypot(x - sx, y - sy) > DRAG_START) { dragging = true; clearTimeout(longT); startDrag(); }
+      if (dragging) { css(e, {left: r.x + x - sx, top: r.y + y - sy}); dragOver(kind, x, y, Math.hypot(x - sx, y - sy)); }
     };
     const startDrag = () => {
       sfx('pickup');
@@ -741,10 +741,10 @@ function bindToken(e, kind, obj) {
     const up = async uev => {
       cleanup(); if (done) return; done = true;
       const [x, y] = toStage(uev.clientX, uev.clientY);
-      e.classList.remove('drag'); e.style.boxShadow = ''; S.sellZone.style.display = 'none';
+      e.classList.remove('drag'); e.style.boxShadow = ''; S.sellZone.style.display = 'none'; S.sellZone.style.opacity = ''; S.sellZone.style.transform = '';
       if (!dragging) { e.style.transform = kind === 'hand' ? e.style.transform : ''; return onTap(kind, e); }
       e.style.transform = '';
-      await onDrop(kind, e, x, y);
+      await onDrop(kind, e, x, y, Math.hypot(x - sx, y - sy));
     };
     e.addEventListener('pointermove', move); e.addEventListener('pointerup', up); e.addEventListener('pointercancel', up);
   });
@@ -762,8 +762,13 @@ function showDetailFor(kind, e) {
 }
 function boardIndexAt(x) { const n = G.me.board.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } return best; }
 let lastGap = null;
-function dragOver(kind, x, y) {
-  const overBoard = y > 150 && y < 270 && x > 100 && x < 740;
+// Buying and selling need a deliberate drag: a minimum distance, and the finger clearly inside the target area.
+const DRAG_START = 12, DROP_MIN = 45;
+const inBoard = (x, y, from) => y > (from === 'feed' ? 172 : 158) && y < 270 && x > 100 && x < 740;
+const inSell = (x, y) => y < 140 && x > 100 && x < 740;
+function dragOver(kind, x, y, dist = 0) {
+  if (kind === 'board') { const armed = inSell(x, y) && dist >= DROP_MIN; S.sellZone.style.opacity = armed ? 1 : .45; S.sellZone.style.transform = armed ? 'scale(1.02)' : 'scale(1)'; }
+  const overBoard = inBoard(x, y, kind) && (kind === 'board' || dist >= DROP_MIN);
   if ((kind === 'hand' || kind === 'feed') && overBoard && G.me.board.length < 7) { const g = boardIndexAt(x); if (g !== lastGap) { lastGap = g; renderBoardOnly(g); } }
   else if (kind === 'board' && overBoard) { const others = G.me.board.filter(m => m !== S.dragM); }
   else if (lastGap !== null) { lastGap = null; renderBoardOnly(null); }
@@ -773,10 +778,11 @@ function renderBoardOnly(gap) {
   me.board.forEach((m, i) => { const t = S.tok.get(m.id); if (t && !t.classList.contains('drag')) { t.style.transition = 'left .2s cubic-bezier(.22,1,.36,1)'; css(t, {left: boardX(gap !== null && i >= gap ? i + 1 : i, n)}); } });
 }
 async function onTap(kind, e) { return showDetailFor(kind, e); }
-async function onDrop(kind, e, x, y) {
-  const overBoard = y > 150 && y < 270 && x > 100 && x < 740;
-  const overFeed = y < 160 && x > 100 && x < 740;
-  const overHand = y >= 262;
+async function onDrop(kind, e, x, y, dist = 999) {
+  const far = dist >= DROP_MIN;
+  const overBoard = inBoard(x, y, kind) && (kind === 'board' || far);
+  const overFeed = inSell(x, y) && far;
+  const overHand = y >= 268 && far;
   const gap = lastGap; lastGap = null;
   if (kind === 'feed') {
     if (overBoard && G.me.board.length < 7) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }

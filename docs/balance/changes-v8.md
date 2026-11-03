@@ -68,3 +68,10 @@ Each change is listed with the flag it answered. Before: `report-v7-before.md`. 
 - **Late tiers** count only lobbies where the bot is still alive when the card arrives. Before, tiers 5–6 were diluted by eliminated bots.
 - **Collabs** wait until there is a minion to stick to.
 - **Phase win rates** leave out draws and are compared with the average of all styles in that phase, because late phases contain only survivors.
+
+## After player feedback (Enlightened Guru)
+
+| Change | Why |
+| --- | --- |
+| Enlightened Guru: the cap of 3 damage applies only to the first two hits each of your other Attention Seekers takes in a combat | **Build-around ceiling:** worth +1.15 places in a Stoics build, against a tier-6 median of about +0.27. The old version made a board of Attention Seekers nearly unkillable. |
+| Bots now favour cards of their own style | The suite couldn't see build-around combos because no bot built around anything. |

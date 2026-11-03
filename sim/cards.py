@@ -372,6 +372,7 @@ V6 = {
     'Rage Quitter': (2, 4, 3, 'Legacy: deal 5 damage to the minion that killed it.'),
     'Consultant': (5, 6, 7, 'Your "every 4 gold you spend" effects trigger every 3 gold instead.'),
     'Thought Leader': (4, 4, 5, 'Every 4 gold you spend: give your other Hustlers +1/+1.'),
+    'Enlightened Guru': (6, 3, 9, 'Attention Seeker. The first two times each of your other Attention Seekers takes damage each combat, it takes at most 3.'),
 }
 STYLE_V8 = {'Corporate Raider': 'EX'}
 for _c in ALL:
