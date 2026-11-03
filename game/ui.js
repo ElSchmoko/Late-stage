@@ -363,7 +363,8 @@ function buildShop() {
   S.save = el('button', 'sb', '', stage); css(S.save, {left: 759, top: 158, width: 58, height: 74}); S.save.onclick = toggleSave;
   S.ready = el('button', 'sb', `<svg width="88" height="110" viewBox="0 0 88 110" aria-hidden="true"><rect x="6" y="12" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="6" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="12" width="76" height="90" rx="38" fill="#2b2140" stroke="#2b2140" stroke-width="3"></rect><g class="face"><rect x="6" y="6" width="76" height="90" rx="38" fill="#2ecb6e" stroke="#2b2140" stroke-width="3"></rect><path d="M22 30Q26 18 40 15" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".7"></path></g></svg><span class="ab" style="left:0;right:0;top:45px;text-align:center;font-size:22px;pointer-events:none">Ready</span>`, stage);
   css(S.ready, {left: 746, top: 246, width: 88, height: 110}); S.ready.onclick = ready;
-  soundButton(30, 200);
+  S.menu = el('button', 'tribebtn', ico('<path d="M5 7h14M5 12h14M5 17h14"></path>', 22, 2.8), stage); css(S.menu, {left: 30, top: 200, display: 'flex', padding: '5px'});
+  S.menu.setAttribute('aria-label', 'Menu'); S.menu.onclick = showMenu;
   S.layer = el('div', 'ab', '', stage); css(S.layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
 
   renderChrome(); renderAll(false);
@@ -1034,6 +1035,46 @@ function diffBursts(prev, next) {
 function findTok(id) { return CombatEls().get(id); }
 let _ce = null; function CombatEls() { return _ce || new Map(); }
 // ---------------------------------------------------------------- end of run
+// ---------------------------------------------------------------- pause menu
+function showMenu() {
+  if (G.busy || G.mode) return;
+  G.mode = 'menu';
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 97}); el('div', 'dim', '', ov);
+  const p = el('div', 'panel menu', '', ov); css(p, {left: 272, top: 40, width: 300, padding: '18px 22px 20px', textAlign: 'center'});
+  const close = () => { ov.remove(); G.mode = null; };
+  const main = () => {
+    const v = AU.get();
+    p.innerHTML = `<p class="bd" style="margin:0 0 14px;font-size:26px">Paused</p>
+      <div class="sndpop" style="position:static;box-shadow:none;border:0;padding:0 0 14px;align-items:center">
+        <label><span>Music</span><input type="range" min="0" max="100" value="${Math.round(v.music * 100)}" data-k="music" aria-label="Music volume"></label>
+        <label><span>Sound</span><input type="range" min="0" max="100" value="${Math.round(v.sfx * 100)}" data-k="sfx" aria-label="Sound volume"></label></div>`;
+    p.querySelectorAll('input').forEach(inp => { inp.oninput = () => AU.set({[inp.dataset.k]: inp.value / 100}); inp.onchange = () => { if (inp.dataset.k === 'sfx') sfx('coin'); }; });
+    const res = el('button', 'btn', 'Resume', p); css(res, {position: 'relative', width: '100%', height: 46, background: '#2ecb6e', fontSize: '20px', marginBottom: '14px'}); res.onclick = close;
+    const q = el('button', 'btn', 'Concede run', p); css(q, {position: 'relative', width: '100%', height: 42, fontSize: '17px'}); q.onclick = confirm;
+  };
+  const confirm = () => {
+    const place = G.lobby.alive().length, suf = ['th', 'st', 'nd', 'rd'][place] && place < 4 ? ['th', 'st', 'nd', 'rd'][place] : 'th';
+    p.innerHTML = `<p class="bd" style="margin:0 0 8px;font-size:24px">Concede this run?</p>
+      <p style="margin:0 0 16px;font-size:14px;font-weight:800;line-height:1.4;color:#5a5270">You finish ${place}${suf} of 8, and your rating updates as usual.</p>`;
+    const yes = el('button', 'btn', 'Concede', p); css(yes, {position: 'relative', width: '100%', height: 46, background: '#ff6b5e', fontSize: '20px', marginBottom: '12px'});
+    yes.onclick = () => { ov.remove(); G.mode = null; concede(); };
+    const no = el('button', 'btn', 'Keep playing', p); css(no, {position: 'relative', width: '100%', height: 42, fontSize: '17px'}); no.onclick = main;
+  };
+  main();
+  anim(p, [{transform: 'translateY(30px) scale(.94)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 240, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+  ov.querySelector('.dim').onclick = close;
+  G.closeMenu = close;
+}
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (G.mode === 'menu' && G.closeMenu) G.closeMenu(); else if (G.screen === 'shop') showMenu(); });
+function concede() {
+  const me = G.me, L = G.lobby;
+  if (!me.alive) return;
+  me.alive = false; me.conceded = true;
+  L.ghosts.push({board: me.board.map(m => Object.assign(Object.create(Object.getPrototypeOf(m)), m, {extras: m.extras.slice()})), tier: me.tier, name: me.name, hero: me.hero});
+  L.deadOrder.push(me); me.place = 9 - L.deadOrder.length;
+  showEnd();
+}
+
 function showEnd() {
   clear(); G.screen = 'end'; bg(false); AU.music(null);
   const me = G.me, L = G.lobby;
@@ -1052,7 +1093,7 @@ function showEnd() {
     PROF.history.push({t: Date.now(), hero: G.heroSlug, place: me.place, d: after - before}); PROF.history = PROF.history.slice(-50);
     checkUnlocks();
   }
-  const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">RUN OVER · ROUND ${L.turn}</p>
+  const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">${me.conceded ? 'CONCEDED' : 'RUN OVER'} · ROUND ${L.turn}</p>
     <p class="bd" style="margin:2px 0 0;font-size:44px"><span class="cnt">0</span>${['th', 'st', 'nd', 'rd'][me.place] && me.place < 4 ? ['th', 'st', 'nd', 'rd'][me.place] : 'th'} <span style="font-size:22px;color:#5a5270">of 8</span></p>
 
     <div class="lst" style="margin-top:8px;display:flex;flex-direction:column;gap:2px"></div>`, stage);
