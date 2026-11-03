@@ -20,7 +20,7 @@ html = f'''<!doctype html>
 <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png">
 <title>Late Stage</title>
 <style>{fonts}{js('style.css')}</style></head>
-<body><div id="wrap"><div id="stage"></div></div><div class="rotate"><span>Turn your phone sideways</span></div>
+<body><div id="wrap"><div id="stage"><div id="core"></div></div></div><div id="inset" aria-hidden="true"></div><div class="rotate"><span>Turn your phone sideways</span></div>
 <script>window.LS_BUILD={json.dumps(build)};</script>
 <script>{js('data.js')}</script><script>{js('engine.js')}</script><script>{js('lobby.js')}</script><script>{js('audio.js')}</script><script>{js('ui.js')}</script>
 <script>if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{{}});</script>

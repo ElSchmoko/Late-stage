@@ -335,7 +335,7 @@ V6 = {
     'Utilitarian': (4, 3, 5, 'Start of combat: give your three lowest-Attack other Philosophers +3/+3.'),
     'Nosy Neighbour': (1, 2, 3, None),
     'Quiet-Hours Enforcer': (2, 3, 3, 'Start of combat: the left-most enemy minion loses 3 Attack.'),
-    'Leaf Blower Guy': (4, 4, 5, 'Start of combat: deal 1 damage to all enemy minions and to the minions next to it.'),
+    'Leaf Blower Guy': (4, 4, 5, 'Start of combat: deal 1 damage to all enemy minions and to your minions next to it.'),
     'Venture Capitalist': (3, 3, 4, 'First Impression: invest up to 4 of your gold: give a minion +3/+3 per gold invested.'),
     # v8 pass 2: tribe curves (late Influencers and Philosophers), parity, cohesion
     'Brand Ambassador': (5, 5, 6, 'Start of combat: give your Followers +1/+1 for each Influencer you have.'),

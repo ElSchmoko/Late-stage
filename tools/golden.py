@@ -110,7 +110,7 @@ GOLD = {
     'Quiet-Hours Enforcer': 'Start of combat: the left-most enemy minion loses 6 Attack.',
     'Caretaker': 'End of turn: give the minions next to it +2/+4.',
     'Helpful Neighbour': 'First Impression: give a minion +6/+6.',
-    'Leaf Blower Guy': 'Start of combat: deal 2 damage to all enemy minions and to the minions next to it.',
+    'Leaf Blower Guy': 'Start of combat: deal 2 damage to all enemy minions and to your minions next to it.',
     'DJ Upstairs': 'Your First Impressions trigger three times.',
     'Lawyer Next Door': 'Your Legacies trigger three times.',
     'The Landlord': 'End of turn, twice: take +1/+1 from each minion next to it.',

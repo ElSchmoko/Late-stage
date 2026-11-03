@@ -35,7 +35,7 @@ NEIGHBOUR_TEXT = {
     'Nosy Neighbour': 'Attention Seeker.', 'Wi-Fi Leech': 'Start of combat: gain +1/+1 for each minion next to it.',
     'Package Hoarder': 'Legacy: give the minions next to it +3/+3.', 'Quiet-Hours Enforcer': 'Start of combat: the left-most enemy minion loses 3 Attack.',
     'Caretaker': 'End of turn: give the minions next to it +1/+2.', 'Helpful Neighbour': 'First Impression: give a minion +3/+3.',
-    'Leaf Blower Guy': 'Start of combat: deal 1 damage to all enemy minions and to the minions next to it.', 'DJ Upstairs': 'Your First Impressions trigger twice.',
+    'Leaf Blower Guy': 'Start of combat: deal 1 damage to all enemy minions and to your minions next to it.', 'DJ Upstairs': 'Your First Impressions trigger twice.',
     'Lawyer Next Door': 'Your Legacies trigger twice.', 'The Landlord': 'End of turn: take +1/+1 from each minion next to it.',
     'Block Party Host': 'End of turn: give each of your minions +1/+1 for each minion next to it.'}
 FLAVOUR = {

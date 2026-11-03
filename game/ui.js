@@ -47,15 +47,25 @@ const artOf = name => ART[name === 'Follower' ? 'follower' : (CARD[name] ? CARD[
 const W = 844, H = 390;
 
 // ---------------------------------------------------------------- helpers
-const stage = document.getElementById('stage');
+const stage = document.getElementById('core'), screenEl = document.getElementById('stage');
 let SCALE = 1;
+/** Fills the whole screen: the outer canvas takes the phone's shape, the 844x390 game area sits centred inside the
+ *  notch-free part, and the side columns (.edge-l / .edge-r) move out by --exl / --exr toward the screen edges. */
 function fit() {
-  const wrap = document.getElementById('wrap'), cs = getComputedStyle(wrap);
-  const aw = wrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), ah = wrap.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-  const s = Math.min(aw / W, ah / H);
-  SCALE = s; stage.style.transform = `scale(${s})`;
+  const wrap = document.getElementById('wrap'), ins = getComputedStyle(document.getElementById('inset'));
+  const iL = parseFloat(ins.paddingLeft) || 0, iR = parseFloat(ins.paddingRight) || 0, iT = parseFloat(ins.paddingTop) || 0, iB = parseFloat(ins.paddingBottom) || 0;
+  const aw = wrap.clientWidth, ah = wrap.clientHeight;
+  const s = Math.min((aw - iL - iR) / W, (ah - iT - iB) / H);
+  const sw = aw / s, sh = ah / s, l = iL / s, r = iR / s, safe = sw - l - r;
+  const left = l + Math.max(0, (safe - W) / 2);
+  SCALE = s;
+  css(screenEl, {width: sw, height: sh}); screenEl.style.transform = `scale(${s})`;
+  css(stage, {left, top: Math.max(0, (sh - H) / 2)});
+  stage.style.setProperty('--exl', Math.max(0, left - l - 6) + 'px');
+  stage.style.setProperty('--exr', Math.max(0, sw - r - (left + W) - 6) + 'px');
 }
-addEventListener('resize', fit); fit();
+addEventListener('resize', fit); addEventListener('orientationchange', () => setTimeout(fit, 250)); fit();
+const edge = (side, ...es) => { for (const e of es) if (e) e.classList.add(side === 'l' ? 'edge-l' : 'edge-r'); };
 function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
 function css(e, o) { for (const k in o) e.style[k] = typeof o[k] === 'number' && !['opacity', 'zIndex'].includes(k) ? o[k] + 'px' : o[k]; return e; }
 const SP = {v: 1};
@@ -211,7 +221,11 @@ const G = {lobby: null, me: null, hand: [], feed: [], heroUsed: false, busy: fal
 
 // ---------------------------------------------------------------- title
 function clear() { stage.innerHTML = ''; }
-function bg(dim) { el('img', 'bg', null, stage).src = ART.city; if (dim) el('div', 'fade-bg', null, stage); }
+function bg(dim) {
+  // the city, plus mirrored copies of it on each side so the buildings continue to the screen edges on wide phones
+  el('img', 'bg mir l', null, stage).src = ART.city; el('img', 'bg mir r', null, stage).src = ART.city;
+  el('img', 'bg', null, stage).src = ART.city; if (dim) el('div', 'fade-bg', null, stage);
+}
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false);
@@ -366,6 +380,7 @@ function buildShop() {
   S.menu = el('button', 'tribebtn', ico('<path d="M5 7h14M5 12h14M5 17h14"></path>', 22, 2.8), stage); css(S.menu, {left: 30, top: 200, display: 'flex', padding: '5px'});
   S.menu.setAttribute('aria-label', 'Menu'); S.menu.onclick = showMenu;
   S.layer = el('div', 'ab', '', stage); css(S.layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
+  edge('l', S.shield, S.tribes, S.tribePop, S.heroAv, S.hp, S.arm, S.menu, S.power); edge('r', S.gold, S.bonus, S.scroll, S.save, S.ready);
 
   renderChrome(); renderAll(false);
 }
@@ -869,6 +884,7 @@ async function playCombat(rec) {
   spd.onclick = () => { SP.v = SP.v === 1 ? 2 : 1; spd.textContent = SP.v === 1 ? '1×' : '2×'; };
   let skip = false;
   const sk = el('button', 'btn', 'Skip', stage); css(sk, {left: 750, top: 72, width: 76, height: 40, fontSize: '15px'}); sk.onclick = () => { skip = true; };
+  edge('l', oav, ohp, mav, mhp); edge('r', spd, sk, rnd);
   const say = () => {};
   const layer = el('div', 'ab', '', stage); css(layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
   // tap a minion or a hero to inspect it; the fight pauses while the details are open
