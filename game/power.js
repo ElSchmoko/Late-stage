@@ -10,6 +10,9 @@ E.Player.prototype.buff = function (m, a, h, src) {
   const before = m.atk + m.hp; origBuff.call(this, m, a, h, src);
   if (src && src !== m && !src.follower) st(src.name).given += (m.atk + m.hp) - before;
 };
+// Likes: credit the card that made them with the stats they give when spent (2 stats per Like, more with Personal Brand)
+const origAdd = E.Player.prototype.addLikes;
+E.Player.prototype.addLikes = function (n, src) { origAdd.call(this, n, src); if (src && n > 0) st(src.name).given += n * 2 * (1 + this.likeBonus); };
 const origT = E.Player.prototype.tbuff;
 E.Player.prototype.tbuff = function (m, a, h, src) { origT.call(this, m, a, h, src); if (src && src !== m) st(src.name).given += (a + h) * 0.5; };
 for (let i = 0; i < N; i++) {

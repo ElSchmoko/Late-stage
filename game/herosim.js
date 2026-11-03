@@ -1,4 +1,4 @@
-// Hero balance: average placement per hero across all-bot lobbies (bots at full skill).
+// Hero balance: average placement per hero across all-bot lobbies (standard bots).
 // Usage: node game/herosim.js N [boundaries-json] [tune-json]
 globalThis.window = globalThis;
 require('./data.js'); require('./engine.js'); require('./lobby.js');
@@ -12,7 +12,7 @@ for (let i = 0; i < N; i++) {
   if (process.env.DBG) process.stderr.write(i + " ");
   const rng = E.RNG(777 + i);
   const hs = rng.shuffle(HEROES.slice()).slice(0, 8);
-  const L = new LSLobby(9000 + i, {botHeroes: hs, skill: 1});
+  const L = new LSLobby(9000 + i, {botHeroes: hs, skill: 0});
   for (const p of L.players) p.boundaries = ARM[p.hero];
   while (!L.over() && L.turn < 30) { L.botTurns(); L.fightRound(); }
   for (const p of L.players) (st[p.hero] = st[p.hero] || []).push(p.place || 1);

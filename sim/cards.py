@@ -261,5 +261,64 @@ for _c in ALL:
         _c.atk, _c.hp, _c.text = V5[_c.name]
         if _c.name == 'Mosh Pit':
             _c.style = 'SA'
+# V6: head-to-head test of tiers 1-3 (game/tiertest.js). (tier, atk, hp, text or None)
+V6 = {
+    'Stan Account': (2, 2, 2, None), 'Comment Section': (1, 2, 2, None), 'Loot Box': (2, 1, 1, None), 'Toxic Teammate': (1, 1, 3, None),
+    'Grindset Guru': (1, 1, 2, None), 'Graffiti Kid': (1, 2, 2, None), 'Trash Panda': (1, 2, 2, None), 'Reply Guy': (1, 2, 2, None),
+    'Engagement Bot': (1, 2, 1, None), 'Nihilist': (1, 2, 3, None), 'City Pigeon': (1, 2, 3, None), 'Nosy Neighbour': (1, 2, 3, None),
+    'Giveaway Host': (2, 2, 3, 'End of turn: your Followers get +2/+2 this game.'),
+    'Compost Heap': (2, 1, 4, 'Legacy: Ferals in the Feed get +1/+1 this game.'),
+    'Sneaker Reseller': (2, 2, 3, 'Once per turn, after you sell a minion: give your Hustlers +2/+1.'),
+    'Side Hustle': (2, 2, 2, None),
+    'Robot Vacuum': (2, 2, 2, 'Collab. Start of combat: deal 2 damage to the enemy minion with the lowest Health.'),
+    'Tree Hugger': (2, 1, 4, 'Attention Seeker. Start of combat: give the minions next to it +2/+2.'),
+    'Package Hoarder': (2, 2, 4, None),
+    'Thought Leader': (3, 3, 4, 'Every 4 gold you spend: give your other Hustlers +1/+1.'),
+    'Feedback Loop': (3, 3, 4, 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +2/+1 permanently.'),
+    'Book-Club Stoic': (3, 3, 5, None),
+    'Unboxing Streamer': (3, 3, 3, 'First Impression: get 3 Likes. Legacy: summon a Follower.'),
+    'Personal Brand': (3, 4, 5, None), 'Rage Quitter': (3, 5, 4, None), 'Keynote Speaker': (3, 3, 3, None),
+    'Helpful Neighbour': (3, 3, 4, None),
+    # round 2: trim the top of each tier, lift the bottom (Hustlers and Punks most)
+    'Smart Plug': (1, 1, 2, None), 'Open Mic Poet': (1, 2, 2, None), 'Wi-Fi Leech': (1, 2, 2, None), 'Dropshipper': (1, 2, 3, None),
+    'Zine Maker': (1, 2, 2, 'When sold: give the minion to its right +4/+4.'),
+    'Giveaway Host': (2, 2, 3, 'End of turn: your Followers get +1/+1 this game.'),
+    'Middle Manager': (2, 3, 4, None), 'Quiet-Hours Enforcer': (2, 3, 4, None),
+    'Package Hoarder': (2, 2, 4, 'Legacy: give the minions next to it +3/+3.'),
+    'Thought Leader': (3, 3, 4, 'Every 5 gold you spend: give your other Hustlers +1/+1.'),
+    'Consultant': (5, 5, 6, 'Your "every 5 gold you spend" effects trigger every 4 gold instead.'),
+    'Feedback Loop': (3, 3, 4, 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +1/+1 permanently.'),
+    'Crypto Bro': (3, 4, 5, None), 'Squat Collective': (3, 4, 5, None), 'Book-Club Stoic': (3, 4, 5, None),
+    'Caretaker': (3, 2, 5, None),
+    # round 3: tribe balance after the tier fixes
+    'Thought Leader': (3, 3, 4, 'Every 4 gold you spend: give your other Hustlers +1/+1.'),
+    'Consultant': (5, 5, 6, 'Your "every 4 gold you spend" effects trigger every 3 gold instead.'),
+    'Sneaker Reseller': (2, 2, 3, 'Once per turn, after you sell a minion: give your Hustlers +2/+2.'),
+    'Giveaway Host': (2, 1, 3, 'End of turn: your Followers get +2/+2 this game.'),
+    'Ring Light Studio': (5, 4, 8, None), 'Main Character': (6, 8, 10, None),
+    'Feedback Loop': (3, 3, 4, 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +2/+1 permanently.'),
+    'Sellout Frontman': (2, 3, 4, None),
+    # round 4: neutral bodies back (they mostly fed the "big stats" bot); Hustler early bodies back
+    'Nosy Neighbour': (1, 2, 2, None), 'Wi-Fi Leech': (1, 1, 2, None), 'Quiet-Hours Enforcer': (2, 3, 3, None), 'Helpful Neighbour': (3, 3, 3, None),
+    'Package Hoarder': (2, 1, 4, None), 'Grindset Guru': (1, 2, 2, None), 'Side Hustle': (2, 2, 3, None),
+    # round 5: effect buffs for the weaker styles
+    'Sellout Frontman': (2, 3, 3, 'When sold: give your other Punks +3/+3. Punks in the Feed get +1/+1 this game.'),
+    'Energy-Drink Sponsor': (4, 4, 5, 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +12).'),
+    'Personal Brand': (3, 3, 4, 'First Impression: get 2 Likes. Your Likes give +1/+1 more this game.'),
+    'Paparazzi': (4, 4, 6, None),
+    'Engagement Farmer': (4, 4, 5, 'After you summon a Follower, give it +6/+6.'),
+    'Viral Video': (3, 3, 3, 'After a friendly minion dies, summon a Follower (4 times per combat).'),
+    'Venture Capitalist': (4, 4, 5, 'First Impression: invest up to 4 of your gold: give a minion +4/+4 per gold invested.'),
+    'Too Big to Fail': (6, 8, 8, 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +4/+4.'),
+    'Anarchist Barista': (1, 2, 3, None), 'Reunion Tour': (5, 5, 9, None), 'Mosh Pit': (4, 6, 8, None),
+    'Stage Diver': (5, 6, 6, "Start of combat: deal damage equal to this minion's Attack to the left-most enemy minion, then gain +4 Attack permanently."),
+    'Unicorn Startup': (6, 7, 9, None), 'Consultant': (5, 6, 7, None), 'Private Equity': (5, 6, 8, None),
+    'Energy-Drink Sponsor': (4, 4, 5, 'When sold: give your other Punks +2/+2 for each Punk you have sold this game (max +16).'),
+    'Greatest Hits': (6, 7, 8, None),
+}
+for _c in ALL:
+    if _c.name in V6:
+        _c.tier, _c.atk, _c.hp, _t = V6[_c.name]
+        if _t: _c.text = _t
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat'),
           Card('Pigeon', F, 1, 1, 1, '-', 'Attention Seeker.', 'There are always more pigeons.', taunt=True, kind='stat')]

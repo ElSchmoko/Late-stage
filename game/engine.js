@@ -9,7 +9,7 @@ const FEED_SIZE = {1: 3, 2: 4, 3: 4, 4: 5, 5: 5, 6: 6};
 const LEVEL_COST = {2: 5, 3: 7, 4: 8, 5: 9, 6: 10};
 const CURVE = {1: 1, 2: 2, 3: 2, 4: 3, 5: 3, 6: 4, 7: 4, 8: 5, 9: 5, 10: 6};
 const COPIES = {1: 16, 2: 15, 3: 13, 4: 11, 5: 9, 6: 7};
-const P_ = {vv: 3, mc: 4};
+const P_ = {vv: 4, mc: 4};
 const RIGHT_GIVERS = new Set(['Shower Thinker', 'Zine Maker', 'Marathon Monk']);
 const LEFT_GIVERS = new Set(['Pub Philosopher']);
 const NB_GIVERS = new Set(['Rooftop Beehive', 'Thought Experiment', 'Bestselling Author', 'Tree Hugger', 'Human Chain', 'Desert Hermit',
@@ -120,7 +120,7 @@ class Player {
     if (!m.golden && this.board.some(o => o !== m && o.name === m.name && !o.golden)) v += 1.5 * this.skill;
     return v + 1.5 * m.extras.length;
   }
-  addLikes(n) { if (n > 0) { this.likes += n; this.note('likes', {n}); } }
+  addLikes(n, src) { if (n > 0) { this.likes += n; this.note('likes', {n, src: src ? src.id : null}); } }
   giveLike(m) {
     if (this.likes <= 0 || !this.board.includes(m)) return false;
     this.likes -= 1; this.likesSpent += 1;
@@ -161,7 +161,7 @@ class Player {
     if (board.length >= 7) return null;
     const f = new M(null, true);
     f.atk += this.fbonus; f.hp += this.fbonus;
-    const ef = 5 * wsum(board, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
+    const ef = 6 * wsum(board, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
     board.push(f); this.note('summon', {id: f.id});
     return f;
   }
@@ -169,7 +169,7 @@ class Player {
     const before = this.spent; this.spent += amount;
     const cons = this.board.filter(m => m.is_('Consultant')), step = cons.some(m => m.golden) ? 2 : cons.length ? 3 : 4;
     for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
-      for (const m of doubled(this.board.slice())) if (m.is_('Thought Leader')) for (const o of this.board) if (o !== m && o.tribe === H) this.buff(o, 2, 1, m);
+      for (const m of doubled(this.board.slice())) if (m.is_('Thought Leader')) for (const o of this.board) if (o !== m && o.tribe === H) this.buff(o, 1, 1, m);
   }
   carry() { const c = this.board.filter(m => !m.follower); return maxBy(c.length ? c : this.board, m => [m.stats(), this.value(m)]); }
   discoverOptions(tribe, tier) {
@@ -188,13 +188,13 @@ class Player {
     for (let r = 0; r < reps; r++) {
       const n = m.name, others = this.board.filter(o => o !== m);
       if (n === 'Dropshipper') { this.bonus_next += 1; this.note('gold_next', {id: m.id, n: 1}); }
-      else if (n === 'Unboxing Streamer') this.addLikes(2);
-      else if (n === 'Personal Brand') { this.likeBonus += 1; this.note('likebonus', {id: m.id}); }
+      else if (n === 'Unboxing Streamer') this.addLikes(3, m);
+      else if (n === 'Personal Brand') { this.addLikes(2, m); this.likeBonus += 1; this.note('likebonus', {id: m.id}); }
       else if (n === 'Engagement Bot') this.summonFollower();
-      else if (n === 'Helpful Neighbour') { const tgt = target && this.board.includes(target) ? target : maxBy(others.length ? others : [m], o => this.value(o)); this.buff(tgt, 2, 2, m); }
+      else if (n === 'Helpful Neighbour') { const tgt = target && this.board.includes(target) ? target : maxBy(others.length ? others : [m], o => this.value(o)); this.buff(tgt, 3, 3, m); }
       else if (n === 'Venture Capitalist') {
         const inv = Math.min(gold[0], 4);
-        if (inv) { gold[0] -= inv; this.gainSpend(inv); const tgt = target && this.board.includes(target) ? target : maxBy(this.board, o => this.value(o)); this.buff(tgt, 3 * inv, 3 * inv, m); this.note('invest', {n: inv}); }
+        if (inv) { gold[0] -= inv; this.gainSpend(inv); const tgt = target && this.board.includes(target) ? target : maxBy(this.board, o => this.value(o)); this.buff(tgt, 4 * inv, 4 * inv, m); this.note('invest', {n: inv}); }
       } else if (n === 'Art Student') {
         const cr = others.filter(o => o.tribe === C);
         if (cr.length) { const tgt = target && cr.includes(target) ? target : maxBy(cr, o => this.value(o)); this.buff(tgt, 2, 2, m); }
@@ -279,9 +279,9 @@ class Player {
   whenSold(m, right) {
     const n = m.name, g = m.g;
     if (n === 'Anarchist Barista') { this.bonus_next += g; this.note('gold_next', {n: g}); }
-    else if (n === 'Zine Maker' && right) this.buff(right, 3 * g, 3 * g);
-    else if (n === 'Sellout Frontman') { for (const o of this.board) if (o.tribe === P) this.buff(o, 2 * g, 2 * g); this.addFeedBuff(P, g, g); }
-    else if (n === 'Energy-Drink Sponsor') { const k = Math.min(8, this.punks_sold) * g; if (k) for (const o of this.board) if (o.tribe === P) this.buff(o, k, k); }
+    else if (n === 'Zine Maker' && right) this.buff(right, 4 * g, 4 * g);
+    else if (n === 'Sellout Frontman') { for (const o of this.board) if (o.tribe === P) this.buff(o, 3 * g, 3 * g); this.addFeedBuff(P, g, g); }
+    else if (n === 'Energy-Drink Sponsor') { const k = Math.min(16, 2 * this.punks_sold) * g; if (k) for (const o of this.board) if (o.tribe === P) this.buff(o, k, k); }
   }
   afterSell(sold) {
     for (const o of this.board) if (o.is_('Sneaker Reseller') && !this.resellUsed.has(o.id)) { this.resellUsed.add(o.id); for (const x of this.board) if (x.tribe === H) this.buff(x, 2 * o.g, 2 * o.g, o); }
@@ -306,15 +306,15 @@ class Player {
         const left = leftOf(b, m);
         if (left) { const v = left; v.atk -= Math.min(1, v.atk); v.hp -= 1; this.note('drain', {id: v.id, src: m.id}); this.buff(m, 1, 1, m);
           if (v.hp <= 0) { b.splice(b.indexOf(v), 1); this.bonus_next += 1; this.note('shopdeath', {id: v.id}); this.onShopDeath(v); } }
-      } else if (n === 'Stan Account') this.addLikes(2);
-      else if (n === 'Ring Light Studio') this.addLikes(2 * b.filter(o => o.tribe === I && o !== m).length);
+      } else if (n === 'Stan Account') this.addLikes(2, m);
+      else if (n === 'Ring Light Studio') this.addLikes(2 * b.filter(o => o.tribe === I && o !== m).length, m);
       else if (n === 'Guerrilla Gardener') this.addFeedBuff(F, 1, 1);
       else if (n === 'Private Equity') {
         const feed = this.getFeed ? this.getFeed() : this.feedRef;
         if (feed && feed.length) { const f = maxBy(feed, x => x.card.atk + x.a); feed.splice(feed.indexOf(f), 1); m.atk += (f.card.atk + f.a) >> 1; m.hp += (f.card.hp + f.h) >> 1; this.buffed.add(m.id); this.note('acquire', {id: m.id, name: f.card.name, a: (f.card.atk + f.a) >> 1, h: (f.card.hp + f.h) >> 1}); }
       }
-      else if (n === 'Giveaway Host') { this.fbonus += 3; for (const o of b) if (o.follower) this.buff(o, 3, 3, m); }
-      else if (n === 'Caretaker') { for (const o of neighbours(b, m)) this.buff(o, 0, 2, m); }
+      else if (n === 'Giveaway Host') { this.fbonus += 2; for (const o of b) if (o.follower) this.buff(o, 2, 2, m); }
+      else if (n === 'Caretaker') { for (const o of neighbours(b, m)) this.buff(o, 1, 2, m); }
       else if (n === 'The Landlord') {
         for (const o of neighbours(b, m)) { o.atk = Math.max(0, o.atk - 1); o.hp -= 1; m.atk += 1; m.hp += 1; this.note('drain', {id: o.id, src: m.id});
           if (o.hp <= 0) { b.splice(b.indexOf(o), 1); this.note('shopdeath', {id: o.id}); this.onShopDeath(o); } }
@@ -345,7 +345,7 @@ class Player {
       if (v.name === 'Reply Guy') for (let i = 0; i < g; i++) this.summonFollower();
       else if (v.name === 'Comment Section') for (let i = 0; i < 2 * g; i++) this.summonFollower();
       else if (v.name === 'Unboxing Streamer') for (let i = 0; i < g; i++) this.summonFollower();
-      else if (v.name === 'Compost Heap') this.addFeedBuff(F, 2 * g, 2 * g);
+      else if (v.name === 'Compost Heap') this.addFeedBuff(F, g, g);
       else if (v.name === 'Golden Parachute Exec') this.bonus_next += 2 * g;
     }
   }
@@ -555,7 +555,7 @@ function combatFollower(side, idx) {
   const b = side.b; if (b.length >= 7) return null;
   const f = new M(null, true); const fb = Math.max(0, ...b.map(x => x.fb || 0));
   f.atk += fb; f.hp += fb; f.fb = fb;
-  const ef = 5 * wsum(b, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
+  const ef = 6 * wsum(b, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
   f.hits = 0; f.surv_used = f.kill_used = false; f.speed_used = 0;
   b.splice(Math.min(idx, b.length), 0, f); return f;
 }
@@ -585,21 +585,21 @@ class Fight {
     if (gurus.length) { const cap = gurus.some(m => m.golden) ? 2 : 3; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) o.cap = cap; }
     for (const m of b.slice()) {
       const n = m.name, g = m.g;
-      if (m.n('Robot Vacuum') && e.length) for (let i = 0; i < m.n('Robot Vacuum'); i++) { const live = e.filter(x => x.hp > 0); if (live.length) { const t = minBy(live, x => x.hp); hit(t, 1); ev(m, 'shot', [t]); } }
+      if (m.n('Robot Vacuum') && e.length) for (let i = 0; i < m.n('Robot Vacuum'); i++) { const live = e.filter(x => x.hp > 0); if (live.length) { const t = minBy(live, x => x.hp); hit(t, 2); ev(m, 'shot', [t]); } }
       if (n === 'Corporate Raider' && e.length) { for (let i = 0; i < g; i++) { const live = e.filter(x => x.hp > 0); if (!live.length) break; const t = minBy(live, x => x.hp); hit(t, 6); ev(m, 'shot', [t]); } }
       else if (n === 'Paparazzi' && b.length) { const ts = b.slice().sort((x, y) => y.atk - x.atk).slice(0, g); for (const t of ts) t.shield = true; ev(m, 'give', ts); }
       else if (n === 'Quiet-Hours Enforcer' && e.length) { e[0].atk = Math.max(0, e[0].atk - 2 * g); ev(m, 'shot', [e[0]]); }
       else if (n === 'Wi-Fi Leech') { const k2 = neighbours(b, m).length * g; m.atk += k2; m.hp += k2; ev(m, 'self'); }
       else if (n === 'Leaf Blower Guy') { for (const x of b.concat(e)) if (x !== m) hit(x, g); ev(m, 'sweep', b.concat(e).filter(x => x !== m)); }
-      else if (n === 'Tree Hugger') { const nb = neighbours(b, m); for (const o of nb) { o.atk += g; o.hp += 2 * g; } ev(m, 'give', nb); }
+      else if (n === 'Tree Hugger') { const nb = neighbours(b, m); for (const o of nb) { o.atk += 2 * g; o.hp += 2 * g; } ev(m, 'give', nb); }
       else if (n === 'Human Chain') { const nb = reach(m, g); for (const o of nb) o.shield = true; ev(m, 'give', nb); }
       else if (n === 'Old-Growth Blockade') { const os = b.filter(o => o !== m); for (const o of os) { o.atk += taunts * g; o.hp += taunts * g; } ev(m, 'give', os); }
       else if (n === 'E-Sports Coach') { const nb = reach(m, g); for (const o of nb) o.toxic = true; if (nb.length) ev(m, 'give', nb); }
       else if (n === 'World Record') { const os = b.filter(o => o !== m && isTribe(o, T)).slice(0, 2 * g); for (const o of os) o.toxic = true; if (os.length) ev(m, 'give', os); }
       else if (n === 'Graffiti Kid' && e.length) { hit(e[0], punks * g + amp); ev(m, 'shot', [e[0]]); }
       else if (n === 'Heckler' && e.length) { const t = maxBy(e, x => x.atk); hit(t, 4 * g + amp); ev(m, 'shot', [t]); }
-      else if (n === 'Feedback Loop') { for (const x of e) hit(x, g + amp); const killed = e.some(x => x.hp <= 0); if (killed) for (const o of b) if (o.tribe === P) perm(o, 3 * g, 2 * g); ev(m, 'sweep', e); }
-      else if (n === 'Stage Diver' && e.length) { const t = e[0]; hit(t, m.atk + amp); perm(m, 3 * g, 0); ev(m, 'shot', [t]); }
+      else if (n === 'Feedback Loop') { for (const x of e) hit(x, g + amp); const killed = e.some(x => x.hp <= 0); if (killed) for (const o of b) if (o.tribe === P) perm(o, 2 * g, g); ev(m, 'sweep', e); }
+      else if (n === 'Stage Diver' && e.length) { const t = e[0]; hit(t, m.atk + amp); perm(m, 4 * g, 0); ev(m, 'shot', [t]); }
       else if (n === 'General Strike') { const alive = e.filter(x => x.hp > 0); for (const x of e) hit(x, punks * g + amp); const k2 = alive.filter(x => x.hp <= 0).length * g; if (k2) for (const o of b) if (o.tribe === P) perm(o, k2, k2); ev(m, 'sweep', e); }
     }
     me.vv = P_.vv * wsum(b, 'Viral Video');
@@ -620,7 +620,7 @@ class Fight {
   }
   clockIn(side, att) {
     const g = att.golden ? 2 : 1; let fired = false;
-    if (att.is_('Hype Man') && side.p && !side.p.ghost && side.p.addLikes) { side.p.likes += 2 * att.n('Hype Man') * g; fired = true; }
+    if (att.is_('Hype Man') && side.p && !side.p.ghost && side.p.addLikes) { side.p.addLikes(2 * att.n('Hype Man') * g, att); fired = true; }
     if (att.is_('Urban Fox')) { const fs = side.b.filter(o => o !== att && o.tribe === F && o.hp > 0); if (fs.length) { perm(this.rng.choice(fs), 2 * g, 2 * g); fired = true; } }
     if (att.is_('Leaderboard')) { for (const o of side.b) if (o !== att && isTribe(o, T)) perm(o, 2 * g, g); fired = true; }
     if (fired) this.frame({type: 'trigger', src: att.id});
@@ -634,9 +634,9 @@ class Fight {
   combatWhenSold(side, m, idx) {
     const b = side.b, n = m.name, g = m.g;
     if (n === 'Anarchist Barista' && side.p && !side.p.ghost) side.p.bonus_next += g;
-    else if (n === 'Zine Maker' && idx < b.length) { b[idx].atk += 3 * g; b[idx].hp += 3 * g; }
-    else if (n === 'Sellout Frontman') { for (const o of b) if (o.tribe === P) { o.atk += 2 * g; o.hp += 2 * g; } if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(P, g, g); }
-    else if (n === 'Energy-Drink Sponsor') { const k = side.p ? Math.min(8, side.p.punks_sold || 0) * g : 0; for (const o of b) if (o.tribe === P) { o.atk += k; o.hp += k; } }
+    else if (n === 'Zine Maker' && idx < b.length) { b[idx].atk += 4 * g; b[idx].hp += 4 * g; }
+    else if (n === 'Sellout Frontman') { for (const o of b) if (o.tribe === P) { o.atk += 3 * g; o.hp += 3 * g; } if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(P, g, g); }
+    else if (n === 'Energy-Drink Sponsor') { const k = side.p ? Math.min(16, 2 * (side.p.punks_sold || 0)) * g : 0; for (const o of b) if (o.tribe === P) { o.atk += k; o.hp += k; } }
   }
   resolveDeaths(k, ptr) {
     const side = this.sides[k], b = side.b;
@@ -645,7 +645,7 @@ class Fight {
       changed = false;
       for (const m of b.slice()) {
         if (m.hp > 0) continue;
-        if (m.name === 'Too Big to Fail' && !m.tbf_used) { m.tbf_used = true; m.hp = 1; for (const o of b) if (o !== m && o.tribe === H) { o.atk += 3 * m.g; o.hp += 3 * m.g; } this.frame({type: 'trigger', src: m.id}); changed = true; continue; }
+        if (m.name === 'Too Big to Fail' && !m.tbf_used) { m.tbf_used = true; m.hp = 1; for (const o of b) if (o !== m && o.tribe === H) { o.atk += 4 * m.g; o.hp += 4 * m.g; } this.frame({type: 'trigger', src: m.id}); changed = true; continue; }
         const idx = b.indexOf(m), nbs = neighbours(b, m);
         b.splice(idx, 1); if (idx < ptr) ptr -= 1;
         side.deaths = (side.deaths || 0) + 1;
@@ -660,8 +660,8 @@ class Fight {
           else if (n === 'Comment Section') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'Unboxing Streamer') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'City Pigeon') { for (let i = 0; i < g; i++) combatToken(side, idx, 'Pigeon'); legacy = true; }
-          else if (n === 'Compost Heap') { if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(F, 2 * g, 2 * g); legacy = true; }
-          else if (n === 'Package Hoarder' || n === 'Open Mic Poet') { for (const o of nbs) { o.atk += 2 * g; o.hp += 2 * g; } legacy = true; }
+          else if (n === 'Compost Heap') { if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(F, g, g); legacy = true; }
+          else if (n === 'Package Hoarder' || n === 'Open Mic Poet') { const k = n === 'Package Hoarder' ? 3 : 2; for (const o of nbs) { o.atk += k * g; o.hp += k * g; } legacy = true; }
           else if (n === 'Golden Parachute Exec' && side.p && !side.p.ghost) { side.p.bonus_next += 2 * g; legacy = true; }
           else if (n === 'Struggling Artist') { for (const o of b) { o.atk += g; o.hp += g; } legacy = true; }
           else if (n === 'Nihilist') { for (const o of b) o.atk += g; legacy = true; }
