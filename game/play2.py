@@ -11,7 +11,9 @@ with sync_playwright() as p:
     pg.on('console', lambda m: errs.append(m.text) if m.type == 'error' else None)
     pg.goto(f'file://{D.parent}/dist/index.html'); pg.wait_for_timeout(800)
     pg.click('text=New run', force=True); pg.wait_for_timeout(700)
-    pg.locator('#stage button.ab').nth(1).click(force=True); pg.click('text=Start', force=True); pg.wait_for_timeout(1300)
+    import os
+    if os.environ.get('PROFILE'): pg.evaluate("localStorage.setItem('ls_profile_v1', JSON.stringify(" + os.environ['PROFILE'] + "))"); pg.reload(); pg.wait_for_timeout(600); pg.click('text=New run', force=True); pg.wait_for_timeout(700)
+    pg.locator('#stage button.ab').nth(int(os.environ.get('HERO', '1'))).click(force=True); pg.click('text=Start', force=True); pg.wait_for_timeout(1300)
     FEEDTOK = "[...document.querySelectorAll('.tok')].find(t=>Math.abs(parseFloat(t.style.top)-74)<2)"
     for turn in range(40):
         if pg.evaluate('LSUI.G.screen') != 'shop': break
@@ -49,11 +51,17 @@ with sync_playwright() as p:
         pg.mouse.click(790, 300); pg.wait_for_timeout(1500)
         if turn == 6: pg.wait_for_timeout(1500); pg.screenshot(path=str(D / 'shots/t6_combat.png'))
         if pg.locator('text=Skip').count(): pg.click('text=Skip', force=True)
-        for _ in range(20):
+        for _ in range(40):
             pg.wait_for_timeout(500)
-            if pg.locator('text=/Back to shop|See results/').count(): break
-        if pg.locator('text=See results').count(): pg.click('text=See results', force=True); pg.wait_for_timeout(2500); break
-        pg.click('text=Back to shop', force=True); pg.wait_for_timeout(1200)
+            if pg.evaluate('LSUI.G.screen') in ('shop', 'end') and not pg.evaluate('LSUI.G.busy'): break
+        # use the hero power when it's an active one
+        if pg.evaluate('LSUI.G.screen') == 'shop' and pg.evaluate(f'{me}.canPower()'):
+            pg.mouse.click(169, 324); pg.wait_for_timeout(700)
+            if pg.evaluate('LSUI.G.mode') == 'target':
+                t = tokcenter(pg, "document.querySelector('.tok.target-ok')"); pg.mouse.click(*t); pg.wait_for_timeout(900)
+            if pg.locator('text=/Discover/').count():
+                pg.locator('#stage button.ab').first.click(force=True); pg.wait_for_timeout(900)
+        if pg.evaluate('LSUI.G.screen') == 'end': pg.wait_for_timeout(2500); break
     print('final screen', pg.evaluate('LSUI.G.screen'), 'turns', pg.evaluate('LSUI.G.me.turn'), 'tier', pg.evaluate('LSUI.G.me.tier'), 'place', pg.evaluate('LSUI.G.me.place'))
     pg.screenshot(path=str(D / 'shots/end.png'))
     b.close()

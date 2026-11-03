@@ -33,8 +33,9 @@ button{font:inherit;color:inherit}
  box-shadow:0 0 0 4px #fff,2px 5px 0 4px var(--ink);isolation:isolate;cursor:pointer;touch-action:none;pointer-events:auto}
 .tok .clip{position:absolute;inset:0;border-radius:13px;overflow:hidden;pointer-events:none}
 .tok .clip img{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:84px;height:84px}
-.tok.seek{box-shadow:0 0 0 3px #fff,0 0 0 6px var(--y),0 0 0 8.5px var(--ink),2px 4px 0 8.5px var(--ink)}
-.tok.gold{box-shadow:0 0 0 3px #fff,0 0 0 7px #ffc928,0 0 0 9.5px var(--ink),2px 5px 0 9.5px var(--ink)}
+.tok.seek{box-shadow:0 0 0 3px #fff,0 0 0 10px #ffc928,0 0 0 12.5px var(--ink),2px 4px 0 12.5px var(--ink)}
+.tok.gold{box-shadow:0 0 0 2.5px #fff6c2,0 0 0 5px #ffd84a,0 0 0 7.5px #e0a800,0 0 0 10px var(--ink),0 0 14px 10px rgba(255,201,40,.55),2px 5px 0 10px var(--ink)}
+.tok.gold.seek{box-shadow:0 0 0 2.5px #fff6c2,0 0 0 5px #ffd84a,0 0 0 7.5px #e0a800,0 0 0 9.5px var(--ink),0 0 0 17px #ffc928,0 0 0 19.5px var(--ink),2px 5px 0 19.5px var(--ink)}
 .tok.gold::after{content:'';position:absolute;inset:-3px;border-radius:16px;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.7) 45%,transparent 60%);background-size:250% 100%;animation:shine 2.4s linear infinite;pointer-events:none}
 @keyframes shine{from{background-position:120% 0}to{background-position:-120% 0}}
 .tok .ooo{position:absolute;inset:-9px;border-radius:24px;background:rgba(143,212,255,.32);border:3px solid #5aa8e0;pointer-events:none;z-index:1}
@@ -143,3 +144,25 @@ button{font:inherit;color:inherit}
 .acts{display:flex;gap:12px;margin-top:18px}
 .acts .btn{position:relative;height:46px;padding:3px 18px 0;font-size:19px}
 .likes[hidden],.tribepop[hidden]{display:none}
+
+.sb .stars-row svg{position:static;flex-shrink:0}
+.tok .seekring{position:absolute;inset:-13px;padding:7px;border-radius:26px;background:repeating-linear-gradient(-45deg,var(--ink) 0 4px,transparent 4px 9px);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.tok.gold .seekring{inset:-20px;border-radius:33px}
+.tok .spk{position:absolute;width:12px;height:12px;z-index:5;pointer-events:none;background:#fff;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);filter:drop-shadow(0 0 2px #ffc928);animation:twinkle 1.8s ease-in-out infinite;left:-10px;top:8px}
+.tok .spk.s2{left:auto;right:-11px;top:44px;width:10px;height:10px;animation-delay:.6s}
+.tok .spk.s3{left:22px;top:auto;bottom:-13px;width:9px;height:9px;animation-delay:1.2s}
+@keyframes twinkle{0%,100%{transform:scale(.2) rotate(0);opacity:0}45%{transform:scale(1.15) rotate(45deg);opacity:1}70%{transform:scale(.8) rotate(70deg);opacity:.9}}
+.tok .bm{position:absolute;right:-7px;top:-12px;z-index:6;pointer-events:none}
+.surf.saved{background:#ffe1ee!important}
+.surf.saved::after{content:'';position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(115deg,rgba(255,255,255,.7) 0 9px,rgba(255,255,255,0) 9px 30px);pointer-events:none;z-index:-1}
+.savetag{position:absolute;z-index:7;pointer-events:none;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:13px;letter-spacing:.12em;color:var(--ink)}
+.savetag svg{position:absolute;inset:0}
+.savetag span{position:absolute;left:0;right:0;top:8px;text-align:center}
+.wrapglare{position:absolute;top:0;bottom:0;width:120px;border-radius:22px;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,255,255,.95) 50%,rgba(255,255,255,0));pointer-events:none;z-index:6}
+.coll{position:absolute;cursor:pointer;padding:0;border:0;background:none}
+.prog{height:10px;border:2.5px solid var(--ink);border-radius:999px;background:#fff;overflow:hidden}
+.prog i{display:block;height:100%;background:#2ecb6e;border-right:2.5px solid var(--ink)}
+.rankchip{position:absolute;display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:4px 14px 2px 5px;box-shadow:0 0 0 3px #fff;font-family:'Baloo 2',sans-serif;font-weight:800;line-height:1;white-space:nowrap}
+.rankchip .rk{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.hitflash{position:absolute;border-radius:50%;background:#ff6b5e;pointer-events:none;z-index:89;mix-blend-mode:multiply}
+@media (prefers-reduced-motion:reduce){.tok .spk{animation:none;opacity:1}}

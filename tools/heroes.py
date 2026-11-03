@@ -4,18 +4,18 @@ from lsdata import BLOB, fmt, ico, page, S
 
 HEROES = [
     # slug, name, power, cost, effect, pushes, boundaries, unlock, colour
-    ('remote', 'The Remote Worker', 'Work from Home', 'Passive', 'Minions you Save in the Feed gain +1/+1 at the start of each turn they stay saved.', 'Saving strong Feed minions', 6, None, '#8fd4ff'),
-    ('boomer', 'The Reply-All Guy', 'Reply All', '1', 'Give a minion of your choice and every minion in the Feed +1/+1.', 'Buffing the Feed', 5, None, '#ff9a8a'),
-    ('h_gymbro', 'The Gym Bro', 'Never Skip Leg Day', 'Passive', 'End of turn: give your lowest-Attack minion +1/+1.', 'Even, wide boards', 6, None, '#ffc928'),
-    ('h_procrastinator', 'The Procrastinator', 'Tomorrow', 'Passive', 'Unspent gold carries over to next turn, up to 3.', 'Big saved-up turns', 5, None, '#b18cff'),
-    ('h_bargainhunter', 'The Bargain Hunter', 'Coupon Clipper', 'Passive', 'Minions cost 2 gold. Scrolling costs 2 gold.', 'Hiring lots, scrolling little', 2, 'Hire 100 minions', '#4fd1c5'),
-    ('h_doomscroller', 'The Doomscroller', 'Endless Feed', 'Passive', 'Your first Scroll each turn is free.', 'Hunting triples', 5, 'Scroll 150 times', '#5ab8ff'),
-    ('h_serial', 'The Serial Entrepreneur', 'Pivot', '2', 'Transform a friendly minion into a random minion one tier higher.', 'Turning duds into upgrades', 0, 'Reach ★★★★★★', '#2ecb6e'),
-    ('h_overthinker', 'The Overthinker', 'Pros and Cons', '1', 'Discover a minion of your tier and add it to the Feed. You still pay 3 gold to hire it.', 'Finding specific cards', 4, 'Win with 4 tribes on your board', '#ff8a3d'),
-    ('h_lifecoach', 'The Life Coach', 'Accountability Partner', '1', 'Choose a minion. If it survives the next combat, it gains +2/+2 permanently.', 'Protecting one carry', 6, 'Keep one minion alive 3 combats in a row', '#ff8ab8'),
-    ('h_minimalist', 'The Minimalist', 'Sparks Joy', 'Passive', 'Start of combat: give your minions +1/+1 for each empty board slot.', 'Small elite boards', 8, 'Win a combat with 3 or fewer minions', '#e6dccb'),
-    ('h_complainer', 'The Complainer', 'Refund Request', 'Passive', 'After you lose a combat, gain 2 extra gold next turn.', 'Comebacks', 8, 'Top 4 after dropping below 10 Sanity', '#b5e05a'),
-    ('h_ex', 'The Ex', 'Back Again', 'Passive', 'The first friendly minion that dies each combat comes back with 1 Health.', 'Legacy and death synergies', 3, 'Have your minions Rebrand 25 times', '#ff6b5e'),
+    ('remote', 'The Remote Worker', 'Auto-Reply', 'Passive', 'Start of combat: give your left-most minion Out of Office.', 'Protecting your first attacker', 9, None, '#8fd4ff'),
+    ('boomer', 'The Reply-All Guy', 'Reply All', '1', 'Give a minion +1/+1, and every minion in the Feed +1/+1.', 'Buffing the Feed', 5, None, '#ff9a8a'),
+    ('h_gymbro', 'The Gym Bro', 'Never Skip Leg Day', 'Passive', 'Every second turn: get a Like.', 'Likes for any tribe', 5, None, '#ffc928'),
+    ('h_procrastinator', 'The Procrastinator', 'Tomorrow', 'Passive', 'Unspent gold carries over to next turn, up to 3.', 'Big saved-up turns', 1, None, '#b18cff'),
+    ('h_bargainhunter', 'The Bargain Hunter', 'Coupon Clipper', 'Passive', 'Minions cost 2 gold. Scrolling costs 2 gold.', 'Hiring lots, scrolling little', 1, 'Hire 60 minions', '#4fd1c5'),
+    ('h_doomscroller', 'The Doomscroller', 'Endless Feed', 'Passive', 'Your first Scroll each turn is free. Every 5th Scroll: Discover a minion of your tier.', 'Hunting triples', 5, 'Scroll 100 times', '#5ab8ff'),
+    ('h_serial', 'The Serial Entrepreneur', 'Pivot', '1', 'Transform a friendly minion into a random minion one tier higher. It keeps the stats it gained.', 'Upgrading early minions', 10, 'Reach ★★★★★★ in a run', '#2ecb6e'),
+    ('h_overthinker', 'The Overthinker', 'Pros and Cons', '2', 'Discover a minion from your tier or lower.', 'Finding specific cards', 2, 'Win a combat with 4 tribes on your board', '#ff8a3d'),
+    ('h_lifecoach', 'The Life Coach', 'Accountability Partner', '1', 'Give a minion +2/+2 for the next combat. If it survives, it keeps the buff.', 'Growing one carry', 6, 'Win 3 combats in a row', '#ff8ab8'),
+    ('h_minimalist', 'The Minimalist', 'Sparks Joy', 'Passive', 'Start of combat: if you have 4 or fewer minions, give them +2/+2.', 'Small elite boards', 5, 'Win a combat with 3 or fewer minions after turn 5', '#e6dccb'),
+    ('h_complainer', 'The Complainer', 'Speak to the Manager', 'Passive', 'Grievance (2): give your minions +1/+1 for this combat.', 'Wide boards that trade', 6, 'Finish top 4 after dropping to 10 Health or less', '#b5e05a'),
+    ('h_ex', 'The Ex', 'Back Again', 'Passive', 'The first friendly minion that dies each combat comes back with 1 Health.', 'Legacy and death synergies', 7, 'Have 80 of your minions die in combat', '#ff6b5e'),
 ]
 HERO_BY = {h[0]: h for h in HEROES}
 

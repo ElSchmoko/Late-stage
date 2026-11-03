@@ -7,7 +7,7 @@ sys.path.insert(0, str(S / 'tools'))
 from cards import BY_TRIBE, NEIGHBOURS, STYLES, TRIBES  # noqa
 
 INK = '#2b2140'
-TRIBE_COL = {'Hustler': '#2ecb6e', 'Influencer': '#ff8ab8', 'Feral': '#b5e05a', 'Creative': '#b18cff',
+TRIBE_COL = {'Hustler': '#14a052', 'Influencer': '#ff8ab8', 'Feral': '#d4e24a', 'Creative': '#b18cff',
              'Techie': '#5ab8ff', 'Punk': '#ff8a3d', 'Philosopher': '#4fd1c5', 'Neutral': '#e6dccb'}
 TRIBE_PLURAL = {'Hustler': 'Hustlers', 'Influencer': 'Influencers', 'Feral': 'Ferals', 'Creative': 'Creatives',
                 'Techie': 'Techies', 'Punk': 'Punks', 'Philosopher': 'Philosophers', 'Neutral': 'Neighbours'}

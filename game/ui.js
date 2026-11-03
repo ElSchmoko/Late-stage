@@ -6,6 +6,31 @@ E.load(window.LS_CARDS, window.LS_STYLES);
 const TC = window.LS_TRIBE_COL, TP = window.LS_TRIBE_PLURAL;
 const HEROES = window.LS_HEROES, HERO = Object.fromEntries(HEROES.map(h => [h.slug, h]));
 const STARTERS = ['remote', 'boomer', 'h_gymbro', 'h_procrastinator'];
+// ---------------------------------------------------------------- profile: rating, unlocks, lifetime stats (saved on this device)
+const PKEY = 'ls_profile_v1';
+const START_RATING = 800;
+function freshProfile() { return {rating: START_RATING, peak: START_RATING, games: 0, top4: 0, wins: 0, unlocked: STARTERS.slice(), seen: STARTERS.slice(), stats: {hires: 0, scrolls: 0, deaths: 0}, flags: {}, history: []}; }
+function loadProfile() { try { const p = JSON.parse(localStorage.getItem(PKEY)); if (p && p.rating != null) return Object.assign(freshProfile(), p, {stats: Object.assign(freshProfile().stats, p.stats), flags: p.flags || {}}); } catch (e) {} return freshProfile(); }
+function saveProfile() { try { localStorage.setItem(PKEY, JSON.stringify(PROF)); } catch (e) {} }
+const PROF = loadProfile();
+const BRACKETS = [[0, 'Unpaid Intern', '#c9c2d6'], [1000, 'Junior Associate', '#8fd4ff'], [2000, 'Middle Management', '#4fd1c5'], [3000, 'Director', '#b18cff'], [4000, 'Vice President', '#ff8ab8'], [5000, 'C-Suite', '#ff8a3d'], [6500, 'Billionaire', '#ffc928']];
+const bracketOf = r => BRACKETS.reduce((b, x) => (r >= x[0] ? x : b), BRACKETS[0]);
+const UNLOCK = {   // hero -> [goal, progress(profile)]
+  h_bargainhunter: [60, P => P.stats.hires], h_doomscroller: [100, P => P.stats.scrolls], h_serial: [1, P => +!!P.flags.tier6],
+  h_overthinker: [1, P => +!!P.flags.fourTribes], h_lifecoach: [1, P => +!!P.flags.streak3], h_minimalist: [1, P => +!!P.flags.small],
+  h_complainer: [1, P => +!!P.flags.comeback], h_ex: [80, P => P.stats.deaths]};
+const isUnlocked = slug => PROF.unlocked.includes(slug);
+function progressOf(slug) { const u = UNLOCK[slug]; return u ? [Math.min(u[0], u[1](PROF)), u[0]] : [1, 1]; }
+let NEW_UNLOCKS = [];
+function checkUnlocks() {
+  for (const slug of Object.keys(UNLOCK)) if (!isUnlocked(slug)) { const [c, g] = progressOf(slug); if (c >= g) { PROF.unlocked.push(slug); NEW_UNLOCKS.push(slug); if (G.screen === 'shop' || G.screen === 'combat') toast(`New hero unlocked: ${HERO[slug].name}`, 2200); } }
+  saveProfile();
+}
+function ratingChange(me, players) {
+  let d = 0;
+  for (const q of players) { if (q === me || q.rating == null) continue; const S = me.place < q.place ? 1 : me.place > q.place ? 0 : .5; d += S - 1 / (1 + Math.pow(10, (q.rating - PROF.rating) / 400)); }
+  return Math.round(40 * d);
+}
 const ART = {};
 for (const [k, v] of Object.entries(window.LS_ART)) ART[k] = URL.createObjectURL(new Blob([v], {type: 'image/svg+xml'}));
 const CARD = Object.fromEntries(window.LS_CARDS.map(c => [c.name, c]));
@@ -61,7 +86,9 @@ const BURST = col => `<svg width="46" height="46" viewBox="0 0 44 44" aria-hidde
 function tokenHTML(m, o = {}) {
   const name = m.name, tribe = m.tribe;
   const atk = o.atk != null ? o.atk : m.atk, hp = o.hp != null ? o.hp : m.hp;
-  let s = `<div class="clip"><img src="${artOf(name)}" alt="" draggable="false"></div>`;
+  let s = (m.taunt ? '<div class="seekring"></div>' : '') + `<div class="clip"><img src="${artOf(name)}" alt="" draggable="false"></div>`;
+  if (m.golden) s += '<i class="spk"></i><i class="spk s2"></i><i class="spk s3"></i>';
+  if (o.saved) s += `<div class="bm"><svg width="18" height="24" viewBox="0 0 18 24" aria-hidden="true"><path d="M3 2H15Q16.5 2 16.5 3.5V21.5L9 17L1.5 21.5V3.5Q1.5 2 3 2Z" fill="#ff8ab8" stroke="#2b2140" stroke-width="2.4" stroke-linejoin="round"></path></svg></div>`;
   if (!m.follower && m.tier) s += `<div class="tier">${STAR(13).repeat(m.tier)}</div>`;
   const fx = m.follower ? [] : fxOf(name).concat((m.extras || []).length ? ['collab'] : []).slice(0, 2);
   if (fx.length) s += `<div class="fx">${fx.map(k => `<span>${ico(FXI[k], 13)}</span>`).join('')}</div>`;
@@ -96,7 +123,7 @@ function cardHTML(c, o = {}) {
   const atk = o.atk != null ? o.atk : c.atk, hp = o.hp != null ? o.hp : c.hp;
   return `<div class="card${o.golden ? ' golden' : ''}"><div class="art" style="background-color:${tc}"><img src="${ART[c.art]}" alt="" draggable="false"></div>
     <p class="nm" style="font-size:${nfs}px">${c.name}</p><div class="meta"><span class="trb" style="background:${tc}">${lab}</span>${fmtStars(c.tier, c.tier <= 4 ? 16 : 13)}</div>
-    <p class="txt" style="font-size:${c.fit}px">${c.html}</p><div class="sa">${atk}</div><div class="sh">${hp}</div></div>`;
+    <p class="txt" style="font-size:${o.golden ? c.gold_fit || c.fit : c.fit}px">${o.golden ? c.gold_face || c.html : c.html}</p><div class="sa">${atk}</div><div class="sh">${hp}</div></div>`;
 }
 const HEXI = '<svg width="40" height="44" viewBox="0 0 40 44" aria-hidden="true"><path d="M20 3L36 12V32L20 41L4 32V12Z" fill="#2fd0d0" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path><path d="M20 12l2.6 5.4 5.9.8-4.3 4.1 1 5.8L20 25.3l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" fill="#ffffff" stroke="#2b2140" stroke-width="2" stroke-linejoin="round"></path></svg>';
 const RIB = '<svg width="100%" height="40" viewBox="0 0 252 40" preserveAspectRatio="none" aria-hidden="true"><path d="M4 8H24V34H4L12 21Z" fill="#e0a800" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path><path d="M248 8H228V34H248L240 21Z" fill="#e0a800" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path><path d="M18 4H234V30H18Z" fill="#ffc928" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path></svg>';
@@ -160,23 +187,64 @@ function showTitle() {
     <h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 64, textAlign: 'center'});
   anim(t.querySelector('h1'), [{transform: 'scale(.6) rotate(-6deg)', opacity: 0}, {transform: 'scale(1.06) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 700, easing: 'ease-out', raw: true});
+  const rc = rankChip(PROF.rating, 15); stage.appendChild(rc); css(rc, {left: '50%', top: 204}); rc.style.transform = 'translateX(-50%)';
   const b = el('button', 'btn', ico('<path d="M7 4.5v15l12-7.5z" fill="#ffffff"></path>', 26, 2.6) + 'New run', stage);
-  css(b, {left: 302, top: 250, width: 240, height: 62, background: '#2ecb6e', fontSize: '30px'});
+  css(b, {left: 216, top: 256, width: 236, height: 62, background: '#2ecb6e', fontSize: '30px'});
   anim(b, [{transform: 'scale(.95)'}, {transform: 'scale(1.03)'}, {transform: 'scale(.95)'}], {duration: 1800, iterations: Infinity, raw: true});
   b.onclick = showHeroSelect;
-  const t1 = makeToken({name: 'Main Character', tribe: 'Influencer', atk: 5, hp: 7, tier: 6}); stage.appendChild(t1); css(t1, {left: 620, top: 250}); t1.style.transform = 'rotate(8deg)';
-  const t2 = makeToken({name: 'Trash Panda', tribe: 'Feral', atk: 2, hp: 1, tier: 1}); stage.appendChild(t2); css(t2, {left: 160, top: 254}); t2.style.transform = 'rotate(-9deg)';
+  const cb = el('button', 'btn', ico('<rect x="3" y="5" width="8" height="14" rx="2" fill="#ffc928"></rect><rect x="13" y="5" width="8" height="14" rx="2" fill="#ff8ab8"></rect>', 22, 2.4) + `Heroes <span style="font-size:13px;color:#5a5270">${PROF.unlocked.length}/${HEROES.length}</span>`, stage);
+  css(cb, {left: 474, top: 262, width: 162, height: 50, fontSize: '20px'}); cb.onclick = showCollection;
+  if (PROF.unlocked.some(x => !PROF.seen.includes(x))) { const d = el('span', 'ab', '', cb); css(d, {right: -4, top: -6, width: 16, height: 16, borderRadius: '50%', background: '#ff6b5e', border: '2.5px solid #2b2140'}); }
+  const t1 = makeToken({name: 'Main Character', tribe: 'Influencer', atk: 5, hp: 7, tier: 6}); stage.appendChild(t1); css(t1, {left: 672, top: 250}); t1.style.transform = 'rotate(8deg)';
+  const t2 = makeToken({name: 'Trash Panda', tribe: 'Feral', atk: 2, hp: 1, tier: 1}); stage.appendChild(t2); css(t2, {left: 120, top: 254}); t2.style.transform = 'rotate(-9deg)';
   for (const [tk, d] of [[t1, 0], [t2, 300]]) anim(tk, [{translate: '0 0'}, {translate: '0 -8px'}, {translate: '0 0'}], {duration: 2200, delay: d, iterations: Infinity, easing: 'ease-in-out', raw: true});
-  const n = el('p', 'ab', `v0.1 prototype · build ${(window.LS_BUILD || {}).n || 'dev'} · all 7 tribes · 7 bots`, stage); css(n, {left: 0, right: 0, bottom: 8, margin: 0, textAlign: 'center', fontSize: '11px', fontWeight: 800, color: '#5a5270'});
+  const n = el('p', 'ab', `v0.2 prototype · build ${(window.LS_BUILD || {}).n || 'dev'} · ${PROF.games} runs played`, stage); css(n, {left: 0, right: 0, bottom: 8, margin: 0, textAlign: 'center', fontSize: '11px', fontWeight: 800, color: '#5a5270'});
+}
+
+function rankChip(r, fs = 14) {
+  const b = bracketOf(r);
+  return el('div', 'rankchip', `<span class="rk" style="background:${b[2]}">${STAR(16)}</span><span style="font-size:${fs}px;padding-top:2px">${b[1]}</span><span style="font-size:${fs}px;padding-top:2px;color:#5a5270">${r.toLocaleString('en')}</span>`);
+}
+function showCollection() {
+  clear(); G.screen = 'collection'; bg(true);
+  PROF.seen = PROF.unlocked.slice(); saveProfile();
+  const t = el('div', 'ab bd', `Heroes <span style="font-size:15px;color:#5a5270">${PROF.unlocked.length} of ${HEROES.length} unlocked</span>`, stage);
+  css(t, {left: 30, top: 12, fontSize: '22px', background: '#fff', border: '3px solid #2b2140', borderRadius: '999px', padding: '6px 16px 2px', boxShadow: '0 0 0 3px #fff'});
+  const rc = rankChip(PROF.rating, 13); stage.appendChild(rc); css(rc, {right: 130, top: 14});
+  const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
+  const order = HEROES.map(h => h.slug).sort((a, b) => isUnlocked(b) - isUnlocked(a));
+  order.forEach((slug, i) => {
+    const h = HERO[slug], lock = !isUnlocked(slug), [c, g] = progressOf(slug);
+    const x = 34 + (i % 6) * 130, y = 66 + Math.floor(i / 6) * 160;
+    const b = el('button', 'coll', `<div style="position:absolute;inset:0;background:#fff;border:3px solid #2b2140;border-radius:20px;box-shadow:0 0 0 3px #fff,3px 5px 0 3px #2b2140"></div>
+      <div style="position:absolute;left:8px;right:8px;top:8px;height:74px;border:2.5px solid #2b2140;border-radius:46px 46px 10px 10px;background:${lock ? '#c9c2d6' : h.col};overflow:visible"><img src="${ART[slug]}" alt="" style="position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);width:92px;height:92px;${lock ? 'filter:grayscale(1) brightness(.7)' : ''}"></div>
+      <p class="bd" style="position:absolute;left:4px;right:4px;top:88px;margin:0;text-align:center;font-size:13.5px;line-height:1.05">${h.name.replace('The ', '')}</p>
+      ${lock ? `<div class="prog" style="position:absolute;left:12px;right:12px;top:120px"><i style="width:${Math.round(100 * c / g)}%;${c ? '' : 'border:0'}"></i></div><p class="bd" style="position:absolute;left:0;right:0;top:134px;margin:0;text-align:center;font-size:10.5px;color:#5a5270">${g > 1 ? `${c} / ${g}` : 'LOCKED'}</p>
+        <span style="position:absolute;right:6px;top:4px">${ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 22)}</span>`
+        : `<p style="position:absolute;left:4px;right:4px;top:108px;margin:0;text-align:center;font-size:11px;font-weight:800;color:#5a5270;line-height:1.15">${h.power}</p>`}`, stage);
+    css(b, {left: x, top: y, width: 118, height: 150}); b.setAttribute('aria-label', h.name + (lock ? ' (locked)' : ''));
+    anim(b, [{transform: 'translateY(30px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 360, delay: 30 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    b.onclick = () => showHeroCard(slug);
+  });
+}
+function showHeroCard(slug) {
+  const h = HERO[slug], lock = !isUnlocked(slug), [c, g] = progressOf(slug);
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 95}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
+  const card = el('div', 'ab', heroHTML(h, lock), ov); css(card, {left: 150, top: 0}); card.style.transform = 'scale(.92)'; card.style.transformOrigin = 'top left';
+  const txt = el('div', 'detail-txt', `<p class="rules" style="font-size:20px"><b>${h.name}</b></p><p class="kwl">Health 30 · Boundaries ${h.boundaries}</p><p class="kwl">Good for: ${h.push}.</p>` +
+    (lock ? `<p class="kwl" style="margin-top:14px;color:#ffc928">To unlock: ${h.unlock}.</p><div class="prog" style="width:240px;margin-top:8px"><i style="width:${Math.round(100 * c / g)}%;${c ? '' : 'border:0'}"></i></div><p class="kwl">${g > 1 ? `${c} of ${g}` : 'Not yet'}</p>` : '<p class="kwl" style="margin-top:14px;color:#2ecb6e">Unlocked. Can appear when you pick a hero.</p>'), ov);
+  css(txt, {left: 420, top: 70, width: 380});
+  anim(card, [{transform: 'scale(.4) rotate(-8deg)', opacity: 0}, {transform: 'scale(.92)', opacity: 1}], {duration: 300, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+  ov.onpointerup = () => ov.remove();
 }
 
 // ---------------------------------------------------------------- hero select
 function showHeroSelect() {
-  clear(); G.screen = 'heroes'; bg(false);
+  clear(); G.screen = 'heroes'; bg(false); G.rated = false;
   const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
   G.seed = seed;
   const rng = E.RNG(seed);
-  const pick = rng.shuffle(STARTERS.slice()).slice(0, 3);
+  const pick = rng.shuffle(PROF.unlocked.slice()).slice(0, 3);
   const tribes = rng.shuffle(E.TRIBES.slice()).slice(0, 5);
   G.tribes = tribes;
   const t = el('div', 'ab bd', 'Pick your hero', stage); css(t, {left: 30, top: 12, fontSize: '22px', background: '#fff', border: '3px solid #2b2140', borderRadius: '999px', padding: '6px 16px 2px', boxShadow: '0 0 0 3px #fff'});
@@ -203,26 +271,25 @@ function showHeroSelect() {
 // ---------------------------------------------------------------- run
 function startRun(slug) {
   const h = HERO[slug];
-  G.lobby = new window.LSLobby(G.seed, {human: true, heroSlug: slug, boundaries: h.boundaries, tribes: G.tribes});
-  G.me = G.lobby.human; G.hand = []; G.feed = []; G.heroSlug = slug; G.firstTurn = true;
+  G.lobby = new window.LSLobby(G.seed, {human: true, heroSlug: slug, boundaries: h.boundaries, tribes: G.tribes, rating: PROF.rating});
+  G.me = G.lobby.human; G.me.rating = PROF.rating; G.hand = []; G.feed = []; G.heroSlug = slug; G.firstTurn = true; G.streak = 0; G.minHealth = 99; G.saved = false; NEW_UNLOCKS = [];
   G.me.board = [];
   newTurn();
 }
 function drawFeed(keep) {
   const me = G.me;
-  if (keep && G.feed.length) {
-    if (G.heroSlug === 'remote') for (const f of G.feed) { f.a += 1; f.h += 1; }
-  } else G.feed = me.drawFeed().map(c => ({card: c, a: me.feedBonus(c).a, h: me.feedBonus(c).h, key: Math.random()}));
+  if (keep && G.feed.length) { /* saved Feed stays */ } else G.feed = me.drawFeed().map(c => ({card: c, a: me.feedBonus(c).a, h: me.feedBonus(c).h, key: Math.random()}));
   me.getFeed = () => G.feed;
 }
 function newTurn() {
   const me = G.me, L = G.lobby;
-  me.beginTurn(); me.log = [];
+  me.beginTurn(); me.log = me.log.filter(e => e.type === 'likes');
   G.heroUsed = false;
+  const kept = G.saved && G.feed.length;
   drawFeed(G.saved); G.saved = false;
   L.planPairs();
   buildShop();
-  animateTurnStart();
+  animateTurnStart(kept).then(() => { if (me.log.length) playLog(); });
 }
 
 // ---------------------------------------------------------------- shop layout
@@ -280,25 +347,30 @@ function renderChrome() {
   }
   // shield
   const lc = me.levelCost();
-  S.shield.innerHTML = shieldSVG(lc === null ? '#ffc928' : '#c88af8') + `<span class="ab" style="left:6px;right:6px;top:16px;display:flex;flex-wrap:wrap;justify-content:center;gap:0 1px">${STAR(17).repeat(me.tier)}</span>` +
-    (lc === null ? '<span class="ab" style="left:0;right:0;top:50px;text-align:center;font-size:12px;letter-spacing:.1em">MAX</span>' :
+  const ss = me.tier <= 3 ? 18 : me.tier === 4 ? 16 : me.tier === 5 ? 14 : 12.5;
+  S.shield.innerHTML = shieldSVG('#c88af8') + `<span class="ab stars-row" style="left:4px;right:4px;top:${lc === null ? 26 : 17}px;height:18px;display:flex;align-items:center;justify-content:center;gap:0">${STAR(ss).repeat(me.tier)}</span>` +
+    (lc === null ? '<span class="ab" style="left:0;right:0;top:52px;text-align:center;font-size:13px;letter-spacing:.12em">MAX TIER</span>' :
     `<span class="ab" style="left:0;right:0;top:40px;text-align:center;font-size:11px;letter-spacing:.1em">LEVEL UP</span><span class="ab" style="left:19px;top:56px;width:54px;height:28px;background:#fff;border:2.5px solid #2b2140;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:4px">${ico('<circle cx="12" cy="12" r="10" fill="#2ecb6e"></circle><path d="M12 17V7.5M7.8 11.5L12 7.3l4.2 4.2"></path>', 18, 2.6)}<span class="coin" style="position:static;width:21px;height:21px;font-size:12px;box-shadow:none">${lc}</span></span>`);
-  S.shield.classList.toggle('off', lc === null || me.gold[0] < lc);
+  S.shield.classList.toggle('off', lc !== null && me.gold[0] < lc);
   S.shield.setAttribute('aria-label', lc === null ? `Tier ${me.tier}, max` : `Tier ${me.tier}. Level up for ${lc} gold`);
   // gold
   S.gold.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#2b2140" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#ffc928"></circle><circle cx="12" cy="12" r="5" stroke="#d99a12" stroke-width="2.4"></circle></svg><span style="padding-top:3px">${me.gold[0]}</span>`;
   S.bonus.style.display = me.bonus_next ? 'block' : 'none'; S.bonus.textContent = `+${me.bonus_next} next turn`;
-  S.scroll.classList.toggle('off', me.gold[0] < 1);
+  const scc = me.scrollCost(); S.scroll.classList.toggle('off', me.gold[0] < scc);
+  const sccEl = S.scroll.querySelector('.coin'); sccEl.textContent = scc === 0 ? 'FREE' : scc; sccEl.style.width = scc === 0 ? '40px' : '24px'; sccEl.style.fontSize = scc === 0 ? '10px' : '13px'; sccEl.style.left = scc === 0 ? '38px' : '46px';
   S.save.innerHTML = `<svg width="58" height="74" viewBox="0 0 58 74" aria-hidden="true"><g stroke-linejoin="round"><path d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" transform="translate(0 5)" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" transform="translate(0 5)" fill="#2b2140" stroke="#2b2140" stroke-width="3"></path><path class="face" d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" fill="${G.saved ? '#ffc928' : '#ff8ab8'}" stroke="#2b2140" stroke-width="3"></path></g></svg><span class="ab" style="left:0;right:0;top:23px;text-align:center;font-size:14px;pointer-events:none">${G.saved ? 'Saved' : 'Save'}</span>`;
-  S.feedSurf.style.outline = G.saved ? '3px dashed #ff8ab8' : 'none'; S.feedSurf.style.outlineOffset = '4px';
+  S.feedSurf.classList.toggle('saved', !!G.saved);
+  if (G.saved && !S.saveTag && !G.saveFly) { S.saveTag = el('div', 'savetag', '<svg width="74" height="44" viewBox="0 0 74 44" aria-hidden="true"><path d="M4 4H70V40L37 30L4 40Z" fill="#ff8ab8" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path></svg><span>SAVED</span>', stage); css(S.saveTag, {left: 648, top: 44, width: 74, height: 44}); }
+  else if (!G.saved && S.saveTag) { const tg = S.saveTag; S.saveTag = null; anim(tg, [{transform: 'translateY(0) rotate(0)', opacity: 1}, {transform: 'translateY(-30px) rotate(-25deg)', opacity: 0}], {duration: 260, fill: 'forwards', raw: true}).then(() => tg.remove()); }
   // hero / power
   S.hp.textContent = me.health; S.arm.textContent = me.boundaries; S.arm.style.display = me.boundaries > 0 ? 'flex' : 'none';
-  const h = HERO[G.heroSlug], passive = h.cost === 'Passive';
-  const usable = !passive && !G.heroUsed && me.gold[0] >= +h.cost;
+  const h = HERO[G.heroSlug], passive = me.powerCost() == null;
+  const usable = !passive && me.canPower();
   S.power.innerHTML = `<svg width="70" height="76" viewBox="0 0 70 76" aria-hidden="true"><g stroke-linejoin="round"><path d="M35 6L62 21V52L35 67L8 52V21Z" transform="translate(0 5)" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M35 6L62 21V52L35 67L8 52V21Z" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M35 6L62 21V52L35 67L8 52V21Z" transform="translate(0 5)" fill="#2b2140" stroke="#2b2140" stroke-width="3"></path><path class="face" d="M35 6L62 21V52L35 67L8 52V21Z" fill="${passive || usable ? '#2fd0d0' : '#c9c2d6'}" stroke="#2b2140" stroke-width="3"></path></g><g transform="translate(20 20) scale(1.25)" fill="none" stroke="#2b2140" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" fill="#fff"></path></g></svg>` +
-    (passive ? '' : `<span class="coin" style="left:50px;top:-2px;width:24px;height:24px;font-size:13px">${h.cost}</span>`) +
-    '';
-  S.feedSurf.querySelector('.price-coin').textContent = G.heroSlug === 'h_bargainhunter' ? 2 : 3;
+    (passive ? '' : `<span class="coin" style="left:50px;top:-2px;width:24px;height:24px;font-size:13px">${me.powerCost()}</span>`) +
+    (G.heroSlug === 'h_doomscroller' ? `<span class="ab bd" style="left:44px;top:56px;min-width:26px;height:22px;padding:2px 5px 0;box-sizing:border-box;background:#fff;border:2.5px solid #2b2140;border-radius:999px;font-size:12px;display:flex;align-items:center;justify-content:center" title="Scrolls until the next Discover">${me.doomLeft()}</span>` : '');
+  S.power.classList.toggle('off', !passive && !usable); S.power.setAttribute('aria-label', `${h.power}: ${h.effect}`);
+  S.feedSurf.querySelector('.price-coin').textContent = me.minionCost();
   S.likes.hidden = !me.likes; S.likes.innerHTML = `<svg width="34" height="32" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 20C4 14 1.5 10 1.5 6.5 1.5 3.5 4 1.5 6.5 1.5c2.2 0 4 1.2 5.5 3.2 1.5-2 3.3-3.2 5.5-3.2 2.5 0 5 2 5 5 0 3.5-2.5 7.5-10.5 13.5Z" fill="#ff6b9a" stroke="#2b2140" stroke-width="2" stroke-linejoin="round"></path></svg><span>${me.likes}</span>`; S.likes.setAttribute('aria-label', `${me.likes} Likes. Tap to give them out`);
 }
 function copiesOf(name) { return G.me.board.filter(m => m.name === name && !m.golden).length + G.hand.filter(h => h.card.name === name).length; }
@@ -325,7 +397,7 @@ function renderAll(animateNew = true, gapAt = null) {
   G.feed.forEach((f, i) => {
     let t = S.feedTok.get(f.key);
     const m = {name: f.card.name, tribe: f.card.tribe, atk: f.card.atk + f.a, hp: f.card.hp + f.h, tier: f.card.tier, taunt: f.card.taunt, shield: f.card.shield, toxic: f.card.toxic};
-    const o = {copies: copiesOf(f.card.name) >= 1 ? copiesOf(f.card.name) : 0, upA: f.a > 0, upH: f.h > 0};
+    const o = {copies: copiesOf(f.card.name) >= 1 ? copiesOf(f.card.name) : 0, upA: f.a > 0, upH: f.h > 0, saved: !!G.saved};
     if (!t) { t = makeToken(m, o); S.layer.appendChild(t); S.feedTok.set(f.key, t); bindToken(t, 'feed', f); css(t, {left: feedX(i, G.feed.length), top: FEED_Y}); }
     else t.innerHTML = tokenHTML(m, o);
     t.style.transition = 'left .26s cubic-bezier(.22,1,.36,1), top .26s';
@@ -388,7 +460,7 @@ async function afterAction(animateNew = true) {
 }
 
 // ---------------------------------------------------------------- shop actions
-function costOf(f) { return f.discount ? 2 : G.heroSlug === 'h_bargainhunter' ? 2 : 3; }
+function costOf(f) { return G.me.minionCost(f); }
 function canBuy(f) { if (G.hand.length >= 10) { toast('Your hand is full'); return false; } if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; }
 function shake(e) { anim(e, [{transform: 'translateX(0)'}, {transform: 'translateX(-6px)'}, {transform: 'translateX(6px)'}, {transform: 'translateX(-3px)'}, {transform: 'translateX(0)'}], {duration: 300, raw: true}); }
 function goldTick(delta) {
@@ -398,7 +470,7 @@ function goldTick(delta) {
 async function buy(f, toBoardAt = null) {
   if (G.busy || !canBuy(f)) return;
   const me = G.me, cst = costOf(f);
-  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst);
+  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++;
   G.feed.splice(G.feed.indexOf(f), 1);
   const hc = {card: f.card, a: f.a, h: f.h, key: Math.random()};
   const t = S.feedTok.get(f.key);
@@ -444,15 +516,15 @@ async function sell(m) {
   coinFly(c, center(rectOf(S.gold)), g); setTimeout(() => goldTick(g), 450);
   floatText(c[0], c[1] - 30, `+${g} gold`, 'gold');
   // Greatest Hits re-release
-  for (const card of me.rerelease) G.feed.push({card, a: 0, h: 0, key: Math.random(), discount: true});
+  for (const card of me.rerelease) G.feed.push({card, a: 0, h: 0, key: Math.random(), discount: 2});
   me.rerelease = [];
   me.log = me.log.filter(x => x.type !== 'sold');
   await afterAction(true);
 }
 async function scroll() {
-  if (G.busy) return; const me = G.me;
-  if (me.gold[0] < 1) { shake(S.scroll); toast('Not enough gold'); return; }
-  me.gold[0] -= 1; me.gainSpend(1); goldTick(-1); G.saved = false;
+  if (G.busy) return; const me = G.me, sc = me.scrollCost();
+  if (me.gold[0] < sc) { shake(S.scroll); toast('Not enough gold'); return; }
+  me.payScroll(); if (sc) goldTick(-sc); G.saved = false; PROF.stats.scrolls++;
   anim(S.scroll.querySelector('.spin'), [{transform: 'translate(18px,17px) scale(1.34) rotate(0)'}, {transform: 'translate(18px,17px) scale(1.34) rotate(360deg)'}], {duration: 420, raw: true});
   const old = [...S.feedTok.values()]; S.feedTok.clear();
   old.forEach((t, i) => { t._leaving = true; t.style.transition = 'none'; anim(t, [{transform: 'translateY(0) rotate(0)'}, {transform: `translateY(-90px) rotate(${i % 2 ? 15 : -15}deg)`, opacity: 0}], {duration: 220, delay: i * 25, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); });
@@ -461,17 +533,36 @@ async function scroll() {
   renderAll();
   [...S.feedTok.values()].forEach((t, i) => anim(t, [{transform: 'translateY(-70px)', opacity: 0}, {transform: 'translateY(6px)', opacity: 1, offset: .7}, {transform: 'translateY(0)'}], {duration: 340, delay: i * 50, easing: 'ease-out', fill: 'backwards'}));
   await playLog();
+  if (me.pending.length) { await sleep(300); await handlePending(); }
 }
 function toggleSave() {
-  G.saved = !G.saved; renderChrome();
+  if (G.busy) return;
+  G.saved = !G.saved;
   anim(S.save, [{transform: 'translateY(-14px) rotate(-6deg)'}, {transform: 'translateY(3px) rotate(3deg)'}, {transform: 'translateY(0)'}], {duration: 300, easing: 'ease-out', raw: true});
-  if (G.saved) anim(S.feedSurf, [{transform: 'scale(1)'}, {transform: 'scale(1.02)'}, {transform: 'scale(1)'}], {duration: 260, raw: true});
+  if (G.saved) {
+    G.saveFly = true;
+    // a bookmark flies from the button to the Feed, a glare wraps the Feed, every minion gets pinned
+    const from = center(rectOf(S.save)), bm = el('div', 'savetag', '<svg width="74" height="44" viewBox="0 0 74 44" aria-hidden="true"><path d="M4 4H70V40L37 30L4 40Z" fill="#ff8ab8" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path></svg><span>SAVED</span>', stage);
+    css(bm, {left: from[0] - 37, top: from[1] - 22, width: 74, height: 44});
+    anim(bm, [{transform: 'translate(0,0) scale(.5) rotate(20deg)'}, {transform: `translate(${(685 - from[0]) / 2}px,${(66 - from[1]) / 2 - 50}px) scale(1.3) rotate(-10deg)`, offset: .55}, {transform: `translate(${685 - from[0]}px,${66 - from[1]}px) scale(1) rotate(0)`}], {duration: 380, easing: 'cubic-bezier(.3,0,.3,1)', raw: true}).then(() => { bm.remove(); G.saveFly = false; renderChrome(); if (S.saveTag) anim(S.saveTag, [{transform: 'rotate(-8deg) scale(1.25)'}, {transform: 'rotate(4deg)'}, {transform: 'rotate(0)'}], {duration: 300, raw: true}); });
+    const gl = el('div', 'wrapglare', '', S.feedSurf); anim(gl, [{left: '-130px'}, {left: '630px'}], {duration: 520, easing: 'ease-in-out', raw: true}).then(() => gl.remove());
+    anim(S.feedSurf, [{transform: 'scale(1)'}, {transform: 'scale(1.025,.97)'}, {transform: 'scale(.99,1.02)'}, {transform: 'scale(1)'}], {duration: 420, raw: true});
+    renderAll(false);
+    [...S.feedTok.values()].forEach((t, i) => {
+      anim(t, [{transform: 'translateY(0)'}, {transform: 'translateY(-14px) rotate(-4deg)'}, {transform: 'translateY(0)'}], {duration: 300, delay: 120 + i * 70, easing: 'ease-out', raw: true});
+      const b = t.querySelector('.bm'); if (b) anim(b, [{transform: 'translateY(-30px) scale(1.6) rotate(-30deg)', opacity: 0}, {transform: 'translateY(0) scale(1) rotate(0)', opacity: 1}], {duration: 300, delay: 160 + i * 70, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    });
+  } else {
+    [...S.feedTok.values()].forEach(t => { const b = t.querySelector('.bm'); if (b) anim(b, [{transform: 'translateY(0) rotate(0)', opacity: 1}, {transform: 'translateY(-26px) rotate(40deg)', opacity: 0}], {duration: 240, fill: 'forwards', raw: true}); });
+    setTimeout(() => renderAll(false), 250); renderChrome();
+  }
 }
 async function levelUp() {
   if (G.busy) return; const me = G.me, lc = me.levelCost();
   if (lc === null) return;
   if (me.gold[0] < lc) { shake(S.shield); toast(`Level up costs ${lc} gold`); return; }
   me.gold[0] -= lc; me.gainSpend(lc); me.tier += 1; me.turns_at_tier = 0; goldTick(-lc);
+  if (me.tier === 6) { PROF.flags.tier6 = true; checkUnlocks(); }
   renderChrome();
   anim(S.shield, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.25) rotate(-8deg)'}, {transform: 'scale(.95) rotate(4deg)'}, {transform: 'scale(1)'}], {duration: 600, easing: 'ease-out', raw: true});
   const c = center(rectOf(S.shield)); ring(c[0], c[1] - 20, '#ffc928', 120); confetti(c[0], c[1] - 20, 14);
@@ -486,21 +577,28 @@ async function useLikes() {
   await chooseTarget(me.board.slice(), `Give a Like (+${1 + me.likeBonus}/+${1 + me.likeBonus}) · ${me.likes} left`, go, () => {});
 }
 async function usePower() {
-  const h = HERO[G.heroSlug];
-  if (h.cost === 'Passive') { showHeroDetail(); return; }
-  if (G.heroUsed) { toast('Already used this turn'); return; }
-  if (G.me.gold[0] < +h.cost) { toast('Not enough gold'); return; }
-  if (G.heroSlug === 'boomer') {
-    const go = async t => {
-      G.me.gold[0] -= 1; G.me.gainSpend(1); G.heroUsed = true; goldTick(-1);
-      if (t) G.me.buff(t, 1, 1);
-      for (const f of G.feed) { f.a += 1; f.h += 1; }
-      const pc = center(rectOf(S.power));
-      for (const tt of S.feedTok.values()) streak(pc, center(rectOf(tt)), '#2fd0d0', 300);
-      await sleep(260); renderAll(); await playLog();
-    };
-    if (G.me.board.length) await chooseTarget(G.me.board.slice(), 'Reply All: choose a minion (the Feed gets +1/+1 too)', go, () => {}); else await go(null);
-  }
+  if (G.busy) return;
+  const me = G.me, h = HERO[G.heroSlug], pc = me.powerCost();
+  if (pc == null) { showHeroDetail(); return; }
+  if (me.powerUsed) { toast('Already used this turn'); return; }
+  if (me.gold[0] < pc) { shake(S.power); toast('Not enough gold'); return; }
+  const def = E.HERO_POWERS[G.heroSlug];
+  if (def.target && !me.board.length && G.heroSlug !== 'boomer') { toast('Play a minion first'); return; }
+  const go = async t => {
+    const before = new Set(me.board.map(m => m.id));
+    me.usePower(t, G.feed); goldTick(-pc); PROF.flags = PROF.flags || {};
+    const pc0 = center(rectOf(S.power));
+    anim(S.power, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.25) rotate(-12deg)'}, {transform: 'scale(1) rotate(0)'}], {duration: 360, raw: true});
+    ring(pc0[0], pc0[1], '#2fd0d0', 100);
+    if (G.heroSlug === 'boomer') { for (const tt of S.feedTok.values()) streak(pc0, center(rectOf(tt)), '#2fd0d0', 300); if (t && S.tok.get(t.id)) streak(pc0, center(rectOf(S.tok.get(t.id))), '#2fd0d0', 300); await sleep(260); }
+    if (t && S.tok.get(t.id) && G.heroSlug !== 'boomer') { await streak(pc0, center(rectOf(S.tok.get(t.id))), '#2fd0d0', 300); }
+    me.log = me.log.filter(e => e.type !== 'feedbuff');
+    renderAll(); await playLog();
+    for (const m of me.board) if (!before.has(m.id)) { const tk = S.tok.get(m.id); if (tk) { const c = center(rectOf(tk)); ring(c[0], c[1], '#ffc928', 110); confetti(c[0], c[1], 16); floatText(c[0], c[1] - 36, 'Pivot!', 'gold'); } }
+    if (me.pending.length) await handlePending();
+  };
+  if (me.powerNeedsTarget()) await chooseTarget(me.board.slice(), G.heroSlug === 'boomer' ? `${h.power}: choose a minion (the Feed gets +1/+1 too)` : `${h.power}: choose a minion`, go, () => {});
+  else await go(null);
 }
 
 // ---------------------------------------------------------------- targeting & discover & detail
@@ -529,7 +627,7 @@ function handlePending() {
     const p = me.pending.shift(); if (!p) return res();
     const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 65});
     el('div', 'dim', '', ov);
-    const head = el('div', 'ab bd', p.why === 'triple' ? `Triple! Discover a ${'★'.repeat(p.tier)} minion` : `Discover a ${TP[p.why] ? TP[p.why].replace(/s$/, '') : 'minion'}`, ov);
+    const head = el('div', 'ab bd', p.why === 'triple' ? `Triple! Discover a ${'★'.repeat(p.tier)} minion` : p.why === 'hero' ? `${HERO[G.heroSlug].power}: Discover a minion` : `Discover a ${TP[p.why] ? TP[p.why].replace(/s$/, '') : 'minion'}`, ov);
     css(head, {left: 0, right: 0, top: 14, textAlign: 'center'}); head.innerHTML = `<span style="display:inline-block;background:#ffc928;border:3px solid #2b2140;border-radius:999px;padding:6px 18px 2px;box-shadow:0 0 0 3px #fff;font-size:22px">${head.textContent}</span>`;
     p.options.forEach((c, i) => {
       const b = el('button', 'ab', `<div style="transform:scale(.62);transform-origin:top left">${cardHTML(c)}</div>`, ov);
@@ -555,7 +653,8 @@ function showDetail(card, inst, actions = []) {
     'Clock In': 'Happens every time it attacks.', 'Grievance': 'Happens every time that many friendly minions have died this combat.', 'Side Gig': 'Pay the gold in the shop to use it, once per turn.', 'Like': 'Give a Like to a minion for +1/+1. Tap the heart next to your hero.', 'Acquire': 'Take a minion out of the Feed.', 'Cleave': 'Also damages the minions next to its target.'};
   const ex = inst && inst.extras && inst.extras.length ? `<p class="kwl">Collabs: ${inst.extras.join(', ')}</p>` : '';
   const tmp = inst && (inst.ta || inst.th) ? `<p class="kwl">Includes +${inst.ta}/+${inst.th} for the next combat only.</p>` : '';
-  const t = el('div', 'detail-txt', `<p class="rules">${card.full_html}</p>${kws.map(k => `<p class="kwl"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}${tmp}<p class="fl">${card.flavour || ''}</p><div class="acts"></div>`, ov);
+  const gold = inst && inst.golden;
+  const t = el('div', 'detail-txt', `${gold ? '<p class="kwl" style="color:#ffc928">Tripled: every effect is doubled.</p>' : ''}<p class="rules">${gold ? card.gold_html || card.full_html : card.full_html}</p>${kws.map(k => `<p class="kwl"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}${tmp}<p class="fl">${card.flavour || ''}</p><div class="acts"></div>`, ov);
   css(t, {left: 360, top: 34, width: 440});
   const acts = t.querySelector('.acts');
   const close = () => { ov.remove(); };
@@ -655,9 +754,14 @@ async function onDrop(kind, e, x, y) {
 }
 
 // ---------------------------------------------------------------- turn flow
-async function animateTurnStart() {
+async function animateTurnStart(kept) {
   G.busy = true;
   const toks = [...S.feedTok.values()];
+  if (kept) {
+    const gl = el('div', 'wrapglare', '', S.feedSurf); anim(gl, [{left: '630px'}, {left: '-130px'}], {duration: 520, easing: 'ease-in-out', raw: true}).then(() => gl.remove());
+    toks.forEach((t, i) => { anim(t, [{transform: 'translateY(0) scale(1)'}, {transform: 'translateY(-10px) scale(1.08)'}, {transform: 'translateY(0) scale(1)'}], {duration: 320, delay: 100 + i * 60, easing: 'ease-out'});
+    });
+  } else
   toks.forEach((t, i) => anim(t, [{transform: 'translateX(320px) rotate(20deg)', opacity: 0}, {transform: 'translateX(-6px) rotate(-3deg)', opacity: 1, offset: .75}, {transform: 'translateX(0) rotate(0)'}], {duration: 420, delay: 80 + i * 60, easing: 'ease-out', fill: 'backwards'}));
   const g = G.me.gold_from || {};
   anim(S.gold, [{transform: 'scale(.6)'}, {transform: 'scale(1.2)'}, {transform: 'scale(1)'}], {duration: 420, easing: 'ease-out'});
@@ -761,15 +865,15 @@ async function playCombat(rec) {
         a.getAnimations().forEach(x => x.cancel());
         const lunge = `translate(${dx * .82}px,${dy * .78}px) scale(1.1) rotate(6deg)`;
         const A = a.animate([{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${-dx * .06}px,${-dy * .12}px) scale(.92) rotate(-5deg)`, offset: .3},
-          {transform: lunge, offset: .55, easing: 'cubic-bezier(.34,1.3,.64,1)'}, {transform: lunge, offset: .62}, {transform: 'translate(0,0) scale(1)'}], {duration: 1000 / SP.v, easing: 'ease-in-out'});
-        await sleep(550);
+          {transform: lunge, offset: .55, easing: 'cubic-bezier(.34,1.3,.64,1)'}, {transform: lunge, offset: .62}, {transform: 'translate(0,0) scale(1)'}], {duration: 667 / SP.v, easing: 'ease-in-out'});
+        await sleep(367);
         anim(t, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,3px) rotate(-5deg)'}, {transform: 'translate(5px,-2px) rotate(4deg)'}, {transform: 'translate(0,0)'}], {duration: 320});
         anim(stage, [{transform: `scale(${SCALE}) translate(0,0)`}, {transform: `scale(${SCALE}) translate(2px,-2px)`}, {transform: `scale(${SCALE}) translate(-2px,1px)`}, {transform: `scale(${SCALE}) translate(0,0)`}], {duration: 220});
         diffBursts(cur, fr.boards);
         place(fr.boards, {floats: false});
         await A.finished.catch(() => {});
         a.style.zIndex = '';
-        await sleep(260);
+        await sleep(173);
       } else place(fr.boards);
     } else if (fr.type === 'death') {
       const t = Cm.els.get(fr.id);
@@ -789,6 +893,14 @@ async function playCombat(rec) {
       if (fr.type === 'trigger') { const s = Cm.els.get(fr.src); if (s) { const c = center(rectOf(s)); ring(c[0], c[1], '#4fd1c5', 90); say(`${nameOf(fr.src)} triggers`); } }
       if (fr.type === 'rebrand') say('Rebrand!');
       place(fr.boards); await sleep(420);
+    } else if (fr.type === 'hero') {
+      const av = sideOf(fr.side) === 1 ? mav : oav, h = HERO[fr.hero];
+      const c = center(rectOf(av));
+      anim(av, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.18) rotate(-6deg)'}, {transform: 'scale(1) rotate(0)'}], {duration: 420});
+      ring(c[0], c[1], '#2fd0d0', 110);
+      if (h) floatText(c[0] + 40, c[1] - 40, h.power, '');
+      await Promise.all((fr.tgts || []).map(id => { const t = Cm.els.get(id); return t ? streak(c, center(rectOf(t)), '#2fd0d0', 380) : null; }));
+      place(fr.boards); await sleep(380);
     } else if (fr.type === 'first') {
       toast(fr.side === 0 ? 'You attack first' : 'They attack first', 1000);
       await sleep(700);
@@ -796,26 +908,56 @@ async function playCombat(rec) {
   }
   if (skip) { place(f.frames[f.frames.length - 1].boards, {floats: false}); for (const [id, t] of Cm.els) if (!f.frames[f.frames.length - 1].boards.some(b => b.some(m => m.id === id))) { t.remove(); Cm.els.delete(id); } }
   await sleep(300);
-  // hero damage
+  // hero damage: survivors wind up together, then dive at the losing hero one after another
   const won = rec.winner === G.me, lost = rec.loser === G.me;
   const survRow = won ? 1 : 0, targetAv = won ? oav : mav;
   if (rec.dmg && (won || lost)) {
     const sv = [...Cm.els.values()].filter(t => Math.abs(parseFloat(t.style.top) - CY[survRow]) < 5);
     const tc = center(rectOf(targetAv));
-    for (const t of sv) {
-      const r = rectOf(t), to = `translate(${tc[0] - r.x - 34}px,${tc[1] - r.y - 34}px) scale(.8) rotate(-10deg)`;
-      t.getAnimations().forEach(x => x.cancel());
-      t.animate([{transform: 'translate(0,0)'}, {transform: to, offset: .45, easing: 'cubic-bezier(.5,0,.75,0)'}, {transform: 'translate(0,0)'}], {duration: 700 / SP.v});
-      await sleep(260);
-      anim(targetAv, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,4px)'}, {transform: 'translate(0,0)'}], {duration: 200});
-      await sleep(200);
-    }
-    burstAt(tc[0] + 20, tc[1] - 20, `−${rec.dmg}`);
+    sv.forEach(t => t.getAnimations().forEach(x => x.cancel()));
+    const up = survRow === 1 ? -1 : 1;
+    await Promise.all(sv.map((t, i) => anim(t, [{transform: 'translateY(0) scale(1)', filter: 'brightness(1)'}, {transform: `translateY(${up * 22}px) scale(1.16) rotate(${i % 2 ? 6 : -6}deg)`, filter: 'brightness(1.25) drop-shadow(0 0 8px #ff6b5e)', offset: .7}, {transform: `translateY(${up * 16}px) scale(1.12)`, filter: 'brightness(1.2) drop-shadow(0 0 6px #ff6b5e)'}], {duration: 380, delay: i * 50, easing: 'ease-out', fill: 'forwards'})));
+    const hits = sv.map((t, i) => new Promise(res => setTimeout(() => {
+      const r = rectOf(t), dx = tc[0] - r.x - 34, dy = tc[1] - r.y - 34;
+      t.style.zIndex = 30; t.getAnimations().forEach(x => x.cancel());
+      const A = t.animate([{transform: `translateY(${up * 16}px) scale(1.12) rotate(0)`},
+        {transform: `translate(${dx * .5}px,${dy * .5 + up * 90}px) scale(1.05) rotate(-200deg)`, offset: .4},
+        {transform: `translate(${dx}px,${dy}px) scale(.62,.82) rotate(-360deg)`, offset: .55, easing: 'ease-out'},
+        {transform: `translate(${dx * .8}px,${dy * .8}px) scale(.9) rotate(-360deg)`, offset: .66},
+        {transform: 'translate(0,0) scale(1) rotate(-360deg)'}], {duration: 760 / SP.v, easing: 'cubic-bezier(.45,0,.55,1)'});
+      setTimeout(() => {
+        anim(targetAv, [{transform: 'translate(0,0) scale(1)'}, {transform: 'translate(-8px,5px) scale(.9) rotate(-6deg)'}, {transform: 'translate(6px,-3px) scale(1.04) rotate(4deg)'}, {transform: 'translate(0,0) scale(1)'}], {duration: 260});
+        ring(tc[0], tc[1], '#ff6b5e', 120);
+        const fl = el('div', 'hitflash', '', stage); css(fl, {left: tc[0] - 44, top: tc[1] - 44, width: 88, height: 88});
+        anim(fl, [{opacity: .85}, {opacity: 0}], {duration: 300}).then(() => fl.remove());
+        for (let k = 0; k < 6; k++) { const sp = el('div', '', '', stage); const ang = Math.random() * Math.PI * 2, d = 40 + Math.random() * 40;
+          css(sp, {position: 'absolute', left: tc[0] - 5, top: tc[1] - 5, width: 10, height: 10, background: '#ffc928', border: '2px solid #2b2140', borderRadius: '2px', zIndex: 88, pointerEvents: 'none'});
+          anim(sp, [{transform: 'translate(0,0) rotate(0)', opacity: 1}, {transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d}px) rotate(180deg)`, opacity: 0}], {duration: 380, easing: 'ease-out'}).then(() => sp.remove()); }
+        anim(stage, [{transform: `scale(${SCALE}) translate(0,0)`}, {transform: `scale(${SCALE}) translate(4px,-3px)`}, {transform: `scale(${SCALE}) translate(-3px,2px)`}, {transform: `scale(${SCALE}) translate(0,0)`}], {duration: 200});
+      }, 0.55 * 760 / SP.v);
+      A.finished.catch(() => {}).then(() => { t.style.zIndex = ''; t.style.filter = ''; res(); });
+    }, i * 150 / SP.v)));
+    await sleep(0.55 * 760 + (sv.length - 1) * 150);
+    burstAt(tc[0] + 24, tc[1] - 24, `−${rec.dmg}`);
     if (lost) mhp.textContent = G.me.health + G.me.boundaries; else ohp.textContent = opp.ghost ? '—' : opp.health + opp.boundaries;
-    anim(lost ? mhp : ohp, [{transform: 'scale(1.6)'}, {transform: 'scale(1)'}], {duration: 360, easing: 'cubic-bezier(.34,1.56,.64,1)'});
-    await sleep(500);
+    anim(lost ? mhp : ohp, [{transform: 'scale(1.7)'}, {transform: 'scale(1)'}], {duration: 360, easing: 'cubic-bezier(.34,1.56,.64,1)'});
+    await Promise.all(hits);
+    await sleep(700);
+  } else await sleep(500);
+  trackCombat(rec);
+}
+function trackCombat(rec) {
+  const me = G.me, f = rec.fight, won = rec.winner === me;
+  PROF.stats.deaths += f.frames.filter(x => x.type === 'death' && x.side === 0).length;
+  G.streak = won ? (G.streak || 0) + 1 : 0;
+  if (G.streak >= 3) PROF.flags.streak3 = true;
+  if (won) {
+    const tribes = new Set(me.board.filter(m => !m.follower && m.tribe !== 'Neutral').map(m => m.tribe));
+    if (tribes.size >= 4) PROF.flags.fourTribes = true;
+    if (me.board.length <= 3 && G.lobby.turn >= 6) PROF.flags.small = true;
   }
-  await showResult(rec);
+  G.minHealth = Math.min(G.minHealth ?? 99, me.health);
+  checkUnlocks();
 }
 function diffBursts(prev, next) {
   // simpler: compute per-id hp loss and shield pops
@@ -831,31 +973,6 @@ function diffBursts(prev, next) {
 }
 function findTok(id) { return CombatEls().get(id); }
 let _ce = null; function CombatEls() { return _ce || new Map(); }
-async function showResult(rec) {
-  const me = G.me, won = rec.winner === me, lost = rec.loser === me;
-  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 90}); el('div', 'dim', '', ov);
-  const opp = rec.b || rec.ghost, oppName = (opp.ghost ? 'Ghost of ' : '') + (HERO[opp.hero] ? HERO[opp.hero].name : opp.name);
-  const surv = rec.fight.survivors;
-  const title = won ? 'Won the round' : lost ? 'Lost the round' : 'Draw';
-  const tierW = won ? me.tier : opp.tier, sv = surv.reduce((x, m) => x + m.tier, 0);
-  const big = rec.dmg ? `<p class="bd" style="margin:14px 0 0;font-size:56px;color:${won ? '#2ecb6e' : '#ff6b5e'}">${won ? '' : '−'}${rec.dmg}</p>
-    <p style="margin:4px 0 0;font-size:13px;font-weight:800;color:#5a5270">${'★'.repeat(tierW)} tier ${tierW} + survivors ${sv}${tierW + sv > rec.dmg ? ` · capped at ${rec.dmg}` : ''}${lost && me.lastDamage && me.lastDamage.armor ? ` · ${me.lastDamage.armor} blocked by Boundaries` : ''}</p>` : '';
-  const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:34px">${title}</p>${big}${lost ? `<p style="margin:14px 0 0;font-size:12.5px;font-weight:800;line-height:1.35;color:#5a5270">${tipFor(rec)}</p>` : ''}`, ov);
-  css(p, {left: 262, top: 60, width: 320, padding: '18px 22px 20px', textAlign: 'center'});
-  anim(p, [{transform: 'translateY(60px) scale(.9)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 360, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
-  if (won) confetti(422, 60, 26);
-  const b = el('button', 'btn', G.lobby.over() ? 'See results' : 'Back to shop', ov); css(b, {left: 334, top: 318, width: 176, height: 44, background: '#2ecb6e', fontSize: '20px'});
-  await new Promise(r => b.onclick = r);
-}
-function tipFor(rec) {
-  const opp = rec.b || rec.ghost, ob = opp.board || [];
-  const big = ob.length ? ob.reduce((a, m) => (m.atk + m.hp > a.atk + a.hp ? m : a), ob[0]) : null;
-  if (G.me.board.length < 4) return 'Fill your board: more minions means more attacks and less damage taken.';
-  if (big && big.atk + big.hp > 25) return `Their ${big.name} is huge. Start-of-combat damage and Toxic can deal with one big threat.`;
-  if (G.me.tier < opp.tier) return `They were a tier higher. Level up when you have spare gold.`;
-  return 'Look for minions of one tribe: synergies beat raw stats in the long run.';
-}
-
 // ---------------------------------------------------------------- end of run
 function showEnd() {
   clear(); G.screen = 'end'; bg(false);
@@ -864,31 +981,60 @@ function showEnd() {
   while (L.alive().length > 1 && guard++ < 40) { L.botTurns(); L.fightRound(); }
   for (const q of L.alive()) q.place = 1;
   if (!me.place) me.place = me.alive ? 1 : 9 - L.deadOrder.indexOf(me) - 1;
+  for (const q of L.players) if (!q.place) q.place = 1;
   const order = L.players.slice().sort((a, b) => (a.place || 1) - (b.place || 1));
+  // rating
+  const before = PROF.rating, delta = ratingChange(me, L.players), after = Math.max(0, before + delta);
+  if (!G.rated) {
+    G.rated = true;
+    PROF.rating = after; PROF.peak = Math.max(PROF.peak, after); PROF.games++; if (me.place <= 4) PROF.top4++; if (me.place === 1) PROF.wins++;
+    if (me.place <= 4 && (G.minHealth ?? 99) <= 10) PROF.flags.comeback = true;
+    PROF.history.push({t: Date.now(), hero: G.heroSlug, place: me.place, d: after - before}); PROF.history = PROF.history.slice(-50);
+    checkUnlocks();
+  }
   const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">RUN OVER · ROUND ${L.turn}</p>
     <p class="bd" style="margin:2px 0 0;font-size:44px"><span class="cnt">0</span>${['th', 'st', 'nd', 'rd'][me.place] && me.place < 4 ? ['th', 'st', 'nd', 'rd'][me.place] : 'th'} <span style="font-size:22px;color:#5a5270">of 8</span></p>
-    <p style="margin:2px 0 0;font-size:13px;font-weight:700">${me.place <= 4 ? 'Top 4. Well played.' : 'Bottom 4. The next run will go better.'}</p>
+
     <div class="lst" style="margin-top:8px;display:flex;flex-direction:column;gap:2px"></div>`, stage);
   css(p, {left: 30, top: 22, width: 380, height: 346, padding: '18px 22px'});
   const lst = p.querySelector('.lst');
   order.forEach((q, i) => {
     const sty = q.style_code && window.LS_STYLES[q.style_code] ? window.LS_STYLES[q.style_code] : null;
     const tr = sty ? sty[0] : null;
-    const row = el('div', '', `<span style="width:18px;text-align:right">${q.place || 1}</span><span style="position:relative;width:22px;height:22px;border-radius:50%;border:2px solid #2b2140;overflow:hidden;background:#8fd4ff"><img src="${ART[q.hero] || ART.follower}" alt="" style="position:absolute;left:-4px;bottom:-4px;width:30px;height:30px"></span><span style="flex:1">${q === me ? 'You' : HERO[q.hero] ? HERO[q.hero].name : q.name}</span>${tr ? `<span class="chip" style="padding:0 7px 0 3px;font-size:11px"><i style="background:${TC[tr]}"></i>${sty[1]}</span>` : q === me ? '' : '<span class="chip" style="padding:0 7px;font-size:11px">Big stats</span>'}`, lst);
+    const row = el('div', '', `<span style="width:18px;text-align:right">${q.place || 1}</span><span style="position:relative;width:22px;height:22px;border-radius:50%;border:2px solid #2b2140;overflow:hidden;background:#8fd4ff"><img src="${ART[q.hero] || ART.follower}" alt="" style="position:absolute;left:-4px;bottom:-4px;width:30px;height:30px"></span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:26px;height:24px">${q === me ? 'You' : HERO[q.hero] ? HERO[q.hero].name.replace('The ', '') : q.name}</span><span style="font-size:11px;color:#5a5270">${(q === me ? before : q.rating ?? '').toLocaleString('en')}</span>${tr ? `<span class="chip" style="padding:0 7px 0 3px;font-size:11px"><i style="background:${TC[tr]}"></i>${sty[1]}</span>` : q === me ? '' : '<span class="chip" style="padding:0 7px;font-size:11px">Big stats</span>'}`, lst);
     css(row, {display: 'flex', alignItems: 'center', gap: '8px', height: 24, borderRadius: '999px', padding: '0 10px 0 3px', fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: '13.5px', lineHeight: 1});
     if (q === me) { row.style.background = '#ffc928'; row.style.border = '2.5px solid #2b2140'; }
     anim(row, [{transform: 'translateX(-30px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 300, delay: 300 + i * 70, fill: 'backwards', raw: true});
   });
   const cnt = p.querySelector('.cnt'); let k = 8; const iv = setInterval(() => { cnt.textContent = k; if (k <= me.place) { clearInterval(iv); anim(cnt, [{transform: 'scale(1.6)'}, {transform: 'scale(1)'}], {duration: 300, raw: true}); if (me.place <= 4) confetti(120, 90, 30); } k--; }, 110);
   cnt.style.display = 'inline-block';
-  const right = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">YOUR FINAL BOARD</p><div class="fb" style="position:relative;height:196px;margin-top:16px"></div>`, stage);
+  const bA = bracketOf(before), bB = bracketOf(after);
+  const right = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">RATING</p>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px"><span class="bd rnum" style="font-size:36px">${before.toLocaleString('en')}</span><span class="bd" style="font-size:22px;color:${delta >= 0 ? '#14a052' : '#ff6b5e'}">${delta >= 0 ? '+' : '−'}${Math.abs(delta)}</span></div>
+    <div class="rcw" style="margin-top:4px"></div>
+    <p class="bd" style="margin:12px 0 0;font-size:13px;letter-spacing:.12em;color:#5a5270">YOUR FINAL BOARD</p><div class="fb" style="position:relative;height:84px;margin-top:10px"></div>`, stage);
   css(right, {left: 430, top: 22, width: 384, height: 266, padding: '18px 22px'});
+  const rcw = right.querySelector('.rcw'), chip = rankChip(after, 13); chip.style.position = 'relative'; chip.style.display = 'inline-flex'; rcw.appendChild(chip);
+  if (bA[1] !== bB[1]) { const pr = el('span', 'bd', delta > 0 ? 'Promoted!' : 'Demoted', rcw); css(pr, {position: 'relative', marginLeft: '10px', fontSize: '15px', color: delta > 0 ? '#14a052' : '#ff6b5e'}); }
+  const rn = right.querySelector('.rnum'); let k2 = 0; const steps = 24;
+  const iv2 = setInterval(() => { k2++; rn.textContent = Math.round(before + (after - before) * k2 / steps).toLocaleString('en'); if (k2 >= steps) clearInterval(iv2); }, 40);
   const fb = right.querySelector('.fb');
-  me.board.forEach((m, i) => { const t = makeToken(m); fb.appendChild(t); css(t, {left: (i % 4) * 84 + 6, top: Math.floor(i / 4) * 92 + 6}); t.style.transform = 'scale(.9)'; });
+  me.board.forEach((m, i) => { const t = makeToken(m); fb.appendChild(t); css(t, {left: i * 49 + 2, top: 4}); t.style.transform = 'scale(.68)'; t.style.transformOrigin = 'top left'; });
   const again = el('button', 'btn', 'Play again', stage); css(again, {left: 438, top: 314, width: 176, height: 48, background: '#2ecb6e', fontSize: '21px'}); again.onclick = showHeroSelect;
   const menu = el('button', 'btn', 'Main menu', stage); css(menu, {left: 634, top: 314, width: 172, height: 48, fontSize: '18px'}); menu.onclick = showTitle;
+  if (NEW_UNLOCKS.length) setTimeout(() => showUnlocks(NEW_UNLOCKS.splice(0)), 1400);
+}
+function showUnlocks(list) {
+  if (!list.length) return;
+  const slug = list.shift(), h = HERO[slug];
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.8)';
+  const head = el('div', 'ab bd', '<span style="display:inline-block;background:#ffc928;border:3px solid #2b2140;border-radius:999px;padding:6px 18px 2px;box-shadow:0 0 0 3px #fff;font-size:22px">New hero unlocked!</span>', ov); css(head, {left: 0, right: 0, top: 14, textAlign: 'center'});
+  const card = el('div', 'ab', heroHTML(h), ov); css(card, {left: 312, top: 62}); card.style.transform = 'scale(.8)'; card.style.transformOrigin = 'top left';
+  anim(card, [{transform: 'scale(.2) rotate(-30deg)', opacity: 0}, {transform: 'scale(.88) rotate(4deg)', opacity: 1, offset: .7}, {transform: 'scale(.8) rotate(0)'}], {duration: 600, easing: 'ease-out', raw: true});
+  setTimeout(() => confetti(422, 150, 40), 300);
+  ov.onpointerup = () => { ov.remove(); showUnlocks(list); };
 }
 
-window.LSUI = {showTitle, G};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd()};
 showTitle();
 })();

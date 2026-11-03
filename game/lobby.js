@@ -15,13 +15,20 @@ class Lobby {
     const options = styles.concat(['BASE']);
     const chosen = this.rng.shuffle(options.slice()).slice(0, opts.human ? 7 : 8);
     const heroes = this.rng.shuffle(BOT_HEROES.filter(h => h !== opts.heroSlug));
+    // Bot ratings sit around the player's rating; a bot's skill follows its own rating.
+    const R = opts.rating;
+    const gauss = () => { let u = 0, v = 0; while (!u) u = this.rng(); while (!v) v = this.rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    const botRating = () => R == null ? null : Math.max(0, Math.round(R + 140 * gauss()));
     this.players = [];
     if (opts.human) {
       const h = new E.Player('HUMAN', E.RNG(this.rng.int(1, 1e9)), this.pool, {human: true, hero: opts.heroSlug, boundaries: opts.boundaries, name: 'You'});
       h.tribe = null; this.players.push(h); this.human = h;
     }
     chosen.forEach((s, i) => {
-      const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero: heroes[i], name: s});
+      const rating = botRating(), skill = opts.skill != null ? opts.skill : rating == null ? 1 : E.skillOf(rating);
+      // unskilled bots often ignore tribes and just buy big stats
+      if (s !== 'BASE' && skill < 0.35 && this.rng() < (0.35 - skill) * 1.6) s = 'BASE';
+      const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero: opts.botHeroes ? opts.botHeroes[i] : heroes[i], name: s, rating, skill});
       this.players.push(p);
     });
     this.turn = 0; this.deadOrder = []; this.ghosts = []; this.lastPairs = [];
@@ -59,6 +66,7 @@ class Lobby {
         if (loser) this.damage(loser, dmg);
       }
       for (const p of [a, b]) if (p) p.lostLast = p === loser;
+      f.sides.forEach((sd, k) => { const p = k === 0 ? a : b; if (p && p.afterCombat) p.afterCombat(new Set(sd.b.filter(m => m.hp > 0 && m.orig).map(m => m.orig.id))); });
       const rec = {a, b, ghost, fight: f, dmg, loser, winner};
       this.results.push(rec);
       if (a.human) humanFight = rec;

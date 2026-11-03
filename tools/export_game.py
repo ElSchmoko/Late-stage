@@ -3,13 +3,26 @@ import json, pathlib
 from lsdata import *
 from heroes import HEROES
 from cards import TOKENS
+from golden import GOLD
+import re
+def gold_face(c):
+    full, face = text_of(c), face_text(c)
+    g = GOLD.get(c.name)
+    if not g or g == full: return face, FIT.get(c.name, 13)
+    a, b = re.findall(r'\d+', full), re.findall(r'\d+', g)
+    mp = {x: y for x, y in zip(a, b)} if len(a) == len(b) else {}
+    sub = lambda t: re.sub(r'\d+', lambda m: mp.get(m.group(0), m.group(0)), t)
+    if mp and sub(full) == g:
+        return sub(face), FIT.get(c.name, 13)
+    fit = FIT.get(c.name, 13) * min(1, (len(face) / len(g)) ** .5)
+    return g, max(10.5, round(fit, 1))
 cards = []
 SLUG['Pigeon'] = 'pigeon'; SLUG['Follower'] = 'follower'
 for c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS + TOKENS:
     cards.append(dict(name=c.name, tribe=c.tribe, tier=c.tier, atk=c.atk, hp=c.hp, style=c.style, text=text_of(c), face=face_text(c),
                       flavour=flavour_of(c), taunt=c.taunt, shield=c.shield, toxic=c.toxic, rebrand=c.rebrand, collab=c.collab,
                       kind=c.kind, sellbait=c.sellbait, discover=c.discover, twice=c.twice, art=SLUG[c.name], fit=FIT.get(c.name, 13),
-                      html=fmt(face_text(c)), full_html=fmt(text_of(c)), token=c in TOKENS))
+                      html=fmt(face_text(c)), full_html=fmt(text_of(c)), gold_html=fmt(GOLD.get(c.name, text_of(c))), gold_face=fmt(gold_face(c)[0]), gold_fit=gold_face(c)[1], token=c in TOKENS))
 heroes = [dict(slug=h[0], name=h[1], power=h[2], cost=h[3], effect=h[4], effect_html=fmt(h[4]), push=h[5], boundaries=h[6], unlock=h[7], col=h[8]) for h in HEROES]
 art = {}
 A = S / 'art'
