@@ -174,3 +174,12 @@ button{font:inherit;color:inherit}
 .sndpop input[type=range]{-webkit-appearance:none;appearance:none;width:130px;height:12px;border:2.5px solid var(--ink);border-radius:999px;background:#fff;margin:0}
 .sndpop input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#ffc928;border:2.5px solid var(--ink);box-shadow:0 2px 0 var(--ink)}
 .sndpop input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#ffc928;border:2.5px solid var(--ink)}
+
+/* Shop = a store shelf (no panel); your board = a warm, sunken desk */
+.surf.shelf{border-color:transparent;box-shadow:none;background:transparent;transition:background .25s}
+.surf.shelf .ledge{position:absolute;left:24px;right:24px;top:79px;height:11px;border-radius:6px;background:#cfe2f8;box-shadow:0 4px 0 rgba(43,33,64,.2);transition:background .25s}
+.surf.shelf.saved{background:rgba(255,138,184,.16)!important}
+.surf.shelf.saved::after{border-radius:22px;background:repeating-linear-gradient(115deg,rgba(255,255,255,.55) 0 9px,rgba(255,255,255,0) 9px 30px)}
+.surf.shelf.saved .ledge{background:#ff8ab8;background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.45) 0 6px,transparent 6px 14px)}
+.surf.desk{background-color:#f3e8d6;background-image:radial-gradient(rgba(140,100,50,.13) 1.3px,transparent 1.6px);background-size:10px 10px;box-shadow:inset 0 5px 0 rgba(90,60,30,.14),0 0 0 3px #fff}
+.surf.desk .slot{border-color:rgba(120,85,40,.26)}

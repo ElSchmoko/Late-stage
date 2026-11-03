@@ -334,8 +334,8 @@ function buildShop() {
   clear(); G.screen = 'shop'; bg(false); AU.music('office'); AU.intensity(tierLevel());
   S = {tok: new Map(), feedTok: new Map(), handEl: new Map()};
   S.lobby = el('div', 'ab', '', stage); css(S.lobby, {left: 114, top: 8, display: 'flex', gap: '5px'});
-  S.feedSurf = el('div', 'surf', '<span class="coin price-coin" style="left:-12px;top:-12px;width:26px;height:26px;font-size:14px">3</span>', stage); css(S.feedSurf, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', background: '#fff'});
-  S.boardSurf = el('div', 'surf', '', stage); css(S.boardSurf, {left: 114, top: 166, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
+  S.feedSurf = el('div', 'surf shelf', '<div class="ledge"></div><span class="coin price-coin" style="left:2px;top:66px;width:26px;height:26px;font-size:14px">3</span>', stage); css(S.feedSurf, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px'});
+  S.boardSurf = el('div', 'surf desk', '', stage); css(S.boardSurf, {left: 114, top: 166, width: 616, height: 96, borderRadius: '24px'});
   S.slots = el('div', 'ab', '', S.boardSurf); css(S.slots, {left: 0, top: 0, width: 610, height: 90, pointerEvents: 'none'});
   for (let i = 0; i < 7; i++) { const sl = el('div', 'slot', '', S.slots); css(sl, {left: (616 - (7 * 68 + 6 * 20)) / 2 + i * 88 - 3, top: 11}); }
   S.sellZone = el('div', 'ab bd', '', stage); css(S.sellZone, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', border: '3px dashed #2b2140', background: 'rgba(255,201,40,.92)', display: 'none', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '26px', zIndex: 5});
@@ -842,7 +842,7 @@ async function playCombat(rec) {
   const Cm = {els: new Map(), side: new Map()};
   _ce = Cm.els;
   const surfE = el('div', 'surf', '', stage); css(surfE, {left: 114, top: 72, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
-  const surfM = el('div', 'surf', '', stage); css(surfM, {left: 114, top: 200, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
+  const surfM = el('div', 'surf desk', '', stage); css(surfM, {left: 114, top: 200, width: 616, height: 96, borderRadius: '24px'});
   const oav = el('div', 'av-big', `<img src="${ART[oppHero] || ART.follower}" alt="">`, stage); css(oav, {left: 16, top: 12, width: 70, height: 70});
   const ohp = el('div', 'badge', `${opp.ghost ? '—' : opp.health + opp.boundaries}`, stage); css(ohp, {left: 60, top: 56, width: 40, height: 30, fontSize: '17px'});
   oav.title = (opp.ghost ? 'Ghost of ' : '') + (HERO[oppHero] ? HERO[oppHero].name : opp.name);
