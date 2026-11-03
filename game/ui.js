@@ -48,7 +48,7 @@ const W = 844, H = 390;
 
 // ---------------------------------------------------------------- helpers
 const stage = document.getElementById('core'), screenEl = document.getElementById('stage');
-let SCALE = 1;
+let SCALE = 1, EXT = {l: 0, r: 0};
 /** Fills the whole screen: the outer canvas takes the phone's shape, the 844x390 game area sits centred inside the
  *  notch-free part, and the side columns (.edge-l / .edge-r) move out by --exl / --exr toward the screen edges. */
 function fit() {
@@ -61,10 +61,11 @@ function fit() {
   SCALE = s;
   css(screenEl, {width: sw, height: sh}); screenEl.style.transform = `scale(${s})`;
   css(stage, {left, top: Math.max(0, (sh - H) / 2)});
-  stage.style.setProperty('--exl', Math.max(0, left - l - 6) + 'px');
-  stage.style.setProperty('--exr', Math.max(0, sw - r - (left + W) - 6) + 'px');
+  EXT = {l: Math.max(0, left - l - 6), r: Math.max(0, sw - r - (left + W) - 6)};
+  stage.style.setProperty('--exl', EXT.l + 'px'); stage.style.setProperty('--exr', EXT.r + 'px');
 }
-addEventListener('resize', fit); addEventListener('orientationchange', () => setTimeout(fit, 250)); fit();
+let refitT = null;
+addEventListener('resize', () => { fit(); clearTimeout(refitT); refitT = setTimeout(() => { if (LY.ff && G.screen === 'shop' && !G.busy && !G.mode) buildShop(); }, 300); }); addEventListener('orientationchange', () => setTimeout(fit, 250)); fit();
 const edge = (side, ...es) => { for (const e of es) if (e) e.classList.add(side === 'l' ? 'edge-l' : 'edge-r'); };
 function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
 function css(e, o) { for (const k in o) e.style[k] = typeof o[k] === 'number' && !['opacity', 'zIndex'].includes(k) ? o[k] + 'px' : o[k]; return e; }
@@ -347,58 +348,70 @@ function newTurn() {
 // the left column moved beside the hand). Only sizes and positions change; taps and drags work the same.
 const LAYOUTS = {
   normal: {ff: false, tok: 68, x0: 114, w: 616, feedY: 74, boardY: 180, handY: 266, fgap: 28, bgap: 20, feedTop: 58, boardTop: 166, rowH: 96,
-    sellMaxY: 140, boardMinY: {feed: 172, other: 158}, boardMaxY: 270, handTop: 268, hand: {cx: 465, spread: 470, w: 84, max: 92},
+    arc: 3, sellMaxY: 140, boardMinY: {feed: 172, other: 158}, boardMaxY: 270, handTop: 268, hand: {cx: 465, spread: 470, w: 84, max: 92},
     cTop: [72, 200], cY: [86, 214], cx0: 114, cw: 616},
-  ff: {ff: true, tok: 88, x0: 8, w: 736, feedY: 51, boardY: 163, handY: 250, fgap: 32, bgap: 20, feedTop: 42, boardTop: 154, rowH: 106,
-    sellMaxY: 148, boardMinY: {feed: 162, other: 150}, boardMaxY: 256, handTop: 256, hand: {cx: 507, avail: 474, w: 96, max: 100},
-    cTop: [50, 178], cY: [59, 187], cx0: 100, cw: 736},
+  // Fat Finger Mode: four bands, no overlaps. Lobby strip 4-38 (plus Tribes and Menu), Feed 42-146, board 152-256, hand 262-390.
+  // Hero, Level Up and Hero Power sit left of the hand; Gold, Scroll, Save and Ready on the right rail (x >= 750).
+  ff: {ff: true, tok: 88, x0: 8, w: 728, feedY: 50, boardY: 160, handY: 262, arc: 1, fgap: 28, bgap: 20, feedTop: 42, boardTop: 152, rowH: 104,
+    sellMaxY: 146, boardMinY: {feed: 160, other: 148}, boardMaxY: 258, handTop: 260, hand: {cx: 489, avail: 454, w: 96, max: 100},
+    cTop: [86, 214], cY: [94, 222], cx0: 100, cw: 736},
 };
 let LY = LAYOUTS.normal;
 /** on = this screen uses the card layout (shop, fights); Fat Finger Mode applies only there. */
-function applyLayout(on) { LY = on && PROF.fatFinger ? LAYOUTS.ff : LAYOUTS.normal; stage.classList.toggle('ff', LY.ff); }
+function applyLayout(on) {
+  LY = on && PROF.fatFinger ? LAYOUTS.ff : LAYOUTS.normal;
+  if (LY.ff) {   // rows use the full width the phone offers, including the space the side columns moved into
+    const w = LAYOUTS.ff.w + EXT.l + EXT.r;
+    LY = Object.assign({}, LY, {x0: LAYOUTS.ff.x0 - EXT.l, w, bgap: Math.min(40, (w - 7 * 88) / 6), fgap: Math.min(48, (w - 6 * 88 - 60) / 5),
+      cx0: LAYOUTS.ff.cx0 - EXT.l, cw: LAYOUTS.ff.cw + EXT.l + EXT.r, hand: Object.assign({}, LY.hand, {cx: LY.hand.cx + EXT.r / 2, avail: LY.hand.avail + EXT.r})});
+  }
+  stage.classList.toggle('ff', LY.ff);
+}
 const HALF = () => LY.tok / 2;
 function rowX(i, n, gap) { return LY.x0 + (LY.w - (n * LY.tok + (n - 1) * gap)) / 2 + i * (LY.tok + gap); }
 function feedX(i, n) { return rowX(i, n, LY.fgap); }
 function boardX(i, n) { return rowX(i, n, LY.bgap); }
-function handPos(i, n) { const h = LY.hand, sp = Math.min(h.max, h.avail ? (h.avail - h.w) / Math.max(1, n - 1) : h.spread / Math.max(1, n)); const x0 = h.cx - ((n - 1) * sp) / 2 - h.w / 2; return {x: x0 + i * sp, y: LY.handY + Math.abs(i - (n - 1) / 2) * 3, r: (i - (n - 1) / 2) * 3}; }
+function handPos(i, n) { const h = LY.hand, sp = Math.min(h.max, h.avail ? (h.avail - h.w) / Math.max(1, n - 1) : h.spread / Math.max(1, n)); const x0 = h.cx - ((n - 1) * sp) / 2 - h.w / 2; return {x: x0 + i * sp, y: LY.handY + Math.abs(i - (n - 1) / 2) * LY.arc, r: (i - (n - 1) / 2) * 3}; }
 let S = {};   // shop dom refs
 function buildShop() {
   clear(); G.screen = 'shop'; bg(false); AU.music('office'); AU.intensity(tierLevel());
   S = {tok: new Map(), feedTok: new Map(), handEl: new Map()}; applyLayout(true); const ff = LY.ff;
+  if (ff) css(el('div', 'ffpaper', '', stage), {left: -EXT.l, top: 38, width: W + EXT.l + EXT.r, height: 420});
   S.lobby = el('div', 'ab', '', stage); css(S.lobby, ff ? {left: 8, top: 4, display: 'flex', gap: '5px', transform: 'scale(.82)', transformOrigin: 'left top'} : {left: 114, top: 8, display: 'flex', gap: '5px'});
-  S.feedSurf = el('div', 'surf shelf', `<div class="ledge"></div><span class="coin price-coin" style="left:2px;top:${LY.rowH - 30}px;width:26px;height:26px;font-size:14px">3</span>`, stage); css(S.feedSurf, {left: LY.x0, top: LY.feedTop, width: LY.w, height: LY.rowH, borderRadius: '22px'});
+  S.feedSurf = el('div', 'surf shelf', `<div class="ledge"></div><span class="coin price-coin" style="left:${ff ? 4 : 2}px;top:${ff ? 39 : 66}px;width:26px;height:26px;font-size:14px">3</span>`, stage); css(S.feedSurf, {left: LY.x0, top: LY.feedTop, width: LY.w, height: LY.rowH, borderRadius: '22px'});
   S.boardSurf = el('div', 'surf desk', '', stage); css(S.boardSurf, {left: LY.x0, top: LY.boardTop, width: LY.w, height: LY.rowH, borderRadius: '24px'});
   S.slots = el('div', 'ab', '', S.boardSurf); css(S.slots, {left: 0, top: 0, width: LY.w - 6, height: LY.rowH - 6, pointerEvents: 'none'});
   for (let i = 0; i < 7; i++) { const sl = el('div', 'slot', '', S.slots); css(sl, {left: (LY.w - (7 * LY.tok + 6 * LY.bgap)) / 2 + i * (LY.tok + LY.bgap) - 3, top: (LY.rowH - LY.tok - 6) / 2 - 1}); }
   S.sellZone = el('div', 'ab bd', '', stage); css(S.sellZone, {left: LY.x0, top: LY.feedTop, width: LY.w, height: LY.rowH, borderRadius: '22px', border: '3px dashed #2b2140', background: 'rgba(255,201,40,.92)', display: 'none', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '26px', zIndex: 5});
-  S.handZone = el('div', 'ab', '', stage); css(S.handZone, ff ? {left: 270, top: 252, width: 474, height: 138} : {left: 200, top: 268, width: 530, height: 122});
+  S.handZone = el('div', 'ab', '', stage); css(S.handZone, ff ? {left: 262, top: 260, width: 454 + EXT.r, height: 130} : {left: 200, top: 268, width: 530, height: 122});
   // left column
-  S.shield = el('button', 'sb', '', stage); css(S.shield, {left: 10, top: 10, width: 92, height: 112}); if (ff) css(S.shield, {left: 92, top: 250, transform: 'scale(.8)', transformOrigin: 'left top'}); S.shield.onclick = levelUp;
+  S.shield = el('button', 'sb', '', stage); css(S.shield, {left: 10, top: 10, width: 92, height: 112}); if (ff) css(S.shield, {left: 100, top: 266, transform: 'scale(.76)', transformOrigin: 'left top'}); S.shield.onclick = levelUp;
   S.tribes = el('button', 'tribebtn', G.lobby.tribes.map(t => `<i style="background:${TC[t]}"></i>`).join(''), stage);
-  css(S.tribes, ff ? {left: 18, top: 250} : {left: 30, top: 140}); S.tribes.setAttribute('aria-label', 'Tribes in this lobby');
+  css(S.tribes, ff ? {left: 630, top: 3, transform: 'scale(.86)', transformOrigin: 'left top'} : {left: 30, top: 140}); S.tribes.setAttribute('aria-label', 'Tribes in this lobby');
   S.tribePop = el('div', 'tribepop', G.lobby.tribes.map(t => `<div><i style="background:${TC[t]}"></i>${TP[t]}</div>`).join(''), stage);
-  css(S.tribePop, ff ? {left: 62, top: 200} : {left: 74, top: 128}); S.tribePop.hidden = true;
+  css(S.tribePop, ff ? {left: 560, top: 44} : {left: 74, top: 128}); S.tribePop.hidden = true;
   const showT = v => { S.tribePop.hidden = !v; if (v) anim(S.tribePop, [{transform: 'scale(.8)', opacity: 0}, {transform: 'scale(1)', opacity: 1}], {duration: 160, raw: true}); };
   S.tribes.onpointerenter = () => showT(true); S.tribes.onpointerleave = () => showT(false);
   S.tribes.onclick = () => { showT(S.tribePop.hidden); clearTimeout(S.tribeT); S.tribeT = setTimeout(() => showT(false), 2500); };
-  S.likes = el('button', 'likes', '', stage); css(S.likes, ff ? {left: 178, top: 256} : {left: 212, top: 318}); S.likes.onclick = useLikes; S.likes.hidden = true;
-  S.heroAv = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(S.heroAv, {left: 16, top: 290, width: 88, height: 88});
+  S.likes = el('button', 'likes', '', stage); css(S.likes, ff ? {left: 8, top: 262} : {left: 212, top: 318}); S.likes.onclick = useLikes; S.likes.hidden = true;
+  S.heroAv = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(S.heroAv, ff ? {left: 8, top: 298, width: 88, height: 88} : {left: 16, top: 290, width: 88, height: 88});
   S.heroAv.onclick = () => showHeroDetail();
-  S.hp = el('div', 'badge', '', stage); css(S.hp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
-  S.arm = el('div', 'badge arm', '', stage); css(S.arm, {left: 76, top: 314, width: 32, height: 30, fontSize: '15px'});
-  S.power = el('button', 'sb', '', stage); css(S.power, ff ? {left: 178, top: 304, width: 70, height: 76} : {left: 134, top: 286, width: 70, height: 76}); S.power.onclick = usePower;
+  S.hp = el('div', 'badge', '', stage); css(S.hp, ff ? {left: 62, top: 352, width: 42, height: 34, fontSize: '20px'} : {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
+  S.arm = el('div', 'badge arm', '', stage); css(S.arm, ff ? {left: 66, top: 320, width: 32, height: 30, fontSize: '15px'} : {left: 76, top: 314, width: 32, height: 30, fontSize: '15px'});
+  S.power = el('button', 'sb', '', stage); css(S.power, ff ? {left: 178, top: 302, width: 70, height: 76} : {left: 134, top: 286, width: 70, height: 76}); S.power.onclick = usePower;
   // right column
-  S.gold = el('div', 'info', '', stage); css(S.gold, {left: ff ? 752 : 746, top: ff ? 6 : 10, width: 84, height: 40, borderRadius: '999px', gap: '6px', fontSize: '21px'});
+  S.gold = el('div', 'info', '', stage); css(S.gold, {left: ff ? 754 : 746, top: ff ? 6 : 10, width: 84, height: 40, borderRadius: '999px', gap: '6px', fontSize: '21px'});
   S.bonus = el('div', 'ab bd', '', stage); css(S.bonus, {left: ff ? 758 : 752, top: ff ? 46 : 50, background: '#ffc928', border: '2.5px solid #2b2140', borderRadius: '0 0 10px 10px', padding: '3px 7px 1px', fontSize: '11px', lineHeight: 1.3, display: 'none'});
   S.scroll = el('button', 'sb', `<svg width="68" height="72" viewBox="0 0 68 72" aria-hidden="true"><circle cx="34" cy="38" r="28" fill="#fff" stroke="#fff" stroke-width="9"></circle><circle cx="34" cy="33" r="28" fill="#fff" stroke="#fff" stroke-width="9"></circle><circle cx="34" cy="38" r="28" fill="#2b2140" stroke="#2b2140" stroke-width="3"></circle><g class="face"><circle cx="34" cy="33" r="28" fill="#8fd4ff" stroke="#2b2140" stroke-width="3"></circle><g class="spin" transform="translate(18 17) scale(1.34)" fill="none" stroke="#2b2140" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 10A8 8 0 0 0 5.4 6.6"></path><path d="M5 2.8v4.4h4.4"></path><path d="M4.5 14a8 8 0 0 0 14.1 3.4"></path><path d="M19 21.2v-4.4h-4.4"></path></g></g></svg><span class="coin" style="left:46px;top:46px;width:24px;height:24px;font-size:13px">1</span>`, stage);
-  css(S.scroll, {left: ff ? 760 : 754, top: ff ? 54 : 78, width: 68, height: 72}); S.scroll.setAttribute('aria-label', 'Scroll the Feed, 1 gold'); S.scroll.onclick = scroll;
-  S.save = el('button', 'sb', '', stage); css(S.save, {left: ff ? 765 : 759, top: ff ? 130 : 158, width: 58, height: 74}); S.save.onclick = toggleSave;
+  css(S.scroll, {left: ff ? 763 : 754, top: ff ? 54 : 78, width: 68, height: 72}); S.scroll.setAttribute('aria-label', 'Scroll the Feed, 1 gold'); S.scroll.onclick = scroll;
+  S.save = el('button', 'sb', '', stage); css(S.save, {left: ff ? 768 : 759, top: ff ? 130 : 158, width: 58, height: 74}); S.save.onclick = toggleSave;
   S.ready = el('button', 'sb', `<svg width="88" height="110" viewBox="0 0 88 110" aria-hidden="true"><rect x="6" y="12" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="6" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="12" width="76" height="90" rx="38" fill="#2b2140" stroke="#2b2140" stroke-width="3"></rect><g class="face"><rect x="6" y="6" width="76" height="90" rx="38" fill="#2ecb6e" stroke="#2b2140" stroke-width="3"></rect><path d="M22 30Q26 18 40 15" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".7"></path></g></svg><span class="ab" style="left:0;right:0;top:45px;text-align:center;font-size:22px;pointer-events:none">Ready</span>`, stage);
-  css(S.ready, {left: ff ? 750 : 746, top: ff ? 254 : 246, width: 88, height: 110}); S.ready.onclick = ready;
-  S.menu = el('button', 'tribebtn', ico('<path d="M5 7h14M5 12h14M5 17h14"></path>', 22, 2.8), stage); css(S.menu, ff ? {left: 776, top: 208, display: 'flex', padding: '5px'} : {left: 30, top: 200, display: 'flex', padding: '5px'});
+  css(S.ready, {left: ff ? 753 : 746, top: ff ? 244 : 246, width: 88, height: 110}); S.ready.onclick = ready;
+  S.menu = el('button', 'tribebtn', ico('<path d="M5 7h14M5 12h14M5 17h14"></path>', 22, 2.8), stage); css(S.menu, ff ? {left: 690, top: 3, display: 'flex', padding: '5px', transform: 'scale(.86)', transformOrigin: 'left top'} : {left: 30, top: 200, display: 'flex', padding: '5px'});
   S.menu.setAttribute('aria-label', 'Menu'); S.menu.onclick = showMenu;
   S.layer = el('div', 'ab', '', stage); css(S.layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
-  edge('l', S.shield, S.tribes, S.tribePop, S.heroAv, S.hp, S.arm, S.menu, S.power); edge('r', S.gold, S.bonus, S.scroll, S.save, S.ready);
+  if (ff) { edge('l', S.shield, S.heroAv, S.hp, S.arm, S.power, S.likes); edge('r', S.gold, S.bonus, S.scroll, S.save, S.ready); }
+  else { edge('l', S.shield, S.tribes, S.tribePop, S.heroAv, S.hp, S.arm, S.menu, S.power); edge('r', S.gold, S.bonus, S.scroll, S.save, S.ready); }
 
   renderChrome(); renderAll(false);
 }
@@ -884,6 +897,7 @@ async function ready() {
 function cX(i, n) { return LY.cx0 + (LY.cw - (n * LY.tok + (n - 1) * 20)) / 2 + i * (LY.tok + 20); }
 async function playCombat(rec) {
   clear(); G.screen = 'combat'; bg(false); AU.music('review'); sfx('fightstart'); applyLayout(true); const ff = LY.ff;
+  if (ff) css(el('div', 'ffpaper', '', stage), {left: -EXT.l, top: 44, width: W + EXT.l + EXT.r, height: 420});
   const f = rec.fight, opp = rec.b || rec.ghost, oppHero = opp.hero;
   const Cm = {els: new Map(), side: new Map()};
   _ce = Cm.els;
