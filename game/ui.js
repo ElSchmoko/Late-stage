@@ -220,15 +220,19 @@ const tierLevel = () => G.me ? Math.min(1, (G.me.tier - 1) / 5 + (G.me.health + 
 const G = {lobby: null, me: null, hand: [], feed: [], heroUsed: false, busy: false, mode: null, screen: null, firstTurn: true};
 
 // ---------------------------------------------------------------- title
-function clear() { stage.innerHTML = ''; }
+function clear() { stage.innerHTML = ''; applyLayout(false); }
 function bg(dim) {
   // the city, plus mirrored copies of it on each side so the buildings continue to the screen edges on wide phones
   el('img', 'bg mir l', null, stage).src = ART.city; el('img', 'bg mir r', null, stage).src = ART.city;
   el('img', 'bg', null, stage).src = ART.city; if (dim) el('div', 'fade-bg', null, stage);
 }
+const ffLabel = () => `${ico('<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V14c0 4-2.5 7-6 7s-5-2-6.5-4.5L3 13.5a1.6 1.6 0 0 1 2.6-1.8L8 14" fill="#ffe08a"></path>', 22, 2.2)}Fat Finger Mode <span class="sw${PROF.fatFinger ? ' on' : ''}">${PROF.fatFinger ? 'On' : 'Off'}</span>`;
+function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sfx('pop'); }
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false);
+  const ffb = el('button', 'btn ffbtn', ffLabel(), stage); css(ffb, {left: 14, top: 12, height: 42, padding: '3px 12px 0', fontSize: '15px'});
+  ffb.setAttribute('aria-label', 'Fat Finger Mode: bigger cards'); ffb.onclick = () => { toggleFatFinger(); ffb.innerHTML = ffLabel(); };
   const t = el('div', 'ab', `<p class="bd" style="margin:0;display:inline-block;background:#2b2140;color:#ffc928;border-radius:999px;padding:4px 14px 2px;font-size:13px;letter-spacing:.2em;box-shadow:0 0 0 3px #fff">AN AUTOBATTLER ABOUT MODERN LIFE</p>
     <h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 64, textAlign: 'center'});
@@ -339,45 +343,59 @@ function newTurn() {
 }
 
 // ---------------------------------------------------------------- shop layout
-const FEED_Y = 74, BOARD_Y = 180, HAND_Y = 266;
-function feedX(i, n) { return 114 + (616 - (n * 68 + (n - 1) * 28)) / 2 + i * 96; }
-function boardX(i, n) { return 114 + (616 - (n * 68 + (n - 1) * 20)) / 2 + i * 88; }
-function handPos(i, n) { const sp = Math.min(92, 470 / Math.max(1, n)); const x0 = 465 - ((n - 1) * sp) / 2 - 42; return {x: x0 + i * sp, y: HAND_Y + Math.abs(i - (n - 1) / 2) * 3, r: (i - (n - 1) / 2) * 3}; }
+// Layouts for the shop and fights: normal, or Fat Finger Mode (cards 88 instead of 68, Feed and board nearly edge to edge,
+// the left column moved beside the hand). Only sizes and positions change; taps and drags work the same.
+const LAYOUTS = {
+  normal: {ff: false, tok: 68, x0: 114, w: 616, feedY: 74, boardY: 180, handY: 266, fgap: 28, bgap: 20, feedTop: 58, boardTop: 166, rowH: 96,
+    sellMaxY: 140, boardMinY: {feed: 172, other: 158}, boardMaxY: 270, handTop: 268, hand: {cx: 465, spread: 470, w: 84, max: 92},
+    cTop: [72, 200], cY: [86, 214], cx0: 114, cw: 616},
+  ff: {ff: true, tok: 88, x0: 8, w: 736, feedY: 51, boardY: 163, handY: 250, fgap: 32, bgap: 20, feedTop: 42, boardTop: 154, rowH: 106,
+    sellMaxY: 148, boardMinY: {feed: 162, other: 150}, boardMaxY: 256, handTop: 256, hand: {cx: 507, avail: 474, w: 96, max: 100},
+    cTop: [50, 178], cY: [59, 187], cx0: 100, cw: 736},
+};
+let LY = LAYOUTS.normal;
+/** on = this screen uses the card layout (shop, fights); Fat Finger Mode applies only there. */
+function applyLayout(on) { LY = on && PROF.fatFinger ? LAYOUTS.ff : LAYOUTS.normal; stage.classList.toggle('ff', LY.ff); }
+const HALF = () => LY.tok / 2;
+function rowX(i, n, gap) { return LY.x0 + (LY.w - (n * LY.tok + (n - 1) * gap)) / 2 + i * (LY.tok + gap); }
+function feedX(i, n) { return rowX(i, n, LY.fgap); }
+function boardX(i, n) { return rowX(i, n, LY.bgap); }
+function handPos(i, n) { const h = LY.hand, sp = Math.min(h.max, h.avail ? (h.avail - h.w) / Math.max(1, n - 1) : h.spread / Math.max(1, n)); const x0 = h.cx - ((n - 1) * sp) / 2 - h.w / 2; return {x: x0 + i * sp, y: LY.handY + Math.abs(i - (n - 1) / 2) * 3, r: (i - (n - 1) / 2) * 3}; }
 let S = {};   // shop dom refs
 function buildShop() {
   clear(); G.screen = 'shop'; bg(false); AU.music('office'); AU.intensity(tierLevel());
-  S = {tok: new Map(), feedTok: new Map(), handEl: new Map()};
-  S.lobby = el('div', 'ab', '', stage); css(S.lobby, {left: 114, top: 8, display: 'flex', gap: '5px'});
-  S.feedSurf = el('div', 'surf shelf', '<div class="ledge"></div><span class="coin price-coin" style="left:2px;top:66px;width:26px;height:26px;font-size:14px">3</span>', stage); css(S.feedSurf, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px'});
-  S.boardSurf = el('div', 'surf desk', '', stage); css(S.boardSurf, {left: 114, top: 166, width: 616, height: 96, borderRadius: '24px'});
-  S.slots = el('div', 'ab', '', S.boardSurf); css(S.slots, {left: 0, top: 0, width: 610, height: 90, pointerEvents: 'none'});
-  for (let i = 0; i < 7; i++) { const sl = el('div', 'slot', '', S.slots); css(sl, {left: (616 - (7 * 68 + 6 * 20)) / 2 + i * 88 - 3, top: 11}); }
-  S.sellZone = el('div', 'ab bd', '', stage); css(S.sellZone, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', border: '3px dashed #2b2140', background: 'rgba(255,201,40,.92)', display: 'none', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '26px', zIndex: 5});
-  S.handZone = el('div', 'ab', '', stage); css(S.handZone, {left: 200, top: 268, width: 530, height: 122});
+  S = {tok: new Map(), feedTok: new Map(), handEl: new Map()}; applyLayout(true); const ff = LY.ff;
+  S.lobby = el('div', 'ab', '', stage); css(S.lobby, ff ? {left: 8, top: 4, display: 'flex', gap: '5px', transform: 'scale(.82)', transformOrigin: 'left top'} : {left: 114, top: 8, display: 'flex', gap: '5px'});
+  S.feedSurf = el('div', 'surf shelf', `<div class="ledge"></div><span class="coin price-coin" style="left:2px;top:${LY.rowH - 30}px;width:26px;height:26px;font-size:14px">3</span>`, stage); css(S.feedSurf, {left: LY.x0, top: LY.feedTop, width: LY.w, height: LY.rowH, borderRadius: '22px'});
+  S.boardSurf = el('div', 'surf desk', '', stage); css(S.boardSurf, {left: LY.x0, top: LY.boardTop, width: LY.w, height: LY.rowH, borderRadius: '24px'});
+  S.slots = el('div', 'ab', '', S.boardSurf); css(S.slots, {left: 0, top: 0, width: LY.w - 6, height: LY.rowH - 6, pointerEvents: 'none'});
+  for (let i = 0; i < 7; i++) { const sl = el('div', 'slot', '', S.slots); css(sl, {left: (LY.w - (7 * LY.tok + 6 * LY.bgap)) / 2 + i * (LY.tok + LY.bgap) - 3, top: (LY.rowH - LY.tok - 6) / 2 - 1}); }
+  S.sellZone = el('div', 'ab bd', '', stage); css(S.sellZone, {left: LY.x0, top: LY.feedTop, width: LY.w, height: LY.rowH, borderRadius: '22px', border: '3px dashed #2b2140', background: 'rgba(255,201,40,.92)', display: 'none', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '26px', zIndex: 5});
+  S.handZone = el('div', 'ab', '', stage); css(S.handZone, ff ? {left: 270, top: 252, width: 474, height: 138} : {left: 200, top: 268, width: 530, height: 122});
   // left column
-  S.shield = el('button', 'sb', '', stage); css(S.shield, {left: 10, top: 10, width: 92, height: 112}); S.shield.onclick = levelUp;
+  S.shield = el('button', 'sb', '', stage); css(S.shield, {left: 10, top: 10, width: 92, height: 112}); if (ff) css(S.shield, {left: 92, top: 250, transform: 'scale(.8)', transformOrigin: 'left top'}); S.shield.onclick = levelUp;
   S.tribes = el('button', 'tribebtn', G.lobby.tribes.map(t => `<i style="background:${TC[t]}"></i>`).join(''), stage);
-  css(S.tribes, {left: 30, top: 140}); S.tribes.setAttribute('aria-label', 'Tribes in this lobby');
+  css(S.tribes, ff ? {left: 18, top: 250} : {left: 30, top: 140}); S.tribes.setAttribute('aria-label', 'Tribes in this lobby');
   S.tribePop = el('div', 'tribepop', G.lobby.tribes.map(t => `<div><i style="background:${TC[t]}"></i>${TP[t]}</div>`).join(''), stage);
-  css(S.tribePop, {left: 74, top: 128}); S.tribePop.hidden = true;
+  css(S.tribePop, ff ? {left: 62, top: 200} : {left: 74, top: 128}); S.tribePop.hidden = true;
   const showT = v => { S.tribePop.hidden = !v; if (v) anim(S.tribePop, [{transform: 'scale(.8)', opacity: 0}, {transform: 'scale(1)', opacity: 1}], {duration: 160, raw: true}); };
   S.tribes.onpointerenter = () => showT(true); S.tribes.onpointerleave = () => showT(false);
   S.tribes.onclick = () => { showT(S.tribePop.hidden); clearTimeout(S.tribeT); S.tribeT = setTimeout(() => showT(false), 2500); };
-  S.likes = el('button', 'likes', '', stage); css(S.likes, {left: 212, top: 318}); S.likes.onclick = useLikes; S.likes.hidden = true;
+  S.likes = el('button', 'likes', '', stage); css(S.likes, ff ? {left: 178, top: 256} : {left: 212, top: 318}); S.likes.onclick = useLikes; S.likes.hidden = true;
   S.heroAv = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(S.heroAv, {left: 16, top: 290, width: 88, height: 88});
   S.heroAv.onclick = () => showHeroDetail();
   S.hp = el('div', 'badge', '', stage); css(S.hp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
   S.arm = el('div', 'badge arm', '', stage); css(S.arm, {left: 76, top: 314, width: 32, height: 30, fontSize: '15px'});
-  S.power = el('button', 'sb', '', stage); css(S.power, {left: 134, top: 286, width: 70, height: 76}); S.power.onclick = usePower;
+  S.power = el('button', 'sb', '', stage); css(S.power, ff ? {left: 178, top: 304, width: 70, height: 76} : {left: 134, top: 286, width: 70, height: 76}); S.power.onclick = usePower;
   // right column
-  S.gold = el('div', 'info', '', stage); css(S.gold, {left: 746, top: 10, width: 84, height: 40, borderRadius: '999px', gap: '6px', fontSize: '21px'});
-  S.bonus = el('div', 'ab bd', '', stage); css(S.bonus, {left: 752, top: 50, background: '#ffc928', border: '2.5px solid #2b2140', borderRadius: '0 0 10px 10px', padding: '3px 7px 1px', fontSize: '11px', lineHeight: 1.3, display: 'none'});
+  S.gold = el('div', 'info', '', stage); css(S.gold, {left: ff ? 752 : 746, top: ff ? 6 : 10, width: 84, height: 40, borderRadius: '999px', gap: '6px', fontSize: '21px'});
+  S.bonus = el('div', 'ab bd', '', stage); css(S.bonus, {left: ff ? 758 : 752, top: ff ? 46 : 50, background: '#ffc928', border: '2.5px solid #2b2140', borderRadius: '0 0 10px 10px', padding: '3px 7px 1px', fontSize: '11px', lineHeight: 1.3, display: 'none'});
   S.scroll = el('button', 'sb', `<svg width="68" height="72" viewBox="0 0 68 72" aria-hidden="true"><circle cx="34" cy="38" r="28" fill="#fff" stroke="#fff" stroke-width="9"></circle><circle cx="34" cy="33" r="28" fill="#fff" stroke="#fff" stroke-width="9"></circle><circle cx="34" cy="38" r="28" fill="#2b2140" stroke="#2b2140" stroke-width="3"></circle><g class="face"><circle cx="34" cy="33" r="28" fill="#8fd4ff" stroke="#2b2140" stroke-width="3"></circle><g class="spin" transform="translate(18 17) scale(1.34)" fill="none" stroke="#2b2140" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 10A8 8 0 0 0 5.4 6.6"></path><path d="M5 2.8v4.4h4.4"></path><path d="M4.5 14a8 8 0 0 0 14.1 3.4"></path><path d="M19 21.2v-4.4h-4.4"></path></g></g></svg><span class="coin" style="left:46px;top:46px;width:24px;height:24px;font-size:13px">1</span>`, stage);
-  css(S.scroll, {left: 754, top: 78, width: 68, height: 72}); S.scroll.setAttribute('aria-label', 'Scroll the Feed, 1 gold'); S.scroll.onclick = scroll;
-  S.save = el('button', 'sb', '', stage); css(S.save, {left: 759, top: 158, width: 58, height: 74}); S.save.onclick = toggleSave;
+  css(S.scroll, {left: ff ? 760 : 754, top: ff ? 54 : 78, width: 68, height: 72}); S.scroll.setAttribute('aria-label', 'Scroll the Feed, 1 gold'); S.scroll.onclick = scroll;
+  S.save = el('button', 'sb', '', stage); css(S.save, {left: ff ? 765 : 759, top: ff ? 130 : 158, width: 58, height: 74}); S.save.onclick = toggleSave;
   S.ready = el('button', 'sb', `<svg width="88" height="110" viewBox="0 0 88 110" aria-hidden="true"><rect x="6" y="12" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="6" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="12" width="76" height="90" rx="38" fill="#2b2140" stroke="#2b2140" stroke-width="3"></rect><g class="face"><rect x="6" y="6" width="76" height="90" rx="38" fill="#2ecb6e" stroke="#2b2140" stroke-width="3"></rect><path d="M22 30Q26 18 40 15" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".7"></path></g></svg><span class="ab" style="left:0;right:0;top:45px;text-align:center;font-size:22px;pointer-events:none">Ready</span>`, stage);
-  css(S.ready, {left: 746, top: 246, width: 88, height: 110}); S.ready.onclick = ready;
-  S.menu = el('button', 'tribebtn', ico('<path d="M5 7h14M5 12h14M5 17h14"></path>', 22, 2.8), stage); css(S.menu, {left: 30, top: 200, display: 'flex', padding: '5px'});
+  css(S.ready, {left: ff ? 750 : 746, top: ff ? 254 : 246, width: 88, height: 110}); S.ready.onclick = ready;
+  S.menu = el('button', 'tribebtn', ico('<path d="M5 7h14M5 12h14M5 17h14"></path>', 22, 2.8), stage); css(S.menu, ff ? {left: 776, top: 208, display: 'flex', padding: '5px'} : {left: 30, top: 200, display: 'flex', padding: '5px'});
   S.menu.setAttribute('aria-label', 'Menu'); S.menu.onclick = showMenu;
   S.layer = el('div', 'ab', '', stage); css(S.layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
   edge('l', S.shield, S.tribes, S.tribePop, S.heroAv, S.hp, S.arm, S.menu, S.power); edge('r', S.gold, S.bonus, S.scroll, S.save, S.ready);
@@ -432,25 +450,25 @@ function renderAll(animateNew = true, gapAt = null) {
   me.board.forEach((m, i) => {
     const k = gapAt !== null && i >= gapAt ? i + 1 : i;
     let t = S.tok.get(m.id);
-    if (!t) { t = makeToken(m, shownStats(m)); S.layer.appendChild(t); S.tok.set(m.id, t); bindToken(t, 'board', m); css(t, {left: boardX(k, n), top: BOARD_Y});
+    if (!t) { t = makeToken(m, shownStats(m)); S.layer.appendChild(t); S.tok.set(m.id, t); bindToken(t, 'board', m); css(t, {left: boardX(k, n), top: LY.boardY});
       if (animateNew) anim(t, [{transform: 'scale(0)'}, {transform: 'scale(1.18)', offset: .6}, {transform: 'scale(1)'}], {duration: 360, easing: 'ease-out'}); }
     else updateToken(t, m, shownStats(m));
     t.style.transition = 'left .26s cubic-bezier(.22,1,.36,1), top .26s cubic-bezier(.22,1,.36,1)';
-    css(t, {left: boardX(k, n), top: BOARD_Y}); t._m = m; seen.add(m.id);
+    css(t, {left: boardX(k, n), top: LY.boardY}); t._m = m; seen.add(m.id);
   });
   for (const [id, t] of S.tok) if (!seen.has(id)) { if (!t._leaving) t.remove(); S.tok.delete(id); }
   if (S.gapEl) { S.gapEl.remove(); S.gapEl = null; }
-  if (gapAt !== null) { S.gapEl = el('div', 'slot-hint', '', S.layer); css(S.gapEl, {left: boardX(gapAt, n), top: BOARD_Y}); }
+  if (gapAt !== null) { S.gapEl = el('div', 'slot-hint', '', S.layer); css(S.gapEl, {left: boardX(gapAt, n), top: LY.boardY}); }
   // feed
   const fseen = new Set();
   G.feed.forEach((f, i) => {
     let t = S.feedTok.get(f.key);
     const m = {name: f.card.name, tribe: f.card.tribe, atk: f.card.atk + f.a, hp: f.card.hp + f.h, tier: f.card.tier, taunt: f.card.taunt, shield: f.card.shield, toxic: f.card.toxic};
     const o = {copies: copiesOf(f.card.name) >= 1 ? copiesOf(f.card.name) : 0, upA: f.a > 0, upH: f.h > 0, saved: !!G.saved};
-    if (!t) { t = makeToken(m, o); S.layer.appendChild(t); S.feedTok.set(f.key, t); bindToken(t, 'feed', f); css(t, {left: feedX(i, G.feed.length), top: FEED_Y}); }
+    if (!t) { t = makeToken(m, o); S.layer.appendChild(t); S.feedTok.set(f.key, t); bindToken(t, 'feed', f); css(t, {left: feedX(i, G.feed.length), top: LY.feedY}); }
     else t.innerHTML = tokenHTML(m, o);
     t.style.transition = 'left .26s cubic-bezier(.22,1,.36,1), top .26s';
-    css(t, {left: feedX(i, G.feed.length), top: FEED_Y}); t._f = f; fseen.add(f.key);
+    css(t, {left: feedX(i, G.feed.length), top: LY.feedY}); t._f = f; fseen.add(f.key);
   });
   for (const [k, t] of S.feedTok) if (!fseen.has(k)) { if (!t._leaving) t.remove(); S.feedTok.delete(k); }
   // hand
@@ -528,7 +546,7 @@ async function buy(f, toBoardAt = null) {
   if (toBoardAt !== null) { if (t) { t._leaving = true; t.remove(); } G.hand.push(hc); await playCard(hc, toBoardAt); return; }
   G.hand.push(hc);
   if (t) { t._leaving = true; const p = handPos(G.hand.length - 1, G.hand.length);
-    t.style.transition = 'none'; await anim(t, [{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${(p.x + 8 - parseFloat(t.style.left)) / 2}px,${(p.y - FEED_Y) / 2 - 40}px) scale(1.15) rotate(-10deg)`}, {transform: `translate(${p.x + 8 - parseFloat(t.style.left)}px,${p.y - FEED_Y}px) scale(.9)`, opacity: .2}], {duration: 300, easing: 'ease-in-out', fill: 'forwards'}); t.remove(); }
+    t.style.transition = 'none'; await anim(t, [{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${(p.x + 8 - parseFloat(t.style.left)) / 2}px,${(p.y - LY.feedY) / 2 - 40}px) scale(1.15) rotate(-10deg)`}, {transform: `translate(${p.x + 8 - parseFloat(t.style.left)}px,${p.y - LY.feedY}px) scale(.9)`, opacity: .2}], {duration: 300, easing: 'ease-in-out', fill: 'forwards'}); t.remove(); }
   renderAll(); G.me.log = [];
 }
 function needsTarget(card) {
@@ -782,12 +800,12 @@ function showDetailFor(kind, e) {
   if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); sfx('like'); renderAll(); await playLog(); }});
   showDetail(card, m, acts);
 }
-function boardIndexAt(x) { const n = G.me.board.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } return best; }
+function boardIndexAt(x) { const n = G.me.board.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + HALF() - x); if (d < bd) { bd = d; best = i; } } return best; }
 let lastGap = null;
 // Buying and selling need a deliberate drag: a minimum distance, and the finger clearly inside the target area.
 const DRAG_START = 12, DROP_MIN = 45;
-const inBoard = (x, y, from) => y > (from === 'feed' ? 172 : 158) && y < 270 && x > 100 && x < 740;
-const inSell = (x, y) => y < 140 && x > 100 && x < 740;
+const inBoard = (x, y, from) => y > LY.boardMinY[from === 'feed' ? 'feed' : 'other'] && y < LY.boardMaxY && x > LY.x0 - 14 && x < LY.x0 + LY.w + 10;
+const inSell = (x, y) => y < LY.sellMaxY && x > LY.x0 - 14 && x < LY.x0 + LY.w + 10;
 function dragOver(kind, x, y, dist = 0) {
   if (kind === 'board') { const armed = inSell(x, y) && dist >= DROP_MIN; S.sellZone.style.opacity = armed ? 1 : .45; S.sellZone.style.transform = armed ? 'scale(1.02)' : 'scale(1)'; }
   const overBoard = inBoard(x, y, kind) && (kind === 'board' || dist >= DROP_MIN);
@@ -804,7 +822,7 @@ async function onDrop(kind, e, x, y, dist = 999) {
   const far = dist >= DROP_MIN;
   const overBoard = inBoard(x, y, kind) && (kind === 'board' || far);
   const overFeed = inSell(x, y) && far;
-  const overHand = y >= 268 && far;
+  const overHand = y >= LY.handTop && far;
   const gap = lastGap; lastGap = null;
   if (kind === 'feed') {
     if (overBoard && G.me.board.length < 7) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
@@ -818,7 +836,7 @@ async function onDrop(kind, e, x, y, dist = 999) {
   if (kind === 'board') {
     const m = e._m;
     if (overFeed) return sell(m);
-    if (overBoard && G.me.board.includes(m)) { const b = G.me.board; b.splice(b.indexOf(m), 1); const n = b.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } b.splice(best, 0, m); }
+    if (overBoard && G.me.board.includes(m)) { const b = G.me.board; b.splice(b.indexOf(m), 1); const n = b.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + HALF() - x); if (d < bd) { bd = d; best = i; } } b.splice(best, 0, m); }
     renderAll(); return;
   }
 }
@@ -863,15 +881,14 @@ async function ready() {
 }
 
 // ---------------------------------------------------------------- combat
-const CY = [86, 214];   // y of [enemy, me] rows
-function cX(i, n) { return 114 + (616 - (n * 68 + (n - 1) * 20)) / 2 + i * 88; }
+function cX(i, n) { return LY.cx0 + (LY.cw - (n * LY.tok + (n - 1) * 20)) / 2 + i * (LY.tok + 20); }
 async function playCombat(rec) {
-  clear(); G.screen = 'combat'; bg(false); AU.music('review'); sfx('fightstart');
+  clear(); G.screen = 'combat'; bg(false); AU.music('review'); sfx('fightstart'); applyLayout(true); const ff = LY.ff;
   const f = rec.fight, opp = rec.b || rec.ghost, oppHero = opp.hero;
   const Cm = {els: new Map(), side: new Map()};
   _ce = Cm.els;
-  const surfE = el('div', 'surf', '', stage); css(surfE, {left: 114, top: 72, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
-  const surfM = el('div', 'surf desk', '', stage); css(surfM, {left: 114, top: 200, width: 616, height: 96, borderRadius: '24px'});
+  const surfE = el('div', 'surf', '', stage); css(surfE, {left: LY.cx0, top: LY.cTop[0], width: LY.cw, height: LY.rowH, borderRadius: '24px', background: '#eeeaf5'});
+  const surfM = el('div', 'surf desk', '', stage); css(surfM, {left: LY.cx0, top: LY.cTop[1], width: LY.cw, height: LY.rowH, borderRadius: '24px'});
   const oav = el('div', 'av-big', `<img src="${ART[oppHero] || ART.follower}" alt="">`, stage); css(oav, {left: 16, top: 12, width: 70, height: 70});
   // every fight of the round is already resolved, so show health as it was before this one (and never below 0)
   const hpOf = (p, before) => Math.max(0, p.health + p.boundaries + (before && rec.loser === p ? rec.dmg : 0));
@@ -879,11 +896,11 @@ async function playCombat(rec) {
   oav.title = (opp.ghost ? 'Ghost of ' : '') + (HERO[oppHero] ? HERO[oppHero].name : opp.name);
   const mav = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(mav, {left: 16, top: 290, width: 88, height: 88});
   const mhp = el('div', 'badge', `${hpOf(G.me, true)}`, stage); css(mhp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
-  const rnd = el('div', 'info', `Round ${G.lobby.turn}`, stage); css(rnd, {left: 640, top: 20, width: 92, height: 34, borderRadius: '999px', fontSize: '15px'});
-  const spd = el('button', 'btn', SP.v === 1 ? '1×' : '2×', stage); css(spd, {left: 750, top: 18, width: 76, height: 40, fontSize: '17px'});
+  const rnd = el('div', 'info', `Round ${G.lobby.turn}`, stage); css(rnd, {left: ff ? 576 : 640, top: ff ? 8 : 20, width: 92, height: 34, borderRadius: '999px', fontSize: '15px'});
+  const spd = el('button', 'btn', SP.v === 1 ? '1×' : '2×', stage); css(spd, ff ? {left: 680, top: 6, width: 64, height: 36, fontSize: '16px'} : {left: 750, top: 18, width: 76, height: 40, fontSize: '17px'});
   spd.onclick = () => { SP.v = SP.v === 1 ? 2 : 1; spd.textContent = SP.v === 1 ? '1×' : '2×'; };
   let skip = false;
-  const sk = el('button', 'btn', 'Skip', stage); css(sk, {left: 750, top: 72, width: 76, height: 40, fontSize: '15px'}); sk.onclick = () => { skip = true; };
+  const sk = el('button', 'btn', 'Skip', stage); css(sk, ff ? {left: 756, top: 6, width: 76, height: 36, fontSize: '15px'} : {left: 750, top: 72, width: 76, height: 40, fontSize: '15px'}); sk.onclick = () => { skip = true; };
   edge('l', oav, ohp, mav, mhp); edge('r', spd, sk, rnd);
   const say = () => {};
   const layer = el('div', 'ab', '', stage); css(layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
@@ -911,14 +928,14 @@ async function playCombat(rec) {
         const o = {hurt: prev ? false : false};
         if (!t) {
           t = makeToken(m); layer.appendChild(t); Cm.els.set(m.id, t); t.style.cursor = 'pointer';
-          css(t, {left: cX(i, b.length), top: CY[row]});
+          css(t, {left: cX(i, b.length), top: LY.cY[row]});
           if (opts.pop !== false) anim(t, [{transform: 'scale(0)'}, {transform: 'scale(1.2)', offset: .6}, {transform: 'scale(1)'}], {duration: 320, easing: 'ease-out'});
         } else {
           const [da, dh] = updateToken(t, m);
           if (opts.floats !== false && (da > 0 || dh > 0)) { const c = center(rectOf(t)); floatText(c[0], c[1] - 30, `+${Math.max(0, da)}/+${Math.max(0, dh)}`); }
         }
         t.style.transition = `left ${380 / SP.v}ms cubic-bezier(.22,1,.36,1), top ${380 / SP.v}ms`;
-        css(t, {left: cX(i, b.length), top: CY[row]}); t._snap = m;
+        css(t, {left: cX(i, b.length), top: LY.cY[row]}); t._snap = m;
       });
     });
     cur = boards;
@@ -973,7 +990,7 @@ async function playCombat(rec) {
       sfx('legacy');
       say(`Legacy · ${fr.name}`);
       const row = sideOf(fr.side), g = el('img', '', null, layer); g.src = artOf(fr.name);
-      css(g, {position: 'absolute', left: 380, top: CY[row] - 10, width: 84, height: 84, opacity: .7, filter: 'grayscale(.4) brightness(1.4)', pointerEvents: 'none'});
+      css(g, {position: 'absolute', left: 380, top: LY.cY[row] - 10, width: 84, height: 84, opacity: .7, filter: 'grayscale(.4) brightness(1.4)', pointerEvents: 'none'});
       await anim(g, [{transform: 'translateY(0) scale(.8)', opacity: .8}, {transform: 'translateY(-40px) scale(1.1)', opacity: 0}], {duration: 420}); g.remove();
       place(fr.boards); await sleep(160);
     } else if (fr.type === 'summon' || fr.type === 'rebrand' || fr.type === 'trigger') {
@@ -1001,13 +1018,13 @@ async function playCombat(rec) {
   const won = rec.winner === G.me, lost = rec.loser === G.me;
   const survRow = won ? 1 : 0, targetAv = won ? oav : mav;
   if (rec.dmg && (won || lost)) {
-    const sv = [...Cm.els.values()].filter(t => Math.abs(parseFloat(t.style.top) - CY[survRow]) < 5);
+    const sv = [...Cm.els.values()].filter(t => Math.abs(parseFloat(t.style.top) - LY.cY[survRow]) < 5);
     const tc = center(rectOf(targetAv));
     sv.forEach(t => t.getAnimations().forEach(x => x.cancel()));
     const up = survRow === 1 ? -1 : 1; sfx('charge');
     await Promise.all(sv.map((t, i) => anim(t, [{transform: 'translateY(0) scale(1)', filter: 'brightness(1)'}, {transform: `translateY(${up * 22}px) scale(1.16) rotate(${i % 2 ? 6 : -6}deg)`, filter: 'brightness(1.25) drop-shadow(0 0 8px #ff6b5e)', offset: .7}, {transform: `translateY(${up * 16}px) scale(1.12)`, filter: 'brightness(1.2) drop-shadow(0 0 6px #ff6b5e)'}], {duration: 380, delay: i * 50, easing: 'ease-out', fill: 'forwards'})));
     const hits = sv.map((t, i) => new Promise(res => setTimeout(() => {
-      const r = rectOf(t), dx = tc[0] - r.x - 34, dy = tc[1] - r.y - 34;
+      const r = rectOf(t), dx = tc[0] - r.x - HALF(), dy = tc[1] - r.y - HALF();
       t.style.zIndex = 30; t.getAnimations().forEach(x => x.cancel());
       const A = t.animate([{transform: `translateY(${up * 16}px) scale(1.12) rotate(0)`},
         {transform: `translate(${dx * .5}px,${dy * .5 + up * 90}px) scale(1.05) rotate(-200deg)`, offset: .4},
@@ -1078,6 +1095,8 @@ function showMenu() {
         <label><span>Music</span><input type="range" min="0" max="100" value="${Math.round(v.music * 100)}" data-k="music" aria-label="Music volume"></label>
         <label><span>Sound</span><input type="range" min="0" max="100" value="${Math.round(v.sfx * 100)}" data-k="sfx" aria-label="Sound volume"></label></div>`;
     p.querySelectorAll('input').forEach(inp => { inp.oninput = () => AU.set({[inp.dataset.k]: inp.value / 100}); inp.onchange = () => { if (inp.dataset.k === 'sfx') sfx('coin'); }; });
+    const ffb = el('button', 'btn ffbtn', ffLabel(), p); css(ffb, {position: 'relative', width: '100%', height: 44, fontSize: '16px', marginBottom: '14px'});
+    ffb.onclick = () => { toggleFatFinger(); close(); buildShop(); };
     const res = el('button', 'btn', 'Resume', p); css(res, {position: 'relative', width: '100%', height: 46, background: '#2ecb6e', fontSize: '20px', marginBottom: '14px'}); res.onclick = close;
     const q = el('button', 'btn', 'Concede run', p); css(q, {position: 'relative', width: '100%', height: 42, fontSize: '17px'}); q.onclick = confirm;
   };

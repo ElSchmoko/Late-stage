@@ -190,3 +190,28 @@ button{font:inherit;color:inherit}
 .surf.shelf.saved .ledge{background:#ff8ab8;background-image:repeating-linear-gradient(115deg,rgba(255,255,255,.45) 0 6px,transparent 6px 14px)}
 .surf.desk{background-color:#f3e8d6;background-image:radial-gradient(rgba(140,100,50,.13) 1.3px,transparent 1.6px);background-size:10px 10px;box-shadow:inset 0 5px 0 rgba(90,60,30,.14),0 0 0 3px #fff}
 .surf.desk .slot{border-color:rgba(120,85,40,.26)}
+/* Fat Finger Mode (shop and fights only): bigger cards, stat badges inside the card, bigger hand cards and panel buttons.
+   Positions come from LAYOUTS.ff in ui.js. */
+.ff .tok{width:88px;height:88px;border-radius:20px}
+.ff .tok .clip{border-radius:17px}
+.ff .tok .clip img{width:108px;height:108px}
+.ff .st{width:36px;height:36px;bottom:4px;font-size:22px}
+.ff .st.at{left:4px}.ff .st.hp{right:4px}
+.ff .fx{left:-12px;top:10px}
+.ff .fx span{width:27px;height:27px}
+.ff .fx span svg{width:17px;height:17px}
+.ff .tier svg{width:17px;height:17px}
+.ff .slot{width:94px;height:94px;border-radius:22px}
+.ff .slot-hint{width:88px;height:88px;border-radius:20px}
+.ff .hc{width:96px;height:116px}
+.ff .hc .pn{height:64px}
+.ff .hc .pn img{width:82px;height:82px}
+.ff .hc .hn{font-size:13.5px}
+.ff .hs{width:34px;height:34px;font-size:20px}
+.ff .acts .btn{height:56px;padding:4px 24px 0;font-size:22px}
+.ff .detail-txt .rules{font-size:18px}
+.ff .detail-txt .kwl,.ff .detail-txt .fl{font-size:15px}
+.ffbtn{gap:7px;white-space:nowrap}
+.ffbtn .sw{display:inline-block;min-width:38px;margin-left:2px;padding:2px 7px 0;border:2px solid var(--ink);border-radius:999px;background:#e6dccb;font-size:13px;line-height:1.3;text-align:center}
+.ffbtn .sw.on{background:#2ecb6e;color:#fff}
+.ff .surf.shelf .ledge{top:90px}
