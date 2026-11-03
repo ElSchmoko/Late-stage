@@ -699,10 +699,15 @@ function showDetail(card, inst, actions = [], onClose = null) {
   css(t, {left: 360, top: 34, width: 440});
   const acts = t.querySelector('.acts');
   const close = () => { ov.remove(); sfx('close'); if (onClose) onClose(); };
+  // The buttons sit over the board. A second tap on the minion, or the phone's delayed click from the tap that opened
+  // this, used to land on Sell. A button only acts if a fresh press started on it, after the panel had been open a moment.
+  const opened = performance.now(), GUARD = 450;
   for (const act of actions) {
     const b = el('button', 'btn', act.label + (act.cost != null ? ` <span class="coin" style="position:static;width:24px;height:24px;font-size:13px;box-shadow:none">${act.cost}</span>` : ''), acts);
     b.style.background = act.color || '#2ecb6e'; if (act.disabled) b.disabled = true;
-    b.onclick = e => { e.stopPropagation(); close(); act.fn(); };
+    let pressed = false;
+    b.addEventListener('pointerdown', () => { pressed = performance.now() - opened >= GUARD; });
+    b.onclick = e => { e.stopPropagation(); if (!pressed) return; pressed = false; close(); act.fn(); };
   }
   anim(c, [{transform: 'scale(.4) rotate(-8deg)', opacity: 0}, {transform: 'scale(1.04) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1)'}], {duration: 300, easing: 'ease-out', raw: true});
   anim(t, [{transform: 'translateX(40px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 260, easing: 'ease-out', raw: true});
