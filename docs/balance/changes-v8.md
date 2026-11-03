@@ -151,3 +151,54 @@ At +1/+1 twice per turn (+2/+2 a turn at most), it read as weak for a tier-6 cap
 The three-times version is close to the build-around limit, and people scroll more reliably than bots do (the Enlightened Guru lesson), so the twice-per-turn version ships: up to +4/+4 to every other Feral each turn, against World Tree's free +2/+2.
 
 Styles after the buff (3,200 lobbies): 4.21–4.76, band 0.55. Scavengers 4.23, Overgrowth 4.27. Both Feral styles win 17–18% of lobbies, at the edge of the 9–17% target (Passive Income and Gadgets are at 18% too). Watch this.
+
+## v10: late-game engines, theming, Philosophers (Nov 3)
+
+### Punks: big boards are a combo ceiling, not tribe strength
+
+A player found that Energy-Drink Sponsor (now **Jingle Writer**) plus Reunion Tour builds very big boards. The measurements:
+
+- **Average Punk card value is at or below the other tribes** at tiers 1, 3, 4 and 5 (`cards-v8.json`).
+- **The bots under-played the combo.** They sold Jingle Writer a turn after buying it and never bought back the Greatest Hits copies. Bots now sell it straight away when it pays (two or more Punks sold, four or more Punks on board) and value it more with Reunion Tour.
+- **Board size with combo-playing bots** (sum of Attack and Health, top 10% of boards at turn 14): Sellouts about 1,470 and Sabotage about 1,070, against 600–790 for every other style.
+- **Placement stays in line** because the boards arrive late (turn 14+), when most lobbies are decided: Sellouts 4.28, top of a 4.28–4.67 band. Sellouts wins 19% of lobbies (21% with smart bots), above the 17% target. **Accepted on purpose:** the late explosion is the Punks' identity.
+
+The player preferred buffing other tribes to nerfing Punks. Matching a 1,400-stat board everywhere would inflate the whole game and leave Punks behind on wins. Instead, the three weakest late capstones get a way to keep growing:
+
+| Card | Was | Now | Effect: before → after (tier median) |
+| --- | --- | --- | --- |
+| Blue Checkmark (FO, 6) | Followers get Out of Office and +2/+2, attack twice | After a friendly Follower dies, give your Influencers +2/+2 permanently. | +0.02 → +0.08 (+0.23); Followers builds +0.22 |
+| World Record (GM, 6) | Left-most other Techie gets Toxic | Also: after a friendly Techie kills a minion, give your Techies +1/+1 permanently. | +0.06 → +0.51 (+0.23); ceiling +0.49 (limit +0.83) |
+| Bestselling Author (BI, 5) | Next-combat buffs become permanent | First gives the Philosophers next to it +1/+1 for the next combat. | +0.13 → +0.34 (+0.30) |
+
+Discarded versions:
+- Bestselling Author giving *all* Philosophers +1/+1: +0.91, ceiling +0.92, over the +0.90 limit.
+- Blue Checkmark with Followers +3/+3 or +4/+4 "this game" (and a summon): about +0.0. Late-game boards are full, so few Followers exist to buff.
+
+Styles after the changes (3,200 lobbies, `styles-v10.json`):
+
+| Check | Result | Target |
+| --- | --- | --- |
+| Standard bots, all styles | 4.28–4.67, band 0.39 (was 0.55) | ≤ 0.60 ✓ |
+| Big Ideas | 4.65 → 4.62 | |
+| Gamers | 4.47 → 4.38; wins 21% of lobbies | Win rate above the 9–17% target (watch) |
+| Smart bots | Band 1.12; Sellouts 3.87 vs Big Ideas 4.99 | Above target; noisy (half-diffs up to 1.47) |
+
+### Theming
+
+| Card | Change | Why |
+| --- | --- | --- |
+| Energy-Drink Sponsor → **Jingle Writer** (Punk) | New name, art and flavour ("Wrote 'Smash the System'. Now it sells yoghurt."); same effect | A corporate sponsor isn't punk. A punk who sold their anthem to an advert is, and it fits the selling-out effect. |
+| Wedding DJ → **DJ Upstairs** (Neighbour) | Name and flavour; same art and effect | Neighbours are people on your street. |
+| Estate Lawyer → **Lawyer Next Door** (Neighbour) | Name and flavour; same art and effect | Same reason. |
+| Corporate Raider | Flavour restored ("Synergy, but with teeth.") | A duplicate entry had replaced it with the rules text. |
+
+Checked and kept: Paparazzi (Influencer, Main Character), Record Label (Creative, Performers), Keynote Speaker (Philosopher), and Gamers sitting under Techies.
+
+### Philosophers
+
+Five Philosophers are now drawn as women: Stoicism Podcaster, Utilitarian, The Cynic, Grand Unified Theory and Enlightened Guru. Together with Book-Club Stoic and Bestselling Author, that's 7 of 15.
+
+### Bug guards
+
+The UI removed cards with `splice(indexOf(x), 1)`. When the card was no longer there (a second play of the same hand card, a buy after the Feed changed, or reordering a minion that had gone), that deleted the *last* card in the hand, Feed or board instead. These paths now check first. This is the likely cause of a player losing hand cards around a Scroll, though it wasn't reproduced.

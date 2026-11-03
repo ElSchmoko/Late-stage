@@ -4,6 +4,7 @@
 <path d="M140 206 L170 150" fill="none" stroke-width="7"/>
 <circle cx="172" cy="146" r="9" fill="#ff6b5e"/>
 <rect x="126" y="196" width="44" height="10" rx="3" fill="#6b6182"/>
+<path d="M128 60 Q160 66 158 110 Q156 132 144 140 Q148 112 132 88 Z" fill="#ff8a3d"/>
 <path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#ffffff"/>
 <path d="M84 140 L100 158 L116 140 Z" fill="#8fd4ff"/>
 <path d="M100 158 L100 206 M100 172 L100 172 M100 188 L100 188" fill="none"/>
@@ -11,7 +12,7 @@
 <circle cx="62" cy="92" r="9" fill="#e8b48a"/>
 <circle cx="138" cy="92" r="9" fill="#e8b48a"/>
 <circle cx="100" cy="86" r="38" fill="#e8b48a"/>
-<path d="M62 84 Q58 46 100 44 Q142 46 138 84 Q130 64 100 66 Q72 66 62 84 Z" fill="#8a5a3a"/>
+<path d="M62 84 Q58 46 100 44 Q142 46 138 84 Q130 64 100 66 Q72 66 62 84 Z" fill="#ff8a3d"/>
 <circle cx="85" cy="92" r="11.5" fill="#ffffff"/>
 <circle cx="115" cy="92" r="11.5" fill="#ffffff"/>
 <circle cx="86" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
@@ -21,6 +22,12 @@
 <ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
 <ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
 <path d="M90 113 Q95 109 100 113 Q105 117 110 113" fill="none"/>
+<circle cx="74" cy="101" r="1.4" fill="#c98a4a" stroke="none"/>
+<circle cx="79" cy="104" r="1.4" fill="#c98a4a" stroke="none"/>
+<circle cx="70" cy="105" r="1.4" fill="#c98a4a" stroke="none"/>
+<circle cx="126" cy="101" r="1.4" fill="#c98a4a" stroke="none"/>
+<circle cx="121" cy="104" r="1.4" fill="#c98a4a" stroke="none"/>
+<circle cx="130" cy="105" r="1.4" fill="#c98a4a" stroke="none"/>
 <path d="M142 64 Q150 76 146 82 Q138 80 142 64 Z" fill="#8fd4ff"/>
 <circle cx="160" cy="160" r="10" fill="#e8b48a"/>
 <rect x="14" y="140" width="40" height="54" rx="5" fill="#c9c2d6"/>

@@ -30,7 +30,7 @@ GOLD = {
     'Paparazzi': 'Start of combat: give your four highest-Attack Influencers Out of Office and +2/+2.',
     'Brand Ambassador': 'Start of combat: give your Followers +2/+2 for each Influencer you have. Legacy: summon four Followers.',
     'Ring Light Studio': 'End of turn: get 4 Likes. Likes you give count triple while this is on your board.',
-    'Blue Checkmark': 'Start of combat: your Followers get Out of Office and +6/+6. They attack twice.',
+    'Blue Checkmark': 'After a friendly Follower dies, give your Influencers +4/+4 permanently.',
     'Main Character': 'Attention Seeker. Likes you give this minion count six times. Clock In: get 4 Likes.',
     # Ferals
     'Windowsill Succulent': 'End of turn: if you have another Feral, gain +2/+2.',
@@ -73,7 +73,7 @@ GOLD = {
     'Leaderboard': 'Clock In: give your other Techies +4/+2 permanently.',
     'Smart Home Hub': 'Your Collabs stick to three minions instead of one.',
     'Pro Gamer': 'Attacks twice. After this kills a minion, gain +8/+8 permanently (once per combat).',
-    'World Record': 'Start of combat: give your two left-most other Techies Toxic.',
+    'World Record': 'Start of combat: give your two left-most other Techies Toxic. After a friendly Techie kills a minion, give your Techies +2/+2 permanently.',
     # Punks
     'Graffiti Kid': 'Start of combat: deal 2 damage to the left-most enemy minion for each Punk you have.',
     'Anarchist Barista': 'When sold: next turn, gain 2 extra gold.',
@@ -84,7 +84,7 @@ GOLD = {
     'Squat Collective': 'Your Punks\' "When sold" effects also trigger twice when they die.',
     'Feedback Loop': 'Start of combat: deal 2 damage to all enemy minions. If that kills any, give your Punks +4/+4 for this combat.',
     'Pirate Radio': 'First Impression: Discover two Punks.',
-    'Energy-Drink Sponsor': 'When sold: give your other Punks +4/+4 for each Punk you have sold this game (max +32).',
+    'Jingle Writer': 'When sold: give your other Punks +4/+4 for each Punk you have sold this game (max +32).',
     'Reunion Tour': 'Your "When sold" effects trigger three times.',
     'Stage Diver': 'Start of combat: deal damage equal to this minion\'s Attack to the left-most enemy minion, then gain +8 Attack permanently.',
     'Greatest Hits': 'After you sell a Punk, give your Punks +2/+2 and put two copies of it in the Feed. They cost 2 gold.',
@@ -101,7 +101,7 @@ GOLD = {
     'Utilitarian': 'Start of combat: give your three lowest-Attack other Philosophers +6/+6.',
     'Desert Hermit': 'Attention Seeker. After this survives damage, give your other Philosophers +4/+4 permanently (once per combat).',
     'The Cynic': 'Attention Seeker. After this takes damage, give your other Philosophers +2/+2.',
-    'Bestselling Author': 'End of turn: your minions also gain their next-combat buffs permanently.',
+    'Bestselling Author': 'End of turn: give the Philosophers next to it +2/+2 for the next combat, then your minions also gain their next-combat buffs permanently.',
     'Grand Unified Theory': 'End of turn: give your minions +2/+2 for the next combat, then triple all next-combat buffs.',
     'Enlightened Guru': 'Attention Seeker. The first four times each of your other Attention Seekers takes damage each combat, it takes at most 3.',
     # Neighbours
@@ -111,8 +111,8 @@ GOLD = {
     'Caretaker': 'End of turn: give the minions next to it +2/+4.',
     'Helpful Neighbour': 'First Impression: give a minion +6/+6.',
     'Leaf Blower Guy': 'Start of combat: deal 2 damage to all enemy minions and to the minions next to it.',
-    'Wedding DJ': 'Your First Impressions trigger three times.',
-    'Estate Lawyer': 'Your Legacies trigger three times.',
+    'DJ Upstairs': 'Your First Impressions trigger three times.',
+    'Lawyer Next Door': 'Your Legacies trigger three times.',
     'The Landlord': 'End of turn, twice: take +1/+1 from each minion next to it.',
     'Block Party Host': 'End of turn: give each of your minions +2/+2 for each minion next to it.',
 }

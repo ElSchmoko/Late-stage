@@ -35,8 +35,8 @@ NEIGHBOUR_TEXT = {
     'Nosy Neighbour': 'Attention Seeker.', 'Wi-Fi Leech': 'Start of combat: gain +1/+1 for each minion next to it.',
     'Package Hoarder': 'Legacy: give the minions next to it +3/+3.', 'Quiet-Hours Enforcer': 'Start of combat: the left-most enemy minion loses 3 Attack.',
     'Caretaker': 'End of turn: give the minions next to it +1/+2.', 'Helpful Neighbour': 'First Impression: give a minion +3/+3.',
-    'Leaf Blower Guy': 'Start of combat: deal 1 damage to all enemy minions and to the minions next to it.', 'Wedding DJ': 'Your First Impressions trigger twice.',
-    'Estate Lawyer': 'Your Legacies trigger twice.', 'The Landlord': 'End of turn: take +1/+1 from each minion next to it.',
+    'Leaf Blower Guy': 'Start of combat: deal 1 damage to all enemy minions and to the minions next to it.', 'DJ Upstairs': 'Your First Impressions trigger twice.',
+    'Lawyer Next Door': 'Your Legacies trigger twice.', 'The Landlord': 'End of turn: take +1/+1 from each minion next to it.',
     'Block Party Host': 'End of turn: give each of your minions +1/+1 for each minion next to it.'}
 FLAVOUR = {
     'Dropshipper': 'Ships from a warehouse he has never seen.', 'Unpaid Intern': 'Paid in exposure. And coffee runs.',
@@ -45,7 +45,6 @@ FLAVOUR = {
     'Golden Parachute Exec': 'Failed upwards. Landed softly.', 'Venture Capitalist': 'Loves the vision. Hates the margins.',
     'Corporate Raider': 'Synergy, but with teeth.', 'Consultant': 'Billed you for this sentence.',
     'Private Equity': 'Bought the shop. Sold the shelves.', 'Unicorn Startup': 'Valued at a billion. Profit: pending.',
-    'Corporate Raider': 'Start of combat: deal 6 damage to the lowest-Health enemy. If it dies, +1 gold next turn.',
     'Main Character': 'Attention Seeker. Likes on this count triple. Clock In: get 2 Likes.',
     'Too Big to Fail': 'Somebody else will pay for this.',
     'Reply Guy': 'Actually, …', 'Engagement Bot': 'Great post! Check my profile.', 'Stan Account': 'Would die for them. Has never met them.',
@@ -57,7 +56,7 @@ FLAVOUR = {
     'Nosy Neighbour': 'Signed for your parcel. Opened it.', 'Wi-Fi Leech': 'The password was "password".',
     'Package Hoarder': 'Your parcels, finally.', 'Quiet-Hours Enforcer': 'It is 22:01.', 'Caretaker': 'Fixed the heating. In July.',
     'Helpful Neighbour': 'Brought cake. Still has your drill.', 'Leaf Blower Guy': 'Saturday, 7 a.m.',
-    'Wedding DJ': 'Plays the same three songs. Twice.', 'Estate Lawyer': 'Reads the will. Then reads it again.',
+    'DJ Upstairs': 'Plays the same three songs. Twice. At 2 a.m.', 'Lawyer Next Door': 'Reads every will twice. Also your lease.',
     'The Landlord': 'Rent is due. Again.', 'Block Party Host': "Everyone's invited. Bring chairs."}
 
 
@@ -202,7 +201,6 @@ SHORT = {
     'Too Big to Fail': 'Attention Seeker. Survives its first death each combat at 1 Health. Other Hustlers get +4/+4.',
     'Brand Ambassador': 'Start of combat: Followers get +1/+1 per Influencer you have. Legacy: summon two Followers.',
     'Ring Light Studio': 'End of turn: get 2 Likes. While this is on your board, Likes count double.',
-    'Blue Checkmark': 'Start of combat: your Followers get Out of Office and +2/+2. They attack twice.',
     'World Tree': 'End of turn: give your other Ferals +2/+2.',
     'Nature Is Healing': 'After you Scroll, give your other Ferals +2/+2 (twice per turn).',
     'Rat King': 'After a friendly Feral comes back, your other Ferals get +2/+2.',
@@ -213,7 +211,7 @@ SHORT = {
     'Pro Gamer': 'Attacks twice. Once per combat, after it kills: gain +4/+4 permanently.',
     'Graffiti Kid': 'Start of combat: deal 1 damage per Punk to the left-most enemy.',
     'Feedback Loop': 'Start of combat: deal 1 damage to all enemies. If any die, Punks get +2/+2 this combat.',
-    'Energy-Drink Sponsor': 'When sold: other Punks get +2/+2 per Punk sold this game (max +16).',
+    'Jingle Writer': 'When sold: other Punks get +2/+2 per Punk sold this game (max +16).',
     'Stage Diver': 'Start of combat: hit the left-most enemy for this Attack, then gain +4 Attack permanently.',
     'General Strike': 'Start of combat: deal 1 damage per Punk to all enemies. Punks get +1/+1 permanently per kill.',
     'Stoicism Podcaster': 'Attention Seeker. Once per combat, after it survives damage: gain +1 Health permanently.',
@@ -223,7 +221,7 @@ SHORT = {
     'Shower Thinker': 'End of turn: the minion on its right gets +3/+3 next combat.',
     'Pub Philosopher': 'End of turn: the minion on its left gets +4/+2 next combat.',
     'Thought Experiment': 'End of turn: the Philosophers next to it get +3/+3 next combat.',
-    'Bestselling Author': 'End of turn: make next-combat buffs on your minions permanent.',
+    'Bestselling Author': 'End of turn: Philosophers next to it get +1/+1 next combat, then all next-combat buffs become permanent.',
     'Grand Unified Theory': 'End of turn: your minions get +1/+1 next combat, then double all next-combat buffs.',
     'The Cynic': 'Attention Seeker. After it takes damage, other Philosophers get +1/+1.',
     'Enlightened Guru': 'Attention Seeker. Each other Attention Seeker takes at most 3 damage from its first two hits each combat.',

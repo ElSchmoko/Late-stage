@@ -106,13 +106,15 @@ def _():
     return o
 
 
-@reg('energysponsor', 'Energy-Drink Sponsor')
+@reg('jinglewriter', 'Jingle Writer')
 def _():
-    return [rect(54, 50, 92, 156, '#3a3150', 18), ell(100, 54, 40, 10, GREY), rect(94, 40, 14, 10, GREY, 3),
-            path('M54 92 L146 92 M54 176 L146 176'), *face(100, 128, .9, 'shades', 'grin'),
-            lightning(102, 148, .7, LIME), path('M54 100 L146 100', 'none', ' stroke="#b5e05a" stroke-width="4"'),
-            g([rect(0, 0, 22, 14, G, 3)], 'translate(18 80) rotate(-20)'), g([rect(0, 0, 22, 14, G, 3)], 'translate(162 70) rotate(20)'),
-            lightning(30, 140, .7, LIME), lightning(176, 130, .7, LIME)]
+    tv = [g([rect(128, 26, 64, 50, INK, 8), rect(134, 32, 52, 36, SKY, 4), path('M148 76 L142 88 M172 76 L178 88'),
+          path('M150 62 L148 44 L172 44 L170 62 Z', W), rect(146, 38, 28, 8, PINK, 3), dot(160, 54, 3, PINK)], 'translate(0 22)')]
+    return person(4, 'spiky', '#ff8ab8', 'leather', INK, eyes='open', mouth='smirk', extra=['earring', 'nosering'], look=3,
+                  back=tv,
+                  prop=[g([path('M0 0 Q-14 -12 -2 -26 Q10 -38 22 -26 Q34 -12 20 0 Q10 10 0 0 Z', RED), circ(10, -14, 5, INK), rect(22, -40, 8, 52, BROWN, 3, ' transform="rotate(40 26 -14)"')], 'translate(24 178) rotate(-12)'),
+                        path('M40 80 L40 62 L52 58 L52 76', 'none', ' stroke-width="4"'), circ(37, 81, 4, INK), circ(49, 77, 4, INK),
+                        g([rect(0, 0, 40, 22, G, 3), circ(20, 11, 6, '#7fd67a')], 'translate(146 150) rotate(-10)'), hand(150, 170, SKINS[4])])
 
 
 @reg('reuniontour', 'Reunion Tour')

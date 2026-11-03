@@ -504,7 +504,7 @@ function goldTick(delta) {
   const c = center(rectOf(S.gold)); floatText(c[0] - 10, c[1] + 20, (delta > 0 ? '+' : '') + delta, delta > 0 ? 'gold' : 'red');
 }
 async function buy(f, toBoardAt = null) {
-  if (G.busy || !canBuy(f)) return;
+  if (G.busy || !G.feed.includes(f) || !canBuy(f)) return;   // the Feed may have changed (Scroll) since this card was picked up
   const me = G.me, cst = costOf(f);
   me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++; sfx('buy');
   G.feed.splice(G.feed.indexOf(f), 1);
@@ -527,11 +527,13 @@ function needsTarget(card) {
 async function playCard(hc, pos = null, target = null) {
   if (G.busy) return;
   const me = G.me, card = hc.card;
+  if (!G.hand.includes(hc)) { renderAll(); return; }   // already played (a second tap or drag on the same card): never remove another one
   if (!card.collab && me.board.length >= 7) { toast('Your board is full (7)'); renderAll(); return; }
   if (target === null) {
     const cands = needsTarget(card);
     if (cands) { await chooseTarget(cands, card.collab ? `Choose a minion for ${card.name} to stick to` : `Choose a minion for ${card.name}`, async t => playCard(hc, pos, t), () => renderAll()); return; }
   }
+  if (!G.hand.includes(hc)) { renderAll(); return; }
   G.hand.splice(G.hand.indexOf(hc), 1);
   const e = S.handEl.get(hc.key); if (e) { e._leaving = true; e.remove(); }
   const m = me.play(card, me.gold, pos, target); sfx('slap');
@@ -801,7 +803,7 @@ async function onDrop(kind, e, x, y, dist = 999) {
   if (kind === 'board') {
     const m = e._m;
     if (overFeed) return sell(m);
-    if (overBoard) { const b = G.me.board; b.splice(b.indexOf(m), 1); const n = b.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } b.splice(best, 0, m); }
+    if (overBoard && G.me.board.includes(m)) { const b = G.me.board; b.splice(b.indexOf(m), 1); const n = b.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } b.splice(best, 0, m); }
     renderAll(); return;
   }
 }

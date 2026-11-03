@@ -25,7 +25,7 @@ def _():
 
 @reg('stoicpodcaster', 'Stoicism Podcaster')
 def _():
-    return person(0, 'buzz', 'brown', 'tee', INK, eyes='calm', mouth='flat', hat='headphones', hatc=DGREY, extra=['beard'],
+    return person(4, 'bob', 'black', 'tee', INK, eyes='calm', mouth='flat', hat='headphones', hatc=DGREY, extra=['earring'],
                   prop=[path('M146 206 L146 160 L176 130', 'none', ' stroke-width="6"'), mic(176, 112, DGREY, 30),
                         rect(14, 64, 34, 20, RED, 10), dot(26, 74, 4, W), path('M34 70 L40 74 L34 78', 'none')])
 
@@ -93,7 +93,7 @@ def _():
 
 @reg('utilitarian', 'Utilitarian')
 def _():
-    return person(2, 'short', 'brown', 'shirt', W, SKY, eyes='open', mouth='wavy', brows='sad', extra=['sweat'],
+    return person(2, 'ponytail', 'ginger', 'shirt', W, SKY, eyes='open', mouth='wavy', brows='sad', extra=['sweat', 'freckles'],
                   back=[path('M140 206 L170 150', 'none', ' stroke-width="7"'), circ(172, 146, 9, RED), rect(126, 196, 44, 10, DGREY, 3)],
                   prop=[hand(160, 160, SKINS[2]),
                         rect(14, 140, 40, 54, GREY, 5), rect(20, 146, 28, 12, LIME, 2), *[rect(20 + c * 10, 164 + r * 10, 7, 7, W, 1) for c in range(3) for r in range(2)]])
@@ -109,7 +109,7 @@ def _():
 
 @reg('cynic', 'The Cynic')
 def _():
-    return person(0, 'sides', 'grey', 'tank', '#d8c4a8', eyes='open', mouth='frown', brows='one', extra=['beard'], look=-3,
+    return person(1, 'bun', 'grey', 'tank', '#d8c4a8', eyes='glasses', mouth='flat', brows='one', extra=['earring'], look=-3,
                   front=[path('M28 140 L172 140 Q182 176 168 206 L32 206 Q18 176 28 140 Z', BROWN), path('M24 158 Q100 168 176 158 M24 190 Q100 200 176 190'),
                          ell(100, 140, 72, 10, '#d8a06a')],
                   prop=[path('M160 140 L166 120'), rect(152, 86, 30, 36, Y, 5), path('M152 98 L182 98 M152 110 L182 110'),
@@ -126,7 +126,7 @@ def _():
 
 @reg('unifiedtheory', 'Grand Unified Theory')
 def _():
-    return person(0, 'curly', 'white', 'cardigan', '#a07a5a', W, eyes='wide', mouth='o', brows='up', extra=['mustache'],
+    return person(5, 'afro', 'black', 'cardigan', '#a07a5a', W, eyes='wide', mouth='o', brows='up', extra=['earring'],
                   back=[rect(-4, 40, 208, 120, '#2e5a4a', 6), rect(-4, 40, 208, 120, 'none', 6),
                         path('M8 60 Q16 52 22 62 Q28 72 34 60 M8 82 L40 82 M16 74 L16 90 M10 104 Q24 96 38 106', 'none', ' stroke="#ffffff" stroke-width="3"'),
                         path('M150 62 L170 62 M160 54 L160 70 M150 88 Q160 78 172 90 Q182 100 190 86 M154 112 L188 112 M160 120 L180 120', 'none', ' stroke="#ffffff" stroke-width="3"'),
@@ -138,7 +138,7 @@ def _():
 def _():
     o = [circ(100, 110, 88, '#fff2b0', ' stroke-width="0"'), circ(100, 110, 88, 'none', ' stroke-dasharray="2 12"'),
          circ(100, 110, 74, 'none', ' stroke-dasharray="2 12"')]
-    o += person(3, 'topknot', 'black', 'robe', W, ORA, eyes='calm', mouth='smile', extra=['beard'])
+    o += person(3, 'long', 'black', 'robe', W, ORA, eyes='calm', mouth='smile', extra=['earring'])
     o += [path('M92 168 L100 146 L108 168 Z', SKINS[3]), path('M82 150 Q100 186 118 150', 'none'),
           *[dot(100 + 18 * __import__('math').cos(a / 10), 162 + 14 * __import__('math').sin(a / 10), 3, RED) for a in range(0, 31, 4)],
           ell(100, 202, 70, 10, '#cfe6f7'), sparkle(30, 70, 7, W), sparkle(170, 64, 7, W)]

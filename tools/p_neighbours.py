@@ -71,7 +71,7 @@ def _():
                         motion(164, 120, 3, 24)])
 
 
-@reg('weddingdj', 'Wedding DJ')
+@reg('weddingdj', 'DJ Upstairs')
 def _():
     return person(2, 'slick', 'dark', 'vest', W, PUR, eyes='closed' if False else 'happy', mouth='grin', hat='headphones', hatc=PINK,
                   front=[path('M98 146 L102 146 L104 156 L96 156 Z', RED)],
@@ -79,7 +79,7 @@ def _():
                         sparkle(28, 74, 9, Y), sparkle(176, 70, 8, PINK), circ(172, 108, 5, Y), path('M168 108 L168 92 L176 90')])
 
 
-@reg('estatelawyer', 'Estate Lawyer')
+@reg('estatelawyer', 'Lawyer Next Door')
 def _():
     return person(0, 'sides', 'grey', 'suit', DGREY, PUR, eyes='glasses', mouth='flat', brows='flat', look=2,
                   prop=[path('M132 112 L184 112 L184 190 L132 190 Z', '#fff2d0'), rect(126, 104, 64, 12, '#f2dcae', 6), rect(126, 186, 64, 12, '#f2dcae', 6),

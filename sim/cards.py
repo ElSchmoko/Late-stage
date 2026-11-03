@@ -118,7 +118,7 @@ PUNKS = [
     Card('Feedback Loop', P, 3, 3, 4, 'SA', 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +3/+2 permanently.', 'Turned it up. Kept going.'),
     Card('Pirate Radio', P, 3, 2, 3, '-', 'First Impression: Discover a Punk.', 'Broadcasting from a van.', kind='fi', discover=P),
     Card('Mosh Pit', P, 4, 4, 4, 'SA', 'Start of combat: remove Out of Office from the enemy minion with the highest Attack, then deal damage equal to this minion\'s Attack to it. If it dies, gain its Attack permanently.', 'Personal space is a social construct.'),
-    Card('Energy-Drink Sponsor', P, 4, 3, 3, 'SO', 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +6).', 'Extreme. Sugar-free.', kind='stat', sellbait=True),
+    Card('Jingle Writer', P, 4, 3, 3, 'SO', 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +6).', 'Wrote "Smash the System". Now it sells yoghurt.', kind='stat', sellbait=True),
     Card('Reunion Tour', P, 5, 3, 6, 'SO', 'Your "When sold" effects trigger twice.', 'Only doing it for the fans.'),
     Card('Stage Diver', P, 5, 5, 5, 'SA', 'Start of combat: deal damage equal to this minion\'s Attack to the left-most enemy minion, then gain +2 Attack permanently.', 'Trust fall. No trust.'),
     Card('Greatest Hits', P, 6, 5, 6, 'SO', 'After you sell a Punk, put a copy of it in the Feed. It costs 2 gold.', 'Contains one new song. Nobody listens to it.'),
@@ -152,8 +152,8 @@ NEIGHBOURS = [
     Card('Caretaker', N, 3, 2, 5),
     Card('Helpful Neighbour', N, 3, 3, 3, kind='fi'),
     Card('Leaf Blower Guy', N, 4, 4, 5),
-    Card('Wedding DJ', N, 5, 2, 5),
-    Card('Estate Lawyer', N, 5, 1, 7),
+    Card('DJ Upstairs', N, 5, 2, 5),
+    Card('Lawyer Next Door', N, 5, 1, 7),
     Card('The Landlord', N, 5, 5, 5),
     Card('Block Party Host', N, 6, 6, 6, text='End of turn: give the minions next to it +2/+2.'),
 ]
@@ -237,7 +237,7 @@ V5 = {
     'Zine Maker': (2, 2, 'When sold: give the minion to its right +3/+3.'),
     'Sellout Frontman': (3, 3, 'When sold: give your other Punks +2/+2. Punks in the Feed get +1/+1 this game.'),
     'Mosh Pit': (6, 6, 'Cleave: its attacks also hit the minions next to its target.'),
-    'Energy-Drink Sponsor': (4, 5, 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +8).'),
+    'Jingle Writer': (4, 5, 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +8).'),
     'Reunion Tour': (4, 8, 'Your "When sold" effects trigger twice.'),
     'Stage Diver': (6, 6, "Start of combat: deal damage equal to this minion's Attack to the left-most enemy minion, then gain +3 Attack permanently."),
     'Greatest Hits': (6, 7, 'After you sell a Punk, put a copy of it in the Feed. It costs 2 gold.'),
@@ -303,7 +303,7 @@ V6 = {
     'Package Hoarder': (2, 1, 4, None), 'Grindset Guru': (1, 2, 2, None), 'Side Hustle': (2, 2, 3, None),
     # round 5: effect buffs for the weaker styles
     'Sellout Frontman': (2, 3, 3, 'When sold: give your other Punks +3/+3. Punks in the Feed get +1/+1 this game.'),
-    'Energy-Drink Sponsor': (4, 4, 5, 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +12).'),
+    'Jingle Writer': (4, 4, 5, 'When sold: give your other Punks +1/+1 for each Punk you have sold this game (max +12).'),
     'Personal Brand': (3, 3, 4, 'First Impression: get 2 Likes. Your Likes give +1/+1 more this game.'),
     'Paparazzi': (4, 4, 6, None),
     'Engagement Farmer': (4, 4, 5, 'After you summon a Follower, give it +6/+6.'),
@@ -313,7 +313,7 @@ V6 = {
     'Anarchist Barista': (1, 2, 3, None), 'Reunion Tour': (5, 5, 9, None), 'Mosh Pit': (4, 6, 8, None),
     'Stage Diver': (5, 6, 6, "Start of combat: deal damage equal to this minion's Attack to the left-most enemy minion, then gain +4 Attack permanently."),
     'Unicorn Startup': (6, 7, 9, None), 'Consultant': (5, 6, 7, None), 'Private Equity': (5, 6, 8, None),
-    'Energy-Drink Sponsor': (4, 4, 5, 'When sold: give your other Punks +2/+2 for each Punk you have sold this game (max +16).'),
+    'Jingle Writer': (4, 4, 5, 'When sold: give your other Punks +2/+2 for each Punk you have sold this game (max +16).'),
     'Greatest Hits': (6, 7, 8, None),
     # v8: multi-dimension balance pass (docs/balance-method.md)
     'Comment Section': (2, 2, 3, None),
@@ -415,5 +415,11 @@ for _c in FERALS:
     if _c.name in _V9:
         _c.tier, _c.atk, _c.hp, _c.style, _t, _c.taunt, _c.shield, _c.rebrand, _c.kind = _V9[_c.name]
         if _t: _c.text = _t
+# v9 late-game engines (Nov 3): the weakest late capstones get a way to grow, so every tribe can build a big late board
+_V9B = {'Blue Checkmark': 'After a friendly Follower dies, give your Influencers +2/+2 permanently.',
+        'World Record': 'Start of combat: give your left-most other Techie Toxic. After a friendly Techie kills a minion, give your Techies +1/+1 permanently.',
+        'Bestselling Author': 'End of turn: give the Philosophers next to it +1/+1 for the next combat, then make all next-combat buffs on your minions permanent.'}
+for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
+    if _c.name in _V9B: _c.text = _V9B[_c.name]
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]

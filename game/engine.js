@@ -116,8 +116,8 @@ class Player {
     }
     if ((SELL_STYLES.includes(this.style) || [H, P].includes(this.tribe)) && c.sellbait) v += 1;
     v += NEUTRAL_GOOD[m.name] || 0;
-    if (m.name === 'Wedding DJ' && ['FO', 'MC', 'PI', 'PE', 'GA'].includes(this.style) && this.count('Wedding DJ') <= 1) v += 4;
-    if (m.name === 'Estate Lawyer' && ['FO', 'PF'].includes(this.style) && this.count('Estate Lawyer') <= 1) v += 4;
+    if (m.name === 'DJ Upstairs' && ['FO', 'MC', 'PI', 'PE', 'GA'].includes(this.style) && this.count('DJ Upstairs') <= 1) v += 4;
+    if (m.name === 'Lawyer Next Door' && ['FO', 'PF'].includes(this.style) && this.count('Lawyer Next Door') <= 1) v += 4;
     if (!m.golden && this.board.some(o => o !== m && o.name === m.name && !o.golden)) v += 1.5 * this.skill;
     return v + 1.5 * m.extras.length;
   }
@@ -158,6 +158,7 @@ class Player {
       if (card.discover) s += 2 * decay;
     }
     if (card.name === 'Helpful Neighbour') s += 2;
+    if (card.name === 'Jingle Writer' && this.tribe === P && this.punks_sold >= 2) s += 3 + 3 * this.count('Reunion Tour');
     if (card.collab && this.board.length) s += 1;
     if (!card.collab) s += 1.5 * this.board.filter(x => x.name === card.name && !x.golden).length;
     return s;
@@ -190,7 +191,7 @@ class Player {
     if (this.board.length < 7 || (best.collab && this.board.length)) this.play(best, gold);
   }
   firstImpression(m, gold, target) {
-    const reps = (1 + this.wcount('Wedding DJ')) * m.g;
+    const reps = (1 + this.wcount('DJ Upstairs')) * m.g;
     for (let r = 0; r < reps; r++) {
       const n = m.name, others = this.board.filter(o => o !== m);
       if (n === 'Dropshipper') { this.bonus_next += 1; this.note('gold_next', {id: m.id, n: 1}); }
@@ -286,7 +287,7 @@ class Player {
     if (n === 'Anarchist Barista') { this.bonus_next += g; this.note('gold_next', {n: g}); }
     else if (n === 'Zine Maker' && right) this.buff(right, 4 * g, 4 * g);
     else if (n === 'Sellout Frontman') { for (const o of this.board) if (o.tribe === P) this.buff(o, 3 * g, 3 * g); this.addFeedBuff(P, g, g); }
-    else if (n === 'Energy-Drink Sponsor') { const k = Math.min(16, 2 * this.punks_sold) * g; if (k) for (const o of this.board) if (o.tribe === P) this.buff(o, k, k); }
+    else if (n === 'Jingle Writer') { const k = Math.min(16, 2 * this.punks_sold) * g; if (k) for (const o of this.board) if (o.tribe === P) this.buff(o, k, k); }
   }
   afterSell(sold) {
     for (const o of this.board) if (o.is_('Sneaker Reseller') && !this.resellUsed.has(o.id)) { this.resellUsed.add(o.id); for (const x of this.board) if (x.tribe === H) this.buff(x, 2 * o.g, 2 * o.g, o); }
@@ -338,12 +339,13 @@ class Player {
     }
     b = this.board;
     this.in_eot = false;
+    for (const m of b) if (m.name === 'Bestselling Author') for (const o of neighbours(b, m)) if (isTribe(o, PH)) this.tbuff(o, m.g, m.g, m);
     for (const m of b) if (m.is_('Grand Unified Theory')) { const k = m.golden ? 3 : 2; for (const o of b) { o.ta = (o.ta + (k - 1)) * k; o.th = (o.th + (k - 1)) * k; this.buffed.add(o.id); } }
     for (const m of b) if (m.name === 'Bestselling Author') for (const o of b) if (o.ta || o.th) { o.atk += o.ta; o.hp += o.th; this.note('buff', {id: o.id, a: o.ta, h: o.th, src: m.id}); if (!m.golden) o.ta = o.th = 0; }
     for (const m of b) m.fb = this.fbonus;
   }
   onShopDeath(v) {
-    const reps = 1 + this.wcount('Estate Lawyer'), g = v.g;
+    const reps = 1 + this.wcount('Lawyer Next Door'), g = v.g;
     for (let r = 0; r < reps; r++) {
       if (v.name === 'Reply Guy') for (let i = 0; i < g; i++) this.summonFollower();
       else if (v.name === 'Comment Section') for (let i = 0; i < 2 * g; i++) this.summonFollower();
@@ -481,7 +483,10 @@ class Player {
         const bs = this.cardScore(best.card), free = this.board.length < 7 || (best.card.collab && this.board.length);
         if (free || (swaps < 3 && bs > this.value(worst) + 1.5)) {
           if (!free) { this.sell(worst, gold); swaps++; }
-          gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1); this.play(best.card, gold, null, null, best); continue;
+          gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1); this.play(best.card, gold, null, null, best);
+          // sell Jingle Writer at once when it pays, as a person would (balance tests must see the combo)
+          if (best.card.name === 'Jingle Writer' && this.tribe === P && this.punks_sold >= 2 && this.board.filter(o => o.tribe === P).length >= 4) { const m = this.board.find(o => o.name === 'Jingle Writer' && !o.golden); if (m) this.sell(m, gold); }
+          continue;
         }
       }
       if (gold[0] >= this.minionCost() + sc && scrolls < maxScrolls) { if (this.payScroll()) { scrolls++; feed = this.feedEntries(this.drawFeed()); continue; } }
@@ -602,7 +607,6 @@ class Fight {
     const reach = (m, r) => { const i = b.indexOf(m); return b.filter((o, j) => o !== m && Math.abs(j - i) <= r); };
     for (const m of b.slice()) if (m.name === 'Brand Ambassador') { const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); for (const f of fs) { f.atk += kk; f.hp += kk; } if (fs.length) ev(m, 'give', fs); }
     const bc = b.filter(m => m.is_('Blue Checkmark'));
-    if (bc.length) { const plus = bc.some(m => m.golden) ? 6 : 2; for (const o of b) if (o.follower) { o.twice = true; o.shield = true; o.atk += plus; o.hp += plus; } ev(bc[0], 'give', b.filter(o => o.follower)); }
     const gurus = b.filter(m => m.is_('Enlightened Guru'));
     if (gurus.length) { const left = gurus.some(m => m.golden) ? 4 : 2; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) { o.cap = 3; o.capLeft = left; } }
     for (const m of b.slice()) {
@@ -654,13 +658,14 @@ class Fight {
     if (killer.is_('Speedrunner') && killer.speed_used < 1) { killer.speed_used++; perm(killer, killer.g, killer.g); }
     if (killer.is_('Pro Gamer') && !killer.kill_used) { killer.kill_used = true; perm(killer, 4 * killer.g, 4 * killer.g); }
     if (isTribe(killer, T) && side.p) side.p.techie_kills += 1;
+    if (isTribe(killer, T)) for (const v of side.b) if (v.is_('World Record')) { for (const o of side.b) if (isTribe(o, T) && o.hp > 0) perm(o, v.g, v.g); this.frame({type: 'trigger', src: v.id}); }
   }
   combatWhenSold(side, m, idx) {
     const b = side.b, n = m.name, g = m.g;
     if (n === 'Anarchist Barista' && side.p && !side.p.ghost) side.p.bonus_next += g;
     else if (n === 'Zine Maker' && idx < b.length) { b[idx].atk += 4 * g; b[idx].hp += 4 * g; }
     else if (n === 'Sellout Frontman') { for (const o of b) if (o.tribe === P) { o.atk += 3 * g; o.hp += 3 * g; } if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(P, g, g); }
-    else if (n === 'Energy-Drink Sponsor') { const k = side.p ? Math.min(16, 2 * (side.p.punks_sold || 0)) * g : 0; for (const o of b) if (o.tribe === P) { o.atk += k; o.hp += k; } }
+    else if (n === 'Jingle Writer') { const k = side.p ? Math.min(16, 2 * (side.p.punks_sold || 0)) * g : 0; for (const o of b) if (o.tribe === P) { o.atk += k; o.hp += k; } }
   }
   resolveDeaths(k, ptr) {
     const side = this.sides[k], b = side.b;
@@ -677,7 +682,7 @@ class Fight {
         let legacy = false;
         const g = m.g;
         if (m.tribe === P && b.some(x => x.is_('Squat Collective'))) { const r = wsum(b, 'Squat Collective') * (1 + wsum(b, 'Reunion Tour')); for (let i = 0; i < r; i++) this.combatWhenSold(side, m, idx); legacy = true; }
-        const reps = 1 + wsum(b, 'Estate Lawyer');
+        const reps = 1 + wsum(b, 'Lawyer Next Door');
         for (let r = 0; r < reps; r++) {
           const n = m.name;
           if (n === 'Reply Guy') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
@@ -700,6 +705,7 @@ class Fight {
           }
           if (v.is_('Museum Retrospective') && side.deaths % 2 === 0) { const g = v.golden ? 6 : 3; for (const o of b) if (o !== v && o.tribe === C) perm(o, g, g); this.frame({type: 'trigger', src: v.id}); }
         }
+        if (m.follower) for (const v of b) if (v.is_('Blue Checkmark')) { for (const o of b) if (isTribe(o, I)) perm(o, 2 * v.g, 2 * v.g); this.frame({type: 'trigger', src: v.id}); }
         if (side.vv > 0) { side.vv--; if (combatFollower(side, idx)) this.frame({type: 'summon', side: k}); }
         const hero = side.p && side.p.hero;
         if (hero === 'h_complainer' && side.deaths % COMPLAIN_EVERY === 0 && b.length) { for (const o of b) { o.atk += 1; o.hp += 1; } this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }

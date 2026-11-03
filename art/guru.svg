@@ -4,20 +4,20 @@
 <circle cx="100" cy="110" r="88" fill="#fff2b0" stroke-width="0"/>
 <circle cx="100" cy="110" r="88" fill="none" stroke-dasharray="2 12"/>
 <circle cx="100" cy="110" r="74" fill="none" stroke-dasharray="2 12"/>
-<circle cx="100" cy="38" r="12" fill="#2b2140"/>
+<path d="M58 90 Q48 40 100 40 Q152 40 142 90 L150 150 Q126 156 118 136 L82 136 Q74 156 50 150 Z" fill="#2b2140"/>
 <path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#ffffff"/>
 <path d="M72 142 Q96 170 118 206 L138 206 Q120 170 96 140 Z" fill="#ff8a3d"/>
 <path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#c98a5e"/>
 <circle cx="62" cy="92" r="9" fill="#c98a5e"/>
 <circle cx="138" cy="92" r="9" fill="#c98a5e"/>
 <circle cx="100" cy="86" r="38" fill="#c98a5e"/>
-<path d="M62 80 Q60 48 100 48 Q140 48 138 80 Q120 62 100 62 Q80 62 62 80 Z" fill="#2b2140"/>
-<path d="M64 96 Q66 134 100 136 Q134 134 136 96 Q130 116 116 112 Q100 118 84 112 Q70 116 64 96 Z" fill="#2b2140"/>
+<path d="M62 86 Q54 40 104 42 Q148 46 138 86 Q134 64 114 58 Q92 74 64 76 Z" fill="#2b2140"/>
 <path d="M78 92 Q85 98 92 92" fill="none"/>
 <path d="M108 92 Q115 98 122 92" fill="none"/>
 <ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
 <ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
 <path d="M90 111 Q100 121 110 111" fill="none"/>
+<circle cx="62" cy="106" r="4" fill="#ffc928"/>
 <path d="M92 168 L100 146 L108 168 Z" fill="#c98a5e"/>
 <path d="M82 150 Q100 186 118 150" fill="none"/>
 <circle cx="118.0" cy="162.0" r="3" fill="#ff6b5e" stroke="none"/>
