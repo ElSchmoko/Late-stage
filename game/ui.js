@@ -184,6 +184,28 @@ function coinFly(from, to, n = 1) {
   }
 }
 
+// ---------------------------------------------------------------- sound
+const AU = window.LSAudio || {sfx() {}, music() {}, intensity() {}, get: () => ({music: 0, sfx: 0}), set() {}};
+const sfx = (n, x) => AU.sfx(n, x);
+stage.addEventListener('click', e => { if (e.target.closest('.btn, .coll, .tribebtn')) sfx('click'); }, true);
+/** Speaker button with a popover holding the Music and Sound sliders. */
+function soundButton(x, y, popLeft = true) {
+  const icon = () => { const v = AU.get(); const on = v.music > 0 || v.sfx > 0;
+    return ico('<path d="M4 9.5v5h3.5l5 4v-13l-5 4H4z" fill="#ffc928"></path>' + (on ? '<path d="M16 9q1.8 3 0 6"></path><path d="M18.6 6.8q3.6 5.2 0 10.4"></path>' : '<path d="M16.5 9.5l5 5M21.5 9.5l-5 5"></path>'), 22, 2.4); };
+  const b = el('button', 'tribebtn', icon(), stage); css(b, {left: x, top: y, display: 'flex', padding: '5px'}); b.setAttribute('aria-label', 'Music and sound volume');
+  const pop = el('div', 'tribepop sndpop', '', stage); pop.hidden = true;
+  css(pop, popLeft ? {left: x + 46, top: y - 14} : {right: W - x + 6, top: y + 44});
+  const row = (k, label) => { const v = AU.get()[k]; return `<label><span>${label}</span><input type="range" min="0" max="100" value="${Math.round(v * 100)}" data-k="${k}" aria-label="${label} volume"></label>`; };
+  pop.innerHTML = row('music', 'Music') + row('sfx', 'Sound');
+  pop.querySelectorAll('input').forEach(inp => { inp.oninput = () => { AU.set({[inp.dataset.k]: inp.value / 100}); b.innerHTML = icon(); }; inp.onchange = () => { if (inp.dataset.k === 'sfx') sfx('coin'); }; });
+  b.onclick = () => { pop.hidden = !pop.hidden; if (!pop.hidden) anim(pop, [{transform: 'scale(.8)', opacity: 0}, {transform: 'scale(1)', opacity: 1}], {duration: 160, raw: true}); };
+  SND = {pop, b};
+  return b;
+}
+let SND = null;
+stage.addEventListener('pointerdown', e => { if (SND && SND.pop.isConnected && !SND.pop.hidden && !SND.pop.contains(e.target) && !SND.b.contains(e.target)) SND.pop.hidden = true; });
+const tierLevel = () => G.me ? Math.min(1, (G.me.tier - 1) / 5 + (G.me.health + G.me.boundaries < 12 ? 0.2 : 0)) : 0;
+
 // ---------------------------------------------------------------- game state
 const G = {lobby: null, me: null, hand: [], feed: [], heroUsed: false, busy: false, mode: null, screen: null, firstTurn: true};
 
@@ -191,7 +213,8 @@ const G = {lobby: null, me: null, hand: [], feed: [], heroUsed: false, busy: fal
 function clear() { stage.innerHTML = ''; }
 function bg(dim) { el('img', 'bg', null, stage).src = ART.city; if (dim) el('div', 'fade-bg', null, stage); }
 function showTitle() {
-  clear(); G.screen = 'title'; bg(true);
+  clear(); G.screen = 'title'; bg(true); AU.music('hold');
+  soundButton(790, 12, false);
   const t = el('div', 'ab', `<p class="bd" style="margin:0;display:inline-block;background:#2b2140;color:#ffc928;border-radius:999px;padding:4px 14px 2px;font-size:13px;letter-spacing:.2em;box-shadow:0 0 0 3px #fff">AN AUTOBATTLER ABOUT MODERN LIFE</p>
     <h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 64, textAlign: 'center'});
@@ -215,7 +238,7 @@ function rankChip(r, fs = 14) {
   return el('div', 'rankchip', `<span class="rk" style="background:${b[2]}">${STAR(16)}</span><span style="font-size:${fs}px;padding-top:2px">${b[1]}</span><span style="font-size:${fs}px;padding-top:2px;color:#5a5270">${r.toLocaleString('en')}</span>`);
 }
 function showCollection() {
-  clear(); G.screen = 'collection'; bg(true);
+  clear(); G.screen = 'collection'; bg(true); AU.music('hold');
   PROF.seen = PROF.unlocked.slice(); saveProfile();
   const t = el('div', 'ab bd', `Heroes <span style="font-size:15px;color:#5a5270">${PROF.unlocked.length} of ${HEROES.length} unlocked</span>`, stage);
   css(t, {left: 30, top: 12, fontSize: '22px', background: '#fff', border: '3px solid #2b2140', borderRadius: '999px', padding: '6px 16px 2px', boxShadow: '0 0 0 3px #fff'});
@@ -249,7 +272,7 @@ function showHeroCard(slug) {
 
 // ---------------------------------------------------------------- hero select
 function showHeroSelect() {
-  clear(); G.screen = 'heroes'; bg(false); G.rated = false;
+  clear(); G.screen = 'heroes'; bg(false); G.rated = false; AU.music('hold');
   const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
   G.seed = seed;
   const rng = E.RNG(seed);
@@ -308,7 +331,7 @@ function boardX(i, n) { return 114 + (616 - (n * 68 + (n - 1) * 20)) / 2 + i * 8
 function handPos(i, n) { const sp = Math.min(92, 470 / Math.max(1, n)); const x0 = 465 - ((n - 1) * sp) / 2 - 42; return {x: x0 + i * sp, y: HAND_Y + Math.abs(i - (n - 1) / 2) * 3, r: (i - (n - 1) / 2) * 3}; }
 let S = {};   // shop dom refs
 function buildShop() {
-  clear(); G.screen = 'shop'; bg(false);
+  clear(); G.screen = 'shop'; bg(false); AU.music('office'); AU.intensity(tierLevel());
   S = {tok: new Map(), feedTok: new Map(), handEl: new Map()};
   S.lobby = el('div', 'ab', '', stage); css(S.lobby, {left: 114, top: 8, display: 'flex', gap: '5px'});
   S.feedSurf = el('div', 'surf', '<span class="coin price-coin" style="left:-12px;top:-12px;width:26px;height:26px;font-size:14px">3</span>', stage); css(S.feedSurf, {left: 114, top: 58, width: 616, height: 96, borderRadius: '22px', background: '#fff'});
@@ -340,6 +363,7 @@ function buildShop() {
   S.save = el('button', 'sb', '', stage); css(S.save, {left: 759, top: 158, width: 58, height: 74}); S.save.onclick = toggleSave;
   S.ready = el('button', 'sb', `<svg width="88" height="110" viewBox="0 0 88 110" aria-hidden="true"><rect x="6" y="12" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="6" width="76" height="90" rx="38" fill="#fff" stroke="#fff" stroke-width="9"></rect><rect x="6" y="12" width="76" height="90" rx="38" fill="#2b2140" stroke="#2b2140" stroke-width="3"></rect><g class="face"><rect x="6" y="6" width="76" height="90" rx="38" fill="#2ecb6e" stroke="#2b2140" stroke-width="3"></rect><path d="M22 30Q26 18 40 15" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".7"></path></g></svg><span class="ab" style="left:0;right:0;top:45px;text-align:center;font-size:22px;pointer-events:none">Ready</span>`, stage);
   css(S.ready, {left: 746, top: 246, width: 88, height: 110}); S.ready.onclick = ready;
+  soundButton(30, 200);
   S.layer = el('div', 'ab', '', stage); css(S.layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
 
   renderChrome(); renderAll(false);
@@ -440,24 +464,26 @@ async function playLog() {
       if (src && src !== t) streak(center(rectOf(src)), tc, e.type === 'tbuff' ? '#4fd1c5' : '#2ecb6e', 240);
       setTimeout(() => floatText(tc[0], tc[1] - 30, `+${e.a}/+${e.h}`, e.type === 'tbuff' ? '' : ''), src && src !== t ? 200 : 0);
       if (src) anim(src, [{transform: 'scale(1)'}, {transform: 'scale(1.12)'}, {transform: 'scale(1)'}], {duration: 240});
+      sfx('buff', {n: e.a + e.h, gap: 0.06});
       if (++i % 2 === 0) await sleep(70);
     } else if (e.type === 'gold' || e.type === 'gold_next') {
       const r = t ? center(rectOf(t)) : [420, 200];
       floatText(r[0], r[1] - 30, e.type === 'gold' ? `+${e.n} gold` : `+${e.n} gold next turn`, 'gold');
-      if (e.type === 'gold') coinFly(r, center(rectOf(S.gold)), e.n);
+      if (e.type === 'gold') coinFly(r, center(rectOf(S.gold)), e.n); sfx('coin');
     } else if (e.type === 'triple') {
       if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#ffc928', 110); confetti(c[0], c[1], 24); anim(t, [{transform: 'scale(.4) rotate(-180deg)'}, {transform: 'scale(1.3) rotate(10deg)', offset: .6}, {transform: 'scale(1)'}], {duration: 700, easing: 'ease-out'}); }
-      toast('Triple! Golden minion', 1400);
+      toast('Triple! Golden minion', 1400); sfx('triple');
     } else if (e.type === 'collab') {
-      if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#8fd4ff', 80); floatText(c[0], c[1] - 34, e.name, ''); }
+      if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#8fd4ff', 80); floatText(c[0], c[1] - 34, e.name, ''); } sfx('sparkle');
     } else if (e.type === 'acquire') {
-      if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#ffc928', 100); floatText(c[0], c[1] - 34, `Acquired ${e.name}`, 'gold'); }
+      if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#ffc928', 100); floatText(c[0], c[1] - 34, `Acquired ${e.name}`, 'gold'); } sfx('buy');
     } else if (e.type === 'likes') {
-      const c = center(rectOf(S.heroAv)); for (let k = 0; k < Math.min(e.n, 5); k++) setTimeout(() => floatText(c[0] + 20 + k * 8, c[1] - 30, '♥', 'red'), k * 90);
+      sfx('like'); const c = center(rectOf(S.heroAv)); for (let k = 0; k < Math.min(e.n, 5); k++) setTimeout(() => floatText(c[0] + 20 + k * 8, c[1] - 30, '♥', 'red'), k * 90);
     } else if (e.type === 'feedbuff') {
+      sfx('feedbuff');
       for (const tt of S.feedTok.values()) if (tt._f && tt._f.card.tribe === e.tribe) { const c = center(rectOf(tt)); floatText(c[0], c[1] - 30, `+${e.a}/+${e.h}`); }
     } else if (e.type === 'drain') {
-      if (t) anim(t, [{transform: 'translateX(0)'}, {transform: 'translateX(-4px)'}, {transform: 'translateX(4px)'}, {transform: 'translateX(0)'}], {duration: 220});
+      if (t) anim(t, [{transform: 'translateX(0)'}, {transform: 'translateX(-4px)'}, {transform: 'translateX(4px)'}, {transform: 'translateX(0)'}], {duration: 220}); sfx('zap');
     }
   }
   renderChrome();
@@ -471,7 +497,7 @@ async function afterAction(animateNew = true) {
 // ---------------------------------------------------------------- shop actions
 function costOf(f) { return G.me.minionCost(f); }
 function canBuy(f) { if (G.hand.length >= 10) { toast('Your hand is full'); return false; } if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; }
-function shake(e) { anim(e, [{transform: 'translateX(0)'}, {transform: 'translateX(-6px)'}, {transform: 'translateX(6px)'}, {transform: 'translateX(-3px)'}, {transform: 'translateX(0)'}], {duration: 300, raw: true}); }
+function shake(e) { sfx('error'); anim(e, [{transform: 'translateX(0)'}, {transform: 'translateX(-6px)'}, {transform: 'translateX(6px)'}, {transform: 'translateX(-3px)'}, {transform: 'translateX(0)'}], {duration: 300, raw: true}); }
 function goldTick(delta) {
   anim(S.gold, [{transform: 'scale(1)'}, {transform: 'scale(1.18)'}, {transform: 'scale(1)'}], {duration: 260, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
   const c = center(rectOf(S.gold)); floatText(c[0] - 10, c[1] + 20, (delta > 0 ? '+' : '') + delta, delta > 0 ? 'gold' : 'red');
@@ -479,7 +505,7 @@ function goldTick(delta) {
 async function buy(f, toBoardAt = null) {
   if (G.busy || !canBuy(f)) return;
   const me = G.me, cst = costOf(f);
-  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++;
+  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++; sfx('buy');
   G.feed.splice(G.feed.indexOf(f), 1);
   const hc = {card: f.card, a: f.a, h: f.h, key: Math.random()};
   const t = S.feedTok.get(f.key);
@@ -507,7 +533,7 @@ async function playCard(hc, pos = null, target = null) {
   }
   G.hand.splice(G.hand.indexOf(hc), 1);
   const e = S.handEl.get(hc.key); if (e) { e._leaving = true; e.remove(); }
-  const m = me.play(card, me.gold, pos, target);
+  const m = me.play(card, me.gold, pos, target); sfx('slap');
   if (m && !card.collab) { m.atk += hc.a; m.hp += hc.h; if (hc.golden) { m.golden = true; m.atk += card.atk; m.hp += card.hp; } }
   if (card.collab) { const c = S.tok.get(m.id); }
   G.firstTurn = G.firstTurn && me.turn <= 1;
@@ -519,7 +545,7 @@ async function sell(m) {
   if (G.busy) return;
   const me = G.me, t = S.tok.get(m.id), g = me.sellValue(m);
   const c = t ? center(rectOf(t)) : [420, 210];
-  me.sell(m, me.gold);
+  me.sell(m, me.gold); sfx('sell');
   if (t) { t._leaving = true; t.style.transition = 'none';
     anim(t, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.2) rotate(-12deg)', offset: .3}, {transform: 'scale(0) rotate(200deg)', opacity: 0}], {duration: 380, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); }
   coinFly(c, center(rectOf(S.gold)), g); setTimeout(() => goldTick(g), 450);
@@ -533,7 +559,7 @@ async function sell(m) {
 async function scroll() {
   if (G.busy) return; const me = G.me, sc = me.scrollCost();
   if (me.gold[0] < sc) { shake(S.scroll); toast('Not enough gold'); return; }
-  me.payScroll(); if (sc) goldTick(-sc); G.saved = false; PROF.stats.scrolls++;
+  me.payScroll(); if (sc) goldTick(-sc); G.saved = false; PROF.stats.scrolls++; sfx('scroll');
   anim(S.scroll.querySelector('.spin'), [{transform: 'translate(18px,17px) scale(1.34) rotate(0)'}, {transform: 'translate(18px,17px) scale(1.34) rotate(360deg)'}], {duration: 420, raw: true});
   const old = [...S.feedTok.values()]; S.feedTok.clear();
   old.forEach((t, i) => { t._leaving = true; t.style.transition = 'none'; anim(t, [{transform: 'translateY(0) rotate(0)'}, {transform: `translateY(-90px) rotate(${i % 2 ? 15 : -15}deg)`, opacity: 0}], {duration: 220, delay: i * 25, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); });
@@ -548,6 +574,7 @@ function toggleSave() {
   if (G.busy) return;
   G.saved = !G.saved;
   anim(S.save, [{transform: 'translateY(-14px) rotate(-6deg)'}, {transform: 'translateY(3px) rotate(3deg)'}, {transform: 'translateY(0)'}], {duration: 300, easing: 'ease-out', raw: true});
+  sfx(G.saved ? 'save' : 'unsave');
   if (G.saved) {
     G.saveFly = true;
     // a bookmark flies from the button to the Feed, a glare wraps the Feed, every minion gets pinned
@@ -572,6 +599,7 @@ async function levelUp() {
   if (me.gold[0] < lc) { shake(S.shield); toast(`Level up costs ${lc} gold`); return; }
   me.gold[0] -= lc; me.gainSpend(lc); me.tier += 1; me.turns_at_tier = 0; goldTick(-lc);
   if (me.tier === 6) { PROF.flags.tier6 = true; checkUnlocks(); }
+  sfx('levelup'); AU.intensity(tierLevel());
   renderChrome();
   anim(S.shield, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.25) rotate(-8deg)'}, {transform: 'scale(.95) rotate(4deg)'}, {transform: 'scale(1)'}], {duration: 600, easing: 'ease-out', raw: true});
   const c = center(rectOf(S.shield)); ring(c[0], c[1] - 20, '#ffc928', 120); confetti(c[0], c[1] - 20, 14);
@@ -582,7 +610,7 @@ async function levelUp() {
 }
 async function useLikes() {
   const me = G.me; if (!me.likes || !me.board.length) { toast(me.likes ? 'Play a minion first' : 'No Likes yet'); return; }
-  const go = async t => { me.giveLike(t); renderAll(); await playLog(); if (me.likes > 0) useLikes(); };
+  const go = async t => { me.giveLike(t); sfx('like'); renderAll(); await playLog(); if (me.likes > 0) useLikes(); };
   await chooseTarget(me.board.slice(), `Give a Like (+${1 + me.likeBonus}/+${1 + me.likeBonus}) · ${me.likes} left`, go, () => {});
 }
 async function usePower() {
@@ -595,7 +623,7 @@ async function usePower() {
   if (def.target && !me.board.length && G.heroSlug !== 'boomer') { toast('Play a minion first'); return; }
   const go = async t => {
     const before = new Set(me.board.map(m => m.id));
-    me.usePower(t, G.feed); goldTick(-pc); PROF.flags = PROF.flags || {};
+    me.usePower(t, G.feed); goldTick(-pc); PROF.flags = PROF.flags || {}; sfx('power');
     const pc0 = center(rectOf(S.power));
     anim(S.power, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.25) rotate(-12deg)'}, {transform: 'scale(1) rotate(0)'}], {duration: 360, raw: true});
     ring(pc0[0], pc0[1], '#2fd0d0', 100);
@@ -626,7 +654,7 @@ function chooseTarget(cands, text, onPick, onCancel) {
       if (m) await onPick(m); else onCancel();
       res();
     };
-    S.pickHandler = m => { if (ids.has(m.id)) done(m); };
+    S.pickHandler = m => { if (ids.has(m.id)) { sfx('pick'); done(m); } };
     cancel.onclick = () => done(null);
   });
 }
@@ -634,6 +662,7 @@ function handlePending() {
   const me = G.me;
   return new Promise(res => {
     const p = me.pending.shift(); if (!p) return res();
+    sfx('discover');
     const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 65});
     el('div', 'dim', '', ov);
     const head = el('div', 'ab bd', p.why === 'triple' ? `Triple! Discover a ${'★'.repeat(p.tier)} minion` : p.why === 'hero' ? `${HERO[G.heroSlug].power}: Discover a minion` : `Discover a ${TP[p.why] ? TP[p.why].replace(/s$/, '') : 'minion'}`, ov);
@@ -643,6 +672,7 @@ function handlePending() {
       css(b, {left: 168 + i * 176, top: 62, width: 149, height: 208, padding: 0, border: 0, background: 'none', cursor: 'pointer'});
       anim(b, [{transform: 'rotateY(90deg) translateY(30px)', opacity: 0}, {transform: 'rotateY(0) translateY(0)', opacity: 1}], {duration: 420, delay: i * 110, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
       b.onclick = async () => {
+        sfx('pick');
         ov.querySelectorAll('button.ab').forEach(o => { if (o !== b) anim(o, [{transform: 'translateY(0)', opacity: 1}, {transform: 'translateY(120px) rotate(12deg)', opacity: 0}], {duration: 300, fill: 'forwards', raw: true}); });
         await anim(b, [{transform: 'scale(1)'}, {transform: 'scale(1.12)'}, {transform: 'translateY(160px) scale(.5)', opacity: 0}], {duration: 420, fill: 'forwards', raw: true});
         ov.remove();
@@ -654,6 +684,7 @@ function handlePending() {
   });
 }
 function showDetail(card, inst, actions = []) {
+  sfx('open');
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 95});
   el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
   const c = el('div', 'ab', cardHTML(card, inst ? {atk: inst.atk + (inst.ta || 0), hp: inst.hp + (inst.th || 0), golden: inst.golden} : {}), ov); css(c, {left: 70, top: 22});
@@ -666,7 +697,7 @@ function showDetail(card, inst, actions = []) {
   const t = el('div', 'detail-txt', `${gold ? '<p class="kwl" style="color:#ffc928">Tripled: every effect is doubled.</p>' : ''}<p class="rules">${gold ? card.gold_html || card.full_html : card.full_html}</p>${kws.map(k => `<p class="kwl"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}${tmp}<p class="fl">${card.flavour || ''}</p><div class="acts"></div>`, ov);
   css(t, {left: 360, top: 34, width: 440});
   const acts = t.querySelector('.acts');
-  const close = () => { ov.remove(); };
+  const close = () => { ov.remove(); sfx('close'); };
   for (const act of actions) {
     const b = el('button', 'btn', act.label + (act.cost != null ? ` <span class="coin" style="position:static;width:24px;height:24px;font-size:13px;box-shadow:none">${act.cost}</span>` : ''), acts);
     b.style.background = act.color || '#2ecb6e'; if (act.disabled) b.disabled = true;
@@ -700,6 +731,7 @@ function bindToken(e, kind, obj) {
       if (dragging) { css(e, {left: r.x + x - sx, top: r.y + y - sy}); dragOver(kind, x, y); }
     };
     const startDrag = () => {
+      sfx('pickup');
       e.style.transition = 'none'; e.classList.add('drag'); e.style.transform = 'scale(1.12) rotate(-4deg)';
       e.style.boxShadow = kind === 'hand' ? '0 0 0 3px #fff, 6px 14px 0 3px rgba(43,33,64,.5)' : '0 0 0 4px #fff, 6px 14px 0 4px rgba(43,33,64,.5)';
       if (kind === 'board') { S.sellZone.style.display = 'flex'; S.sellZone.innerHTML = `Sell for <span class="coin" style="position:static;width:34px;height:34px;font-size:19px">${G.me.sellValue(e._m)}</span>`; anim(S.sellZone, [{opacity: 0, transform: 'scale(.96)'}, {opacity: 1, transform: 'scale(1)'}], {duration: 160, raw: true}); }
@@ -724,7 +756,7 @@ function showDetailFor(kind, e) {
   const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
   const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
   if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.slice(), 'Side Gig: choose a minion for +2/+2', async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
-  if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); renderAll(); await playLog(); }});
+  if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); sfx('like'); renderAll(); await playLog(); }});
   showDetail(card, m, acts);
 }
 function boardIndexAt(x) { const n = G.me.board.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + 34 - x); if (d < bd) { bd = d; best = i; } } return best; }
@@ -764,7 +796,7 @@ async function onDrop(kind, e, x, y) {
 
 // ---------------------------------------------------------------- turn flow
 async function animateTurnStart(kept) {
-  G.busy = true;
+  G.busy = true; sfx('turn');
   const toks = [...S.feedTok.values()];
   if (kept) {
     const gl = el('div', 'wrapglare', '', S.feedSurf); anim(gl, [{left: '630px'}, {left: '-130px'}], {duration: 520, easing: 'ease-in-out', raw: true}).then(() => gl.remove());
@@ -789,7 +821,7 @@ async function ready() {
   me.spent_this_turn = me.spent - me.spent_start;
   me.log = [];
   me.endOfTurn();
-  anim(S.ready, [{transform: 'translateY(0)'}, {transform: 'translateY(6px)'}, {transform: 'translateY(0)'}], {duration: 200, raw: true});
+  anim(S.ready, [{transform: 'translateY(0)'}, {transform: 'translateY(6px)'}, {transform: 'translateY(0)'}], {duration: 200, raw: true}); sfx('ready');
   if (me.log.length) { renderAll(); await playLog(); await sleep(500); }
   me.log = [];
   G.firstTurn = false;
@@ -805,7 +837,7 @@ async function ready() {
 const CY = [86, 214];   // y of [enemy, me] rows
 function cX(i, n) { return 114 + (616 - (n * 68 + (n - 1) * 20)) / 2 + i * 88; }
 async function playCombat(rec) {
-  clear(); G.screen = 'combat'; bg(false);
+  clear(); G.screen = 'combat'; bg(false); AU.music('review'); sfx('fightstart');
   const f = rec.fight, opp = rec.b || rec.ghost, oppHero = opp.hero;
   const Cm = {els: new Map(), side: new Map()};
   _ce = Cm.els;
@@ -859,7 +891,9 @@ async function playCombat(rec) {
     if (skip) { continue; }
     if (fr.type === 'soc') {
       const s = Cm.els.get(fr.src);
-      if (s) { await anim(s, [{transform: 'scale(1)', filter: 'brightness(1)'}, {transform: 'scale(1.22)', filter: 'brightness(1.35)'}, {transform: 'scale(1)', filter: 'brightness(1)'}], {duration: 420});
+      if (s) { sfx(fr.kind === 'give' ? 'sparkle' : fr.kind === 'summon' ? 'summon' : fr.kind === 'self' ? 'trigger' : 'charge');
+        await anim(s, [{transform: 'scale(1)', filter: 'brightness(1)'}, {transform: 'scale(1.22)', filter: 'brightness(1.35)'}, {transform: 'scale(1)', filter: 'brightness(1)'}], {duration: 420});
+        if (fr.kind === 'shot' || fr.kind === 'sweep') sfx('zap');
         say(`Start of combat · ${nameOf(fr.src)}`);
         const sc = center(rectOf(s));
         await Promise.all((fr.tgts || []).map(id => { const t = Cm.els.get(id); return t ? streak(sc, center(rectOf(t)), fr.kind === 'give' ? '#2ecb6e' : '#ff6b5e', 420) : null; }));
@@ -871,11 +905,12 @@ async function playCombat(rec) {
       if (a && t) {
         const ra = rectOf(a), rt = rectOf(t), dx = rt.x - ra.x, dy = rt.y - ra.y;
         a.style.zIndex = 20;
-        a.getAnimations().forEach(x => x.cancel());
+        a.getAnimations().forEach(x => x.cancel()); sfx('windup');
         const lunge = `translate(${dx * .82}px,${dy * .78}px) scale(1.1) rotate(6deg)`;
         const A = a.animate([{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${-dx * .06}px,${-dy * .12}px) scale(.92) rotate(-5deg)`, offset: .3},
           {transform: lunge, offset: .55, easing: 'cubic-bezier(.34,1.3,.64,1)'}, {transform: lunge, offset: .62}, {transform: 'translate(0,0) scale(1)'}], {duration: 667 / SP.v, easing: 'ease-in-out'});
         await sleep(367);
+        sfx('hit', {n: fr.da || 1, gap: 0});
         anim(t, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,3px) rotate(-5deg)'}, {transform: 'translate(5px,-2px) rotate(4deg)'}, {transform: 'translate(0,0)'}], {duration: 320});
         anim(stage, [{transform: `scale(${SCALE}) translate(0,0)`}, {transform: `scale(${SCALE}) translate(2px,-2px)`}, {transform: `scale(${SCALE}) translate(-2px,1px)`}, {transform: `scale(${SCALE}) translate(0,0)`}], {duration: 220});
         diffBursts(cur, fr.boards);
@@ -886,24 +921,26 @@ async function playCombat(rec) {
       } else place(fr.boards);
     } else if (fr.type === 'death') {
       const t = Cm.els.get(fr.id);
-      if (t) { Cm.els.delete(fr.id); t.style.transition = 'none'; t.style.filter = 'grayscale(1)';
+      if (t) { sfx('death'); Cm.els.delete(fr.id); t.style.transition = 'none'; t.style.filter = 'grayscale(1)';
         anim(t, [{transform: 'rotate(0) translateY(0)', opacity: 1}, {transform: 'rotate(-14deg) translateY(-8px)', opacity: 1, offset: .3}, {transform: 'rotate(24deg) translateY(60px)', opacity: 0}], {duration: 380, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove());
         const c = center(rectOf(t)); for (let i = 0; i < 5; i++) { const p = el('div', '', '', stage); css(p, {position: 'absolute', left: c[0], top: c[1] + 20, width: 12, height: 12, borderRadius: '50%', background: '#e6dccb', border: '2px solid #2b2140', zIndex: 83, pointerEvents: 'none'}); anim(p, [{transform: 'translate(0,0) scale(1)', opacity: 1}, {transform: `translate(${(i - 2) * 16}px,${-10 - Math.random() * 14}px) scale(.3)`, opacity: 0}], {duration: 420}).then(() => p.remove()); }
       }
       cur = cur.map(b => b.filter(x => x.id !== fr.id));
       await sleep(420); place(fr.boards); await sleep(200);
     } else if (fr.type === 'legacy') {
+      sfx('legacy');
       say(`Legacy · ${fr.name}`);
       const row = sideOf(fr.side), g = el('img', '', null, layer); g.src = artOf(fr.name);
       css(g, {position: 'absolute', left: 380, top: CY[row] - 10, width: 84, height: 84, opacity: .7, filter: 'grayscale(.4) brightness(1.4)', pointerEvents: 'none'});
       await anim(g, [{transform: 'translateY(0) scale(.8)', opacity: .8}, {transform: 'translateY(-40px) scale(1.1)', opacity: 0}], {duration: 420}); g.remove();
       place(fr.boards); await sleep(160);
     } else if (fr.type === 'summon' || fr.type === 'rebrand' || fr.type === 'trigger') {
+      sfx(fr.type === 'trigger' ? 'trigger' : fr.type === 'rebrand' ? 'rebrand' : 'summon');
       if (fr.type === 'trigger') { const s = Cm.els.get(fr.src); if (s) { const c = center(rectOf(s)); ring(c[0], c[1], '#4fd1c5', 90); say(`${nameOf(fr.src)} triggers`); } }
       if (fr.type === 'rebrand') say('Rebrand!');
       place(fr.boards); await sleep(420);
     } else if (fr.type === 'hero') {
-      const av = sideOf(fr.side) === 1 ? mav : oav, h = HERO[fr.hero];
+      const av = sideOf(fr.side) === 1 ? mav : oav, h = HERO[fr.hero]; sfx('power');
       const c = center(rectOf(av));
       anim(av, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.18) rotate(-6deg)'}, {transform: 'scale(1) rotate(0)'}], {duration: 420});
       ring(c[0], c[1], '#2fd0d0', 110);
@@ -924,7 +961,7 @@ async function playCombat(rec) {
     const sv = [...Cm.els.values()].filter(t => Math.abs(parseFloat(t.style.top) - CY[survRow]) < 5);
     const tc = center(rectOf(targetAv));
     sv.forEach(t => t.getAnimations().forEach(x => x.cancel()));
-    const up = survRow === 1 ? -1 : 1;
+    const up = survRow === 1 ? -1 : 1; sfx('charge');
     await Promise.all(sv.map((t, i) => anim(t, [{transform: 'translateY(0) scale(1)', filter: 'brightness(1)'}, {transform: `translateY(${up * 22}px) scale(1.16) rotate(${i % 2 ? 6 : -6}deg)`, filter: 'brightness(1.25) drop-shadow(0 0 8px #ff6b5e)', offset: .7}, {transform: `translateY(${up * 16}px) scale(1.12)`, filter: 'brightness(1.2) drop-shadow(0 0 6px #ff6b5e)'}], {duration: 380, delay: i * 50, easing: 'ease-out', fill: 'forwards'})));
     const hits = sv.map((t, i) => new Promise(res => setTimeout(() => {
       const r = rectOf(t), dx = tc[0] - r.x - 34, dy = tc[1] - r.y - 34;
@@ -935,6 +972,7 @@ async function playCombat(rec) {
         {transform: `translate(${dx * .8}px,${dy * .8}px) scale(.9) rotate(-360deg)`, offset: .66},
         {transform: 'translate(0,0) scale(1) rotate(-360deg)'}], {duration: 760 / SP.v, easing: 'cubic-bezier(.45,0,.55,1)'});
       setTimeout(() => {
+        sfx('hit', {n: 10, gap: 0});
         anim(targetAv, [{transform: 'translate(0,0) scale(1)'}, {transform: 'translate(-8px,5px) scale(.9) rotate(-6deg)'}, {transform: 'translate(6px,-3px) scale(1.04) rotate(4deg)'}, {transform: 'translate(0,0) scale(1)'}], {duration: 260});
         ring(tc[0], tc[1], '#ff6b5e', 120);
         const fl = el('div', 'hitflash', '', stage); css(fl, {left: tc[0] - 44, top: tc[1] - 44, width: 88, height: 88});
@@ -947,7 +985,7 @@ async function playCombat(rec) {
       A.finished.catch(() => {}).then(() => { t.style.zIndex = ''; t.style.filter = ''; res(); });
     }, i * 150 / SP.v)));
     await sleep(0.55 * 760 + (sv.length - 1) * 150);
-    burstAt(tc[0] + 24, tc[1] - 24, `−${rec.dmg}`);
+    burstAt(tc[0] + 24, tc[1] - 24, `−${rec.dmg}`); sfx('heroslam');
     if (lost) mhp.textContent = G.me.health + G.me.boundaries; else ohp.textContent = opp.ghost ? '—' : opp.health + opp.boundaries;
     anim(lost ? mhp : ohp, [{transform: 'scale(1.7)'}, {transform: 'scale(1)'}], {duration: 360, easing: 'cubic-bezier(.34,1.56,.64,1)'});
     await Promise.all(hits);
@@ -975,7 +1013,7 @@ function diffBursts(prev, next) {
     const p = all.get(m.id); if (!p) return;
     const tEl = findTok(m.id); if (!tEl) return;
     const c = center(rectOf(tEl));
-    if (p.shield && !m.shield) { ring(c[0], c[1], '#8fd4ff', 90); floatText(c[0], c[1] - 34, 'OOO!', ''); }
+    if (p.shield && !m.shield) { sfx('pop'); ring(c[0], c[1], '#8fd4ff', 90); floatText(c[0], c[1] - 34, 'OOO!', ''); }
     if (m.hp < p.hp) burstAt(c[0] + 14, c[1] - 14, `−${p.hp - m.hp}`);
   }));
   prev.forEach(b => b.forEach(p => { if (!next.some(nb => nb.some(m => m.id === p.id))) { const t = findTok(p.id); if (t) { const c = center(rectOf(t)); burstAt(c[0] + 14, c[1] - 14, '✕'); } } }));
@@ -984,7 +1022,7 @@ function findTok(id) { return CombatEls().get(id); }
 let _ce = null; function CombatEls() { return _ce || new Map(); }
 // ---------------------------------------------------------------- end of run
 function showEnd() {
-  clear(); G.screen = 'end'; bg(false);
+  clear(); G.screen = 'end'; bg(false); AU.music(null);
   const me = G.me, L = G.lobby;
   let guard = 0;
   while (L.alive().length > 1 && guard++ < 40) { L.botTurns(); L.fightRound(); }
@@ -1015,7 +1053,7 @@ function showEnd() {
     if (q === me) { row.style.background = '#ffc928'; row.style.border = '2.5px solid #2b2140'; }
     anim(row, [{transform: 'translateX(-30px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 300, delay: 300 + i * 70, fill: 'backwards', raw: true});
   });
-  const cnt = p.querySelector('.cnt'); let k = 8; const iv = setInterval(() => { cnt.textContent = k; if (k <= me.place) { clearInterval(iv); anim(cnt, [{transform: 'scale(1.6)'}, {transform: 'scale(1)'}], {duration: 300, raw: true}); if (me.place <= 4) confetti(120, 90, 30); } k--; }, 110);
+  const cnt = p.querySelector('.cnt'); let k = 8; const iv = setInterval(() => { cnt.textContent = k; sfx('tick', {n: 8 - k, gap: 0}); if (k <= me.place) { clearInterval(iv); sfx(me.place <= 4 ? 'victory' : 'defeat'); setTimeout(() => { if (G.screen === 'end') AU.music('hold'); }, 3500); anim(cnt, [{transform: 'scale(1.6)'}, {transform: 'scale(1)'}], {duration: 300, raw: true}); if (me.place <= 4) confetti(120, 90, 30); } k--; }, 110);
   cnt.style.display = 'inline-block';
   const bA = bracketOf(before), bB = bracketOf(after);
   const right = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">RATING</p>
@@ -1024,6 +1062,7 @@ function showEnd() {
     <p class="bd" style="margin:12px 0 0;font-size:13px;letter-spacing:.12em;color:#5a5270">YOUR FINAL BOARD</p><div class="fb" style="position:relative;height:84px;margin-top:10px"></div>`, stage);
   css(right, {left: 430, top: 22, width: 384, height: 266, padding: '18px 22px'});
   const rcw = right.querySelector('.rcw'), chip = rankChip(after, 13); chip.style.position = 'relative'; chip.style.display = 'inline-flex'; rcw.appendChild(chip);
+  setTimeout(() => sfx(delta >= 0 ? 'rankup' : 'rankdown'), 1300);
   if (bA[1] !== bB[1]) { const pr = el('span', 'bd', delta > 0 ? 'Promoted!' : 'Demoted', rcw); css(pr, {position: 'relative', marginLeft: '10px', fontSize: '15px', color: delta > 0 ? '#14a052' : '#ff6b5e'}); }
   const rn = right.querySelector('.rnum'); let k2 = 0; const steps = 24;
   const iv2 = setInterval(() => { k2++; rn.textContent = Math.round(before + (after - before) * k2 / steps).toLocaleString('en'); if (k2 >= steps) clearInterval(iv2); }, 40);
@@ -1040,7 +1079,7 @@ function showUnlocks(list) {
   const head = el('div', 'ab bd', '<span style="display:inline-block;background:#ffc928;border:3px solid #2b2140;border-radius:999px;padding:6px 18px 2px;box-shadow:0 0 0 3px #fff;font-size:22px">New hero unlocked!</span>', ov); css(head, {left: 0, right: 0, top: 14, textAlign: 'center'});
   const card = el('div', 'ab', heroHTML(h), ov); css(card, {left: 312, top: 62}); card.style.transform = 'scale(.8)'; card.style.transformOrigin = 'top left';
   anim(card, [{transform: 'scale(.2) rotate(-30deg)', opacity: 0}, {transform: 'scale(.88) rotate(4deg)', opacity: 1, offset: .7}, {transform: 'scale(.8) rotate(0)'}], {duration: 600, easing: 'ease-out', raw: true});
-  setTimeout(() => confetti(422, 150, 40), 300);
+  setTimeout(() => confetti(422, 150, 40), 300); sfx('unlock');
   ov.onpointerup = () => { ov.remove(); showUnlocks(list); };
 }
 

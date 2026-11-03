@@ -166,3 +166,11 @@ button{font:inherit;color:inherit}
 .rankchip .rk{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center}
 .hitflash{position:absolute;border-radius:50%;background:#ff6b5e;pointer-events:none;z-index:89;mix-blend-mode:multiply}
 @media (prefers-reduced-motion:reduce){.tok .spk{animation:none;opacity:1}}
+
+.sndpop{padding:8px 12px;display:flex;flex-direction:column;gap:6px}
+.sndpop[hidden]{display:none}
+.sndpop label{display:flex;align-items:center;gap:10px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:13px;line-height:1}
+.sndpop label span{width:44px;padding-top:2px}
+.sndpop input[type=range]{-webkit-appearance:none;appearance:none;width:130px;height:12px;border:2.5px solid var(--ink);border-radius:999px;background:#fff;margin:0}
+.sndpop input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#ffc928;border:2.5px solid var(--ink);box-shadow:0 2px 0 var(--ink)}
+.sndpop input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#ffc928;border:2.5px solid var(--ink)}
