@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<g transform="translate(100 118) scale(1.25)"><path d="M-44 -12 L-58 -62 L-12 -36 Z" fill="#c9c2d6"/>
+<path d="M44 -12 L58 -62 L12 -36 Z" fill="#c9c2d6"/>
+<path d="M-42 -22 L-49 -48 L-25 -34 Z" fill="#2b2140"/>
+<path d="M42 -22 L49 -48 L25 -34 Z" fill="#2b2140"/>
+<ellipse cx="0" cy="2" rx="62" ry="50" fill="#c9c2d6"/>
+<path d="M-6 -46 Q0 -40 6 -46 L4 -18 Q0 -14 -4 -18 Z" fill="#564d6b"/>
+<path d="M-58 2 Q-38 -30 -4 -6 Q0 14 -12 22 Q-42 28 -58 2 Z" fill="#2b2140"/>
+<path d="M58 2 Q38 -30 4 -6 Q0 14 12 22 Q42 28 58 2 Z" fill="#2b2140"/>
+<path d="M-46 -18 Q-30 -30 -14 -20" fill="none" stroke="#ffffff" stroke-width="5"/>
+<path d="M46 -18 Q30 -30 14 -20" fill="none" stroke="#ffffff" stroke-width="5"/>
+<circle cx="-23" cy="2" r="12.5" fill="#ffffff"/>
+<circle cx="23" cy="2" r="12.5" fill="#ffffff"/>
+<circle cx="-17" cy="4" r="5.4" fill="#2b2140" stroke="none"/>
+<circle cx="29" cy="4" r="5.4" fill="#2b2140" stroke="none"/>
+<circle cx="-15" cy="2" r="1.8" fill="#ffffff" stroke="none"/>
+<circle cx="31" cy="2" r="1.8" fill="#ffffff" stroke="none"/></g>
+<rect x="-80" y="140" width="360" height="160" rx="0" fill="#6b6182"/>
+<rect x="-80" y="150" width="360" height="12" rx="0" fill="#564d6b" stroke="none"/>
+<path d="M-12 166 L-12 236 M44 166 L44 236 M100 166 L100 236 M156 166 L156 236 M212 166 L212 236" fill="none"/>
+<rect x="-84" y="126" width="368" height="26" rx="12" fill="#c9c2d6"/>
+<path d="M8 134 L84 134" fill="none" stroke="#ffffff" stroke-width="5"/>
+<g transform="translate(128 184) rotate(-12)"><path d="M0.0 -15.0 L4.0 -5.5 L14.3 -4.6 L6.4 2.1 L8.8 12.1 L0.0 6.8 L-8.8 12.1 L-6.4 2.1 L-14.3 -4.6 L-4.0 -5.5 Z" fill="#ffc928"/></g>
+<g transform="translate(30 132) scale(1 1)"><ellipse cx="0" cy="0" rx="17" ry="14" fill="#c9c2d6"/>
+<path d="M-8 6 L-9 13 M0 7 L0 15 M8 6 L9 13" fill="none" stroke-width="3.5"/></g>
+<g transform="translate(170 132) scale(-1 1)"><ellipse cx="0" cy="0" rx="17" ry="14" fill="#c9c2d6"/>
+<path d="M-8 6 L-9 13 M0 7 L0 15 M8 6 L9 13" fill="none" stroke-width="3.5"/></g>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>
