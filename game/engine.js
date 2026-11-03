@@ -16,7 +16,7 @@ const NB_GIVERS = new Set(['Rooftop Beehive', 'Thought Experiment', 'Bestselling
   'Squat Collective', 'Package Hoarder', 'Open Mic Poet', 'Thought Leader', 'Caretaker', 'Nihilist', 'World Record', 'E-Sports Coach']);
 const NEUTRAL_GOOD = {'Caretaker': 2, 'The Landlord': 2, 'Block Party Host': 4, 'Package Hoarder': 1, 'Wi-Fi Leech': 1, 'Leaf Blower Guy': 1};
 const SELL_STYLES = ['EX', 'SO'];
-const TARGETED_FI = new Set(['Personal Brand', 'Helpful Neighbour', 'Art Student', 'Venture Capitalist']);
+const TARGETED_FI = new Set(['Helpful Neighbour', 'Art Student', 'Venture Capitalist']);
 
 let CARDS = [], BY_NAME = {}, BY_TRIBE = {}, STYLES = {}, TOKENS = {};
 function load(cards, styles) {

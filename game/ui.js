@@ -683,7 +683,7 @@ function handlePending() {
     });
   });
 }
-function showDetail(card, inst, actions = []) {
+function showDetail(card, inst, actions = [], onClose = null) {
   sfx('open');
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 95});
   el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
@@ -697,7 +697,7 @@ function showDetail(card, inst, actions = []) {
   const t = el('div', 'detail-txt', `${gold ? '<p class="kwl" style="color:#ffc928">Tripled: every effect is doubled.</p>' : ''}<p class="rules">${gold ? card.gold_html || card.full_html : card.full_html}</p>${kws.map(k => `<p class="kwl"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}${tmp}<p class="fl">${card.flavour || ''}</p><div class="acts"></div>`, ov);
   css(t, {left: 360, top: 34, width: 440});
   const acts = t.querySelector('.acts');
-  const close = () => { ov.remove(); sfx('close'); };
+  const close = () => { ov.remove(); sfx('close'); if (onClose) onClose(); };
   for (const act of actions) {
     const b = el('button', 'btn', act.label + (act.cost != null ? ` <span class="coin" style="position:static;width:24px;height:24px;font-size:13px;box-shadow:none">${act.cost}</span>` : ''), acts);
     b.style.background = act.color || '#2ecb6e'; if (act.disabled) b.disabled = true;
@@ -707,12 +707,12 @@ function showDetail(card, inst, actions = []) {
   anim(t, [{transform: 'translateX(40px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 260, easing: 'ease-out', raw: true});
   ov.onpointerup = e => { if (!e.target.closest('.btn')) close(); };
 }
-function showHeroDetail() {
-  const h = HERO[G.heroSlug];
+function showHeroDetail(slug = G.heroSlug, onClose = null) {
+  const h = HERO[slug]; if (!h) return; sfx('open');
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 95}); el('div', 'dim', '', ov);
   const c = el('div', 'ab', heroHTML(h), ov); css(c, {left: 292, top: 0}); c.style.transform = 'scale(.92)';
   anim(c, [{transform: 'scale(.4) rotate(-8deg)', opacity: 0}, {transform: 'scale(.92)', opacity: 1}], {duration: 300, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
-  ov.onpointerup = () => ov.remove();
+  ov.onpointerup = () => { ov.remove(); sfx('close'); if (onClose) onClose(); };
 }
 
 // ---------------------------------------------------------------- pointer: tap, drag, long-press
@@ -857,6 +857,17 @@ async function playCombat(rec) {
   const sk = el('button', 'btn', 'Skip', stage); css(sk, {left: 750, top: 72, width: 76, height: 40, fontSize: '15px'}); sk.onclick = () => { skip = true; };
   const say = () => {};
   const layer = el('div', 'ab', '', stage); css(layer, {left: 0, top: 0, width: W, height: H, pointerEvents: 'none'});
+  // tap a minion or a hero to inspect it; the fight pauses while the details are open
+  G.cPaused = false;
+  const resume = () => { G.cPaused = false; };
+  layer.addEventListener('click', e => {
+    const t = e.target.closest('.tok'); if (!t || !t._snap || G.cPaused) return;
+    const m = t._snap, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
+    G.cPaused = true; showDetail(card, {atk: m.atk, hp: Math.max(0, m.hp), golden: m.golden, extras: m.extras || []}, [], resume);
+  });
+  oav.onclick = () => { if (!G.cPaused && HERO[oppHero]) { G.cPaused = true; showHeroDetail(oppHero, resume); } };
+  mav.onclick = () => { if (!G.cPaused) { G.cPaused = true; showHeroDetail(G.heroSlug, resume); } };
+  const held = async () => { while (G.cPaused && !skip) await new Promise(r => setTimeout(r, 80)); };
   const sideOf = k => k === 0 ? 1 : 0;  // fight side 0 = me (row 1)
   const nameOf = id => { for (const b of cur) { const m = b.find(x => x.id === id); if (m) return m.name; } return ''; };
   let cur = [[], []];
@@ -869,7 +880,7 @@ async function playCombat(rec) {
         const prev = cur[k].find(x => x.id === m.id);
         const o = {hurt: prev ? false : false};
         if (!t) {
-          t = makeToken(m); layer.appendChild(t); Cm.els.set(m.id, t);
+          t = makeToken(m); layer.appendChild(t); Cm.els.set(m.id, t); t.style.cursor = 'pointer';
           css(t, {left: cX(i, b.length), top: CY[row]});
           if (opts.pop !== false) anim(t, [{transform: 'scale(0)'}, {transform: 'scale(1.2)', offset: .6}, {transform: 'scale(1)'}], {duration: 320, easing: 'ease-out'});
         } else {
@@ -877,7 +888,7 @@ async function playCombat(rec) {
           if (opts.floats !== false && (da > 0 || dh > 0)) { const c = center(rectOf(t)); floatText(c[0], c[1] - 30, `+${Math.max(0, da)}/+${Math.max(0, dh)}`); }
         }
         t.style.transition = `left ${380 / SP.v}ms cubic-bezier(.22,1,.36,1), top ${380 / SP.v}ms`;
-        css(t, {left: cX(i, b.length), top: CY[row]});
+        css(t, {left: cX(i, b.length), top: CY[row]}); t._snap = m;
       });
     });
     cur = boards;
@@ -889,6 +900,7 @@ async function playCombat(rec) {
   for (let fi = 1; fi < f.frames.length; fi++) {
     const fr = f.frames[fi];
     if (skip) { continue; }
+    await held();
     if (fr.type === 'soc') {
       const s = Cm.els.get(fr.src);
       if (s) { sfx(fr.kind === 'give' ? 'sparkle' : fr.kind === 'summon' ? 'summon' : fr.kind === 'self' ? 'trigger' : 'charge');
@@ -954,6 +966,7 @@ async function playCombat(rec) {
   }
   if (skip) { place(f.frames[f.frames.length - 1].boards, {floats: false}); for (const [id, t] of Cm.els) if (!f.frames[f.frames.length - 1].boards.some(b => b.some(m => m.id === id))) { t.remove(); Cm.els.delete(id); } }
   await sleep(300);
+  await held();
   // hero damage: survivors wind up together, then dive at the losing hero one after another
   const won = rec.winner === G.me, lost = rec.loser === G.me;
   const survRow = won ? 1 : 0, targetAv = won ? oav : mav;
