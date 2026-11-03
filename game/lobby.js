@@ -26,7 +26,9 @@ class Lobby {
     }
     chosen.forEach((s, i) => {
       const rating = botRating(), skill = opts.skill != null ? opts.skill : rating == null ? 0 : E.skillOf(rating);
-      const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero: opts.botHeroes ? opts.botHeroes[i] : heroes[i], name: s, rating, skill});
+      const hero = opts.botHeroes ? opts.botHeroes[i] : heroes[i], hd = (root.LS_HEROES || []).find(h => h.slug === hero);
+      // bots start with their hero's Boundaries, like the player does (the hero balance sims assume this)
+      const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero, boundaries: hd ? hd.boundaries : undefined, name: s, rating, skill});
       this.players.push(p);
     });
     this.turn = 0; this.deadOrder = []; this.ghosts = []; this.lastPairs = [];

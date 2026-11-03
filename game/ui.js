@@ -851,12 +851,12 @@ async function playCombat(rec) {
   const surfE = el('div', 'surf', '', stage); css(surfE, {left: 114, top: 72, width: 616, height: 96, borderRadius: '24px', background: '#eeeaf5'});
   const surfM = el('div', 'surf desk', '', stage); css(surfM, {left: 114, top: 200, width: 616, height: 96, borderRadius: '24px'});
   const oav = el('div', 'av-big', `<img src="${ART[oppHero] || ART.follower}" alt="">`, stage); css(oav, {left: 16, top: 12, width: 70, height: 70});
-  const ohp = el('div', 'badge', `${opp.ghost ? '—' : opp.health + opp.boundaries}`, stage); css(ohp, {left: 60, top: 56, width: 40, height: 30, fontSize: '17px'});
+  // every fight of the round is already resolved, so show health as it was before this one (and never below 0)
+  const hpOf = (p, before) => Math.max(0, p.health + p.boundaries + (before && rec.loser === p ? rec.dmg : 0));
+  const ohp = el('div', 'badge', `${opp.ghost ? '—' : hpOf(opp, true)}`, stage); css(ohp, {left: 60, top: 56, width: 40, height: 30, fontSize: '17px'});
   oav.title = (opp.ghost ? 'Ghost of ' : '') + (HERO[oppHero] ? HERO[oppHero].name : opp.name);
   const mav = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(mav, {left: 16, top: 290, width: 88, height: 88});
-  const mhp = el('div', 'badge', `${G.me.health + (rec.loser === G.me ? 0 : 0)}`, stage); css(mhp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
-  const preHealth = G.me.health + (rec.loser === G.me ? rec.dmg : 0) + G.me.boundaries;
-  mhp.textContent = preHealth;
+  const mhp = el('div', 'badge', `${hpOf(G.me, true)}`, stage); css(mhp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
   const rnd = el('div', 'info', `Round ${G.lobby.turn}`, stage); css(rnd, {left: 640, top: 20, width: 92, height: 34, borderRadius: '999px', fontSize: '15px'});
   const spd = el('button', 'btn', SP.v === 1 ? '1×' : '2×', stage); css(spd, {left: 750, top: 18, width: 76, height: 40, fontSize: '17px'});
   spd.onclick = () => { SP.v = SP.v === 1 ? 2 : 1; spd.textContent = SP.v === 1 ? '1×' : '2×'; };
@@ -1006,7 +1006,7 @@ async function playCombat(rec) {
     }, i * 150 / SP.v)));
     await sleep(0.55 * 760 + (sv.length - 1) * 150);
     burstAt(tc[0] + 24, tc[1] - 24, `−${rec.dmg}`); sfx('heroslam');
-    if (lost) mhp.textContent = G.me.health + G.me.boundaries; else ohp.textContent = opp.ghost ? '—' : opp.health + opp.boundaries;
+    if (lost) mhp.textContent = hpOf(G.me, false); else ohp.textContent = opp.ghost ? '—' : hpOf(opp, false);
     anim(lost ? mhp : ohp, [{transform: 'scale(1.7)'}, {transform: 'scale(1)'}], {duration: 360, easing: 'cubic-bezier(.34,1.56,.64,1)'});
     await Promise.all(hits);
     await sleep(700);
