@@ -1,0 +1,227 @@
+[
+ {
+  "dim": "Power for tier",
+  "who": "Thought Leader",
+  "msg": "effect worth +1.46 vs tier 4 median +0.67"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Crypto Bro",
+  "msg": "effect worth +0.12 vs tier 3 median +0.93"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Stan Account",
+  "msg": "effect worth +1.24 vs tier 2 median +0.66"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Giveaway Host",
+  "msg": "effect worth +1.37 vs tier 2 median +0.66"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Hype Man",
+  "msg": "effect worth +0.88 vs tier 1 median +0.40"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Unboxing Streamer",
+  "msg": "effect worth +0.47 vs tier 3 median +0.93"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Ring Light Studio",
+  "msg": "effect worth +0.86 vs tier 5 median +0.30"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Protest Camp",
+  "msg": "effect worth +1.43 vs tier 3 median +0.93"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Robot Vacuum",
+  "msg": "effect worth +0.24 vs tier 2 median +0.66"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Squat Collective",
+  "msg": "effect worth +0.35 vs tier 3 median +0.93"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Desert Hermit",
+  "msg": "effect worth +1.38 vs tier 4 median +0.67"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Enlightened Guru",
+  "msg": "effect worth +0.97 vs tier 6 median +0.23"
+ },
+ {
+  "dim": "Power for tier",
+  "who": "Helpful Neighbour",
+  "msg": "effect worth +0.20 vs tier 3 median +0.93"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Hustler tier 3",
+  "msg": "Golden Parachute Exec +1.00 vs Crypto Bro +0.12"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Hustler tier 4",
+  "msg": "Thought Leader +1.46 vs Corporate Raider +0.60"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Influencer tier 1",
+  "msg": "Hype Man +0.88 vs Reply Guy +0.24"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Influencer tier 2",
+  "msg": "Giveaway Host +1.37 vs Comment Section +0.62"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Influencer tier 5",
+  "msg": "Ring Light Studio +0.86 vs Brand Ambassador -0.05"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Feral tier 2",
+  "msg": "Compost Heap +0.93 vs Monstera +0.31"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Creative tier 1",
+  "msg": "Busker +0.78 vs Art Student +0.17"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Philosopher tier 6",
+  "msg": "Enlightened Guru +0.97 vs Grand Unified Theory +0.36"
+ },
+ {
+  "dim": "Inner-tribe parity",
+  "who": "Neutral tier 3",
+  "msg": "Caretaker +0.88 vs Helpful Neighbour +0.20"
+ },
+ {
+  "dim": "Variety",
+  "who": "Feral",
+  "msg": "6 of 14 triggers are EOT"
+ },
+ {
+  "dim": "Tribe curve",
+  "who": "Hustler tier 4",
+  "msg": "cards worth 1.60 places on average vs 0.99 for all tribes (a spike)"
+ },
+ {
+  "dim": "Tribe curve",
+  "who": "Feral tier 6",
+  "msg": "cards worth 0.05 places on average vs 0.31 for all tribes (a hole)"
+ },
+ {
+  "dim": "Tribe curve",
+  "who": "Creative tier 5",
+  "msg": "cards worth 0.82 places on average vs 0.36 for all tribes (a spike)"
+ },
+ {
+  "dim": "Tribe curve",
+  "who": "Philosopher tier 6",
+  "msg": "cards worth 0.69 places on average vs 0.31 for all tribes (a spike)"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Middle Manager",
+  "msg": "generic power: worth +0.49 to other tribes, +0.42 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Golden Parachute Exec",
+  "msg": "generic power: worth +1.00 to other tribes, +1.00 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Venture Capitalist",
+  "msg": "generic power: worth +0.78 to other tribes, +0.66 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Reply Guy",
+  "msg": "generic power: worth +0.37 to other tribes, +0.24 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Engagement Bot",
+  "msg": "generic power: worth +0.43 to other tribes, +0.41 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Hype Man",
+  "msg": "generic power: worth +1.01 to other tribes, +0.88 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Loot Box",
+  "msg": "generic power: worth +0.58 to other tribes, +0.53 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Toxic Teammate",
+  "msg": "generic power: worth +0.42 to other tribes, +0.51 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Heckler",
+  "msg": "generic power: worth +0.53 to other tribes, +0.61 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Pirate Radio",
+  "msg": "generic power: worth +0.76 to other tribes, +0.63 to its own"
+ },
+ {
+  "dim": "Cohesion",
+  "who": "Shower Thinker",
+  "msg": "generic power: worth +0.46 to other tribes, +0.40 to its own"
+ },
+ {
+  "dim": "Variance",
+  "who": "Philosopher / Big Ideas (skill0)",
+  "msg": "wins 18% of lobbies (target 9%–17%)"
+ },
+ {
+  "dim": "Tribe curve",
+  "who": "Philosopher / Big Ideas (skill0)",
+  "msg": "end game: wins 69% of decided fights vs 58% for all styles"
+ },
+ {
+  "dim": "Tribe curve",
+  "who": "Punk / Sellouts (skill0)",
+  "msg": "end game: wins 48% of decided fights vs 58% for all styles"
+ },
+ {
+  "dim": "Archetypes",
+  "who": "Influencer / Followers (skill0)",
+  "msg": "places 4.68, worse than the big-stats bot (4.66)"
+ },
+ {
+  "dim": "Archetypes",
+  "who": "skill1",
+  "msg": "placement band 1.52 (target ≤ 0.90)"
+ },
+ {
+  "dim": "Uptake",
+  "who": "Quiet-Hours Enforcer",
+  "msg": "bought 3% of the times it is offered (tier 2 median 8%)"
+ },
+ {
+  "dim": "Uptake",
+  "who": "Estate Lawyer",
+  "msg": "bought 8% of the times it is offered (tier 5 median 24%)"
+ }
+]

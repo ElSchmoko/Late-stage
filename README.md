@@ -34,3 +34,11 @@ node game/herosim.js 1800         # average placement per hero
 node game/skillsim.js 800 0 1     # bot skill 0 vs skill 1 in the same lobbies
 node game/laddersim.js 160        # where a player of fixed skill settles on the rating ladder
 ```
+
+Full balance check (12 dimensions, see `docs/balance-method.md`):
+
+```bash
+node game/balance/sim.js cards 250 > cards.json
+node game/balance/sim.js styles 3200 160 > styles.json
+node game/balance/report.js cards.json styles.json > docs/balance/report.md
+```

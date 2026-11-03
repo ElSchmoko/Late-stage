@@ -756,7 +756,7 @@ function showDetailFor(kind, e) {
   if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk + h.a, hp: h.card.hp + h.h, golden: h.golden}, [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7}]); }
   const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
   const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
-  if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.slice(), 'Side Gig: choose a minion for +2/+2', async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
+  if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.filter(o => (o.tribe === 'Hustler' || o.tribe2 === 'Hustler') && o !== m), `Side Gig: choose a Hustler for +${m.golden ? 6 : 3}/+${m.golden ? 6 : 3}`, async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
   if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); sfx('like'); renderAll(); await playLog(); }});
   showDetail(card, m, acts);
 }
