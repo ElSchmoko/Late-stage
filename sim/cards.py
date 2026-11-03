@@ -401,7 +401,7 @@ FERALS += [
     Card('Seagull', F, 2, 3, 3, 'SV', 'After you Scroll, give another Feral +1/+1 (twice per turn).', 'Took your chips. Then the bag.'),
     Card('Wild Boar', F, 4, 4, 5, 'SV', 'Start of combat: give the Ferals next to it Rebrand.', 'Knows which day is bin day.'),
     Card('Rat King', F, 5, 4, 7, 'SV', 'After a friendly Feral comes back, give your other Ferals +2/+2.', 'Rules the tunnels. Nobody voted.'),
-    Card('Nature Is Healing', F, 6, 5, 9, 'SV', 'After you Scroll, give your other Ferals +1/+1 (twice per turn).', 'Swans in the canal. Foxes on the council.'),
+    Card('Nature Is Healing', F, 6, 5, 9, 'SV', 'After you Scroll, give your other Ferals +2/+2 (twice per turn).', 'Swans in the canal. Foxes on the council.'),
 ]
 _V9 = {  # name: (tier, atk, hp, style, text, taunt, shield, rebrand, kind)
     'City Pigeon': (1, 1, 3, 'SV', 'After you Scroll, gain +1/+1 (twice per turn).', False, False, False, 'eng'),

@@ -47,7 +47,7 @@ GOLD = {
     'Ancient Oak': 'Your end-of-turn effects give Ferals three times as much.',
     'Rat King': 'After a friendly Feral comes back, give your other Ferals +4/+4.',
     'World Tree': 'End of turn: give your other Ferals +4/+4.',
-    'Nature Is Healing': 'After you Scroll, give your other Ferals +2/+2 (twice per turn).',
+    'Nature Is Healing': 'After you Scroll, give your other Ferals +4/+4 (twice per turn).',
     # Creatives
     'Busker': 'After you play a Creative, gain +2/+2.',
     'Open Mic Poet': 'Legacy: give the minions next to it +4/+4.',

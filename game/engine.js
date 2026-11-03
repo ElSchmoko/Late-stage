@@ -364,7 +364,7 @@ class Player {
     for (const m of this.board.slice()) {
       if (m.is_('City Pigeon') && this.scrollUse(m, 2)) this.buff(m, m.g, m.g, m);
       if (m.is_('Seagull')) { const fs = this.board.filter(o => o !== m && isTribe(o, F)); if (fs.length && this.scrollUse(m, 2, 'sg')) this.buff(this.rng.choice(fs), m.g, m.g, m); }
-      if (m.is_('Nature Is Healing') && this.scrollUse(m, 2, 'nh')) { for (const o of this.board) if (o !== m && isTribe(o, F)) this.buff(o, m.g, m.g, m); }
+      if (m.is_('Nature Is Healing') && this.scrollUse(m, 2, 'nh')) { for (const o of this.board) if (o !== m && isTribe(o, F)) this.buff(o, 2 * m.g, 2 * m.g, m); }
     }
     if (this.hero === 'h_doomscroller' && this.scrollsTotal % DOOM_EVERY === 0) this.heroDiscover(this.tier);
     return true;
@@ -376,7 +376,7 @@ class Player {
     for (const m of this.board) {
       if (m.is_('City Pigeon')) n += 2 - (U[m.id] || 0);
       if (m.is_('Seagull') && this.board.some(o => o !== m && isTribe(o, F))) n += 2 - (U[m.id + 'sg'] || 0);
-      if (m.is_('Nature Is Healing')) n += 2 * (2 - (U[m.id + 'nh'] || 0));
+      if (m.is_('Nature Is Healing')) n += 4 * (2 - (U[m.id + 'nh'] || 0));
     }
     return n;
   }

@@ -138,3 +138,16 @@ Bots now put leftover gold into Scrolls while they still have Scroll triggers to
 | Smart bots | Band 0.94, driven by Posthumous Fame and Passive Income, not Ferals | ≤ 0.90 (noisy, half-diffs up to 1.3) |
 
 **Also fixed.** Two stat-only entries from the earlier player review overwrote newer card texts. Windowsill Succulent's card showed an old rule, and Zine Maker showed +3/+3 while giving +4/+4.
+
+### Nature Is Healing buff (player feedback)
+
+At +1/+1 twice per turn (+2/+2 a turn at most), it read as weak for a tier-6 capstone. Two stronger versions were measured (200 paired lobbies, `--ceiling`):
+
+| Version | Average Effect | Ceiling | Tier-6 limit |
+| --- | --- | --- | --- |
+| +2/+2, twice per turn (**shipped**) | +0.49 | +0.50 | +0.83 |
+| +2/+2, three times per turn | +0.57 | +0.74 | +0.83 |
+
+The three-times version is close to the build-around limit, and people scroll more reliably than bots do (the Enlightened Guru lesson), so the twice-per-turn version ships: up to +4/+4 to every other Feral each turn, against World Tree's free +2/+2.
+
+Styles after the buff (3,200 lobbies): 4.21–4.76, band 0.55. Scavengers 4.23, Overgrowth 4.27. Both Feral styles win 17–18% of lobbies, at the edge of the 9–17% target (Passive Income and Gadgets are at 18% too). Watch this.

@@ -204,7 +204,7 @@ SHORT = {
     'Ring Light Studio': 'End of turn: get 2 Likes. While this is on your board, Likes count double.',
     'Blue Checkmark': 'Start of combat: your Followers get Out of Office and +2/+2. They attack twice.',
     'World Tree': 'End of turn: give your other Ferals +2/+2.',
-    'Nature Is Healing': 'After you Scroll, give your other Ferals +1/+1 (twice per turn).',
+    'Nature Is Healing': 'After you Scroll, give your other Ferals +2/+2 (twice per turn).',
     'Rat King': 'After a friendly Feral comes back, your other Ferals get +2/+2.',
     'Museum Retrospective': 'Grievance (2): other Creatives get +3/+3 permanently.',
     'Memorial Mural': 'Grievance (2): your Creatives get +1 Attack this game.',
