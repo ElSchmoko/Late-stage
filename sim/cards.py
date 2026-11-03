@@ -377,10 +377,10 @@ V6 = {
     'Middle Manager': (2, 3, 4, 'Attention Seeker. End of turn: take +1/+1 from the minion to its left. If that kills it, gain 2 extra gold next turn.'),
     'Brand Ambassador': (5, 5, 6, 'Start of combat: give your Followers +1/+1 for each Influencer you have. Legacy: summon two Followers.'),
     'Ring Light Studio': (5, 4, 8, 'End of turn: get 2 Likes. Likes you give count double while this is on your board.'),
-    'City Pigeon': (1, 1, 3, None), 'Windowsill Succulent': (1, 2, 2, None),
+    'City Pigeon': (1, 1, 3, None), 'Windowsill Succulent': (1, 2, 2, 'End of turn: if you have another Feral, gain +1/+1.'),
     'World Tree': (6, 5, 9, 'End of turn: give your other Ferals +2/+2.'),
     'Merch Stand': (2, 2, 3, 'After you play a Creative, gain 1 extra gold next turn (twice per turn).'),
-    'Method Actor': (2, 4, 1, None), 'Zine Maker': (1, 2, 1, None),
+    'Method Actor': (2, 4, 1, None), 'Zine Maker': (1, 2, 1, 'When sold: give the minion to its right +4/+4.'),
 }
 STYLE_V8 = {'Corporate Raider': 'EX'}
 for _c in ALL:
@@ -389,5 +389,31 @@ for _c in ALL:
     if _c.name in V6:
         _c.tier, _c.atk, _c.hp, _t = V6[_c.name]
         if _t: _c.text = _t
-TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat'),
-          Card('Pigeon', F, 1, 1, 1, '-', 'Attention Seeker.', 'There are always more pigeons.', taunt=True, kind='stat')]
+# ======================================================================== v9 Feral rework (Nov 3)
+# Tree Huggers (Attention Seekers, the Stoics' identity) becomes Scavengers: urban animals that rummage through the bins
+# (Scroll triggers, a trigger no other tribe uses) and keep coming back (Rebrand). Overgrowth keeps the plants and plant people.
+# Retired: Protest Camp, Human Chain, Old-Growth Blockade (activist Attention Seekers) and Monstera (its Scroll trigger moved
+# to the animals). The Pigeon token goes with City Pigeon's Legacy.
+STYLES.pop('TH', None); STYLES['SV'] = (F, 'Scavengers')
+_RETIRED = {'Protest Camp', 'Human Chain', 'Old-Growth Blockade', 'Monstera'}
+FERALS[:] = [c for c in FERALS if c.name not in _RETIRED]
+FERALS += [
+    Card('Seagull', F, 2, 3, 3, 'SV', 'After you Scroll, give another Feral +1/+1 (twice per turn).', 'Took your chips. Then the bag.'),
+    Card('Wild Boar', F, 4, 4, 5, 'SV', 'Start of combat: give the Ferals next to it Rebrand.', 'Knows which day is bin day.'),
+    Card('Rat King', F, 5, 4, 7, 'SV', 'After a friendly Feral comes back, give your other Ferals +2/+2.', 'Rules the tunnels. Nobody voted.'),
+    Card('Nature Is Healing', F, 6, 5, 9, 'SV', 'After you Scroll, give your other Ferals +1/+1 (twice per turn).', 'Swans in the canal. Foxes on the council.'),
+]
+_V9 = {  # name: (tier, atk, hp, style, text, taunt, shield, rebrand, kind)
+    'City Pigeon': (1, 1, 3, 'SV', 'After you Scroll, gain +1/+1 (twice per turn).', False, False, False, 'eng'),
+    'Trash Panda': (1, 2, 1, 'SV', 'Rebrand. When it comes back, give your other Ferals +1/+1.', False, False, True, 'eng'),
+    'Urban Fox': (3, 2, 3, 'SV', 'Rebrand. Clock In: give another Feral +2/+2 permanently.', False, False, True, 'eng'),
+    'Tree Hugger': (2, 2, 4, 'OG', 'Start of combat: give the Ferals next to it +2/+2.', False, False, False, 'eng'),
+    'Guerrilla Gardener': (4, 3, 5, 'OG', None, False, False, False, 'eng'),
+    'Compost Heap': (2, 1, 3, 'OG', None, False, False, False, 'eng'),
+}
+for _c in FERALS:
+    if _c.name in _V9:
+        _c.tier, _c.atk, _c.hp, _c.style, _t, _c.taunt, _c.shield, _c.rebrand, _c.kind = _V9[_c.name]
+        if _t: _c.text = _t
+ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
+TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]

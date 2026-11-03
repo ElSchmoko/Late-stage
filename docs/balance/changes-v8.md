@@ -92,3 +92,49 @@ Each changed card was re-measured (200 paired lobbies, `--card=` filter). Effect
 | Method Actor 4/1 (was 3/2); Zine Maker 2/1 (was 2/2) | Player review | +0.72 → +0.66; +0.34 → +0.37 |
 
 All are within the power band (−0.40…+0.45 of the tier median). Style placements after the change (1,400 lobbies, skill 0): 4.24–4.72, all at or ahead of the big-stats bot (4.73).
+
+## v9: Feral rework (Nov 3)
+
+**Problem.** Five Ferals were Attention Seekers (City Pigeon and its token, Tree Hugger, Protest Camp, Human Chain, Old-Growth Blockade). That is the Stoics' identity (seven Attention Seekers), and the activist cards didn't match the urban-wildlife flavour. Ferals were a weaker copy of Stoics.
+
+**Change.** Tree Huggers becomes **Scavengers (SV)**: urban animals that rummage through the bins and keep coming back.
+- **Scroll triggers ("rummaging").** No other tribe used them; Monstera was the only one, and it moves out with its plant.
+- **Rebrand payoffs ("you can't get rid of them").** Rebrand was spread thinly across three tribes.
+
+Overgrowth keeps the plants and plant people, and is unchanged apart from taking Tree Hugger and Guerrilla Gardener.
+
+| Card | Style | Tier | Stats | Text |
+| --- | --- | --- | --- | --- |
+| City Pigeon | SV | 1 | 1/3 | After you Scroll, gain +1/+1 (twice per turn). |
+| Trash Panda | SV | 1 | 2/1 | Rebrand. When it comes back, give your other Ferals +1/+1. |
+| Seagull (new) | SV | 2 | 3/3 | After you Scroll, give another Feral +1/+1 (twice per turn). |
+| Urban Fox | SV | 3 | 2/3 | Rebrand (was Out of Office). Clock In: give another Feral +2/+2 permanently. |
+| Wild Boar (new) | SV | 4 | 4/5 | Start of combat: give the Ferals next to it Rebrand. |
+| Rat King (new) | SV | 5 | 4/7 | After a friendly Feral comes back, give your other Ferals +2/+2. |
+| Nature Is Healing (new) | SV | 6 | 5/9 | After you Scroll, give your other Ferals +1/+1 (twice per turn). |
+| Tree Hugger | OG | 2 | 2/4 | Loses Attention Seeker (+1 Attack). |
+| Guerrilla Gardener | OG | 4 | 3/5 | Moves to Overgrowth. |
+| Compost Heap | OG | 2 | 1/3 | −1 Health. |
+
+Retired: Protest Camp, Human Chain, Old-Growth Blockade, Monstera, and the Pigeon token.
+
+Bots now put leftover gold into Scrolls while they still have Scroll triggers to use.
+
+**Tuning.** The first version put both Feral styles on top (Scavengers 4.01, Overgrowth 4.05). Turning off the bots' extra scrolling only moved them to 4.11/4.15, so the cards were the cause. Each Feral card sat 0.2–0.3 above its tier median, and the Scavenger cards that buff any Feral also lifted Overgrowth. Changes, one round at a time:
+1. Seagull +1 Health; Wild Boar −1/−1; Nature Is Healing three → twice per turn; Guerrilla Gardener −1 Attack; Compost Heap −1 Health; Urban Fox −1 Attack. Result: Overgrowth 4.21, Scavengers still 4.04.
+2. Trash Panda back to 2/1; Wild Boar loses its own Rebrand (4/5). Result: Scavengers 4.20, Overgrowth 4.37 (1,400 lobbies).
+
+**Checks after the change.**
+
+| Check | Result | Target |
+| --- | --- | --- |
+| Styles, standard bots (3,200 lobbies, `styles-v9.json`) | Scavengers 4.31, Overgrowth 4.35; all styles 4.19–4.76 | Band ≤ 0.60 ✓ |
+| 1st / 8th place | Scavengers 13% / 10%, Overgrowth 14% / 11% | 9–17% / ≤ 17% ✓ |
+| Early-game win rate | 0.51 / 0.50 | Within ±10 points ✓ |
+| Build-around ceiling (`--ceiling`, `cards-v9-ferals.json`) | Highest margin: Urban Fox +1.17, against a limit of +1.53 | ≤ tier median + 0.60 ✓ |
+| Dominance, redundancy | None; at most 2 cards per effect signature | ✓ |
+| Trigger variety | Most common Feral trigger (end of turn) 33%, was 43% | ≤ 40% ✓ |
+| Style coverage | Both styles have a card at tiers 1–6 | ✓ |
+| Smart bots | Band 0.94, driven by Posthumous Fame and Passive Income, not Ferals | ≤ 0.90 (noisy, half-diffs up to 1.3) |
+
+**Also fixed.** Two stat-only entries from the earlier player review overwrote newer card texts. Windowsill Succulent's card showed an old rule, and Zine Maker showed +3/+3 while giving +4/+4.

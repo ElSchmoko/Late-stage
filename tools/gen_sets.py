@@ -7,7 +7,7 @@ STYLE_BLURB = {
     'FO': 'Flood the board with 1/1 Followers, then make them huge.',
     'MC': 'Pour every buff into your single highest-Attack star.',
     'OG': 'Slow growers that get bigger at every end of turn.',
-    'TH': 'Attention Seekers that hold the line and shelter the rest.',
+    'SV': 'Animals that rummage through the bins and keep coming back.',
     'PE': 'Every Creative you play makes the whole band bigger.',
     'PF': 'Deaths and Legacies make the survivors legendary.',
     'GA': 'Collab gadgets onto your best minions to make them Techies.',

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M40 206 Q30 150 70 128 L130 128 Q176 150 166 206 Z" fill="#ffffff"/>
+<path d="M64 140 Q34 158 30 198 Q64 186 82 150 Z" fill="#c9c2d6"/>
+<path d="M136 140 Q166 158 170 198 Q136 186 118 150 Z" fill="#c9c2d6"/>
+<path d="M30 198 L22 206 M170 198 L178 206" fill="none"/>
+<circle cx="100" cy="92" r="40" fill="#ffffff"/>
+<circle cx="87.25" cy="86" r="9.775" fill="#ffffff"/>
+<circle cx="112.75" cy="86" r="9.775" fill="#ffffff"/>
+<circle cx="88.1" cy="87.275" r="3.23" fill="#2b2140" stroke="none"/>
+<circle cx="113.6" cy="87.275" r="3.23" fill="#2b2140" stroke="none"/>
+<path d="M78.75 70.7 L94.9 76.65" fill="none"/>
+<path d="M121.25 70.7 L105.1 76.65" fill="none"/>
+<path d="M84 104 L132 110 Q120 122 86 116 Z" fill="#ffc928"/>
+<circle cx="124" cy="113" r="3.5" fill="#ff6b5e" stroke="none"/>
+<rect x="132" y="132" width="44" height="50" rx="4" fill="#ff6b5e" transform="rotate(10 154 157)"/>
+<rect x="136" y="112" width="7" height="30" rx="2" fill="#ffc928" transform="rotate(6 154 157)"/>
+<rect x="144" y="118" width="7" height="30" rx="2" fill="#ffc928" transform="rotate(10 154 157)"/>
+<rect x="152" y="112" width="7" height="30" rx="2" fill="#ffc928" transform="rotate(14 154 157)"/>
+<rect x="160" y="118" width="7" height="30" rx="2" fill="#ffc928" transform="rotate(18 154 157)"/>
+<path d="M140 150 Q154 160 170 152" fill="none" transform="rotate(10 154 157)"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

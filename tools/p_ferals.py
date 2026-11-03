@@ -183,3 +183,59 @@ def _():
 
 
 TRIBE = 'Feral'
+
+
+# ---- v9 Scavengers ----
+@reg('seagull', 'Seagull')
+def _():
+    fries = [rect(132, 132, 44, 50, RED, 4, ' transform="rotate(10 154 157)"'),
+             *[rect(136 + 8 * i, 112 + (i % 2) * 6, 7, 30, Y, 2, f' transform="rotate({6 + 4 * i} 154 157)"') for i in range(4)],
+             path('M140 150 Q154 160 170 152', 'none', ' transform="rotate(10 154 157)"')]
+    return [path('M40 206 Q30 150 70 128 L130 128 Q176 150 166 206 Z', W),
+            path('M64 140 Q34 158 30 198 Q64 186 82 150 Z', GREY), path('M136 140 Q166 158 170 198 Q136 186 118 150 Z', GREY),
+            path('M30 198 L22 206 M170 198 L178 206', 'none'),
+            circ(100, 92, 40, W), *face(100, 86, .85, 'angry', 'none', blush=False),
+            path('M84 104 L132 110 Q120 122 86 116 Z', Y), dot(124, 113, 3.5, RED),
+            *fries]
+
+
+@reg('wildboar', 'Wild Boar')
+def _():
+    BOAR, DBOAR = '#8a6a52', '#5e4636'
+    return [g([rect(132, 120, 52, 76, DGREY, 6), rect(126, 112, 64, 14, GREY, 6), path('M146 136 L146 186 M166 136 L166 186'),
+            path('M150 112 Q160 92 176 104', 'none'), rect(118, 178, 40, 16, '#ffe08a', 3, ' transform="rotate(-18 138 186)"'),
+            path('M24 206 Q22 150 64 128 L124 128 Q160 150 156 206 Z', BOAR),
+            path('M56 64 L50 30 L80 52 Z', BOAR), path('M144 64 L150 30 L120 52 Z', BOAR),
+            path('M70 46 L76 30 L84 46 L92 26 L100 44 L108 26 L116 46 L124 30 L130 46', DBOAR),
+            path('M52 70 Q52 44 100 42 Q148 44 148 70 Q156 112 100 138 Q44 112 52 70 Z', BOAR),
+            *face(100, 80, .8, 'angry', 'none', blush=False),
+            ell(100, 114, 26, 18, '#ff9a8a'), ell(92, 114, 4, 6, INK), ell(108, 114, 4, 6, INK),
+            path('M74 118 Q66 104 70 94 Q76 106 82 112 Z', W), path('M126 118 Q134 104 130 94 Q124 106 118 112 Z', W)], 'translate(0 18)')]
+
+
+@reg('ratking', 'Rat King')
+def _():
+    RAT = '#a79fb8'
+    crown = path('M66 46 L66 20 L80 34 L100 14 L120 34 L134 20 L134 46 Z', Y)
+    return [g([path('M150 196 Q196 176 186 132 Q180 112 164 118', 'none', ' stroke-width="7"'),
+            path('M150 196 Q196 176 186 132 Q180 112 164 118', 'none', f' stroke="{PINK}" stroke-width="3"'),
+            path('M34 206 Q36 150 70 136 L130 136 Q164 150 166 206 Z', RED), path('M70 136 L100 170 L130 136', W),
+            *[dot(84 + 10 * i, 152 + (i % 2) * 6, 2.5) for i in range(4)],
+            circ(56, 70, 22, RAT), circ(144, 70, 22, RAT), circ(56, 70, 12, PINK), circ(144, 70, 12, PINK),
+            path('M58 84 Q60 50 100 48 Q140 50 142 84 Q140 116 112 130 L100 142 L88 130 Q60 116 58 84 Z', RAT),
+            *face(100, 88, .7, 'open', 'none', blush=True, brows='flat'),
+            circ(100, 132, 6, PINK), path('M86 132 L64 128 M86 136 L66 140 M114 132 L136 128 M114 136 L134 140', 'none'),
+            crown, circ(100, 30, 4, RED), circ(78, 40, 3, TEAL), circ(122, 40, 3, TEAL)], 'translate(0 24)')]
+
+
+@reg('natureishealing', 'Nature Is Healing')
+def _():
+    trolley = g([rect(0, 0, 50, 30, 'none', 3), path('M0 10 L50 10 M0 20 L50 20 M12 0 L12 30 M25 0 L25 30 M38 0 L38 30'),
+                 path('M50 0 L60 -10 L68 -10')], 'translate(132 132) rotate(14)')
+    return [trolley, rect(0, 160, 200, 46, SKY), path('M0 160 L200 160'),
+            path('M12 182 Q28 174 44 182 M150 194 Q166 186 182 194 M86 200 Q100 194 114 200', 'none'),
+            path('M82 150 Q100 130 88 108 Q76 86 94 66 L106 70 Q92 88 100 108 Q114 130 98 152 Z', W),
+            path('M28 176 Q24 136 64 136 L96 138 Q114 156 96 178 Z', W),
+            path('M42 152 Q54 144 76 150 Q64 162 42 158 Z', '#eeeaf5'),
+            circ(102, 70, 13, W), path('M112 68 L130 74 L112 78 Z', ORA), path('M106 66 L114 62 L112 72 Z', INK), dot(102, 66, 2.6),
+            sparkle(40, 84, 9, Y), sparkle(160, 66, 7, Y), sparkle(176, 112, 6, W)]

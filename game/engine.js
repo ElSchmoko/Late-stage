@@ -12,7 +12,7 @@ const COPIES = {1: 16, 2: 15, 3: 13, 4: 11, 5: 9, 6: 7};
 const P_ = {vv: 4, mc: 4};
 const RIGHT_GIVERS = new Set(['Shower Thinker', 'Zine Maker', 'Marathon Monk']);
 const LEFT_GIVERS = new Set(['Pub Philosopher']);
-const NB_GIVERS = new Set(['Rooftop Beehive', 'Thought Experiment', 'Bestselling Author', 'Tree Hugger', 'Human Chain', 'Desert Hermit',
+const NB_GIVERS = new Set(['Rooftop Beehive', 'Thought Experiment', 'Bestselling Author', 'Tree Hugger', 'Wild Boar', 'Desert Hermit',
   'Squat Collective', 'Package Hoarder', 'Open Mic Poet', 'Thought Leader', 'Caretaker', 'Nihilist', 'World Record', 'E-Sports Coach']);
 const NEUTRAL_GOOD = {'Caretaker': 2, 'The Landlord': 2, 'Block Party Host': 4, 'Package Hoarder': 1, 'Wi-Fi Leech': 1, 'Leaf Blower Guy': 1};
 const SELL_STYLES = ['EX', 'SO'];
@@ -91,7 +91,7 @@ class Player {
     this.sold_hustle = false; this.punks_sold = 0; this.kills_last = 0; this.techie_kills = 0; this.spent_this_turn = 0;
     this.human = !!opts.human; this.hero = opts.hero || null; this.name = opts.name || style;
     this.hand = []; this.feed = []; this.saved = false; this.gold = [0]; this.log = []; this.pending = []; this.lostLast = false;
-    this.skill = opts.skill ?? 0; this.monsteraUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
+    this.skill = opts.skill ?? 0; this.scrollUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
     this.likes = 0; this.likeBonus = 0; this.likesSpent = 0; this.feedBuff = {}; this.creativeAtk = 0; this.creativesThisTurn = 0; this.gigUsed = new Set(); this.feedRef = null; this.getFeed = null;
   }
   has(n) { return this.board.some(m => m.is_(n)); }
@@ -325,7 +325,6 @@ class Player {
           if (o.hp <= 0) { b.splice(b.indexOf(o), 1); this.note('shopdeath', {id: o.id}); this.onShopDeath(o); } }
       } else if (n === 'Block Party Host') { for (const o of b) { const k = neighbours(b, o).length; if (k) this.buff(o, k, k, m); } }
       else if (n === 'Unicorn Startup') { const g = this.spent_this_turn >> 1; if (g) for (const o of b) if (o !== m && o.tribe === H) this.buff(o, g, g, m); }
-      else if (n === 'Protest Camp') { for (const o of b) if (o !== m && o.taunt && o.tribe === F) this.buff(o, 3, 3, m); }
       else if (n === 'Windowsill Succulent') { if (b.some(o => o !== m && o.tribe === F)) this.buff(m, 1, 1, m); }
       else if (n === 'Record Label') { const k = 3 * this.creativesThisTurn, cr = b.filter(o => o !== m && o.tribe === C); if (k && cr.length) this.buff(this.rng.choice(cr), k, k, m); }
       else if (n === 'Plant Parent') { const fs = this.rng.shuffle(b.filter(o => o !== m && o.tribe === F)).slice(0, 2); for (const o of fs) this.buff(o, 1, 1, m); }
@@ -361,9 +360,25 @@ class Player {
   payScroll() {
     const c = this.scrollCost(); if (this.gold[0] < c) return false;
     this.gold[0] -= c; if (c) this.gainSpend(c); this.scrollsThisTurn++; this.scrollsTotal++;
-    for (const m of this.board) if (m.is_('Monstera')) { const k = (this.monsteraUses[m.id] || 0); if (k < 2) { this.monsteraUses[m.id] = k + 1; this.buff(m, m.g, m.g, m); } }
+    // Scavengers rummage through what the Scroll threw out
+    for (const m of this.board.slice()) {
+      if (m.is_('City Pigeon') && this.scrollUse(m, 2)) this.buff(m, m.g, m.g, m);
+      if (m.is_('Seagull')) { const fs = this.board.filter(o => o !== m && isTribe(o, F)); if (fs.length && this.scrollUse(m, 2, 'sg')) this.buff(this.rng.choice(fs), m.g, m.g, m); }
+      if (m.is_('Nature Is Healing') && this.scrollUse(m, 2, 'nh')) { for (const o of this.board) if (o !== m && isTribe(o, F)) this.buff(o, m.g, m.g, m); }
+    }
     if (this.hero === 'h_doomscroller' && this.scrollsTotal % DOOM_EVERY === 0) this.heroDiscover(this.tier);
     return true;
+  }
+  scrollUse(m, max, key = '') { const id = m.id + key, k = this.scrollUses[id] || 0; if (k >= max) return false; this.scrollUses[id] = k + 1; return true; }
+  /** How many Scroll triggers this board still has this turn (bots scroll leftover gold into them). */
+  scrollWant() {
+    let n = 0; const U = this.scrollUses;
+    for (const m of this.board) {
+      if (m.is_('City Pigeon')) n += 2 - (U[m.id] || 0);
+      if (m.is_('Seagull') && this.board.some(o => o !== m && isTribe(o, F))) n += 2 - (U[m.id + 'sg'] || 0);
+      if (m.is_('Nature Is Healing')) n += 2 * (2 - (U[m.id + 'nh'] || 0));
+    }
+    return n;
   }
   doomLeft() { return DOOM_EVERY - (this.scrollsTotal % DOOM_EVERY); }
 
@@ -406,7 +421,7 @@ class Player {
   beginTurn() {
     this.turn += 1; this.kills_last = this.techie_kills; this.techie_kills = 0; this.buffed = new Set();
     this.merch_used = this.side_used = this.sold_hustle = false; this.merchUsed = {}; this.resellUsed = new Set(); this.creativesThisTurn = 0; this.gigUsed = new Set(); this.rerelease = []; this.discounts = {}; this.in_eot = this.oak = false;
-    this.powerUsed = false; this.scrollsThisTurn = 0; this.monsteraUses = {};
+    this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollUses = {};
     for (const m of this.board) { m.turns_on_board += 1; m.ta = m.th = 0; }
     const carry = this.hero === 'h_procrastinator' ? Math.min(3, this.gold[0]) : 0;
     this.gold = [Math.min(2 + this.turn, 10) + this.bonus_next + carry]; this.gold_from = {base: Math.min(2 + this.turn, 10), bonus: this.bonus_next, carry};
@@ -470,6 +485,8 @@ class Player {
         }
       }
       if (gold[0] >= this.minionCost() + sc && scrolls < maxScrolls) { if (this.payScroll()) { scrolls++; feed = this.feedEntries(this.drawFeed()); continue; } }
+      // leftover gold goes into Scroll triggers (City Pigeon, Seagull, Nature Is Healing)
+      if (gold[0] >= sc && scrolls < maxScrolls + 6 && this.scrollWant() > 0) { if (this.payScroll()) { scrolls++; feed = this.feedEntries(this.drawFeed()); continue; } }
       break;
     }
     if (hp === 'h_serial' && this.canPower() && this.board.length) { const low = minBy(this.board.filter(m => !m.golden && m.tier < 6), m => [m.tier, this.value(m)]); if (low && low.tier <= this.tier) this.usePower(low, feed); }
@@ -599,8 +616,7 @@ class Fight {
       else if (n === 'Tree Hugger') { const nb = neighbours(b, m).filter(o => isTribe(o, F)); for (const o of nb) { o.atk += 2 * g; o.hp += 2 * g; } if (nb.length) ev(m, 'give', nb); }
       else if (n === 'Utilitarian') { const os = b.filter(o => o !== m && o.tribe === PH).sort((x, y) => x.atk - y.atk).slice(0, 3); for (const o of os) { o.atk += 3 * g; o.hp += 3 * g; } if (os.length) ev(m, 'give', os); }
       else if (n === 'Book-Club Stoic') { const os = b.filter(o => o !== m && o.taunt); for (const o of os) { o.atk += 2 * g; o.hp += 2 * g; } if (os.length) ev(m, 'give', os); }
-      else if (n === 'Human Chain') { const nb = reach(m, g); for (const o of nb) o.shield = true; ev(m, 'give', nb); }
-      else if (n === 'Old-Growth Blockade') { const os = b.filter(o => o !== m); for (const o of os) { o.atk += taunts * g; o.hp += taunts * g; } ev(m, 'give', os); }
+      else if (n === 'Wild Boar') { const nb = reach(m, g).filter(o => isTribe(o, F)); for (const o of nb) o.rebrand = true; if (nb.length) ev(m, 'give', nb); }
       else if (n === 'E-Sports Coach') { const nb = reach(m, g); for (const o of nb) o.toxic = true; if (nb.length) ev(m, 'give', nb); }
       else if (n === 'World Record') { const os = b.filter(o => o !== m && isTribe(o, T)).slice(0, g); for (const o of os) o.toxic = true; if (os.length) ev(m, 'give', os); }
       else if (n === 'Graffiti Kid' && e.length) { hit(e[0], punks * g + amp); ev(m, 'shot', [e[0]]); }
@@ -667,7 +683,6 @@ class Fight {
           if (n === 'Reply Guy') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'Comment Section') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'Brand Ambassador') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
-          else if (n === 'City Pigeon') { for (let i = 0; i < g; i++) combatToken(side, idx, 'Pigeon'); legacy = true; }
           else if (n === 'Compost Heap') { if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(F, g, g); legacy = true; }
           else if (n === 'Package Hoarder' || n === 'Open Mic Poet') { const k = n === 'Package Hoarder' ? 3 : 2; for (const o of nbs) { o.atk += k * g; o.hp += k * g; } legacy = true; }
           else if (n === 'Golden Parachute Exec' && side.p && !side.p.ghost) { side.p.bonus_next += 2 * g; legacy = true; }
@@ -694,6 +709,9 @@ class Fight {
           const r = Object.assign(Object.create(Object.getPrototypeOf(m)), m);
           r.hp = 1; r.rebrand = false; r.extras = m.extras.slice(); r.hits = 0; r.id = UID++; r.orig = m.orig;
           b.splice(Math.min(idx, b.length), 0, r); this.frame({type: 'rebrand', side: k, id: r.id});
+          // Scavengers: "when it comes back" / "after a friendly Feral comes back"
+          if (r.is_('Trash Panda')) { const os = b.filter(o => o !== r && isTribe(o, F)); for (const o of os) { o.atk += r.g; o.hp += r.g; } if (os.length) this.frame({type: 'trigger', src: r.id}); }
+          if (isTribe(r, F)) for (const v of b) if (v.is_('Rat King')) { for (const o of b) if (o !== v && isTribe(o, F)) { o.atk += 2 * v.g; o.hp += 2 * v.g; } this.frame({type: 'trigger', src: v.id}); }
         }
         changed = true; break;
       }
