@@ -1,10 +1,10 @@
-// Ladder check: a bot of fixed skill climbs from 800 in rating-matched lobbies; prints where its rating settles.
+// Ladder check: a bot of fixed skill climbs from 0 in rating-matched lobbies; prints where its rating settles.
 globalThis.window = globalThis;
 require('./data.js'); require('./engine.js'); require('./lobby.js');
 const E = LSEngine; E.load(LS_CARDS, LS_STYLES);
 const games = +process.argv[2] || 150;
 for (const s of (process.argv[3] || '0,0.25,0.5,0.75,1').split(',').map(Number)) {
-  let R = 800; const hist = [];
+  let R = 0; const hist = [];
   for (let g = 0; g < games; g++) {
     const L = new LSLobby(50000 + g * 7 + Math.round(s * 1000), {rating: R});
     const me = L.players[0]; me.skill = s; me.rating = R;

@@ -8,9 +8,18 @@ const HEROES = window.LS_HEROES, HERO = Object.fromEntries(HEROES.map(h => [h.sl
 const STARTERS = ['remote', 'boomer', 'h_gymbro', 'h_procrastinator'];
 // ---------------------------------------------------------------- profile: rating, unlocks, lifetime stats (saved on this device)
 const PKEY = 'ls_profile_v1';
-const START_RATING = 800;
-function freshProfile() { return {rating: START_RATING, peak: START_RATING, games: 0, top4: 0, wins: 0, unlocked: STARTERS.slice(), seen: STARTERS.slice(), stats: {hires: 0, scrolls: 0, deaths: 0}, flags: {}, history: []}; }
-function loadProfile() { try { const p = JSON.parse(localStorage.getItem(PKEY)); if (p && p.rating != null) return Object.assign(freshProfile(), p, {stats: Object.assign(freshProfile().stats, p.stats), flags: p.flags || {}}); } catch (e) {} return freshProfile(); }
+const START_RATING = 0;
+function freshProfile() { return {v: 2, rating: START_RATING, peak: START_RATING, games: 0, top4: 0, wins: 0, unlocked: STARTERS.slice(), seen: STARTERS.slice(), stats: {hires: 0, scrolls: 0, deaths: 0}, flags: {}, history: []}; }
+function loadProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem(PKEY));
+    if (p && p.rating != null) {
+      if (!p.v) { p.v = 2; p.rating = Math.max(0, p.rating - 800); p.peak = Math.max(p.rating, (p.peak || 0) - 800); }   // ratings used to start at 800
+      return Object.assign(freshProfile(), p, {stats: Object.assign(freshProfile().stats, p.stats), flags: p.flags || {}});
+    }
+  } catch (e) {}
+  return freshProfile();
+}
 function saveProfile() { try { localStorage.setItem(PKEY, JSON.stringify(PROF)); } catch (e) {} }
 const PROF = loadProfile();
 const BRACKETS = [[0, 'Unpaid Intern', '#c9c2d6'], [1000, 'Junior Associate', '#8fd4ff'], [2000, 'Middle Management', '#4fd1c5'], [3000, 'Director', '#b18cff'], [4000, 'Vice President', '#ff8ab8'], [5000, 'C-Suite', '#ff8a3d'], [6500, 'Billionaire', '#ffc928']];

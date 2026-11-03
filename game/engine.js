@@ -71,7 +71,7 @@ const minBy = (arr, f) => arr.reduce((best, x) => (best === null || cmp(f(x), f(
 function cmp(a, b) { if (Array.isArray(a)) { for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return a[i] > b[i] ? 1 : -1; } return 0; } return a === b ? 0 : a > b ? 1 : -1; }
 const doubled = b => b.flatMap(x => x.golden ? [x, x] : [x]);
 const wsum = (b, n) => b.reduce((s, m) => s + m.w(n), 0);
-const skillOf = r => Math.max(0, Math.min(1, (r - 600) / 4000));
+const skillOf = r => Math.max(0, Math.min(1, r / 5000));
 
 // ---------- pool ----------
 function buildPool(tribes) {
@@ -91,7 +91,7 @@ class Player {
     this.sold_hustle = false; this.punks_sold = 0; this.kills_last = 0; this.techie_kills = 0; this.spent_this_turn = 0;
     this.human = !!opts.human; this.hero = opts.hero || null; this.name = opts.name || style;
     this.hand = []; this.feed = []; this.saved = false; this.gold = [0]; this.log = []; this.pending = []; this.lostLast = false;
-    this.skill = opts.skill ?? 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = new Set(); this.resellUsed = new Set();
+    this.skill = opts.skill ?? 0; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = new Set(); this.resellUsed = new Set();
     this.likes = 0; this.likeBonus = 0; this.likesSpent = 0; this.feedBuff = {}; this.creativeAtk = 0; this.creativesThisTurn = 0; this.gigUsed = new Set(); this.feedRef = null; this.getFeed = null;
   }
   has(n) { return this.board.some(m => m.is_(n)); }
@@ -416,19 +416,35 @@ class Player {
     if (SELL_STYLES.includes(this.style) || [H, P].includes(this.tribe))
       for (const m of this.board.slice()) if (m.c && m.c.sellbait && m.turns_on_board >= 1 && this.board.length > 4) this.sell(m, gold);
     const target = CURVE[this.turn] || 6;
-    // low skill: sometimes forgets to level on curve; high skill levels a turn early when healthy and ahead on gold
-    const lazy = r() < 0.4 * (1 - sk), eager = sk > 0.6 && this.health >= 20 && this.turn >= 4 && r() < sk - 0.4;
-    if (this.tier < 6 && ((this.tier < target && !lazy) || (eager && this.tier === target))) {
+    // skill 0 is the standard bot. Skill adds: levelling a turn early when healthy and rich
+    let eager = sk >= 0.4 && this.health >= 20 && this.turn >= 4 && r() < sk, hold = false;
+    // skill 0.6+: judge the board in simulated fights first; level early when ahead, stabilise when behind and hurting
+    const scouted = sk >= 0.5 ? this.scoutBoards() : [];
+    if (sk >= 0.6 && scouted.length && this.board.length && this.tier < 6) {
+      const w = this.simScore(this.board, scouted);
+      if (w >= 0.7 && this.turn >= 3) eager = true;
+      if (w < 0.3 && this.health + this.boundaries < 16) { eager = false; hold = this.tier >= target - 1; }
+    }
+    if (this.tier < 6 && !hold && (this.tier < target || (eager && this.tier <= target))) {
       const cost = this.levelCost(); if (gold[0] >= cost + (this.tier >= target ? 3 : 0)) { gold[0] -= cost; this.gainSpend(cost); this.tier += 1; this.turns_at_tier = 0; }
     }
     let feed = this.savedFeed || this.feedEntries(this.drawFeed()); this.savedFeed = null;
     this.getFeed = () => feed;
     let scrolls = 0, digs = 0, swaps = 0, guard = 0;
-    const maxScrolls = Math.round(1 + 3 * sk + (this.health < 12 ? 2 * sk : 0));
+    const maxScrolls = 4 + (this.health < 12 ? Math.round(3 * sk) : 0);
     const hp = this.hero;
     if (hp === 'h_overthinker' && this.canPower() && this.board.length < 7 && gold[0] >= 2 + (this.turn > 2 ? 3 : 0)) this.usePower(null, feed);
-    if (hp === 'boomer' && this.canPower() && gold[0] >= 4 && r() < 0.5 + 0.5 * sk) this.usePower(this.board.length ? this.carry() : null, feed);
-    const pick = afford => (r() < 0.4 * (1 - sk)) ? r.choice(afford) : maxBy(afford, e => this.cardScore(e.card) + (e.a + e.h) / 4);
+    if (hp === 'boomer' && this.canPower() && gold[0] >= 4) this.usePower(this.board.length ? this.carry() : null, feed);
+    const opps = scouted;
+    const pick = afford => {
+      const sc = e => this.cardScore(e.card) + (e.a + e.h) / 4;
+      // skill 0.75+: among the top few candidates, test each in simulated fights against scouted boards
+      if (sk >= 0.75 && opps.length && afford.length > 1) {
+        const top = afford.slice().sort((x, y) => sc(y) - sc(x)).slice(0, 3);
+        if (sc(top[0]) - sc(top[top.length - 1]) < 4) return maxBy(top, e => sc(e) + 8 * sk * this.simWith(e, opps));
+      }
+      return maxBy(afford, sc);
+    };
     while (guard++ < 60) {
       if (this.rerelease.length) { for (const c of this.rerelease) feed.push({card: c, a: 0, h: 0, discount: this.rereleaseCost}); this.rerelease = []; }
       const afford = feed.filter(e => this.minionCost(e) <= gold[0]);
@@ -443,7 +459,7 @@ class Player {
       if (sc === 0 && scrolls === 0 && best && this.tribe && best.card.tribe !== this.tribe) { this.payScroll(); scrolls++; feed = this.feedEntries(this.drawFeed()); continue; }
       if (best) {
         const bs = this.cardScore(best.card), free = this.board.length < 7 || (best.card.collab && this.board.length);
-        if (free || (swaps < 3 && bs > this.value(worst) + 1.5 && r() < 0.3 + 0.7 * sk)) {
+        if (free || (swaps < 3 && bs > this.value(worst) + 1.5)) {
           if (!free) { this.sell(worst, gold); swaps++; }
           gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1); this.play(best.card, gold, null, null, best); continue;
         }
@@ -455,13 +471,54 @@ class Player {
     if (hp === 'h_lifecoach' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
     if (hp === 'boomer' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
     for (const m of this.board.slice()) if (this.canGig(m) && this.board.length) this.sideGig(m, this.carry());
-    if (r() < sk) this.spendLikes(); else while (this.likes > 0 && this.board.length) this.giveLike(r.choice(this.board));
+    this.spendLikes();
     this.spent_this_turn = this.spent - this.spent_start;
     // skilled bots Save a Feed that holds a card they want but couldn't afford
-    if (sk > 0.5 && feed.length && r() < sk && feed.some(e => this.cardScore(e.card) > 9 || this.board.some(m => m.name === e.card.name && !m.golden))) this.savedFeed = feed;
+    if (sk >= 0.3 && feed.length && r() < sk + 0.3 && feed.some(e => this.cardScore(e.card) > 9 || this.board.some(m => m.name === e.card.name && !m.golden))) this.savedFeed = feed;
     this.feedRef = feed; this.getFeed = null;
-    if (r() < 0.3 + 0.7 * sk) this.arrange();
+    this.arrange();
     this.endOfTurn();
+    if (opps.length) this.searchOrder(opps, sk);
+  }
+
+  // ---- scouting (smarter bots): simulated fights against the boards opponents showed last round
+  scoutBoards() {
+    const s = this.scout || []; if (!s.length) return [];
+    const next = s.filter(o => o.next), rest = s.filter(o => !o.next).sort((a, b) => b.power - a.power);
+    return next.concat(rest).slice(0, 3);
+  }
+  simScore(board, opps, seeds = 1) {
+    let tot = 0, n = 0;
+    for (const o of opps) for (let k = 0; k < seeds; k++) {
+      const f = new Fight({ghost: true, hero: this.hero, punks_sold: this.punks_sold}, {ghost: true, hero: o.hero}, board, o.board, RNG(this.simSeed++ * 7919));
+      f.quiet = true; f.run();
+      const w = (o.next ? 2 : 1);
+      tot += w * (f.result === 1 ? 1 + 0.02 * f.survivors.length : f.result === 0 ? 0.5 : 0); n += w;
+    }
+    return tot / n;
+  }
+  simWith(entry, opps) {
+    const m = new M(entry.card); UID--; m.atk += entry.a; m.hp += entry.h;
+    let b = this.board.slice();
+    if (entry.card.collab) { if (!b.length) return 0; const c = this.carry(); const cp = Object.assign(Object.create(M.prototype), c, {extras: c.extras.concat(entry.card.name), atk: c.atk + entry.card.atk, hp: c.hp + entry.card.hp}); b[b.indexOf(c)] = cp; }
+    else if (b.length >= 7) { const w = minBy(b, x => this.value(x)); b.splice(b.indexOf(w), 1, m); } else b.push(m);
+    return this.simScore(b, opps);
+  }
+  /** Tries several orderings of the board in simulated fights and keeps the best one. */
+  searchOrder(opps, sk) {
+    const b = this.board; if (b.length < 2) return;
+    const cands = [b.slice()];
+    const byStats = b.slice().sort((x, y) => x.stats() - y.stats());
+    cands.push(byStats, byStats.slice().reverse());
+    cands.push(b.filter(m => m.taunt).concat(b.filter(m => !m.taunt)));
+    cands.push(b.filter(m => !m.taunt).concat(b.filter(m => m.taunt)));
+    const legacyFirst = b.filter(m => m.c && /Legacy|Rebrand/.test(m.c.text)).concat(b.filter(m => !(m.c && /Legacy|Rebrand/.test(m.c.text))));
+    cands.push(legacyFirst);
+    for (let i = 0; i < Math.round(4 * sk); i++) cands.push(this.rng.shuffle(b.slice()));
+    const seeds = sk >= 0.9 ? 2 : 1;
+    let best = cands[0], bs = this.simScore(cands[0], opps, seeds) + 0.01;   // small bias to keep the current order on ties
+    for (const c of cands.slice(1)) { const v = this.simScore(c, opps, seeds); if (v > bs) { bs = v; best = c; } }
+    this.board = best;
   }
 }
 
@@ -511,7 +568,7 @@ class Fight {
     if (pb === null || pb.ghost) B.forEach(m => m.orig = null);
     this.sides = [new Side(pa, A), new Side(pb, B)];
   }
-  frame(ev) { this.frames.push(Object.assign({boards: [snap(this.sides[0]), snap(this.sides[1])]}, ev)); for (const s of this.sides) for (const m of s.b) { m.popped = false; m.toxicked = false; } }
+  frame(ev) { if (this.quiet) { for (const s of this.sides) for (const m of s.b) { m.popped = false; m.toxicked = false; } return; } this.frames.push(Object.assign({boards: [snap(this.sides[0]), snap(this.sides[1])]}, ev)); for (const s of this.sides) for (const m of s.b) { m.popped = false; m.toxicked = false; } }
   startOfCombat(k) {
     const me = this.sides[k], them = this.sides[1 - k], b = me.b, e = them.b;
     const punks = b.filter(m => m.tribe === P).length, taunts = b.filter(m => m.taunt).length;

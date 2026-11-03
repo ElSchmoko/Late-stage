@@ -25,16 +25,19 @@ class Lobby {
       h.tribe = null; this.players.push(h); this.human = h;
     }
     chosen.forEach((s, i) => {
-      const rating = botRating(), skill = opts.skill != null ? opts.skill : rating == null ? 1 : E.skillOf(rating);
-      // unskilled bots often ignore tribes and just buy big stats
-      if (s !== 'BASE' && skill < 0.35 && this.rng() < (0.35 - skill) * 1.6) s = 'BASE';
+      const rating = botRating(), skill = opts.skill != null ? opts.skill : rating == null ? 0 : E.skillOf(rating);
       const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero: opts.botHeroes ? opts.botHeroes[i] : heroes[i], name: s, rating, skill});
       this.players.push(p);
     });
     this.turn = 0; this.deadOrder = []; this.ghosts = []; this.lastPairs = [];
   }
   alive() { return this.players.filter(p => p.alive); }
-  botTurns() { for (const p of this.alive()) if (!p.human) p.takeTurn(); }
+  botTurns() {
+    for (const p of this.alive()) if (!p.human) {
+      if (p.skill >= 0.5) p.scout = this.alive().filter(q => q !== p && q.lastSeen).map(q => ({board: q.lastSeen, hero: q.hero, power: q.lastSeen.reduce((s, m) => s + m.atk + m.hp, 0), next: this.nextOpponentFor(p) === q}));
+      p.takeTurn();
+    }
+  }
   pair() {
     const alive = this.rng.shuffle(this.alive());
     // keep the human from facing the same opponent twice in a row when possible
@@ -50,6 +53,7 @@ class Lobby {
     this.turn += 1;
     const pairs = this.plannedPairs || this.pair();
     this.plannedPairs = null;
+    for (const p of this.alive()) p.lastSeen = p.board.map(m => Object.assign(Object.create(Object.getPrototypeOf(m)), m, {extras: m.extras.slice(), orig: null}));
     let humanFight = null;
     this.results = [];
     for (let [a, b] of pairs) {

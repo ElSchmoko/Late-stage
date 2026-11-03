@@ -83,12 +83,20 @@ Text and engine mismatches fixed along the way:
 
 ## Rating ladder
 
-- **Rating:** everyone starts at 800. After a run, the rating moves by Elo against each of the 7 bots: 40 × Σ(result − expected). With equal ratings, 1st place gives +140, 4th +20, 5th −20 and 8th −140.
-- **Bot ratings:** each bot is rated around the player's rating (±140). A bot's skill is (rating − 600) / 4000, capped to 0–1.
-- **What bot skill changes:**
-  - Low-skill bots sometimes buy a random card, forget to level, skip the sell-to-upgrade swap, scroll less, don't arrange the board, and hand out Likes at random.
-  - Under 0.35 skill, many bots switch to "big stats only".
-  - High-skill bots level a turn early when healthy, value pairs toward triples, Save a Feed with a card they want, and scroll more when low on Health.
+- **Rating:** everyone starts at 0, and a run can never take you below 0. After a run, the rating moves by Elo against each of the 7 bots: 40 × Σ(result − expected). With equal ratings, 1st place gives +140, 4th +20, 5th −20 and 8th −140.
+- **Bot ratings:** each bot is rated around the player's rating (±140). A bot's skill is rating / 5000, capped to 0–1.
+- **Skill 0 is the standard bot.** Low brackets are not dumbed down. Skill only adds behaviour on top:
+
+  | Skill | What the bot adds |
+  | --- | --- |
+  | > 0 | Values pairs toward triples (more with skill) |
+  | 0.3+ | Saves a Feed that holds a card it wants |
+  | 0.4+ | Levels a turn early when healthy |
+  | 0.5+ | Scouts: simulates fights against the boards its opponents showed last round (the next opponent counts double) and tries several orderings of its board after end of turn, keeping the best |
+  | 0.6+ | Tempo: levels early when its board already wins the simulated fights; holds levelling to stabilise when it is losing and low on Health |
+  | 0.75+ | Tests the top 3 Feed candidates in simulated fights before buying |
+  | High skill, low Health | Scrolls more |
+
 - **Brackets:**
 
   | From | Bracket |
@@ -101,7 +109,9 @@ Text and engine mismatches fixed along the way:
   | 5,000 | C-Suite |
   | 6,500 | Billionaire |
 
+  Bots reach full skill at 5,000.
+
 Checks:
 
-- **`node game/skillsim.js 800 0 1`:** zero-skill bots place 5.22 on average and full-skill bots 3.78 in the same lobbies.
-- **`node game/laddersim.js 160`:** a player of fixed skill settles at about 1,000 (skill 0), 1,600 (0.5), 2,300 (0.75) and 4,600 (1.0).
+- **`node game/skillsim.js 330 0 1`:** in the same lobbies, standard bots place 4.82 on average and full-skill bots 4.18.
+- **`node game/laddersim.js 90 0,1`:** starting from 0, a player who plays like the standard bot hovers near the bottom (averages about 650). One who plays like the full-skill bot is still climbing after 90 runs (about 2,200).
