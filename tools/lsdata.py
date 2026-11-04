@@ -199,7 +199,7 @@ SHORT = {
     'Private Equity': 'End of turn: Acquire the highest-Attack Feed minion: gain half its stats.',
     'Unicorn Startup': 'End of turn: other Hustlers get +1/+1 per 2 gold you spent.',
     'Too Big to Fail': 'Attention Seeker. Survives its first death each combat at 1 Health. Other Hustlers get +4/+4.',
-    'Brand Ambassador': 'Start of combat: Followers get +1/+1 per Influencer you have. Legacy: summon two Followers.',
+    'Brand Ambassador': 'Start of combat: all your Followers this combat get +1/+1 per Influencer. Legacy: summon two Followers.',
     'Ring Light Studio': 'End of turn: get 2 Likes. While this is on your board, Likes count double.',
     'World Tree': 'End of turn: give your other Ferals +2/+2.',
     'Nature Is Healing': 'After you Scroll, give your other Ferals +2/+2 (twice per turn).',

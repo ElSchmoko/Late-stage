@@ -207,3 +207,7 @@ The UI removed cards with `splice(indexOf(x), 1)`. When the card was no longer t
 
 - **Buying a third copy makes the triple at once.** No free board slot (or hand slot) is needed. Board copies are merged first, then copies from the hand. If no copy is on the board, the golden card goes to the hand. The triple's Discover and "after you play" effects still happen once. Bots follow the same rule, and a third copy already in the hand can be played onto a full board.
 - **Greatest Hits:** its copies in the Feed cost the normal price (it was 2 gold). Styles afterwards (1,400 lobbies, skill 0): 4.20–4.70; Sellouts 4.32 (was 4.28).
+
+## Nov 4: Brand Ambassador
+
+The start-of-combat bonus (+1/+1 per Influencer) now holds for the whole combat: Followers summoned later in that combat get it too, including the two from Brand Ambassador's own Legacy. Followers style 4.64 → 4.42; all styles 4.23–4.73 (1,400 lobbies, skill 0).

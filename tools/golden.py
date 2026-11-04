@@ -28,7 +28,7 @@ GOLD = {
     'Personal Brand': 'First Impression: get 4 Likes. Your Likes give +2/+2 more this game.',
     'Engagement Farmer': 'After you summon a Follower, give it +12/+12.',
     'Paparazzi': 'Start of combat: give your four highest-Attack Influencers Out of Office and +2/+2.',
-    'Brand Ambassador': 'Start of combat: give your Followers +2/+2 for each Influencer you have. Legacy: summon four Followers.',
+    'Brand Ambassador': 'Start of combat: for this combat, your Followers have +2/+2 for each Influencer you have, including Followers summoned later. Legacy: summon four Followers.',
     'Ring Light Studio': 'End of turn: get 4 Likes. Likes you give count triple while this is on your board.',
     'Blue Checkmark': 'After a friendly Follower dies, give your Influencers +4/+4 permanently.',
     'Main Character': 'Attention Seeker. Likes you give this minion count six times. Clock In: get 4 Likes.',

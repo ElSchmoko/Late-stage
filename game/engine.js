@@ -610,6 +610,7 @@ function combatFollower(side, idx) {
   const b = side.b; if (b.length >= 7) return null;
   const f = new M(null, true); const fb = Math.max(0, ...b.map(x => x.fb || 0));
   f.atk += fb; f.hp += fb; f.fb = fb;
+  const ba = side.baff || 0; f.atk += ba; f.hp += ba;   // Brand Ambassador's bonus for this combat
   const ef = 6 * wsum(b, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
   f.hits = 0; f.surv_used = f.kill_used = false; f.speed_used = 0;
   b.splice(Math.min(idx, b.length), 0, f); return f;
@@ -633,7 +634,8 @@ class Fight {
     if (hero === 'remote' && b.length) { b[0].shield = true; this.frame({type: 'hero', side: k, hero, tgts: [b[0].id]}); }
     if (hero === 'h_minimalist' && b.length <= MINI_MAX) { const e2 = MINI_BUFF; for (const o of b) { o.atk += e2; o.hp += e2; } this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
     const reach = (m, r) => { const i = b.indexOf(m); return b.filter((o, j) => o !== m && Math.abs(j - i) <= r); };
-    for (const m of b.slice()) if (m.name === 'Brand Ambassador') { const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); for (const f of fs) { f.atk += kk; f.hp += kk; } if (fs.length) ev(m, 'give', fs); }
+    // Brand Ambassador: the bonus holds for this whole combat, so Followers summoned later get it too (see combatFollower)
+    for (const m of b.slice()) if (m.name === 'Brand Ambassador') { const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); me.baff = (me.baff || 0) + kk; for (const f of fs) { f.atk += kk; f.hp += kk; } ev(m, 'give', fs); }
     const bc = b.filter(m => m.is_('Blue Checkmark'));
     const gurus = b.filter(m => m.is_('Enlightened Guru'));
     if (gurus.length) { const left = gurus.some(m => m.golden) ? 4 : 2; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) { o.cap = 3; o.capLeft = left; } }

@@ -375,7 +375,7 @@ V6 = {
     'Enlightened Guru': (6, 3, 9, 'Attention Seeker. The first two times each of your other Attention Seekers takes damage each combat, it takes at most 3.'),
     # player review, Nov 3
     'Middle Manager': (2, 3, 4, 'Attention Seeker. End of turn: take +1/+1 from the minion to its left. If that kills it, gain 2 extra gold next turn.'),
-    'Brand Ambassador': (5, 5, 6, 'Start of combat: give your Followers +1/+1 for each Influencer you have. Legacy: summon two Followers.'),
+    'Brand Ambassador': (5, 5, 6, 'Start of combat: for this combat, your Followers have +1/+1 for each Influencer you have, including Followers summoned later. Legacy: summon two Followers.'),
     'Ring Light Studio': (5, 4, 8, 'End of turn: get 2 Likes. Likes you give count double while this is on your board.'),
     'City Pigeon': (1, 1, 3, None), 'Windowsill Succulent': (1, 2, 2, 'End of turn: if you have another Feral, gain +1/+1.'),
     'World Tree': (6, 5, 9, 'End of turn: give your other Ferals +2/+2.'),
