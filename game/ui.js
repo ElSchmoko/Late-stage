@@ -912,7 +912,8 @@ function cX(i, n) { return LY.cx0 + (LY.cw - (n * LY.tok + (n - 1) * 20)) / 2 + 
 async function playCombat(rec) {
   clear(); G.screen = 'combat'; bg(false); AU.music('review'); sfx('fightstart'); applyLayout(true); const ff = LY.ff;
   if (ff) css(el('div', 'ffpaper', '', stage), {left: -EXT.l, top: 44, width: W + EXT.l + EXT.r, height: 420});
-  const f = rec.fight, opp = rec.b || rec.ghost, oppHero = opp.hero;
+  // a ghost (the board of a player who is already out) has no health of its own: mark it so the badge shows a dash, not NaN
+  const f = rec.fight, opp = rec.b || Object.assign({ghost: true}, rec.ghost), oppHero = opp.hero;
   const Cm = {els: new Map(), side: new Map()};
   _ce = Cm.els;
   const surfE = el('div', 'surf', '', stage); css(surfE, {left: LY.cx0, top: LY.cTop[0], width: LY.cw, height: LY.rowH, borderRadius: '24px', background: '#eeeaf5'});
