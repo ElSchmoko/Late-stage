@@ -87,7 +87,7 @@ GOLD = {
     'Jingle Writer': 'When sold: give your other Punks +4/+4 for each Punk you have sold this game (max +32).',
     'Reunion Tour': 'Your "When sold" effects trigger three times.',
     'Stage Diver': 'Start of combat: deal damage equal to this minion\'s Attack to the left-most enemy minion, then gain +8 Attack permanently.',
-    'Greatest Hits': 'After you sell a Punk, give your Punks +2/+2 and put two copies of it in the Feed. They cost 2 gold.',
+    'Greatest Hits': 'After you sell a Punk, give your Punks +2/+2 and put two copies of it in the Feed.',
     'General Strike': 'Start of combat: deal 2 damage to all enemy minions for each Punk you have. Then give your Punks +2/+2 permanently for each enemy minion that died.',
     # Philosophers
     'Shower Thinker': 'End of turn: give the minion to its right +6/+6 for the next combat.',

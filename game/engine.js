@@ -253,6 +253,35 @@ class Player {
     this.checkTriple(card, gold);
     return m;
   }
+  /** Buying a third copy makes the triple straight away, so no free board slot is needed.
+   *  pieces: stat bonuses {a, h} of the copies that are not on the board (the bought one, plus any taken from the hand).
+   *  Returns the golden board minion, 'hand' when no copy was on the board (the golden card goes to the hand), or null. */
+  tripleOnBuy(card, pieces, gold) {
+    const same = this.board.filter(x => x.name === card.name && !x.golden && !x.follower);
+    const useBoard = Math.min(same.length, 3 - pieces.length);
+    if (card.collab || useBoard + pieces.length < 3) return null;
+    let keep = 'hand';
+    if (useBoard >= 1) {
+      keep = same[0];
+      for (const x of same.slice(1, useBoard)) {
+        keep.atk += x.atk - card.atk; keep.hp += x.hp - card.hp; keep.shield = keep.shield || x.shield;
+        keep.extras.push(...x.extras); keep.sell_bonus += x.sell_bonus; this.board.splice(this.board.indexOf(x), 1);
+      }
+      for (const pc of pieces) { keep.atk += pc.a; keep.hp += pc.h; }
+      keep.atk += card.atk; keep.hp += card.hp; keep.golden = true; keep.tier = card.tier; this.buffed.add(keep.id);
+      this.note('triple', {id: keep.id});
+    }
+    this.afterPlay(card, keep === 'hand' ? null : keep, gold);
+    this.tripleReward(gold);
+    return keep;
+  }
+  tripleReward(gold) {
+    const t = Math.min(6, this.tier + 1);
+    const opts = this.discoverOptions(null, t);
+    if (this.human) { this.pending.push({kind: 'discover', options: opts, why: 'triple', tier: t}); return; }
+    const best = maxBy(opts, c => this.cardScore(c));
+    if (this.board.length < 7 || (best.collab && this.board.length)) this.play(best, gold);
+  }
   checkTriple(card, gold) {
     const same = this.board.filter(x => x.name === card.name && !x.golden && !x.follower);
     if (same.length < 3) return;
@@ -263,11 +292,7 @@ class Player {
     }
     keep.atk += card.atk; keep.hp += card.hp; keep.golden = true; keep.tier = card.tier;
     this.note('triple', {id: keep.id});
-    const t = Math.min(6, this.tier + 1);
-    const opts = this.discoverOptions(null, t);
-    if (this.human) { this.pending.push({kind: 'discover', options: opts, why: 'triple', tier: t}); return; }
-    const best = maxBy(opts, c => this.cardScore(c));
-    if (this.board.length < 7 || (best.collab && this.board.length)) this.play(best, gold);
+    this.tripleReward(gold);
   }
   sellValue(m) {
     let g = m.name === 'Unpaid Intern' ? 2 * m.g : m.name === 'Crypto Bro' ? (m.turns_on_board > 6 ? 0 : Math.min(1 + m.turns_on_board, 7) * m.g) : 1;
@@ -468,7 +493,7 @@ class Player {
       return maxBy(afford, sc);
     };
     while (guard++ < 60) {
-      if (this.rerelease.length) { for (const c of this.rerelease) feed.push({card: c, a: 0, h: 0, discount: this.rereleaseCost}); this.rerelease = []; }
+      if (this.rerelease.length) { for (const c of this.rerelease) feed.push({card: c, a: 0, h: 0}); this.rerelease = []; }
       const afford = feed.filter(e => this.minionCost(e) <= gold[0]);
       const sc = this.scrollCost();
       if (!afford.length && gold[0] < sc) break;
@@ -480,10 +505,13 @@ class Player {
       }
       if (sc === 0 && scrolls === 0 && best && this.tribe && best.card.tribe !== this.tribe) { this.payScroll(); scrolls++; feed = this.feedEntries(this.drawFeed()); continue; }
       if (best) {
-        const bs = this.cardScore(best.card), free = this.board.length < 7 || (best.card.collab && this.board.length);
+        const twin = !best.card.collab && this.board.filter(x => x.name === best.card.name && !x.golden && !x.follower).length >= 2;
+        const bs = this.cardScore(best.card), free = twin || this.board.length < 7 || (best.card.collab && this.board.length);
         if (free || (swaps < 3 && bs > this.value(worst) + 1.5)) {
           if (!free) { this.sell(worst, gold); swaps++; }
-          gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1); this.play(best.card, gold, null, null, best);
+          gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1);
+          if (twin) { this.tripleOnBuy(best.card, [{a: best.a, h: best.h}], gold); continue; }
+          this.play(best.card, gold, null, null, best);
           // sell Jingle Writer at once when it pays, as a person would (balance tests must see the combo)
           if (best.card.name === 'Jingle Writer' && this.tribe === P && this.punks_sold >= 2 && this.board.filter(o => o.tribe === P).length >= 4) { const m = this.board.find(o => o.name === 'Jingle Writer' && !o.golden); if (m) this.sell(m, gold); }
           continue;

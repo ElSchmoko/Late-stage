@@ -358,7 +358,7 @@ V6 = {
     'Rooftop Beehive': (4, 3, 6, 'End of turn: give the Ferals next to it +2/+2.'),
     'Firmware Update': (2, 2, 3, 'After you Collab, give your Techies +1/+1.'),
     'Feedback Loop': (3, 3, 4, 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +2/+2 for this combat.'),
-    'Greatest Hits': (6, 7, 8, 'After you sell a Punk, give your Punks +1/+1 and put a copy of it in the Feed. It costs 2 gold.'),
+    'Greatest Hits': (6, 7, 8, 'After you sell a Punk, give your Punks +1/+1 and put a copy of it in the Feed.'),
     'Leaf Blower Guy': (4, 5, 6, None),
     'Main Character': (6, 8, 10, 'Attention Seeker. Likes you give this minion count triple. End of turn: get 2 Likes.'),
     'Ring Light Studio': (5, 4, 8, 'End of turn: get 3 Likes for each other Influencer you have.'),

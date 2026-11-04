@@ -202,3 +202,8 @@ Five Philosophers are now drawn as women: Stoicism Podcaster, Utilitarian, The C
 ### Bug guards
 
 The UI removed cards with `splice(indexOf(x), 1)`. When the card was no longer there (a second play of the same hand card, a buy after the Feed changed, or reordering a minion that had gone), that deleted the *last* card in the hand, Feed or board instead. These paths now check first. This is the likely cause of a player losing hand cards around a Scroll, though it wasn't reproduced.
+
+## Nov 4: triples on buy, Greatest Hits price
+
+- **Buying a third copy makes the triple at once.** No free board slot (or hand slot) is needed. Board copies are merged first, then copies from the hand. If no copy is on the board, the golden card goes to the hand. The triple's Discover and "after you play" effects still happen once. Bots follow the same rule, and a third copy already in the hand can be played onto a full board.
+- **Greatest Hits:** its copies in the Feed cost the normal price (it was 2 gold). Styles afterwards (1,400 lobbies, skill 0): 4.20–4.70; Sellouts 4.32 (was 4.28).

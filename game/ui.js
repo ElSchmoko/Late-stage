@@ -232,8 +232,6 @@ function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sf
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false);
-  const ffb = el('button', 'btn ffbtn', ffLabel(), stage); css(ffb, {left: 14, top: 12, height: 42, padding: '3px 12px 0', fontSize: '15px'});
-  ffb.setAttribute('aria-label', 'Fat Finger Mode: bigger cards'); ffb.onclick = () => { toggleFatFinger(); ffb.innerHTML = ffLabel(); };
   const t = el('div', 'ab', `<p class="bd" style="margin:0;display:inline-block;background:#2b2140;color:#ffc928;border-radius:999px;padding:4px 14px 2px;font-size:13px;letter-spacing:.2em;box-shadow:0 0 0 3px #fff">AN AUTOBATTLER ABOUT MODERN LIFE</p>
     <h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 64, textAlign: 'center'});
@@ -543,7 +541,13 @@ async function afterAction(animateNew = true) {
 
 // ---------------------------------------------------------------- shop actions
 function costOf(f) { return G.me.minionCost(f); }
-function canBuy(f) { if (G.hand.length >= 10) { toast('Your hand is full'); return false; } if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; }
+/** A third copy makes a triple the moment it is bought: no free board slot or hand slot is needed. */
+function tripleReady(card) {
+  if (!card || card.collab) return false;
+  const onBoard = G.me.board.filter(m => m.name === card.name && !m.golden && !m.follower).length;
+  return onBoard + G.hand.filter(h => h.card.name === card.name && !h.golden).length >= 2;
+}
+function canBuy(f) { if (tripleReady(f.card)) { if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; } if (G.hand.length >= 10) { toast('Your hand is full'); return false; } if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; }
 function shake(e) { sfx('error'); anim(e, [{transform: 'translateX(0)'}, {transform: 'translateX(-6px)'}, {transform: 'translateX(6px)'}, {transform: 'translateX(-3px)'}, {transform: 'translateX(0)'}], {duration: 300, raw: true}); }
 function goldTick(delta) {
   anim(S.gold, [{transform: 'scale(1)'}, {transform: 'scale(1.18)'}, {transform: 'scale(1)'}], {duration: 260, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
@@ -556,6 +560,15 @@ async function buy(f, toBoardAt = null) {
   G.feed.splice(G.feed.indexOf(f), 1);
   const hc = {card: f.card, a: f.a, h: f.h, key: Math.random()};
   const t = S.feedTok.get(f.key);
+  if (tripleReady(f.card)) {   // triple at once: board copies first, then copies from the hand
+    if (t) { t._leaving = true; t.remove(); }
+    const onBoard = me.board.filter(m => m.name === f.card.name && !m.golden && !m.follower).length;
+    const fromHand = G.hand.filter(h => h.card.name === f.card.name && !h.golden).slice(0, Math.max(0, 2 - onBoard));
+    for (const h of fromHand) { G.hand.splice(G.hand.indexOf(h), 1); const e = S.handEl.get(h.key); if (e) { e._leaving = true; e.remove(); } }
+    const res = me.tripleOnBuy(f.card, [{a: f.a, h: f.h}, ...fromHand.map(h => ({a: h.a, h: h.h}))], me.gold);
+    if (res === 'hand') { G.hand.push({card: f.card, a: f.a + fromHand.reduce((s, h) => s + h.a, 0), h: f.h + fromHand.reduce((s, h) => s + h.h, 0), golden: true, key: Math.random()}); toast('Triple! Golden minion', 1400); sfx('triple'); }
+    await afterAction(true); return;
+  }
   if (toBoardAt !== null) { if (t) { t._leaving = true; t.remove(); } G.hand.push(hc); await playCard(hc, toBoardAt); return; }
   G.hand.push(hc);
   if (t) { t._leaving = true; const p = handPos(G.hand.length - 1, G.hand.length);
@@ -574,7 +587,8 @@ async function playCard(hc, pos = null, target = null) {
   if (G.busy) return;
   const me = G.me, card = hc.card;
   if (!G.hand.includes(hc)) { renderAll(); return; }   // already played (a second tap or drag on the same card): never remove another one
-  if (!card.collab && me.board.length >= 7) { toast('Your board is full (7)'); renderAll(); return; }
+  const merges = !hc.golden && me.board.filter(m => m.name === card.name && !m.golden && !m.follower).length >= 2;
+  if (!card.collab && me.board.length >= 7 && !merges) { toast('Your board is full (7)'); renderAll(); return; }
   if (target === null) {
     const cands = needsTarget(card);
     if (cands) { await chooseTarget(cands, card.collab ? `Choose a minion for ${card.name} to stick to` : `Choose a minion for ${card.name}`, async t => playCard(hc, pos, t), () => renderAll()); return; }
@@ -600,7 +614,7 @@ async function sell(m) {
   coinFly(c, center(rectOf(S.gold)), g); setTimeout(() => goldTick(g), 450);
   floatText(c[0], c[1] - 30, `+${g} gold`, 'gold');
   // Greatest Hits re-release
-  for (const card of me.rerelease) G.feed.push({card, a: 0, h: 0, key: Math.random(), discount: 2});
+  for (const card of me.rerelease) G.feed.push({card, a: 0, h: 0, key: Math.random()});
   me.rerelease = [];
   me.log = me.log.filter(x => x.type !== 'sold');
   await afterAction(true);
@@ -805,8 +819,8 @@ function bindToken(e, kind, obj) {
 const FOLLOWER = () => CARD['Follower'] || {name: 'Follower', tribe: 'Influencer', tier: 1, atk: 1, hp: 1, art: 'follower', fit: 13, html: 'A loyal fan.', full_html: 'A loyal fan.', text: '', flavour: ''};
 function showDetailFor(kind, e) {
   const me = G.me;
-  if (kind === 'feed') { const f = e._f; return showDetail(f.card, {atk: f.card.atk + f.a, hp: f.card.hp + f.h}, [{label: 'Hire', cost: costOf(f), fn: () => buy(f), disabled: me.gold[0] < costOf(f) || G.hand.length >= 10}]); }
-  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk + h.a, hp: h.card.hp + h.h, golden: h.golden}, [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7}]); }
+  if (kind === 'feed') { const f = e._f; return showDetail(f.card, {atk: f.card.atk + f.a, hp: f.card.hp + f.h}, [{label: 'Hire', cost: costOf(f), fn: () => buy(f), disabled: me.gold[0] < costOf(f) || (G.hand.length >= 10 && !tripleReady(f.card))}]); }
+  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk + h.a, hp: h.card.hp + h.h, golden: h.golden}, [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7 && !(!h.golden && me.board.filter(m => m.name === h.card.name && !m.golden && !m.follower).length >= 2)}]); }
   const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
   const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
   if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.filter(o => (o.tribe === 'Hustler' || o.tribe2 === 'Hustler') && o !== m), `Side Gig: choose a Hustler for +${m.golden ? 6 : 3}/+${m.golden ? 6 : 3}`, async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
@@ -838,7 +852,7 @@ async function onDrop(kind, e, x, y, dist = 999) {
   const overHand = y >= LY.handTop && far;
   const gap = lastGap; lastGap = null;
   if (kind === 'feed') {
-    if (overBoard && G.me.board.length < 7) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
+    if (overBoard && (G.me.board.length < 7 || tripleReady(e._f.card))) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
     else if (overHand) return buy(e._f);
     renderAll(); return;
   }
