@@ -237,3 +237,22 @@ def face_text(c):
 import json as _json
 _fit = S / 'tools/fit.json'
 FIT = _json.loads(_fit.read_text()) if _fit.exists() else {}
+
+
+# v12 (Nov 6)
+NEIGHBOUR_TEXT.update({
+    'Package Hoarder': 'Start of combat: give the minions next to it +2/+2 and Attention Seeker.',
+    'Caretaker': 'End of turn: give the minions next to it +1/+2 and Attention Seeker.',
+    'The Landlord': 'End of turn: take +1/+1 from each of your other minions and gain twice that. Gain 2 extra gold next turn for each minion that dies this way.',
+})
+SHORT.update({
+    'The Landlord': 'End of turn: take +1/+1 from each other minion, gain double. +2 gold next turn per minion that dies.',
+    'Caretaker': 'End of turn: the minions next to it get +1/+2 and Attention Seeker.',
+    'Rat King': 'After you Scroll, gain the stats of the strongest minion scrolled away (twice per turn).',
+    'Memorial Mural': 'Grievance (2): your Creatives get +1 Attack this game, wherever they are.',
+    'Record Label': 'End of turn: another Creative gets +1/+1 per Creative played since this joined.',
+    'General Strike': 'Start of combat: deal 1 damage per Punk to all enemies. Punks get +2/+2 permanently per kill.',
+    'Thought Experiment': 'End of turn: your minions get +1/+1 next combat per tribe you have.',
+    'Grand Unified Theory': 'End of turn: minions get +1/+1 next combat per tribe, then double next-combat buffs (triple with 4+ tribes).',
+    'Quantum Computer': 'Collab. Out of Office. Rebrand. End of turn: its host gets +2/+2 per Collab on it.',
+})

@@ -265,3 +265,53 @@ Readings under expert play:
 - **Sneaker Reseller** is over its band: +0.67 above the tier-2 median.
 - **Creatives** read slightly lower.
 - **Main Character** and **Followers** remain the weakest styles.
+
+## v12 (Nov 7): reworks and ceilings, measured with expert bots
+
+| Card | Change | Effect vs tier median (expert) |
+| --- | --- | --- |
+| Memorial Mural | **Bug fix:** the +1 Attack now reaches every Creative you own, including ones that died earlier in the fight | +0.30 |
+| Art Critic | No longer limited to 3 times per combat | +0.18 |
+| Thought Experiment | End of turn: your minions get +1/+1 next combat for each tribe you have | +0.56 (was −0.14) |
+| Grand Unified Theory | End of turn: minions get +1/+1 next combat per tribe, then double all next-combat buffs (triple with 4+ tribes). Replaces "Philosophers +4/+4" | +0.27 (was +0.59) |
+| Package Hoarder (T2) | 2/5. Start of combat: give the minions next to it +2/+2 and Attention Seeker | −0.18 (was −0.49) |
+| Caretaker (T3) | End of turn: the minions next to it get +1/+2 and Attention Seeker | −0.23 |
+| The Landlord | End of turn: take +1/+1 from each of your other minions and gain double. +2 gold next turn per minion that dies this way | −0.17 (was −0.25) |
+| Personal Brand | Back to tier 3 | +0.27 |
+| Main Character | 10/12, Clock In: get 3 Likes | −0.00 |
+| General Strike | 1 damage per Punk again; +2/+2 per kill kept | +0.26 |
+| Record Label | +1/+1 for each Creative played since it joined your board (grows all game) | +0.12 |
+| Rat King | After you Scroll, gain the stats of the strongest minion scrolled away (twice per turn) | +0.25 (was −0.15) |
+| Quantum Computer | Also: end of turn, its host gains +2/+2 per Collab on it | +0.63 (was −0.08). Watch |
+
+The Philosophers' new direction rewards boards that mix tribes, instead of piling stats on Philosophers.
+
+**Sneaker Reseller nerf dropped.** At +1/+1, Exits fell from 4.59 to 5.03 and Passive Income from 4.45 to 4.77; at +2/+1, Exits was still 4.85. The style runs through this card, so it stays at +2/+2. Lift other Exits cards first (Crypto Bro, Venture Capitalist are under the band).
+
+**Tuning tried:**
+
+| Card | Variant | Effect |
+| --- | --- | --- |
+| Package Hoarder | Attention Seeker only | −0.71 |
+| Record Label | Counts all Creatives played this game | +0.58 |
+| Grand Unified Theory | Double, triple with 4+ tribes (no +1/+1 per tribe) | −0.32 |
+| Grand Unified Theory | Same, triple from 3 tribes | −0.31 |
+
+**Styles (3,200 lobbies, expert bots).**
+
+| | Value |
+| --- | --- |
+| Spread | 4.12 (Overgrowth) to 4.85 (Main Character): 0.73, was 0.88 |
+| Followers | 4.68 |
+| Creatives | Performers 4.64, Pure Feeling 4.67 |
+| Big Ideas | 4.34 |
+
+**Ceilings (top 10% of boards at turn 14).** Every style is between 745 and 1,140. Before, the range was 621 to 1,388. The largest boards come from several tribes now:
+
+| Style | Largest board |
+| --- | --- |
+| Sellouts | 3,104 |
+| Gadgets (turn 17) | 3,227 |
+| Sabotage | 2,604 |
+| Big Ideas | 2,534 |
+| Stoics | 2,422 |

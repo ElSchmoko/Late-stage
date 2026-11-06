@@ -443,5 +443,23 @@ for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
         if _x: _c.text = _x
         if _st: _c.style = _st
         if _c.name == 'Engagement Bot': _c.kind = 'fi'
+_V12 = {  # name: (tier, atk, hp, text or None)  (Neutral texts live in lsdata.NEIGHBOUR_TEXT)
+    'Personal Brand': (3, 4, 6, None),
+    'Main Character': (6, 10, 12, 'Attention Seeker. Likes you give this minion count double. Clock In: get 3 Likes.'),
+    'General Strike': (6, None, None, 'Start of combat: deal 1 damage to all enemy minions for each Punk you have. Then give your Punks +2/+2 permanently for each enemy minion that died.'),
+    'Art Critic': (4, None, None, 'After a friendly minion dies, gain +1/+1 permanently.'),
+    'Record Label': (4, None, None, 'End of turn: give another Creative +1/+1 for each Creative you have played since this joined your board.'),
+    'Rat King': (5, None, None, 'After you Scroll, gain the stats of the highest-Attack minion you scrolled away (twice per turn).'),
+    'Quantum Computer': (6, None, None, 'Collab. Out of Office. Rebrand. End of turn: the minion it sticks to gains +2/+2 for each Collab on it.'),
+    'Thought Experiment': (3, 3, 3, 'End of turn: give your minions +1/+1 for the next combat for each tribe you have.'),
+    'Grand Unified Theory': (6, None, None, 'End of turn: give your minions +1/+1 for the next combat for each tribe you have, then double all next-combat buffs. With 4 or more tribes, triple them instead.'),
+    'Package Hoarder': (2, 2, 5, None), 'Caretaker': (3, 2, 5, None), 'The Landlord': (5, 5, 5, None),
+}
+for _c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS:
+    if _c.name in _V12:
+        _t, _a, _h, _x = _V12[_c.name]
+        _c.tier = _t
+        if _a is not None: _c.atk, _c.hp = _a, _h
+        if _x: _c.text = _x
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]

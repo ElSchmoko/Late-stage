@@ -116,3 +116,17 @@ GOLD = {
     'The Landlord': 'End of turn, twice: take +1/+1 from each minion next to it.',
     'Block Party Host': 'End of turn: give each of your minions +2/+2 for each minion next to it.',
 }
+
+GOLD.update({  # v12
+    'Main Character': 'Attention Seeker. Likes you give this minion count four times. Clock In: get 6 Likes.',
+    'General Strike': 'Start of combat: deal 2 damage to all enemy minions for each Punk you have. Then give your Punks +4/+4 permanently for each enemy minion that died.',
+    'Art Critic': 'After a friendly minion dies, gain +2/+2 permanently.',
+    'Record Label': 'End of turn: give another Creative +2/+2 for each Creative you have played since this joined your board.',
+    'Rat King': 'After you Scroll, gain the stats of the highest-Attack minion you scrolled away (four times per turn).',
+    'Quantum Computer': 'Collab. Out of Office. Rebrand. End of turn, twice: the minion it sticks to gains +2/+2 for each Collab on it.',
+    'Thought Experiment': 'End of turn: give your minions +2/+2 for the next combat for each tribe you have.',
+    'Grand Unified Theory': 'End of turn: give your minions +2/+2 for the next combat for each tribe you have, then triple all next-combat buffs. With 4 or more tribes, quadruple them instead.',
+    'Package Hoarder': 'Start of combat: give the two minions on each side of it +4/+4 and Attention Seeker.',
+    'Caretaker': 'End of turn: give the minions next to it +2/+4 and Attention Seeker.',
+    'The Landlord': 'End of turn, twice: take +1/+1 from each of your other minions and gain twice that. Gain 2 extra gold next turn for each minion that dies this way.',
+})
