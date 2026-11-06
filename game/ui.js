@@ -420,7 +420,7 @@ function renderChrome() {
   const nxt = L.nextOpponentFor(me);
   S.lobby.innerHTML = '';
   for (const p of L.standings()) {
-    const c = el('div', 'lobchip' + (p === me ? ' you' : '') + (p === nxt ? ' next' : '') + (!p.alive ? ' dead' : ''), `<span class="av"><img src="${ART[p.hero] || ART.follower}" alt=""></span>${p.alive ? p.health + p.boundaries : '✕'}${p === nxt ? '<span class="nx">NEXT</span>' : ''}`, S.lobby);
+    const c = el('div', 'lobchip' + (p === me ? ' you' : '') + (p === nxt ? ' next' : '') + (!p.alive ? ' dead' : ''), `<span class="av"><img src="${ART[p.hero] || ART.follower}" alt=""></span><i class="tierb" title="Tier ${p.tier}">${p.tier}</i>${p.alive ? p.health + p.boundaries : '✕'}${p === nxt ? '<span class="nx">NEXT</span>' : ''}`, S.lobby);
     c.title = p === me ? 'You' : HERO[p.hero] ? HERO[p.hero].name : p.name;
   }
   // shield
@@ -487,7 +487,7 @@ function renderAll(animateNew = true, gapAt = null) {
   G.hand.forEach((hc, i) => {
     let e = S.handEl.get(hc.key);
     const c = hc.card, p = handPos(i, G.hand.length);
-    if (!e) { e = el('div', 'hc' + (hc.golden ? ' golden' : ''), `<div class="pn" style="background-color:${TC[c.tribe]}"><img src="${ART[c.art]}" alt="" draggable="false"></div><p class="hn">${c.name}</p><div class="hs at">${c.atk + hc.a}</div><div class="hs hp">${c.hp + hc.h}</div>`, S.layer); S.handEl.set(hc.key, e); bindToken(e, 'hand', hc); css(e, {left: p.x, top: p.y + 40}); }
+    if (!e) { e = el('div', 'hc' + (hc.golden ? ' golden' : ''), `<div class="pn" style="background-color:${TC[c.tribe]}"><img src="${ART[c.art]}" alt="" draggable="false"></div><p class="hn">${c.name}</p><div class="hs at">${c.atk * (hc.golden ? 2 : 1) + hc.a}</div><div class="hs hp">${c.hp * (hc.golden ? 2 : 1) + hc.h}</div>`, S.layer); S.handEl.set(hc.key, e); bindToken(e, 'hand', hc); css(e, {left: p.x, top: p.y + 40}); }
     e.style.transition = 'left .26s cubic-bezier(.22,1,.36,1), top .26s cubic-bezier(.22,1,.36,1), transform .26s';
     requestAnimationFrame(() => { css(e, {left: p.x, top: p.y}); e.style.transform = `rotate(${p.r}deg)`; });
     e._h = hc; hseen.add(hc.key);
@@ -547,7 +547,20 @@ function tripleReady(card) {
   const onBoard = G.me.board.filter(m => m.name === card.name && !m.golden && !m.follower).length;
   return onBoard + G.hand.filter(h => h.card.name === card.name && !h.golden).length >= 2;
 }
-function canBuy(f) { if (tripleReady(f.card)) { if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; } if (G.hand.length >= 10) { toast('Your hand is full'); return false; } if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; }
+/** Forms a triple as a golden card in the hand: board copies are used first (that frees board space), then hand copies.
+ *  newPiece: the copy being bought ({a, h}), or null when the third copy is already in the hand (from a Discover). */
+function makeTriple(card, newPiece) {
+  const me = G.me, need = newPiece ? 2 : 3;
+  const onBoard = me.board.filter(m => m.name === card.name && !m.golden && !m.follower).length, fromBoard = Math.min(onBoard, need);
+  const fromHand = G.hand.filter(h => h.card.name === card.name && !h.golden).slice(0, need - fromBoard);
+  for (const h of fromHand) { G.hand.splice(G.hand.indexOf(h), 1); const e = S.handEl.get(h.key); if (e) { e._leaving = true; e.remove(); } }
+  const spec = me.takeTriple(card, [...(newPiece ? [newPiece] : []), ...fromHand.map(h => ({a: h.a, h: h.h}))], fromBoard);
+  G.hand.push({card, a: spec.a, h: spec.h, golden: true, extras: spec.extras, shield: spec.shield, sell: spec.sell, key: Math.random()});
+  me.tripleReward(me.gold); toast('Triple! Golden card in your hand', 1500); sfx('triple');
+}
+const handCopies = card => G.hand.filter(h => h.card.name === card.name && !h.golden).length;
+function canBuy(f) { if (tripleReady(f.card)) { if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; }
+  const onB = G.me.board.filter(m => m.name === f.card.name && !m.golden && !m.follower).length; if (G.hand.length >= 10 && onB >= 2) { toast('Your hand is full'); return false; } return true; } if (G.hand.length >= 10) { toast('Your hand is full'); return false; } if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; } return true; }
 function shake(e) { sfx('error'); anim(e, [{transform: 'translateX(0)'}, {transform: 'translateX(-6px)'}, {transform: 'translateX(6px)'}, {transform: 'translateX(-3px)'}, {transform: 'translateX(0)'}], {duration: 300, raw: true}); }
 function goldTick(delta) {
   anim(S.gold, [{transform: 'scale(1)'}, {transform: 'scale(1.18)'}, {transform: 'scale(1)'}], {duration: 260, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
@@ -560,13 +573,9 @@ async function buy(f, toBoardAt = null) {
   G.feed.splice(G.feed.indexOf(f), 1);
   const hc = {card: f.card, a: f.a, h: f.h, key: Math.random()};
   const t = S.feedTok.get(f.key);
-  if (tripleReady(f.card)) {   // triple at once: board copies first, then copies from the hand
+  if (tripleReady(f.card)) {   // the third copy makes the triple at once: a golden card in the hand (no board slot needed)
     if (t) { t._leaving = true; t.remove(); }
-    const onBoard = me.board.filter(m => m.name === f.card.name && !m.golden && !m.follower).length;
-    const fromHand = G.hand.filter(h => h.card.name === f.card.name && !h.golden).slice(0, Math.max(0, 2 - onBoard));
-    for (const h of fromHand) { G.hand.splice(G.hand.indexOf(h), 1); const e = S.handEl.get(h.key); if (e) { e._leaving = true; e.remove(); } }
-    const res = me.tripleOnBuy(f.card, [{a: f.a, h: f.h}, ...fromHand.map(h => ({a: h.a, h: h.h}))], me.gold);
-    if (res === 'hand') { G.hand.push({card: f.card, a: f.a + fromHand.reduce((s, h) => s + h.a, 0), h: f.h + fromHand.reduce((s, h) => s + h.h, 0), golden: true, key: Math.random()}); toast('Triple! Golden minion', 1400); sfx('triple'); }
+    makeTriple(f.card, {a: f.a, h: f.h});
     await afterAction(true); return;
   }
   if (toBoardAt !== null) { if (t) { t._leaving = true; t.remove(); } G.hand.push(hc); await playCard(hc, toBoardAt); return; }
@@ -596,8 +605,7 @@ async function playCard(hc, pos = null, target = null) {
   if (!G.hand.includes(hc)) { renderAll(); return; }
   G.hand.splice(G.hand.indexOf(hc), 1);
   const e = S.handEl.get(hc.key); if (e) { e._leaving = true; e.remove(); }
-  const m = me.play(card, me.gold, pos, target); sfx('slap');
-  if (m && !card.collab) { m.atk += hc.a; m.hp += hc.h; if (hc.golden) { m.golden = true; m.atk += card.atk; m.hp += card.hp; } }
+  const m = me.play(card, me.gold, pos, target, card.collab ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell}); sfx('slap');
   if (card.collab) { const c = S.tok.get(m.id); }
   G.firstTurn = G.firstTurn && me.turn <= 1;
   // sticker slap
@@ -672,6 +680,7 @@ async function levelUp() {
   await playLog();
 }
 async function useLikes() {
+  if (G.busy) return;
   const me = G.me; if (!me.likes || !me.board.length) { toast(me.likes ? 'Play a minion first' : 'No Likes yet'); return; }
   const go = async t => { me.giveLike(t); sfx('like'); renderAll(); await playLog(); if (me.likes > 0) useLikes(); };
   await chooseTarget(me.board.slice(), `Give a Like (+${me.likeValue(null)}/+${me.likeValue(null)}) · ${me.likes} left`, go, () => {});
@@ -730,6 +739,14 @@ function handlePending() {
     el('div', 'dim', '', ov);
     const head = el('div', 'ab bd', p.why === 'triple' ? `Triple! Discover a ${'★'.repeat(p.tier)} minion` : p.why === 'hero' ? `${HERO[G.heroSlug].power}: Discover a minion` : `Discover a ${TP[p.why] ? TP[p.why].replace(/s$/, '') : 'minion'}`, ov);
     css(head, {left: 0, right: 0, top: 14, textAlign: 'center'}); head.innerHTML = `<span style="display:inline-block;background:#ffc928;border:3px solid #2b2140;border-radius:999px;padding:6px 18px 2px;box-shadow:0 0 0 3px #fff;font-size:22px">${head.textContent}</span>`;
+    // look at the board before choosing: the overlay hides, minions can be tapped to inspect, nothing else can be done
+    const look = el('button', 'btn', ico('<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="#fff"></path><circle cx="12" cy="12" r="3" fill="#2b2140"></circle>', 20, 2.2) + 'Look at board', ov);
+    css(look, {left: 342, top: 300, width: 160, height: 42, fontSize: '16px', zIndex: 2});
+    look.onclick = () => {
+      sfx('close'); ov.style.visibility = 'hidden'; G.busy = true; G.mode = 'peek';
+      const back = el('button', 'btn', 'Back to Discover', stage); css(back, {left: 312, top: 322, width: 220, height: 46, fontSize: '18px', background: '#ffc928', zIndex: 70});
+      back.onclick = () => { sfx('open'); back.remove(); ov.style.visibility = ''; G.busy = false; G.mode = null; };
+    };
     p.options.forEach((c, i) => {
       const b = el('button', 'ab', `<div style="transform:scale(.62);transform-origin:top left">${cardHTML(c)}</div>`, ov);
       css(b, {left: 168 + i * 176, top: 62, width: 149, height: 208, padding: 0, border: 0, background: 'none', cursor: 'pointer'});
@@ -739,7 +756,7 @@ function handlePending() {
         ov.querySelectorAll('button.ab').forEach(o => { if (o !== b) anim(o, [{transform: 'translateY(0)', opacity: 1}, {transform: 'translateY(120px) rotate(12deg)', opacity: 0}], {duration: 300, fill: 'forwards', raw: true}); });
         await anim(b, [{transform: 'scale(1)'}, {transform: 'scale(1.12)'}, {transform: 'translateY(160px) scale(.5)', opacity: 0}], {duration: 420, fill: 'forwards', raw: true});
         ov.remove();
-        if (G.hand.length < 10) G.hand.push({card: c, a: 0, h: 0, key: Math.random()});
+        if (G.hand.length < 10) { G.hand.push({card: c, a: 0, h: 0, key: Math.random()}); if (!c.collab && G.me.board.filter(m => m.name === c.name && !m.golden && !m.follower).length + handCopies(c) >= 3) makeTriple(c, null); }
         renderAll();
         await handlePending(); res();
       };
@@ -786,8 +803,9 @@ function showHeroDetail(slug = G.heroSlug, onClose = null) {
 // ---------------------------------------------------------------- pointer: tap, drag, long-press
 function bindToken(e, kind, obj) {
   e.addEventListener('pointerdown', ev => {
-    if (G.busy || G.screen !== 'shop') return;
+    if ((G.busy && G.mode !== 'peek') || G.screen !== 'shop') return;
     ev.preventDefault();
+    if (G.mode === 'peek') { const up = () => { e.removeEventListener('pointerup', up); showDetailFor(kind, e, true); }; e.addEventListener('pointerup', up); return; }
     if (G.mode === 'target') { if (kind === 'board' && S.pickHandler) S.pickHandler(e._m); return; }
     const [sx, sy] = toStage(ev.clientX, ev.clientY);
     const r = {x: parseFloat(e.style.left), y: parseFloat(e.style.top)};
@@ -817,15 +835,15 @@ function bindToken(e, kind, obj) {
   });
 }
 const FOLLOWER = () => CARD['Follower'] || {name: 'Follower', tribe: 'Influencer', tier: 1, atk: 1, hp: 1, art: 'follower', fit: 13, html: 'A loyal fan.', full_html: 'A loyal fan.', text: '', flavour: ''};
-function showDetailFor(kind, e) {
+function showDetailFor(kind, e, look = false) {
   const me = G.me;
-  if (kind === 'feed') { const f = e._f; return showDetail(f.card, {atk: f.card.atk + f.a, hp: f.card.hp + f.h}, [{label: 'Hire', cost: costOf(f), fn: () => buy(f), disabled: me.gold[0] < costOf(f) || (G.hand.length >= 10 && !tripleReady(f.card))}]); }
-  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk + h.a, hp: h.card.hp + h.h, golden: h.golden}, [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7 && !(!h.golden && me.board.filter(m => m.name === h.card.name && !m.golden && !m.follower).length >= 2)}]); }
+  if (kind === 'feed') { const f = e._f; return showDetail(f.card, {atk: f.card.atk + f.a, hp: f.card.hp + f.h}, look ? [] : [{label: 'Hire', cost: costOf(f), fn: () => buy(f), disabled: me.gold[0] < costOf(f) || (G.hand.length >= 10 && !tripleReady(f.card))}]); }
+  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk * (h.golden ? 2 : 1) + h.a, hp: h.card.hp * (h.golden ? 2 : 1) + h.h, golden: h.golden}, look ? [] : [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7 && !(!h.golden && me.board.filter(m => m.name === h.card.name && !m.golden && !m.follower).length >= 2)}]); }
   const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
   const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
   if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.filter(o => (o.tribe === 'Hustler' || o.tribe2 === 'Hustler') && o !== m), `Side Gig: choose a Hustler for +${m.golden ? 6 : 3}/+${m.golden ? 6 : 3}`, async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
   if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); sfx('like'); renderAll(); await playLog(); }});
-  showDetail(card, m, acts);
+  showDetail(card, m, look ? [] : acts);
 }
 function boardIndexAt(x) { const n = G.me.board.length + 1; let best = 0, bd = 1e9; for (let i = 0; i < n; i++) { const d = Math.abs(boardX(i, n) + HALF() - x); if (d < bd) { bd = d; best = i; } } return best; }
 let lastGap = null;
@@ -923,6 +941,7 @@ async function playCombat(rec) {
   const hpOf = (p, before) => Math.max(0, p.health + p.boundaries + (before && rec.loser === p ? rec.dmg : 0));
   const ohp = el('div', 'badge', `${opp.ghost ? '—' : hpOf(opp, true)}`, stage); css(ohp, {left: 60, top: 56, width: 40, height: 30, fontSize: '17px'});
   oav.title = (opp.ghost ? 'Ghost of ' : '') + (HERO[oppHero] ? HERO[oppHero].name : opp.name);
+  const otier = el('div', 'tierpill', `${STAR(13)}<span>${opp.tier || 1}</span>`, stage); css(otier, {left: 60, top: 2}); otier.title = `Tier ${opp.tier || 1}`; edge('l', otier);
   const mav = el('div', 'av-big', `<img src="${ART[G.heroSlug]}" alt="">`, stage); css(mav, {left: 16, top: 290, width: 88, height: 88});
   const mhp = el('div', 'badge', `${hpOf(G.me, true)}`, stage); css(mhp, {left: 72, top: 346, width: 42, height: 34, fontSize: '20px'});
   const rnd = el('div', 'info', `Round ${G.lobby.turn}`, stage); css(rnd, {left: ff ? 576 : 640, top: ff ? 8 : 20, width: 92, height: 34, borderRadius: '999px', fontSize: '15px'});
@@ -1179,7 +1198,7 @@ function showEnd() {
   order.forEach((q, i) => {
     const sty = q.style_code && window.LS_STYLES[q.style_code] ? window.LS_STYLES[q.style_code] : null;
     const tr = sty ? sty[0] : null;
-    const row = el('div', '', `<span style="width:18px;text-align:right">${q.place || 1}</span><span style="position:relative;width:22px;height:22px;border-radius:50%;border:2px solid #2b2140;overflow:hidden;background:#8fd4ff"><img src="${ART[q.hero] || ART.follower}" alt="" style="position:absolute;left:-4px;bottom:-4px;width:30px;height:30px"></span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:26px;height:24px">${q === me ? 'You' : HERO[q.hero] ? HERO[q.hero].name.replace('The ', '') : q.name}</span><span style="font-size:11px;color:#5a5270">${(q === me ? before : q.rating ?? '').toLocaleString('en')}</span>${tr ? `<span class="chip" style="padding:0 7px 0 3px;font-size:11px"><i style="background:${TC[tr]}"></i>${sty[1]}</span>` : q === me ? '' : '<span class="chip" style="padding:0 7px;font-size:11px">Big stats</span>'}`, lst);
+    const row = el('div', '', `<span style="width:18px;text-align:right">${q.place || 1}</span><span style="position:relative;width:22px;height:22px;border-radius:50%;border:2px solid #2b2140;overflow:hidden;background:#8fd4ff"><img src="${ART[q.hero] || ART.follower}" alt="" style="position:absolute;left:-4px;bottom:-4px;width:30px;height:30px"></span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:26px;height:24px">${q === me ? 'You' : HERO[q.hero] ? HERO[q.hero].name.replace('The ', '') : q.name}</span><span class="tierpill sm">${STAR(10)}<span>${q.tier || 1}</span></span><span style="font-size:11px;color:#5a5270">${(q === me ? before : q.rating ?? '').toLocaleString('en')}</span>${tr ? `<span class="chip" style="padding:0 7px 0 3px;font-size:11px"><i style="background:${TC[tr]}"></i>${sty[1]}</span>` : q === me ? '' : '<span class="chip" style="padding:0 7px;font-size:11px">Big stats</span>'}`, lst);
     css(row, {display: 'flex', alignItems: 'center', gap: '8px', height: 24, borderRadius: '999px', padding: '0 10px 0 3px', fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: '13.5px', lineHeight: 1});
     if (q === me) { row.style.background = '#ffc928'; row.style.border = '2.5px solid #2b2140'; }
     anim(row, [{transform: 'translateX(-30px)', opacity: 0}, {transform: 'translateX(0)', opacity: 1}], {duration: 300, delay: 300 + i * 70, fill: 'backwards', raw: true});

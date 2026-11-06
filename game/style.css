@@ -217,3 +217,7 @@ button{font:inherit;color:inherit}
 .ff .surf.shelf .ledge{top:88px}
 .ffpaper{position:absolute;pointer-events:none;background-color:#fff6dc;background-image:radial-gradient(rgba(43,33,64,.07) 1.6px,transparent 1.9px);background-size:18px 18px;border:2.2px solid #4a3d6a;border-radius:28px}
 .ff .savetag{display:none}
+/* other heroes' tavern tier */
+.lobchip .tierb{position:absolute;left:-5px;top:-7px;width:15px;height:15px;border-radius:50%;background:var(--y);border:2px solid var(--ink);font-style:normal;font-size:9.5px;line-height:1;display:flex;align-items:center;justify-content:center;padding-top:1px;z-index:1}
+.tierpill{position:absolute;display:inline-flex;align-items:center;gap:2px;height:22px;padding:1px 7px 0 4px;border-radius:999px;background:var(--ink);color:var(--y);border:2px solid #fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;line-height:1;z-index:3}
+.tierpill.sm{position:relative;height:18px;font-size:11px;padding:1px 5px 0 3px;border:0}

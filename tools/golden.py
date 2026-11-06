@@ -18,7 +18,7 @@ GOLD = {
     'Too Big to Fail': 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +8/+8.',
     # Influencers
     'Reply Guy': 'Legacy: summon two 1/1 Followers.',
-    'Engagement Bot': 'First Impression: summon two 1/1 Followers.',
+    'Engagement Bot': 'First Impression: get 2 Likes.',
     'Stan Account': 'End of turn: get 4 Likes.',
     'Giveaway Host': 'End of turn: your Followers get +2/+2 this game.',
     'Comment Section': 'Legacy: summon four 1/1 Followers.',
@@ -29,9 +29,9 @@ GOLD = {
     'Engagement Farmer': 'After you summon a Follower, give it +12/+12.',
     'Paparazzi': 'Start of combat: give your four highest-Attack Influencers Out of Office and +2/+2.',
     'Brand Ambassador': 'Start of combat: for this combat, your Followers have +2/+2 for each Influencer you have, including Followers summoned later. Legacy: summon four Followers.',
-    'Ring Light Studio': 'End of turn: get 4 Likes. Likes you give count triple while this is on your board.',
+    'Ring Light Studio': 'First Impression: get 4 Likes. Likes you give count triple while this is on your board.',
     'Blue Checkmark': 'After a friendly Follower dies, give your Influencers +4/+4 permanently.',
-    'Main Character': 'Attention Seeker. Likes you give this minion count six times. Clock In: get 4 Likes.',
+    'Main Character': 'Attention Seeker. Likes you give this minion count four times. Clock In: get 4 Likes.',
     # Ferals
     'Windowsill Succulent': 'End of turn: if you have another Feral, gain +2/+2.',
     'City Pigeon': 'After you Scroll, gain +2/+2 (twice per turn).',
@@ -46,7 +46,7 @@ GOLD = {
     'Guerrilla Gardener': 'End of turn: Ferals in the Feed get +4/+4 this game.',
     'Ancient Oak': 'Your end-of-turn effects give Ferals three times as much.',
     'Rat King': 'After a friendly Feral comes back, give your other Ferals +4/+4.',
-    'World Tree': 'End of turn: give your other Ferals +4/+4.',
+    'World Tree': 'End of turn: give your other Ferals +8/+8.',
     'Nature Is Healing': 'After you Scroll, give your other Ferals +4/+4 (twice per turn).',
     # Creatives
     'Busker': 'After you play a Creative, gain +2/+2.',
@@ -87,8 +87,8 @@ GOLD = {
     'Jingle Writer': 'When sold: give your other Punks +4/+4 for each Punk you have sold this game (max +32).',
     'Reunion Tour': 'Your "When sold" effects trigger three times.',
     'Stage Diver': 'Start of combat: deal damage equal to this minion\'s Attack to the left-most enemy minion, then gain +8 Attack permanently.',
-    'Greatest Hits': 'After you sell a Punk, give your Punks +2/+2 and put two copies of it in the Feed.',
-    'General Strike': 'Start of combat: deal 2 damage to all enemy minions for each Punk you have. Then give your Punks +2/+2 permanently for each enemy minion that died.',
+    'Greatest Hits': 'After you sell a Punk, give your Punks +2/+2. The first 3 Punks you sell each turn also go back into the Feed, twice.',
+    'General Strike': 'Start of combat: deal 4 damage to all enemy minions for each Punk you have. Then give your Punks +4/+4 permanently for each enemy minion that died.',
     # Philosophers
     'Shower Thinker': 'End of turn: give the minion to its right +6/+6 for the next combat.',
     'Stoicism Podcaster': 'Attention Seeker. After this survives damage, gain +2 Health permanently (once per combat).',
@@ -102,7 +102,7 @@ GOLD = {
     'Desert Hermit': 'Attention Seeker. After this survives damage, give your other Philosophers +4/+4 permanently (once per combat).',
     'The Cynic': 'Attention Seeker. After this takes damage, give your other Philosophers +2/+2.',
     'Bestselling Author': 'End of turn: give the Philosophers next to it +2/+2 for the next combat, then your minions also gain their next-combat buffs permanently.',
-    'Grand Unified Theory': 'End of turn: give your minions +2/+2 for the next combat, then triple all next-combat buffs.',
+    'Grand Unified Theory': 'End of turn: give your Philosophers +8/+8 for the next combat, then triple all next-combat buffs.',
     'Enlightened Guru': 'Attention Seeker. The first four times each of your other Attention Seekers takes damage each combat, it takes at most 3.',
     # Neighbours
     'Wi-Fi Leech': 'Start of combat: gain +2/+2 for each minion next to it.',

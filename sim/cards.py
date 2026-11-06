@@ -421,5 +421,27 @@ _V9B = {'Blue Checkmark': 'After a friendly Follower dies, give your Influencers
         'Bestselling Author': 'End of turn: give the Philosophers next to it +1/+1 for the next combat, then make all next-combat buffs on your minions permanent.'}
 for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
     if _c.name in _V9B: _c.text = _V9B[_c.name]
+# v11 player balance (Nov 6): Likes were too strong (Main Character boards of 5,000+ stats), so the Like cards move up a tier and
+# Main Character doubles instead of triples. Punk, Feral and Philosopher capstones get stronger.
+_V11 = {  # name: (tier, atk, hp, text or None, style or None)
+    'Engagement Bot': (1, 2, 2, 'First Impression: get 1 Like.', 'MC'),
+    'Hype Man': (2, 2, 4, None, None),
+    'Stan Account': (3, 3, 4, None, None),
+    'Personal Brand': (4, 4, 6, None, None),
+    'Ring Light Studio': (5, None, None, 'First Impression: get 2 Likes. Likes you give count double while this is on your board.', None),
+    'Main Character': (6, None, None, 'Attention Seeker. Likes you give this minion count double. Clock In: get 2 Likes.', None),
+    'Greatest Hits': (6, None, None, 'After you sell a Punk, give your Punks +1/+1. The first 3 Punks you sell each turn also go back into the Feed.', None),
+    'General Strike': (6, None, None, 'Start of combat: deal 2 damage to all enemy minions for each Punk you have. Then give your Punks +2/+2 permanently for each enemy minion that died.', None),
+    'World Tree': (6, None, None, 'End of turn: give your other Ferals +4/+4.', None),
+    'Grand Unified Theory': (6, None, None, 'End of turn: give your Philosophers +4/+4 for the next combat, then double all next-combat buffs.', None),
+}
+for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
+    if _c.name in _V11:
+        _t, _a, _h, _x, _st = _V11[_c.name]
+        _c.tier = _t
+        if _a is not None: _c.atk, _c.hp = _a, _h
+        if _x: _c.text = _x
+        if _st: _c.style = _st
+        if _c.name == 'Engagement Bot': _c.kind = 'fi'
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]

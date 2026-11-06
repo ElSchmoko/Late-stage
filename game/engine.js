@@ -125,7 +125,7 @@ class Player {
   /** Stats one Like gives this minion (Personal Brand, Main Character and Ring Light Studio raise it). */
   likeValue(m) {
     const rl = this.board.filter(o => o.is_('Ring Light Studio')), ring = rl.length ? (rl.some(o => o.golden) ? 3 : 2) : 1;
-    return (1 + this.likeBonus) * (m && m.is_('Main Character') ? (m.golden ? 6 : 3) : 1) * ring;
+    return (1 + this.likeBonus) * (m && m.is_('Main Character') ? (m.golden ? 4 : 2) : 1) * ring;
   }
   giveLike(m) {
     if (this.likes <= 0 || !this.board.includes(m)) return false;
@@ -197,7 +197,8 @@ class Player {
       if (n === 'Dropshipper') { this.bonus_next += 1; this.note('gold_next', {id: m.id, n: 1}); }
       else if (n === 'Unboxing Streamer') { this.summonFollower(); this.summonFollower(); this.addLikes(2, m); }
       else if (n === 'Personal Brand') { this.addLikes(2, m); this.likeBonus += 1; this.note('likebonus', {id: m.id}); }
-      else if (n === 'Engagement Bot') this.summonFollower();
+      else if (n === 'Engagement Bot') this.addLikes(m.g, m);
+      else if (n === 'Ring Light Studio') this.addLikes(2 * m.g, m);
       else if (n === 'Helpful Neighbour') { const tgt = target && this.board.includes(target) ? target : maxBy(others.length ? others : [m], o => this.value(o)); this.buff(tgt, 3, 3, m); }
       else if (n === 'Venture Capitalist') {
         const inv = Math.min(gold[0], 4);
@@ -244,7 +245,8 @@ class Player {
       return tgt;
     }
     const m = new M(card);
-    if (bonus) { m.atk += bonus.a; m.hp += bonus.h; }
+    if (bonus) { m.atk += bonus.a || 0; m.hp += bonus.h || 0; }
+    if (bonus && bonus.golden) { m.golden = true; m.atk += card.atk; m.hp += card.hp; if (bonus.extras) m.extras.push(...bonus.extras); m.shield = m.shield || !!bonus.shield; m.sell_bonus += bonus.sell || 0; }
     if (card.tribe === C && this.creativeAtk) m.atk += this.creativeAtk;
     if (pos === null || pos > this.board.length) this.board.push(m); else this.board.splice(pos, 0, m);
     this.note('play', {id: m.id});
@@ -253,27 +255,28 @@ class Player {
     this.checkTriple(card, gold);
     return m;
   }
-  /** Buying a third copy makes the triple straight away, so no free board slot is needed.
-   *  pieces: stat bonuses {a, h} of the copies that are not on the board (the bought one, plus any taken from the hand).
-   *  Returns the golden board minion, 'hand' when no copy was on the board (the golden card goes to the hand), or null. */
-  tripleOnBuy(card, pieces, gold) {
-    const same = this.board.filter(x => x.name === card.name && !x.golden && !x.follower);
-    const useBoard = Math.min(same.length, 3 - pieces.length);
-    if (card.collab || useBoard + pieces.length < 3) return null;
-    let keep = 'hand';
-    if (useBoard >= 1) {
-      keep = same[0];
-      for (const x of same.slice(1, useBoard)) {
-        keep.atk += x.atk - card.atk; keep.hp += x.hp - card.hp; keep.shield = keep.shield || x.shield;
-        keep.extras.push(...x.extras); keep.sell_bonus += x.sell_bonus; this.board.splice(this.board.indexOf(x), 1);
-      }
-      for (const pc of pieces) { keep.atk += pc.a; keep.hp += pc.h; }
-      keep.atk += card.atk; keep.hp += card.hp; keep.golden = true; keep.tier = card.tier; this.buffed.add(keep.id);
-      this.note('triple', {id: keep.id});
+  /** Collects a triple: removes fromBoard non-golden board copies and adds up what every copy gained.
+   *  pieces: {a, h} gains of the copies that are not on the board (the new one, and any from the hand).
+   *  Returns the golden card's spec {a, h, extras, shield, sell}; play(card, gold, pos, target, {...spec, golden: true}) plays it. */
+  takeTriple(card, pieces, fromBoard) {
+    const same = this.board.filter(x => x.name === card.name && !x.golden && !x.follower).slice(0, fromBoard);
+    const spec = {a: 0, h: 0, extras: [], shield: false, sell: 0};
+    for (const x of same) {
+      spec.a += x.atk - card.atk; spec.h += x.hp - card.hp; spec.extras.push(...x.extras); spec.shield = spec.shield || (x.shield && !card.shield); spec.sell += x.sell_bonus;
+      this.board.splice(this.board.indexOf(x), 1);
     }
-    this.afterPlay(card, keep === 'hand' ? null : keep, gold);
+    for (const pc of pieces) { spec.a += pc.a || 0; spec.h += pc.h || 0; }
+    return spec;
+  }
+  /** Bots: buying the third copy makes the golden card and plays it at once (bots have no hand), First Impression doubled. */
+  tripleOnBuy(card, pieces, gold) {
+    const onBoard = this.board.filter(x => x.name === card.name && !x.golden && !x.follower).length;
+    if (card.collab || onBoard + pieces.length < 3) return null;
+    const spec = this.takeTriple(card, pieces, 3 - pieces.length);
+    const m = this.play(card, gold, null, null, Object.assign({golden: true}, spec));
+    this.note('triple', {id: m.id});
     this.tripleReward(gold);
-    return keep;
+    return m;
   }
   tripleReward(gold) {
     const t = Math.min(6, this.tier + 1);
@@ -304,7 +307,7 @@ class Player {
     const reps = m.tribe === P ? 1 + this.wcount('Reunion Tour') : 1;
     for (let r = 0; r < reps; r++) this.whenSold(m, right);
     if (m.tribe === P && !m.follower) this.punks_sold += 1;
-    if (m.tribe === P && !m.follower && this.has('Greatest Hits')) { const k = this.board.some(x => x.is_('Greatest Hits') && x.golden) ? 2 : 1; for (const x of this.board) if (x.tribe === P) this.buff(x, k, k); for (let i = 0; i < k; i++) this.rerelease.push(m.c); }
+    if (m.tribe === P && !m.follower && this.has('Greatest Hits')) { const k = this.board.some(x => x.is_('Greatest Hits') && x.golden) ? 2 : 1; for (const x of this.board) if (x.tribe === P) this.buff(x, k, k); this.ghSold = (this.ghSold || 0) + 1; if (this.ghSold <= 3) for (let i = 0; i < k; i++) this.rerelease.push(m.c); }
     this.afterSell(m);
   }
   whenSold(m, right) {
@@ -338,7 +341,6 @@ class Player {
         if (left) { const v = left; v.atk -= Math.min(1, v.atk); v.hp -= 1; this.note('drain', {id: v.id, src: m.id}); this.buff(m, 1, 1, m);
           if (v.hp <= 0) { b.splice(b.indexOf(v), 1); this.bonus_next += 2; this.note('shopdeath', {id: v.id}); this.onShopDeath(v); } }
       } else if (n === 'Stan Account') this.addLikes(2, m);
-      else if (n === 'Ring Light Studio') this.addLikes(2, m);
       else if (n === 'Guerrilla Gardener') this.addFeedBuff(F, 2, 2);
       else if (n === 'Private Equity') {
         const feed = this.getFeed ? this.getFeed() : this.feedRef;
@@ -355,7 +357,7 @@ class Player {
       else if (n === 'Record Label') { const k = 3 * this.creativesThisTurn, cr = b.filter(o => o !== m && o.tribe === C); if (k && cr.length) this.buff(this.rng.choice(cr), k, k, m); }
       else if (n === 'Plant Parent') { const fs = this.rng.shuffle(b.filter(o => o !== m && o.tribe === F)).slice(0, 2); for (const o of fs) this.buff(o, 1, 1, m); }
       else if (n === 'Rooftop Beehive') { for (const o of neighbours(b, m)) if (isTribe(o, F)) this.buff(o, 2, 2, m); }
-      else if (n === 'World Tree') { for (const o of b) if (o !== m && o.tribe === F) this.buff(o, 2, 2, m); }
+      else if (n === 'World Tree') { for (const o of b) if (o !== m && o.tribe === F) this.buff(o, 4, 4, m); }
       else if (n === 'Shower Thinker') { const o = rightOf(b, m); if (o) this.tbuff(o, 3, 3, m); }
       else if (n === 'Pub Philosopher') { const o = leftOf(b, m); if (o) this.tbuff(o, 4, 2, m); }
       else if (n === 'Thought Experiment') { for (const o of neighbours(b, m)) if (isTribe(o, PH)) this.tbuff(o, 3, 3, m); }
@@ -365,7 +367,7 @@ class Player {
     b = this.board;
     this.in_eot = false;
     for (const m of b) if (m.name === 'Bestselling Author') for (const o of neighbours(b, m)) if (isTribe(o, PH)) this.tbuff(o, m.g, m.g, m);
-    for (const m of b) if (m.is_('Grand Unified Theory')) { const k = m.golden ? 3 : 2; for (const o of b) { o.ta = (o.ta + (k - 1)) * k; o.th = (o.th + (k - 1)) * k; this.buffed.add(o.id); } }
+    for (const m of b) if (m.is_('Grand Unified Theory')) { const k = m.golden ? 3 : 2, add = m.golden ? 8 : 4; for (const o of b) { if (isTribe(o, PH)) { o.ta += add; o.th += add; } o.ta *= k; o.th *= k; this.buffed.add(o.id); } }
     for (const m of b) if (m.name === 'Bestselling Author') for (const o of b) if (o.ta || o.th) { o.atk += o.ta; o.hp += o.th; this.note('buff', {id: o.id, a: o.ta, h: o.th, src: m.id}); if (!m.golden) o.ta = o.th = 0; }
     for (const m of b) m.fb = this.fbonus;
   }
@@ -448,7 +450,7 @@ class Player {
   beginTurn() {
     this.turn += 1; this.kills_last = this.techie_kills; this.techie_kills = 0; this.buffed = new Set();
     this.merch_used = this.side_used = this.sold_hustle = false; this.merchUsed = {}; this.resellUsed = new Set(); this.creativesThisTurn = 0; this.gigUsed = new Set(); this.rerelease = []; this.discounts = {}; this.in_eot = this.oak = false;
-    this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollUses = {};
+    this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollUses = {}; this.ghSold = 0;
     for (const m of this.board) { m.turns_on_board += 1; m.ta = m.th = 0; }
     const carry = this.hero === 'h_procrastinator' ? Math.min(3, this.gold[0]) : 0;
     this.gold = [Math.min(2 + this.turn, 10) + this.bonus_next + carry]; this.gold_from = {base: Math.min(2 + this.turn, 10), bonus: this.bonus_next, carry};
@@ -657,7 +659,7 @@ class Fight {
       else if (n === 'Heckler' && e.length) { const t = maxBy(e, x => x.atk); hit(t, 4 * g + amp); ev(m, 'shot', [t]); }
       else if (n === 'Feedback Loop') { for (const x of e) hit(x, g + amp); const killed = e.some(x => x.hp <= 0); if (killed) for (const o of b) if (o.tribe === P) { o.atk += 2 * g; o.hp += 2 * g; } ev(m, 'sweep', e); }
       else if (n === 'Stage Diver' && e.length) { const t = e[0]; hit(t, m.atk + amp); perm(m, 4 * g, 0); ev(m, 'shot', [t]); }
-      else if (n === 'General Strike') { const alive = e.filter(x => x.hp > 0); for (const x of e) hit(x, punks * g + amp); const k2 = alive.filter(x => x.hp <= 0).length * g; if (k2) for (const o of b) if (o.tribe === P) perm(o, k2, k2); ev(m, 'sweep', e); }
+      else if (n === 'General Strike') { const alive = e.filter(x => x.hp > 0); for (const x of e) hit(x, 2 * punks * g + amp); const k2 = 2 * alive.filter(x => x.hp <= 0).length * g; if (k2) for (const o of b) if (o.tribe === P) perm(o, k2, k2); ev(m, 'sweep', e); }
     }
     me.vv = P_.vv * wsum(b, 'Viral Video');
   }

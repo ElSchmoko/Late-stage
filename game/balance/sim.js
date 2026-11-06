@@ -84,7 +84,7 @@ if (mode === 'styles') {
   const oDraw = E.Player.prototype.drawFeed, oPlay = E.Player.prototype.play, oSell = E.Player.prototype.sell;
   let track = false;
   E.Player.prototype.drawFeed = function () { const f = oDraw.call(this); if (track && !this.human) for (const c of f) U(c.name).offered++; return f; };
-  E.Player.prototype.play = function (card, gold, pos, target, bonus) { if (track && bonus) U(card.name).bought++; return oPlay.call(this, card, gold, pos, target, bonus); };
+  E.Player.prototype.play = function (card, gold, pos, target, bonus) { if (track && bonus && !bonus.golden) U(card.name).bought++; return oPlay.call(this, card, gold, pos, target, bonus); };
   E.Player.prototype.sell = function (m, gold) { if (track && m.c) U(m.c.name).sold++; return oSell.call(this, m, gold); };
   for (const [label, N, skill] of [['skill0', N0, 0], ['skill1', N1, 1]]) {
     const st = {};

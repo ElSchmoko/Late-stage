@@ -211,3 +211,48 @@ The UI removed cards with `splice(indexOf(x), 1)`. When the card was no longer t
 ## Nov 4: Brand Ambassador
 
 The start-of-combat bonus (+1/+1 per Influencer) now holds for the whole combat: Followers summoned later in that combat get it too, including the two from Brand Ambassador's own Legacy. Followers style 4.64 → 4.42; all styles 4.23–4.73 (1,400 lobbies, skill 0).
+
+## v11: player balance list (Nov 6)
+
+The player's changes, applied as given. Stan Account and Personal Brand also get bodies that fit their new tiers (3/4 and 4/6), and Engagement Bot moves to Main Character so that style keeps a tier-1 card.
+
+| Card | Change | Effect (tier median) | Note |
+| --- | --- | --- | --- |
+| Engagement Bot | 2/2, First Impression: get 1 Like (was: summon a Follower); now Main Character | +0.51 (0.40) | |
+| Hype Man | Tier 2, 2/4 | +0.56 (0.66) | |
+| Stan Account | Tier 3, 3/4 | +0.58 (0.93) | Low end |
+| Personal Brand | Tier 4, 4/6 | +0.87 (0.67) | |
+| Ring Light Studio | 2 Likes on First Impression instead of every end of turn | +0.44 (0.30) | |
+| Main Character | Likes on it count double (was triple) | +0.17 (0.23) | |
+| Greatest Hits | Only the first 3 Punks sold each turn go back into the Feed | +0.18 (0.23) | |
+| General Strike | 2 damage per Punk, +2/+2 per kill | **+0.84** (0.23); ceiling +0.79 | Above the power band |
+| World Tree | +4/+4 per turn | **+0.69** (0.23); ceiling +0.66 | Just above the band |
+| Grand Unified Theory | Philosophers +4/+4 for the next combat, then double | **+1.03** (0.23); ceiling **+1.05** | Over the build-around limit (+0.83) |
+
+**Likes ceiling (board size, bots).** Main Character's top 10% of boards at turn 14 went from 875 to 675 total stats, and the largest board from 3,314 to 1,830. Big Ideas' top 10% went from 595 to 989, and Overgrowth's from 712 to 916.
+
+**Styles (1,400 lobbies).** Sellouts 4.15, Scavengers 4.18 and Overgrowth 4.20 lead. Main Character is at 4.92, below the big-stats bot (4.86).
+
+**Variants tested for Main Character's floor:**
+
+| Variant | Main Character |
+| --- | --- |
+| Ring Light also gets 1 Like per turn | 4.92 |
+| Ring Light keeps 2 Likes per turn | 4.93 |
+| Main Character 10/12 with Clock In 3 Likes | 4.89 |
+| Personal Brand back at tier 3, plus Main Character 10/12 with Clock In 3 Likes | **4.74** |
+
+**Gentler capstones tested:**
+
+| Variant | Effect | Ceiling |
+| --- | --- | --- |
+| Grand Unified Theory at +3/+3 | +0.84 | +0.92 (still over the limit) |
+| General Strike with 2 damage, +1/+1 per kill | +0.81 | |
+
+The doubled damage, not the per-kill buff, makes General Strike strong.
+
+## Also in this update
+
+- **Triples go to the hand.** The third copy (bought or Discovered) makes a golden card in the hand; board copies are used first. The golden card is golden before its First Impression runs, so the effect fires doubled. Bots play their golden card at once.
+- **Look at board during Discover.**
+- **Other heroes' tier** is shown on the lobby strip, the fight screen and the end-of-run standings.
