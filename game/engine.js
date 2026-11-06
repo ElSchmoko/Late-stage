@@ -91,7 +91,7 @@ class Player {
     this.sold_hustle = false; this.punks_sold = 0; this.kills_last = 0; this.techie_kills = 0; this.spent_this_turn = 0;
     this.human = !!opts.human; this.hero = opts.hero || null; this.name = opts.name || style;
     this.hand = []; this.feed = []; this.saved = false; this.gold = [0]; this.log = []; this.pending = []; this.lostLast = false;
-    this.skill = opts.skill ?? 0; this.scrollUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
+    this.skill = opts.skill ?? 0; this.expert = opts.expert ?? this.skill >= 0.8; this.scrollUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
     this.likes = 0; this.likeBonus = 0; this.likesSpent = 0; this.feedBuff = {}; this.creativeAtk = 0; this.creativesThisTurn = 0; this.gigUsed = new Set(); this.feedRef = null; this.getFeed = null;
   }
   has(n) { return this.board.some(m => m.is_(n)); }
@@ -119,6 +119,8 @@ class Player {
     if (m.name === 'DJ Upstairs' && ['FO', 'MC', 'PI', 'PE', 'GA'].includes(this.style) && this.count('DJ Upstairs') <= 1) v += 4;
     if (m.name === 'Lawyer Next Door' && ['FO', 'PF'].includes(this.style) && this.count('Lawyer Next Door') <= 1) v += 4;
     if (!m.golden && this.board.some(o => o !== m && o.name === m.name && !o.golden)) v += 1.5 * this.skill;
+    if (this.expert && c) v += 0.8 * this.synergy(c, m) * this.commit();
+    if (this.expert && c && this.tier >= 5 && c.style === this.style && c.tier === 6 && !this.board.some(o => o !== m && o.name === c.name)) v += 8;
     return v + 1.5 * m.extras.length;
   }
   addLikes(n, src) { if (n > 0) { this.likes += n; this.note('likes', {n, src: src ? src.id : null}); } }
@@ -133,7 +135,8 @@ class Player {
     const k = this.likeValue(m);
     this.buff(m, k, k); return true;
   }
-  spendLikes() { while (this.likes > 0 && this.board.length) { const mc = this.board.find(m => m.is_('Main Character')); this.giveLike(mc || this.carry()); } }
+  spendLikes() {
+    while (this.likes > 0 && this.board.length) { const mc = this.board.find(m => m.is_('Main Character')); this.giveLike(mc || this.carry()); } }
   feedBonus(card) { const b = this.feedBuff[card.tribe]; return b ? b : {a: 0, h: 0}; }
   addFeedBuff(tribe, a, h) {
     const b = this.feedBuff[tribe] = this.feedBuff[tribe] || {a: 0, h: 0}; b.a += a; b.h += h;
@@ -462,8 +465,12 @@ class Player {
     this.beginTurn(); const gold = this.gold, r = this.rng, sk = this.skill;
     if (this.onBegin) this.onBegin(this);   // test hook (balance suite)
     for (const m of this.board.slice()) if (m.name === 'Crypto Bro' && m.turns_on_board >= 6) this.sell(m, gold);
-    if (SELL_STYLES.includes(this.style) || [H, P].includes(this.tribe))
+    if ((SELL_STYLES.includes(this.style) || [H, P].includes(this.tribe)) && !(this.expert && this.has('Squat Collective')))
       for (const m of this.board.slice()) if (m.c && m.c.sellbait && m.turns_on_board >= 1 && this.board.length > 4) this.sell(m, gold);
+    if (this.expert && (this.has('Sneaker Reseller') || this.has('Private Equity')) && this.board.length >= 4) {
+      const spare = minBy(this.board.filter(o => !o.is_('Sneaker Reseller') && !o.is_('Private Equity') && !o.golden), o => this.value(o) - (o.name === 'Unpaid Intern' ? 3 : 0));
+      if (spare) this.sell(spare, gold);
+    }
     const target = CURVE[this.turn] || 6;
     // skill 0 is the standard bot. Skill adds: levelling a turn early when healthy and rich
     let eager = sk >= 0.4 && this.health >= 20 && this.turn >= 4 && r() < sk, hold = false;
@@ -479,7 +486,7 @@ class Player {
     }
     let feed = this.savedFeed || this.feedEntries(this.drawFeed()); this.savedFeed = null;
     this.getFeed = () => feed;
-    let scrolls = 0, digs = 0, swaps = 0, guard = 0;
+    let scrolls = 0, digs = 0, swaps = 0, guard = 0, digCap = 0;
     const maxScrolls = 4 + (this.health < 12 ? Math.round(3 * sk) : 0);
     const hp = this.hero;
     if (hp === 'h_overthinker' && this.canPower() && this.board.length < 7 && gold[0] >= 2 + (this.turn > 2 ? 3 : 0)) this.usePower(null, feed);
@@ -502,18 +509,20 @@ class Player {
       if (!afford.length && gold[0] < this.minionCost() && sc > 0) break;
       const best = afford.length ? pick(afford) : null;
       const worst = this.board.length ? minBy(this.board, m => this.value(m)) : null;
-      if (best && this.tribe && this.turn >= 3 && best.card.tribe !== this.tribe && gold[0] >= this.minionCost() + sc && digs < 3 && !feed.some(e => e.card.tribe === this.tribe)) {
+      if (best && this.tribe && this.turn >= 3 && best.card.tribe !== this.tribe && gold[0] >= this.minionCost() + sc && digs < (this.expert ? 5 : 3) && !feed.some(e => e.card.tribe === this.tribe)) {
         if (this.payScroll()) { digs++; feed = this.feedEntries(this.drawFeed()); continue; }
       }
       if (sc === 0 && scrolls === 0 && best && this.tribe && best.card.tribe !== this.tribe) { this.payScroll(); scrolls++; feed = this.feedEntries(this.drawFeed()); continue; }
       if (best) {
         const twin = !best.card.collab && this.board.filter(x => x.name === best.card.name && !x.golden && !x.follower).length >= 2;
         const bs = this.cardScore(best.card), free = twin || this.board.length < 7 || (best.card.collab && this.board.length);
-        if (free || (swaps < 3 && bs > this.value(worst) + 1.5)) {
+        const playEngines = this.expert && best.card.tribe === C ? ['World Tour', 'Festival Headliner', 'Busker', 'Indie Band', 'Record Label', 'Merch Stand'].reduce((k, n) => k + this.count(n), 0) : 0;
+        if (free || (swaps < (playEngines ? 5 : 3) && bs > this.value(worst) + 1.5 - 1.5 * Math.min(3, playEngines))) {
           if (!free) { this.sell(worst, gold); swaps++; }
           gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1);
           if (twin) { this.tripleOnBuy(best.card, [{a: best.a, h: best.h}], gold); continue; }
-          this.play(best.card, gold, null, null, best);
+          const played = this.play(best.card, gold, null, null, best);
+          this.expertAfterBuy(played, gold);
           // sell Jingle Writer at once when it pays, as a person would (balance tests must see the combo)
           if (best.card.name === 'Jingle Writer' && this.tribe === P && this.punks_sold >= 2 && this.board.filter(o => o.tribe === P).length >= 4) { const m = this.board.find(o => o.name === 'Jingle Writer' && !o.golden); if (m) this.sell(m, gold); }
           continue;
@@ -521,9 +530,10 @@ class Player {
       }
       if (gold[0] >= this.minionCost() + sc && scrolls < maxScrolls) { if (this.payScroll()) { scrolls++; feed = this.feedEntries(this.drawFeed()); continue; } }
       // leftover gold goes into Scroll triggers (City Pigeon, Seagull, Nature Is Healing)
-      if (gold[0] >= sc && scrolls < maxScrolls + 6 && this.scrollWant() > 0) { if (this.payScroll()) { scrolls++; feed = this.feedEntries(this.drawFeed()); continue; } }
+      if (gold[0] >= sc && scrolls < maxScrolls + 6 && (this.scrollWant() > 0 || (this.expert && sc > 0 && (this.has('Thought Leader') || this.has('Unicorn Startup'))))) { if (this.payScroll()) { scrolls++; feed = this.feedEntries(this.drawFeed()); continue; } }
       break;
     }
+    this.expertGreatestHits(gold, feed);
     if (hp === 'h_serial' && this.canPower() && this.board.length) { const low = minBy(this.board.filter(m => !m.golden && m.tier < 6), m => [m.tier, this.value(m)]); if (low && low.tier <= this.tier) this.usePower(low, feed); }
     if (hp === 'h_lifecoach' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
     if (hp === 'boomer' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
@@ -533,9 +543,87 @@ class Player {
     // skilled bots Save a Feed that holds a card they want but couldn't afford
     if (sk >= 0.3 && feed.length && r() < sk + 0.3 && feed.some(e => this.cardScore(e.card) > 9 || this.board.some(m => m.name === e.card.name && !m.golden))) this.savedFeed = feed;
     this.feedRef = feed; this.getFeed = null;
-    this.arrange();
+    this.arrange(); if (this.expert) this.arrangeExpert();
     this.endOfTurn();
     if (opps.length) this.searchOrder(opps, sk);
+  }
+
+  // ---- expert play
+  /** How many board minions share each of the card's mechanics (capped at 3 per mechanic). */
+  synergy(card, exclude = null) {
+    const tags = tagsOf(card); if (!tags.length) return 0;
+    let s = 0;
+    for (const t of tags) {
+      let k = 0;
+      for (const o of this.board) {
+        if (o === exclude) continue;
+        if (o.follower ? t === 'followers' : tagsOf(o.c).includes(t) || o.extras.some(x => tagsOf(BY_NAME[x]).includes(t))) k++;
+      }
+      s += Math.min(3, k);
+    }
+    return s;
+  }
+  /** Sell plays right after a buy: cash in "when sold" cards at once (Zine Maker first moves left of the carry). */
+  expertAfterBuy(m, gold) {
+    if (!this.expert || !m || !this.board.includes(m) || this.has('Squat Collective')) return;
+    const punks = this.board.filter(o => o.tribe === P && !o.follower && o !== m).length;
+    if (m.name === 'Sellout Frontman' && punks >= 2) this.sell(m, gold);
+    else if (m.name === 'Zine Maker' && this.board.length >= 2) { const c = this.carry(); if (c !== m) { this.board.splice(this.board.indexOf(m), 1); this.board.splice(this.board.indexOf(c), 0, m); } this.sell(m, gold); }
+    else if (m.name === 'Anarchist Barista' && this.has('Greatest Hits')) this.sell(m, gold);
+  }
+  /** Greatest Hits: sell a spare Punk and buy its copy back, up to three times a turn (each sale gives your Punks +1/+1). */
+  expertGreatestHits(gold, feed) {
+    if (!this.expert || !this.has('Greatest Hits')) return;
+    for (let i = 0; i < 3 && (this.ghSold || 0) < 3 && gold[0] >= this.minionCost(); i++) {
+      const ps = this.board.filter(o => o.tribe === P && !o.follower && !o.golden && !KEEP_PUNKS.has(o.name));
+      if (ps.length < 1 || this.board.filter(o => o.tribe === P).length < 3) return;
+      const v = minBy(ps, o => this.value(o) - (o.c && o.c.sellbait ? 3 : 0));
+      this.sell(v, gold);
+      const c = this.rerelease.pop(); this.rerelease = [];
+      if (!c) return;
+      gold[0] -= this.minionCost(); this.gainSpend(this.minionCost());
+      this.expertAfterBuy(this.play(c, gold), gold);
+    }
+  }
+  /** Score of a board order for shop-phase and start-of-combat neighbour effects (higher is better). */
+  orderScore(b) {
+    let s = 0; const cy = this.carry();
+    const isF = o => o && isTribe(o, F), isPH = o => o && isTribe(o, PH);
+    b.forEach((m, i) => {
+      const L = b[i - 1], R = b[i + 1], nb = [L, R].filter(Boolean), g = m.g;
+      if (m.is_('Rooftop Beehive')) s += 4 * g * nb.filter(isF).length;
+      if (m.is_('Tree Hugger')) s += 4 * g * nb.filter(isF).length;
+      if (m.is_('Wild Boar')) s += 3 * g * nb.filter(isF).length;
+      if (m.is_('Caretaker')) s += 3 * g * nb.length;
+      if (m.is_('Thought Experiment')) s += 6 * g * nb.filter(isPH).length;
+      if (m.is_('Bestselling Author')) s += 2 * g * nb.filter(isPH).length;
+      if (m.is_('Shower Thinker') && R) s += 6 * g + (R === cy ? 3 : 0);
+      if (m.is_('Pub Philosopher') && L) s += 6 * g + (L === cy ? 3 : 0);
+      if (m.is_('Marathon Monk') && isPH(R)) s += 3 * g;
+      if (m.is_('E-Sports Coach')) s += 3 * g * nb.length;
+      if (m.is_('Wi-Fi Leech')) s += 2 * g * nb.length;
+      if (m.is_('Open Mic Poet') || m.is_('Package Hoarder')) s += 2 * g * nb.length;
+      if (m.is_('Zine Maker') && R) s += 4 + (R === cy ? 4 : 0);
+      if (m.is_('Middle Manager')) s += L ? (L.follower || L.stats() <= 4 ? 6 : -L.stats() / 6) : -3;   // fodder on its left pays 2 gold
+      if (m.is_('The Landlord')) for (const o of nb) s -= o.follower || o.stats() <= 4 ? -2 : o.stats() / 8;
+      if (m.is_('Leaf Blower Guy')) for (const o of nb) s -= o.shield ? 0 : o.hp <= 1 ? 6 : 2;
+    });
+    b.forEach((m, i) => { if (m.c && /Clock In/.test(m.c.text)) s += (b.length - i) * 0.6; });
+    const ci = b.indexOf(cy); if (ci > 0 && ci < b.length - 1) s += 1;
+    return s;
+  }
+  /** Hill-climbs board order with swaps to raise orderScore. */
+  arrangeExpert() {
+    let b = this.board.slice(), best = this.orderScore(b);
+    for (let pass = 0; pass < 3; pass++) {
+      let improved = false;
+      for (let i = 0; i < b.length; i++) for (let j = i + 1; j < b.length; j++) {
+        [b[i], b[j]] = [b[j], b[i]]; const v = this.orderScore(b);
+        if (v > best + 1e-9) { best = v; improved = true; } else [b[i], b[j]] = [b[j], b[i]];
+      }
+      if (!improved) break;
+    }
+    this.board = b;
   }
 
   // ---- scouting (smarter bots): simulated fights against the boards opponents showed last round
@@ -579,6 +667,22 @@ class Player {
   }
 }
 
+// ======================================================================== expert play
+// The plays a strong player makes, used by the top rating brackets and by the balance suite to see top boards:
+// synergy-aware buying, sell plays, positioning around neighbour effects, spending into spend engines, digging for pieces.
+const TAG_RE = [[/Like/, 'likes'], [/Follower/, 'followers'], [/When sold|you sell|Punks you have sold/, 'selling'], [/Legacy/, 'legacy'],
+  [/next combat|next-combat/, 'tempbuff'], [/Attention Seeker/, 'taunt'], [/Collab/, 'collab'], [/Scroll/, 'scroll'], [/Rebrand|comes back/, 'rebrand'],
+  [/End of turn|end-of-turn/, 'eot'], [/gold you spend|you spent/, 'spend'], [/Toxic|kills a minion/, 'kill'], [/play a Creative|Creatives you|Creative you/, 'cplay'],
+  [/minion dies|Grievance/, 'death'], [/in the Feed/, 'feed'], [/Clock In/, 'clock'], [/damage to|start-of-combat damage/, 'damage']];
+const TAGS = new Map();
+function tagsOf(card) {
+  if (!card) return [];
+  let t = TAGS.get(card.name);
+  if (!t) { t = TAG_RE.filter(([re]) => re.test(card.text)).map(x => x[1]); if (card.taunt && !t.includes('taunt')) t.push('taunt'); if (card.rebrand && !t.includes('rebrand')) t.push('rebrand'); TAGS.set(card.name, t); }
+  return t;
+}
+const capstonesOf = style => CARDS.filter(c => !c.token && c.style === style && c.tier === 6).map(c => c.name);
+const KEEP_PUNKS = new Set(['Greatest Hits', 'Reunion Tour', 'General Strike', 'Squat Collective', 'Crust Punk', 'Stage Diver', 'Mosh Pit']);
 const HERO_POWERS = {boomer: {cost: 1, target: true}, h_serial: {cost: 1, target: true}, h_overthinker: {cost: 2}, h_lifecoach: {cost: 1, target: true}};
 let STYLE_PULL = 2.0, DOOM_EVERY = 5, COACH = 2, GYM_LIKES = 1, COMPLAIN_EVERY = 2, MINI_MAX = 4, MINI_BUFF = 2, GYM_EVERY = 2;
 

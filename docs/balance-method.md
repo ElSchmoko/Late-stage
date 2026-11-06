@@ -82,3 +82,64 @@ node game/balance/report.js cards.json styles.json > docs/balance/report.md
 2. Then fix cards outside the power band, starting with the furthest. Prefer changing the effect to changing the body, so the card keeps its identity.
 3. Re-run, then check archetypes and heroes. Fix in small steps: a large nerf to a tribe's engine card dropped that tribe to last in v7.
 4. Accept a flag only on purpose, and write down why. For example, a tier-6 capstone may be a tribe's strongest card.
+
+## 14 · Expert play (Nov 6)
+
+**Why.** The bots measured a card as a standard player would use it. Our card decisions lean on these numbers, so where a strong player gets far more out of a card than the bot does, we misjudge it. Earlier cases: Enlightened Guru (bots didn't build around Attention Seekers), the Jingle Writer and Reunion Tour combo (bots sold too late), and Main Character boards of 5,000+ stats (bots peaked around 3,300).
+
+**What the bot was missing** (audit of the decision code):
+
+| # | Gap | Effect on measurements |
+| --- | --- | --- |
+| 1 | Buying was synergy-blind: a card was valued by stats, tribe, style and "is it an engine", never by what it does with this board | Engines that need partners were undervalued: Personal Brand with Main Character, Reunion Tour with sell cards, Ancient Oak with end-of-turn givers |
+| 2 | "When sold" cards were sold a turn late or never; Greatest Hits was never looped; Sneaker Reseller and Private Equity got no deliberate sale; Punks were sold even with Squat Collective out | Sell styles were undervalued |
+| 3 | Positioning: one giver on each side of the carry, nothing else | Neighbour cards were undervalued: Beehive, Tree Hugger, Wild Boar, Thought Experiment, Shower Thinker, Pub Philosopher, Caretaker, Middle Manager fodder, Landlord, Leaf Blower Guy, Clock In order |
+| 4 | Leftover gold was wasted with spend engines out | Passive Income was undervalued |
+| 5 | No digging for missing pieces, and capstones were valued like any other card | Build-arounds came together less often |
+
+**The expert layer** (`game/engine.js`, "expert play"). It is on for every bot at skill 0.8+ (the top rating brackets) and for the whole lobby with `--expert`.
+
+- **Synergy-aware value.** Each card's text is tagged by mechanic: Likes, Followers, selling, Legacy, next-combat buffs, Attention Seekers, Collab, Scroll, Rebrand, end of turn, spending, kills, Creative plays, deaths, Feed, Clock In, damage. A card gains value for each board minion that shares a tag (capped at 3 per tag). A missing style capstone is worth +8 from tier 5, so triple Discovers pick it.
+- **Sell plays.**
+  - Sellout Frontman is sold at once with two or more other Punks.
+  - Zine Maker moves left of the carry, then is sold.
+  - Anarchist Barista is sold at once with Greatest Hits.
+  - Greatest Hits loops: sell a spare Punk, buy the copy back, three times a turn.
+  - Sneaker Reseller and Private Equity get one sale a turn.
+  - When-sold Punks are kept while Squat Collective is out.
+- **Positioning.** The board order is hill-climbed by swaps to maximise neighbour effects:
+  - Ferals next to Beehive, Tree Hugger and Wild Boar; Philosophers next to Thought Experiment and Bestselling Author.
+  - Shower Thinker and Pub Philosopher pointing at the carry.
+  - Fodder left of Middle Manager and next to The Landlord; Leaf Blower Guy away from fragile minions.
+  - Clock In minions on the left, so they attack first.
+- **Gold.** Leftover gold is scrolled with Thought Leader or Unicorn Startup out, since scrolling counts as spending. The bot digs (up to 5 times) for its tribe.
+- **Performers.** With "after you play a Creative" engines out, the bot keeps buying Creatives onto a full board, selling the weakest each time.
+
+Tried and dropped, because it made bots weaker:
+- Saving Likes for Main Character: Likes spent now win fights now.
+- Scrolling up to 4 times a turn for the capstone: about a 3% chance per Feed, and the gold is missed elsewhere.
+
+**Validation.** In mixed lobbies (half expert, half standard, 1,500 lobbies), experts place 4.28 against 4.72. Every style gains: from +0.11 (Performers) to +0.78 (Passive Income).
+
+**How to use it.** Measure with `--expert` from now on. Treat the standard numbers as how an average player sees a card:
+
+```bash
+node game/balance/sim.js styles 3200 1 --expert > styles.json
+node game/balance/sim.js cards 150 Hustler,Influencer --expert > cards.json
+```
+
+**What changed in the readings** (150 lobbies per card; the eight biggest moves rechecked at 450):
+
+- Most card verdicts hold. In the 150-lobby runs, eight cards moved by about 0.4 or more. At 450 lobbies only Sneaker Reseller kept its move: +0.32 → +0.67 above the tier-2 median, now over the band, because the bot now sells deliberately each turn. The others were noise. Urban Fox, Nihilist and Shower Thinker gained less than 0.15.
+- Creatives read a little lower with good play: Indie Band +0.58 → +0.45, Museum Retrospective +0.52 → +0.37. Their edge over a plain minion shrinks when the rest of the lobby also builds well.
+- Ceilings rise. Top-10% boards at turn 14 (standard → expert):
+
+| Style | Standard | Expert |
+| --- | --- | --- |
+| Big Ideas | 989 | 1,388 |
+| Main Character | 675 | 927 |
+| Exits | 694 | 880 |
+| Followers | 472 | 621 |
+
+  The largest Stoics board grows from 1,815 to 2,963. The style order barely moves: Main Character (5.02) and Followers (4.82) are still last, and Overgrowth, Sellouts, Scavengers and Sabotage still lead.
+- Noise: two 150-lobby card runs disagree by up to ±0.4 on a single card. Recheck any single-card decision at 450 lobbies or more with `--card=`.

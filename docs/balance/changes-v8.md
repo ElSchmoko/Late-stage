@@ -256,3 +256,12 @@ The doubled damage, not the per-kill buff, makes General Strike strong.
 - **Triples go to the hand.** The third copy (bought or Discovered) makes a golden card in the hand; board copies are used first. The golden card is golden before its First Impression runs, so the effect fires doubled. Bots play their golden card at once.
 - **Look at board during Discover.**
 - **Other heroes' tier** is shown on the lobby strip, the fight screen and the end-of-run standings.
+
+## Simulator: expert play (Nov 6)
+
+The bots now have an expert layer. It handles synergy-aware buying, sell timing (including the Greatest Hits loop), neighbour positioning, spending leftover gold for spend engines, and longer digging. It is used for the top rating brackets in the game, and for measurements with `--expert`; see the balance method, §14. In mixed lobbies, experts place 4.28 against 4.72 for standard bots.
+
+Readings under expert play:
+- **Sneaker Reseller** is over its band: +0.67 above the tier-2 median.
+- **Creatives** read slightly lower.
+- **Main Character** and **Followers** remain the weakest styles.

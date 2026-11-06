@@ -8,6 +8,8 @@ const E = LSEngine; E.load(LS_CARDS, LS_STYLES);
 const STY = LS_STYLES, TRIBES = E.TRIBES;
 const TURN = {1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11}, LATE = 3;
 const mode = process.argv[2];
+// --expert: every bot plays the expert layer (synergy buying, sell plays, positioning), so results reflect strong boards
+const EXPERT = process.argv.includes('--expert');
 
 function stylesOf(t) { return Object.keys(STY).filter(s => STY[s][0] === t); }
 function setup(seed, cardTribe, own, forceStyle) {
@@ -17,7 +19,7 @@ function setup(seed, cardTribe, own, forceStyle) {
   const off = others[seed % others.length];
   const botTribe = cardTribe === 'Neutral' ? others[(seed >> 1) % others.length] : own ? cardTribe : off;
   const tribes = [...new Set([cardTribe === 'Neutral' ? botTribe : cardTribe, botTribe].concat(r.shuffle(others.slice())))].slice(0, 5);
-  const L = new LSLobby(seed, {tribes, skill: 0});
+  const L = new LSLobby(seed, {tribes, skill: 0, expert: EXPERT});
   const p = L.players[0], sts = stylesOf(botTribe), st = forceStyle || sts[seed % sts.length];
   p.style_code = st; p.style = st; p.tribe = STY[st][0];
   return {L, p};
@@ -40,7 +42,7 @@ const plainOf = (tribe, tier) => {
 };
 
 if (mode === 'cards') {
-  const N = +process.argv[3] || 200, only = process.argv[4] ? process.argv[4].split(',') : null, CEIL = process.argv.includes('--ceiling'), ONLYCARD = (process.argv.find(a => a.startsWith('--card=')) || '').slice(7);
+  const N = +process.argv[3] || 200, only = process.argv[4] && !process.argv[4].startsWith('--') ? process.argv[4].split(',') : null, CEIL = process.argv.includes('--ceiling'), ONLYCARD = (process.argv.find(a => a.startsWith('--card=')) || '').slice(7);
   const cards = LS_CARDS.filter(c => !c.token && (!only || only.includes(c.tribe)) && (!ONLYCARD || ONLYCARD.split('|').includes(c.name)));
   const tribes = [...new Set(cards.map(c => c.tribe))];
   const out = {};
@@ -76,7 +78,8 @@ if (mode === 'cards') {
 }
 
 if (mode === 'styles') {
-  const N0 = +process.argv[3] || 1600, N1 = +process.argv[4] || 150;
+  const nums = process.argv.slice(3).filter(a => /^\d+$/.test(a));
+  const N0 = +nums[0] || 1600, N1 = +nums[1] || 150;
   const res = {};
   const PH = t => t <= 4 ? 'early' : t <= 8 ? 'mid' : t <= 12 ? 'late' : 'end';
   const up = {};   // uptake: name -> {offered, bought, sold, boardTurns}
@@ -91,7 +94,7 @@ if (mode === 'styles') {
     const S = k => st[k] = st[k] || {places: [], ph: {early: [0, 0], mid: [0, 0], late: [0, 0], end: [0, 0]}};   // [wins, losses] (draws left out)
     track = label === 'skill0';
     for (let i = 0; i < N; i++) {
-      const L = new LSLobby(700000 + i, {skill});
+      const L = new LSLobby(700000 + i, {skill, expert: EXPERT});
       while (!L.over() && L.turn < 30) {
         L.botTurns();
         if (track) for (const p of L.alive()) for (const m of p.board) if (m.c) U(m.c.name).boardTurns++;
