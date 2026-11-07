@@ -256,3 +256,19 @@ SHORT.update({
     'Grand Unified Theory': 'End of turn: minions get +1/+1 next combat per tribe, then double next-combat buffs (triple with 4+ tribes).',
     'Quantum Computer': 'Collab. Out of Office. Rebrand. End of turn: its host gets +2/+2 per Collab on it.',
 })
+
+# v13 (Nov 7)
+NEIGHBOUR_TEXT.update({
+    'Leaf Blower Guy': 'Start of combat: deal 1 damage to all enemy minions twice.',
+    'Helpful Neighbour': 'First Impression: give a minion of each tribe +2/+2.',
+    'Block Party Host': 'End of turn: give each of your minions +2/+2 for each minion next to it.',
+})
+SHORT.update({
+    'World Tour': 'Your "after you play a Creative" effects trigger twice.',
+    'Art Critic': 'After a friendly minion dies, gain +1/+1 and give another Creative +1/+1, permanently.',
+    'Consultant': 'Every 3 gold you spend: other Hustlers +1/+1. "Every 4 gold" effects trigger every 3.',
+    'Too Big to Fail': 'Attention Seeker. Survives its first death each combat at 1 Health. Other Hustlers get +4/+4 permanently.',
+    'Utilitarian': 'End of turn: your three lowest-Attack other Philosophers get +2/+1 permanently.',
+    'Mosh Pit': 'Cleave. After this kills a minion, your Punks get +1/+1 permanently.',
+    'Noise-Cancelling Headphones': 'Collab. Out of Office. When its host loses Out of Office, Techies get +2 Attack permanently.',
+})

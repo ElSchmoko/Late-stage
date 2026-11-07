@@ -461,5 +461,22 @@ for _c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS:
         _c.tier = _t
         if _a is not None: _c.atk, _c.hp = _a, _h
         if _x: _c.text = _x
+_V13 = {  # name: text  (Neutral texts live in lsdata.NEIGHBOUR_TEXT)
+    'World Tour': 'Your "after you play a Creative" effects trigger twice.',
+    'Dead Rock Star': 'Rebrand. Legacy: give your other Creatives +4/+4 permanently.',
+    'Art Critic': 'After a friendly minion dies, gain +1/+1 permanently and give another Creative +1/+1 permanently.',
+    'Nature Is Healing': 'After you Scroll, give your other Ferals +2/+2 (four times per turn).',
+    'Rooftop Beehive': 'End of turn: give the Ferals next to it +2/+2 and Rebrand.',
+    'Consultant': 'Every 3 gold you spend: give your other Hustlers +1/+1. Your "every 4 gold you spend" effects trigger every 3 gold instead.',
+    'Too Big to Fail': 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +4/+4 permanently.',
+    'The Cynic': 'Attention Seeker. After this takes damage, give your other Philosophers +1/+1 permanently.',
+    'Utilitarian': 'End of turn: give your three lowest-Attack other Philosophers +2/+1 permanently.',
+    'Mosh Pit': 'Cleave: its attacks also hit the minions next to its target. After this kills a minion, give your Punks +1/+1 permanently.',
+    'Noise-Cancelling Headphones': 'Collab. Out of Office. When the minion it sticks to loses Out of Office, give your Techies +2 Attack permanently.',
+}
+for _c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS:
+    if _c.name in _V13: _c.text = _V13[_c.name]
+    if _c.name == 'Dead Rock Star': _c.rebrand = True
+    if _c.name == 'Helpful Neighbour': _c.kind = 'fi'
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]

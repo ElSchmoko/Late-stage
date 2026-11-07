@@ -130,3 +130,20 @@ GOLD.update({  # v12
     'Caretaker': 'End of turn: give the minions next to it +2/+4 and Attention Seeker.',
     'The Landlord': 'End of turn, twice: take +1/+1 from each of your other minions and gain twice that. Gain 2 extra gold next turn for each minion that dies this way.',
 })
+
+GOLD.update({  # v13
+    'World Tour': 'Your "after you play a Creative" effects trigger three times.',
+    'Dead Rock Star': 'Rebrand. Legacy: give your other Creatives +8/+8 permanently.',
+    'Art Critic': 'After a friendly minion dies, gain +2/+2 permanently and give another Creative +2/+2 permanently.',
+    'Nature Is Healing': 'After you Scroll, give your other Ferals +4/+4 (four times per turn).',
+    'Rooftop Beehive': 'End of turn, twice: give the Ferals next to it +2/+2 and Rebrand.',
+    'Consultant': 'Every 3 gold you spend: give your other Hustlers +2/+2. Your "every 4 gold you spend" effects trigger every 2 gold instead.',
+    'Too Big to Fail': 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +8/+8 permanently.',
+    'The Cynic': 'Attention Seeker. After this takes damage, give your other Philosophers +2/+2 permanently.',
+    'Utilitarian': 'End of turn: give your three lowest-Attack other Philosophers +4/+2 permanently.',
+    'Mosh Pit': 'Cleave: its attacks also hit the minions next to its target. After this kills a minion, give your Punks +2/+2 permanently.',
+    'Noise-Cancelling Headphones': 'Collab. Out of Office. When the minion it sticks to loses Out of Office, give your Techies +4 Attack permanently.',
+    'Leaf Blower Guy': 'Start of combat: deal 1 damage to all enemy minions four times.',
+    'Helpful Neighbour': 'First Impression: give a minion of each tribe +4/+4.',
+    'Block Party Host': 'End of turn: give each of your minions +4/+4 for each minion next to it.',
+})
