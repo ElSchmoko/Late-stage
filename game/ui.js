@@ -592,7 +592,7 @@ function needsTarget(card) {
   if (card.name === 'Venture Capitalist' && me.gold[0] <= 0) return null;
   return cand.length ? cand : null;
 }
-async function playCard(hc, pos = null, target = null) {
+async function playCard(hc, pos = null, target = null, more = null) {
   if (G.busy) return;
   const me = G.me, card = hc.card;
   if (!G.hand.includes(hc)) { renderAll(); return; }   // already played (a second tap or drag on the same card): never remove another one
@@ -602,10 +602,22 @@ async function playCard(hc, pos = null, target = null) {
     const cands = needsTarget(card);
     if (cands) { await chooseTarget(cands, card.collab ? `Choose a minion for ${card.name} to stick to` : `Choose a minion for ${card.name}`, async t => playCard(hc, pos, t), () => renderAll()); return; }
   }
+  // Smart Home Hub: the Collab also sticks to more minions; the player picks each one
+  if (card.collab && target && more === null) {
+    const extra = me.hubExtra(), picked = [];
+    for (let i = 0; i < extra; i++) {
+      const cands = me.board.filter(m => m !== target && !picked.includes(m) && !m.follower);
+      if (!cands.length) break;
+      let got = null;
+      await chooseTarget(cands, `Smart Home Hub: choose another minion for ${card.name} (${i + 2} of ${extra + 1})`, async t => { got = t; }, () => {});
+      if (!got) break; picked.push(got);
+    }
+    return playCard(hc, pos, target, picked);
+  }
   if (!G.hand.includes(hc)) { renderAll(); return; }
   G.hand.splice(G.hand.indexOf(hc), 1);
   const e = S.handEl.get(hc.key); if (e) { e._leaving = true; e.remove(); }
-  const m = me.play(card, me.gold, pos, target, card.collab ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell}); sfx('slap');
+  const m = me.play(card, me.gold, pos, target, card.collab ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell}, more); sfx('slap');
   if (card.collab) { const c = S.tok.get(m.id); }
   G.firstTurn = G.firstTurn && me.turn <= 1;
   // sticker slap
@@ -1279,6 +1291,6 @@ function showUnlocks(list) {
   ov.onpointerup = () => { ov.remove(); showUnlocks(list); };
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd()};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard};
 showTitle();
 })();

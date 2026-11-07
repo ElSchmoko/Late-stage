@@ -237,14 +237,19 @@ class Player {
     tgt.extras.push(card.name); this.buffed.add(tgt.id); this.note('collab', {id: tgt.id, name: card.name});
     this.afterCollab();
   }
-  play(card, gold, pos = null, target = null, bonus = null) {
+  /** Extra minions a Collab sticks to (Smart Home Hub: +1 each, golden +2). */
+  hubExtra() { return this.board.reduce((k, m) => k + m.w('Smart Home Hub'), 0); }
+  play(card, gold, pos = null, target = null, bonus = null, more = null) {
     if (card.collab && this.board.length) {
       let tgt = target && this.board.includes(target) ? target : null;
       if (!tgt) { const own = this.tribe === card.tribe ? this.board.filter(x => !x.follower && isTribe(x, card.tribe)) : []; tgt = own.length ? maxBy(own, x => x.stats()) : this.carry(); }
+      const extra = this.hubExtra(), done = [tgt];
       this.stick(card, tgt);
-      if (this.has('Smart Home Hub')) {
-        const rest = this.board.filter(x => x !== tgt && !x.follower);
-        if (rest.length) this.stick(card, maxBy(rest, x => [isTribe(x, T) ? 1 : 0, x.stats()]));
+      for (let i = 0; i < extra; i++) {   // the player picks these (more); bots and unpicked slots take the best other minion
+        const pick = more && more[i] && this.board.includes(more[i]) && !done.includes(more[i]) ? more[i] : null;
+        const rest = this.board.filter(x => !done.includes(x) && !x.follower);
+        const t = pick || (rest.length ? maxBy(rest, x => [isTribe(x, T) ? 1 : 0, x.is_('Smart Home Hub') ? 0 : 1, x.stats()]) : null);
+        if (!t) break; done.push(t); this.stick(card, t);
       }
       this.afterPlay(card, tgt, gold);
       return tgt;
