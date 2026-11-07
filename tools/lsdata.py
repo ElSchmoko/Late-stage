@@ -272,3 +272,7 @@ SHORT.update({
     'Mosh Pit': 'Cleave. After this kills a minion, your Punks get +1/+1 permanently.',
     'Noise-Cancelling Headphones': 'Collab. Out of Office. When its host loses Out of Office, Techies get +2 Attack permanently.',
 })
+SHORT.update({
+    'Nature Is Healing': 'After you Scroll, your other Ferals get +2/+2 (four times per turn).',
+    'The Cynic': 'Attention Seeker. After this takes damage, your other Philosophers get +1/+1 permanently.',
+})
