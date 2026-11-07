@@ -22,7 +22,7 @@ html = f'''<!doctype html>
 <style>{fonts}{js('style.css')}</style></head>
 <body><div id="wrap"><div id="stage"><div id="core"></div></div></div><div id="inset" aria-hidden="true"></div><div class="rotate"><span>Turn your phone sideways</span></div>
 <script>window.LS_BUILD={json.dumps(build)};</script>
-<script>{js('data.js')}</script><script>{js('engine.js')}</script><script>{js('lobby.js')}</script><script>{js('audio.js')}</script><script>{js('ui.js')}</script>
+<script>{js('data.js')}</script><script>{js('changelog.js')}</script><script>{js('engine.js')}</script><script>{js('lobby.js')}</script><script>{js('audio.js')}</script><script>{js('ui.js')}</script>
 <script>if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{{}});</script>
 </body></html>'''
 (OUT / 'index.html').write_text(html)

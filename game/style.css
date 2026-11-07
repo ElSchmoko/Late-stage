@@ -221,3 +221,22 @@ button{font:inherit;color:inherit}
 .lobchip .tierb{position:absolute;left:-5px;top:-7px;width:15px;height:15px;border-radius:50%;background:var(--y);border:2px solid var(--ink);font-style:normal;font-size:9.5px;line-height:1;display:flex;align-items:center;justify-content:center;padding-top:1px;z-index:1}
 .tierpill{position:absolute;display:inline-flex;align-items:center;gap:2px;height:22px;padding:1px 7px 0 4px;border-radius:999px;background:var(--ink);color:var(--y);border:2px solid #fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;line-height:1;z-index:3}
 .tierpill.sm{position:relative;height:18px;font-size:11px;padding:1px 5px 0 3px;border:0}
+
+/* card change log */
+.logpanel{display:flex;flex-direction:column;overflow:hidden}
+.loghead{display:flex;align-items:center;gap:14px;padding:12px 16px 10px 20px;border-bottom:3px solid var(--ink)}
+.logtabs{display:flex;gap:6px;flex:1;justify-content:flex-end;flex-wrap:wrap}
+.logtab{border:2.5px solid var(--ink);border-radius:999px;background:#fff;padding:4px 12px 1px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;cursor:pointer;color:var(--ink)}
+.logtab span{font-size:11px;color:#5a5270}
+.logtab.on{background:var(--y)}
+.logbody{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 10px 22px 20px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:16px 26px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.logrow{position:relative;display:flex;align-items:center;gap:6px;padding:4px 10px 14px 10px}
+.logcard{width:120px;height:168px;position:relative;flex-shrink:0}
+.logcard .card{transform:scale(.5);transform-origin:top left;position:absolute;left:0;top:0;box-shadow:3px 4px 0 var(--ink)}
+.logcard.gone{filter:grayscale(.85);opacity:.75}
+.logcard .sa.up,.logcard .sh.up{box-shadow:0 0 0 4px #fff,0 0 0 10px #2ecb6e}
+.logcard .sa.down,.logcard .sh.down{box-shadow:0 0 0 4px #fff,0 0 0 10px #ff6b5e}
+.logcard .txt.chg,.logcard .stars.chg{background:#fff1b8;border-radius:8px;box-shadow:0 0 0 4px #fff1b8}
+.logarrow{font-size:26px;font-weight:900;color:var(--ink);width:24px;text-align:center}
+.logtag{position:absolute;left:-2px;top:-8px;z-index:2;border:2.5px solid var(--ink);border-radius:999px;padding:1px 8px 0;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:11px;letter-spacing:.08em}
+.logtag.new{background:#2ecb6e;color:#fff}.logtag.gone{background:#c9c2d6}

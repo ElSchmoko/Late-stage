@@ -41,7 +41,7 @@ function ratingChange(me, players) {
   return Math.round(40 * d);
 }
 const ART = {};
-for (const [k, v] of Object.entries(window.LS_ART)) ART[k] = URL.createObjectURL(new Blob([v], {type: 'image/svg+xml'}));
+for (const [k, v] of Object.entries(Object.assign({}, window.LS_CHANGELOG_ART || {}, window.LS_ART))) ART[k] = URL.createObjectURL(new Blob([v], {type: 'image/svg+xml'}));
 const CARD = Object.fromEntries(window.LS_CARDS.map(c => [c.name, c]));
 const artOf = name => ART[name === 'Follower' ? 'follower' : (CARD[name] ? CARD[name].art : 'follower')];
 const W = 844, H = 390;
@@ -231,7 +231,7 @@ const ffLabel = () => `${ico('<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4a1.
 function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sfx('pop'); }
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
-  soundButton(790, 12, false);
+  soundButton(790, 12, false); changelogButton(740, 12);
   const t = el('div', 'ab', `<p class="bd" style="margin:0;display:inline-block;background:#2b2140;color:#ffc928;border-radius:999px;padding:4px 14px 2px;font-size:13px;letter-spacing:.2em;box-shadow:0 0 0 3px #fff">AN AUTOBATTLER ABOUT MODERN LIFE</p>
     <h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 64, textAlign: 'center'});
@@ -1129,6 +1129,51 @@ function diffBursts(prev, next) {
 function findTok(id) { return CombatEls().get(id); }
 let _ce = null; function CombatEls() { return _ce || new Map(); }
 // ---------------------------------------------------------------- end of run
+// ---------------------------------------------------------------- card change log
+// Data: game/changelog.js (tools/changelog.py). Each change shows the card face before and after.
+const LOG = window.LS_CHANGELOG || [];
+const LOGICO = (s = 22) => ico('<rect x="5" y="3" width="14" height="18" rx="2.5" fill="#ffffff"></rect><path d="M9 8h6M9 12h6M9 16h3.5"></path>', s, 2.4);
+const logUnseen = () => LOG.length && PROF.seenLog !== LOG[0].v;
+function changelogButton(x, y) {
+  const b = el('button', 'tribebtn', LOGICO(), stage); css(b, {left: x, top: y, display: 'flex', padding: '5px'}); b.setAttribute('aria-label', 'Card changes');
+  if (logUnseen()) { const d = el('span', 'ab', '', b); css(d, {right: -4, top: -5, width: 14, height: 14, borderRadius: '50%', background: '#ff6b5e', border: '2.5px solid #2b2140'}); }
+  b.onclick = () => { b.querySelector('span') && b.querySelector('span').remove(); showChangelog(); };
+  return b;
+}
+function logCard(name, c, mark) {
+  const w = el('div', 'logcard'); w.innerHTML = cardHTML(Object.assign({name}, c));
+  for (const [k, sel] of [['atk', '.sa'], ['hp', '.sh']]) if (mark && mark[k] != null && mark[k] !== c[k]) w.querySelector(sel).classList.add(c[k] > mark[k] ? 'up' : 'down');
+  if (mark && mark.tier !== c.tier) w.querySelector('.stars').classList.add('chg');
+  if (mark && mark.html !== c.html) w.querySelector('.txt').classList.add('chg');
+  return w;
+}
+function showChangelog() {
+  if (LOG.length) { PROF.seenLog = LOG[0].v; saveProfile(); }
+  sfx('pop');
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
+  const p = el('div', 'panel logpanel', '', ov); css(p, {left: 24, top: 14, width: W - 48, height: H - 28});
+  const head = el('div', 'loghead', `<p class="bd" style="margin:0;font-size:24px">Card changes</p>`, p);
+  const tabs = el('div', 'logtabs', '', head);
+  const x = el('button', 'btn', 'Close', head); css(x, {position: 'relative', width: 92, height: 38, fontSize: '16px', flexShrink: 0});
+  const body = el('div', 'logbody', '', p);
+  const show = i => {
+    tabs.querySelectorAll('button').forEach((t, j) => t.classList.toggle('on', i === j));
+    body.innerHTML = ''; body.scrollTop = 0;
+    const v = LOG[i];
+    if (!v) { body.innerHTML = '<p class="kwl" style="color:#5a5270">No card changes yet.</p>'; return; }
+    for (const ch of v.cards) {
+      const row = el('div', 'logrow', '', body);
+      if (ch.old && ch.new) { row.appendChild(logCard(ch.name, ch.old)); el('div', 'logarrow', '&#10140;', row); row.appendChild(logCard(ch.name, ch.new, ch.old)); }
+      else { const tag = el('div', 'logtag ' + (ch.new ? 'new' : 'gone'), ch.new ? 'NEW' : 'RETIRED', row); row.appendChild(logCard(ch.name, ch.new || ch.old)); if (!ch.new) row.lastChild.classList.add('gone'); }
+    }
+  };
+  LOG.forEach((v, i) => { const t = el('button', 'logtab', `${v.v} <span>${new Date(v.date + 'T12:00').toLocaleDateString('en-GB', {day: 'numeric', month: 'short'})}</span>`, tabs); t.onclick = () => { sfx('pop'); show(i); }; });
+  show(0);
+  const close = () => ov.remove();
+  x.onclick = close; ov.querySelector('.dim').onclick = close;
+  anim(p, [{transform: 'translateY(30px) scale(.96)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 240, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+}
+
 // ---------------------------------------------------------------- pause menu
 function showMenu() {
   if (G.busy || G.mode) return;
@@ -1145,6 +1190,7 @@ function showMenu() {
     p.querySelectorAll('input').forEach(inp => { inp.oninput = () => AU.set({[inp.dataset.k]: inp.value / 100}); inp.onchange = () => { if (inp.dataset.k === 'sfx') sfx('coin'); }; });
     const ffb = el('button', 'btn ffbtn', ffLabel(), p); css(ffb, {position: 'relative', width: '100%', height: 44, fontSize: '16px', marginBottom: '14px'});
     ffb.onclick = () => { toggleFatFinger(); close(); buildShop(); };
+    const cl = el('button', 'btn', LOGICO(20) + 'Card changes', p); css(cl, {position: 'relative', width: '100%', height: 42, fontSize: '17px', marginBottom: '14px'}); cl.onclick = () => showChangelog();
     const res = el('button', 'btn', 'Resume', p); css(res, {position: 'relative', width: '100%', height: 46, background: '#2ecb6e', fontSize: '20px', marginBottom: '14px'}); res.onclick = close;
     const q = el('button', 'btn', 'Concede run', p); css(q, {position: 'relative', width: '100%', height: 42, fontSize: '17px'}); q.onclick = confirm;
   };
