@@ -300,27 +300,31 @@ function showCards(tribe = 'Hustler') {
     tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === tribe));
     const st = body.scrollTop; body.innerHTML = ''; const d = deckSet(), neutral = tribe === 'Neutral';
     const all = CARDS_ALL().filter(c => inTribe(c, tribe));
-    if (!neutral) { const lg = all.filter(c => c.legendary), on = lg.filter(c => d.has(c.name)).length;
-      el('div', 'legrow', `<span class="gem${on ? ' on' : ''}"></span>${legendsOpen() ? '' : LOCK + `<b>${LEGEND_AT.toLocaleString('en')}</b>`}`, body); }
+    const addCard = (c, row) => {
+      const on = neutral || d.has(c.name), locked = c.legendary && !legendsOpen();
+      const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
+      if (on && !neutral) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
+      if (locked) el('span', 'lock', LOCK, w);
+      w.onclick = () => showDetail(c, null, neutral || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
+        const r = deckToggle(c);
+        if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
+        sfx('error'); show(tribe, true);
+        const rr = body.querySelector(`.tierrow[data-tier="${c.tier}"]`);
+        if (r === 'legend') { const g = body.querySelector('.legrow'); g && g.classList.add('flash'); toast('One legendary per tribe'); }
+        else if (rr) { rr.classList.add('flash'); toast(r === 'last' ? 'Keep at least one per tier' : `${PER_TIER} per tier`); }
+      }}]);
+    };
+    if (!neutral) {   // legendaries first, in their own row; they still take a slot in their tier
+      const lg = all.filter(c => c.legendary), on = lg.filter(c => d.has(c.name)).length;
+      const row = el('div', 'tierrow legrow', `<div class="tierlab"><span class="gem${on ? ' on' : ''}"></span>${legendsOpen() ? '' : `<b class="legat">${LEGEND_AT.toLocaleString('en')}</b>`}</div>`, body);
+      for (const c of lg) addCard(c, row);
+    }
     for (let t = 1; t <= 6; t++) {
-      const cs = all.filter(c => c.tier === t).sort((a, b) => !!a.legendary - !!b.legendary || a.name.localeCompare(b.name)); if (!cs.length) continue;
-      const n = cs.filter(c => d.has(c.name)).length;
+      const cs = all.filter(c => c.tier === t && !c.legendary).sort((a, b) => a.name.localeCompare(b.name)); if (!cs.length) continue;
+      const n = all.filter(c => c.tier === t && d.has(c.name)).length;
       const row = el('div', 'tierrow', `<div class="tierlab">${fmtStars(t, 13)}${neutral ? '' : `<div class="slots">${[0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`}</div>`, body);
       row.dataset.tier = t;
-      for (const c of cs) {
-        const on = neutral || d.has(c.name), locked = c.legendary && !legendsOpen();
-        const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
-        if (on && !neutral) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-        if (locked) el('span', 'lock', LOCK, w);
-        w.onclick = () => showDetail(c, null, neutral || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
-          const r = deckToggle(c);
-          if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
-          sfx('error'); show(tribe, true);
-          const rr = body.querySelector(`.tierrow[data-tier="${c.tier}"]`);
-          if (r === 'legend') { const g = body.querySelector('.legrow'); g && g.classList.add('flash'); toast('One legendary per tribe'); }
-          else if (rr) { rr.classList.add('flash'); toast(r === 'last' ? 'Keep at least one per tier' : `${PER_TIER} per tier`); }
-        }}]);
-      }
+      for (const c of cs) addCard(c, row);
     }
     if (keep) body.scrollTop = st;
   };

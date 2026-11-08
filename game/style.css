@@ -274,3 +274,5 @@ button{font:inherit;color:inherit}
 .legtut{display:flex;justify-content:center;gap:22px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:17px;color:#fff}
 .legtut>div{display:flex;align-items:center;gap:8px}.legtut>div>span:first-child:not(.gem){width:24px;height:24px;border-radius:50%;background:#ffc928;color:var(--ink);display:flex;align-items:center;justify-content:center;border:2.5px solid var(--ink);font-size:14px;padding-top:2px}
 .slotsdemo{display:inline-flex;gap:3px}
+.tierrow.legrow{background:linear-gradient(90deg,#fff6dc,#fff);padding-top:10px}.legat{font-family:'Baloo 2',sans-serif;font-size:13px;color:#5a5270}.tierrow.legrow .gem{width:22px;height:22px}
+.logcard.pick:not(.on):not(.locked):has(.legend){filter:grayscale(.25);opacity:.9}
