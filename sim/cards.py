@@ -499,3 +499,6 @@ LEGENDS = [
     _leg('Wise Old Owl', F, 5, 4, 8, 'End of turn: give your Ferals and Philosophers +1/+1 for each tribe you have.', 'Who? Exactly.', tribe2=PH),
     _leg('Punk Philosopher', P, 5, 6, 6, 'When sold, and when it dies: give your Punks and Philosophers +3/+3 permanently.', 'Lives in a barrel. Plays in a band.', tribe2=PH),
 ]
+for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
+    if _c.name == 'Zine Maker': _c.text = 'When sold: give the minion to its right +3/+3.'
+    if _c.name == 'Speedrunner': _c.text = 'After this kills a minion, gain +1/+1 permanently.'

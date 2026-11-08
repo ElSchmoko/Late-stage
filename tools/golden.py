@@ -161,3 +161,4 @@ GOLD.update({
     'Wise Old Owl': 'End of turn, twice: give your Ferals and Philosophers +1/+1 for each tribe you have.',
     'Punk Philosopher': 'When sold, and when it dies: give your Punks and Philosophers +6/+6 permanently.',
 })
+GOLD.update({'Zine Maker': 'When sold: give the minion to its right +6/+6.', 'Speedrunner': 'After this kills a minion, gain +2/+2 permanently.'})

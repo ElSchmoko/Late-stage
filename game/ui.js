@@ -144,7 +144,7 @@ function cardHTML(c, o = {}) {
   const atk = o.atk != null ? o.atk : c.atk, hp = o.hp != null ? o.hp : c.hp;
   const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${tc} 50%,${TC[c.tribe2]} 50%)` : `background-color:${tc}`;
   return `<div class="card${o.golden ? ' golden' : ''}${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}"><img src="${ART[c.art]}" alt="" draggable="false"></div>${c.legendary ? '<i class="foil"></i>' : ''}
-    <p class="nm" style="font-size:${nfs}px">${c.name}</p><div class="meta">${tag}${c.tribe2 ? '' : fmtStars(c.tier, c.tier <= 4 ? 16 : 13)}</div>
+    <p class="nm" style="font-size:${nfs}px">${c.name}</p><div class="meta${c.tribe2 ? ' duo' : ''}">${tag}${fmtStars(c.tier, c.tribe2 ? 11 : c.tier <= 4 ? 16 : 13)}</div>
     <p class="txt" style="font-size:${o.golden ? c.gold_fit || c.fit : c.fit}px">${o.golden ? c.gold_face || c.html : c.html}</p><div class="sa">${atk}</div><div class="sh">${hp}</div></div>`;
 }
 const HEXI = '<svg width="40" height="44" viewBox="0 0 40 44" aria-hidden="true"><path d="M20 3L36 12V32L20 41L4 32V12Z" fill="#2fd0d0" stroke="#2b2140" stroke-width="3" stroke-linejoin="round"></path><path d="M20 12l2.6 5.4 5.9.8-4.3 4.1 1 5.8L20 25.3l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z" fill="#ffffff" stroke="#2b2140" stroke-width="2" stroke-linejoin="round"></path></svg>';
@@ -974,12 +974,15 @@ async function onDrop(kind, e, x, y, dist = 999) {
   const overHand = y >= LY.handTop && far;
   const gap = lastGap; lastGap = null;
   if (kind === 'feed') {
-    if (overBoard && (G.me.board.length < 7 || tripleReady(e._f.card))) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
+    if (overBoard && (G.me.board.length < 7 || tripleReady(e._f.card) || (e._f.card.collab && G.me.board.length))) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
     else if (overHand) return buy(e._f);
     renderAll(); return;
   }
   if (kind === 'hand') {
     if (overBoard) return playCard(e._h, gap !== null ? gap : boardIndexAt(x));
+    if (overFeed && e._h.card.collab && G.hand.includes(e._h)) {   // a Collab in the hand can be sold like a minion
+      G.hand.splice(G.hand.indexOf(e._h), 1); G.me.gold[0] += 1; sfx('coin'); goldTick(1); G.saved = false;
+    }
     renderAll(); return;
   }
   if (kind === 'board') {

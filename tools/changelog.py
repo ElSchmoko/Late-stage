@@ -8,11 +8,10 @@ Only card changes are listed (tier, stats, card text, new and retired cards), wi
 import json, subprocess, sys, pathlib, re
 R = pathlib.Path(__file__).resolve().parent.parent
 OUT = R / 'game/changelog.js'
-VERSIONS = [  # (label, date, base rev, head rev)
-    ('v12', '2026-11-07', '4c11f46', '1c2b1a6'),
-    ('v11', '2026-11-06', 'b8618d3', '3bae388'),
-    ('v10', '2026-11-04', 'ac2d505', 'b8618d3'),
-    ('v9', '2026-11-03', '9137f32', 'ac2d505'),
+VERSIONS = [  # (label, date, base rev, head rev; None = working copy). Group releases into larger updates.
+    ('Update 3', '2026-11-08', '0265f56', None),
+    ('Update 2', '2026-11-07', 'b8618d3', '0265f56'),
+    ('Update 1', '2026-11-04', '9137f32', 'b8618d3'),
 ]
 KEYS = ('tier', 'atk', 'hp', 'face')
 def cards_at(rev):

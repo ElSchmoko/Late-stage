@@ -276,3 +276,4 @@ button{font:inherit;color:inherit}
 .slotsdemo{display:inline-flex;gap:3px}
 .tierrow.legrow{background:linear-gradient(90deg,#fff6dc,#fff);padding-top:10px}.legat{font-family:'Baloo 2',sans-serif;font-size:13px;color:#5a5270}.tierrow.legrow .gem{width:22px;height:22px}
 .logcard.pick:not(.on):not(.locked):has(.legend){filter:grayscale(.25);opacity:.9}
+.card .meta.duo{gap:4px}.card .meta.duo .trb{font-size:9px;padding:0 5px}

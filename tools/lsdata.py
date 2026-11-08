@@ -280,3 +280,4 @@ SHORT['Pro Gamer'] = 'Attacks twice. After this attacks, gain +3/+2 permanently.
 SLUG.update({'The Billionaire': 'billionaire', 'Cancelled Celebrity': 'cancelled', 'Apex Scavenger': 'apexcrow', 'Pop Diva': 'popdiva', 'The Algorithm': 'algorithm',
     'Mohawk Legend': 'mohawklegend', 'Renaissance Thinker': 'renaissance', 'Tech Founder': 'techfounder', 'Content Creator': 'contentcreator', 'Wise Old Owl': 'wiseowl',
     'Punk Philosopher': 'punkphilosopher'})
+SHORT.pop('Zine Maker', None); SHORT.pop('Speedrunner', None)

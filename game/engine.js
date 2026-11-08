@@ -332,7 +332,7 @@ class Player {
     if (m.name === 'Punk Philosopher') for (const o of this.board) if (isTribe(o, P) || isTribe(o, PH)) this.buff(o, 3 * m.g, 3 * m.g, m);
     const n = m.name, g = m.g;
     if (n === 'Anarchist Barista') { this.bonus_next += g; this.note('gold_next', {n: g}); }
-    else if (n === 'Zine Maker' && right) this.buff(right, 4 * g, 4 * g);
+    else if (n === 'Zine Maker' && right) this.buff(right, 3 * g, 3 * g);
     else if (n === 'Sellout Frontman') { for (const o of this.board) if (o.tribe === P) this.buff(o, 3 * g, 3 * g); this.addFeedBuff(P, g, g); }
     else if (n === 'Jingle Writer') { const k = Math.min(16, 2 * this.punks_sold) * g; if (k) for (const o of this.board) if (o.tribe === P) this.buff(o, k, k); }
   }
@@ -818,7 +818,7 @@ class Fight {
   }
   onKill(side, killer) {
     if (!side.b.includes(killer)) return;
-    if (killer.is_('Speedrunner') && killer.speed_used < 1) { killer.speed_used++; perm(killer, killer.g, killer.g); }
+    if (killer.is_('Speedrunner')) perm(killer, killer.g, killer.g);
     if (killer.is_('Mosh Pit')) { const k = killer.w('Mosh Pit'); for (const o of side.b) if (isTribe(o, P) && o.hp > 0) perm(o, k, k); }
     if (isTribe(killer, T) && side.p) side.p.techie_kills += 1;
     if (isTribe(killer, T)) for (const v of side.b) if (v.is_('World Record')) { for (const o of side.b) if (isTribe(o, T) && o.hp > 0) perm(o, v.g, v.g); this.frame({type: 'trigger', src: v.id}); }
@@ -826,7 +826,7 @@ class Fight {
   combatWhenSold(side, m, idx) {
     const b = side.b, n = m.name, g = m.g;
     if (n === 'Anarchist Barista' && side.p && !side.p.ghost) side.p.bonus_next += g;
-    else if (n === 'Zine Maker' && idx < b.length) { b[idx].atk += 4 * g; b[idx].hp += 4 * g; }
+    else if (n === 'Zine Maker' && idx < b.length) { b[idx].atk += 3 * g; b[idx].hp += 3 * g; }
     else if (n === 'Sellout Frontman') { for (const o of b) if (o.tribe === P) { o.atk += 3 * g; o.hp += 3 * g; } if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(P, g, g); }
     else if (n === 'Jingle Writer') { const k = side.p ? Math.min(16, 2 * (side.p.punks_sold || 0)) * g : 0; for (const o of b) if (o.tribe === P) { o.atk += k; o.hp += k; } }
   }

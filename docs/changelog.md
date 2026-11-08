@@ -15,3 +15,5 @@ python3 game/build.py --out dist --artifact
 ```
 
 `add` compares the card data at that commit against the working copy and puts the result at the top. Running it again with the same label replaces that entry. `rebuild` regenerates the history from the `VERSIONS` list in the script.
+
+Releases are grouped into larger updates: edit `VERSIONS` (the newest entry can use `None` as head for the working copy) and run `rebuild`.
