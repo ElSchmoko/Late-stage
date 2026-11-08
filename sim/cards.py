@@ -478,5 +478,6 @@ for _c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS:
     if _c.name in _V13: _c.text = _V13[_c.name]
     if _c.name == 'Dead Rock Star': _c.rebrand = True
     if _c.name == 'Helpful Neighbour': _c.kind = 'fi'
+    if _c.name == 'Pro Gamer': _c.text = 'Attacks twice. After this attacks, gain +3/+2 permanently.'
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]

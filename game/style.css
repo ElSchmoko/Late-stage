@@ -240,3 +240,5 @@ button{font:inherit;color:inherit}
 .logarrow{font-size:26px;font-weight:900;color:var(--ink);width:24px;text-align:center}
 .logtag{position:absolute;left:-2px;top:-8px;z-index:2;border:2.5px solid var(--ink);border-radius:999px;padding:1px 8px 0;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:11px;letter-spacing:.08em}
 .logtag.new{background:#2ecb6e;color:#fff}.logtag.gone{background:#c9c2d6}
+.colltabs{display:flex;gap:8px}.colltabs .logtab{font-size:19px;padding:6px 16px 2px;box-shadow:0 0 0 3px #fff}
+.logpanel .loghead .logtabs .logtab{font-size:13.5px;padding:3px 9px 0}

@@ -147,3 +147,4 @@ GOLD.update({  # v13
     'Helpful Neighbour': 'First Impression: give a minion of each tribe +4/+4.',
     'Block Party Host': 'End of turn: give each of your minions +4/+4 for each minion next to it.',
 })
+GOLD['Pro Gamer'] = 'Attacks twice. After this attacks, gain +6/+4 permanently.'

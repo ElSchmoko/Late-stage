@@ -232,17 +232,16 @@ function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sf
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false); changelogButton(740, 12);
-  const t = el('div', 'ab', `<p class="bd" style="margin:0;display:inline-block;background:#2b2140;color:#ffc928;border-radius:999px;padding:4px 14px 2px;font-size:13px;letter-spacing:.2em;box-shadow:0 0 0 3px #fff">AN AUTOBATTLER ABOUT MODERN LIFE</p>
-    <h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
-  css(t, {left: 0, right: 0, top: 64, textAlign: 'center'});
+  const t = el('div', 'ab', `<h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
+  css(t, {left: 0, right: 0, top: 74, textAlign: 'center'});
   anim(t.querySelector('h1'), [{transform: 'scale(.6) rotate(-6deg)', opacity: 0}, {transform: 'scale(1.06) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 700, easing: 'ease-out', raw: true});
   const rc = rankChip(PROF.rating, 15); stage.appendChild(rc); css(rc, {left: '50%', top: 204}); rc.style.transform = 'translateX(-50%)';
   const b = el('button', 'btn', ico('<path d="M7 4.5v15l12-7.5z" fill="#ffffff"></path>', 26, 2.6) + 'New run', stage);
   css(b, {left: 216, top: 256, width: 236, height: 62, background: '#2ecb6e', fontSize: '30px'});
   anim(b, [{transform: 'scale(.95)'}, {transform: 'scale(1.03)'}, {transform: 'scale(.95)'}], {duration: 1800, iterations: Infinity, raw: true});
   b.onclick = showHeroSelect;
-  const cb = el('button', 'btn', ico('<rect x="3" y="5" width="8" height="14" rx="2" fill="#ffc928"></rect><rect x="13" y="5" width="8" height="14" rx="2" fill="#ff8ab8"></rect>', 22, 2.4) + `Heroes <span style="font-size:13px;color:#5a5270">${PROF.unlocked.length}/${HEROES.length}</span>`, stage);
-  css(cb, {left: 474, top: 262, width: 162, height: 50, fontSize: '20px'}); cb.onclick = showCollection;
+  const cb = el('button', 'btn', ico('<rect x="3" y="5" width="8" height="14" rx="2" fill="#ffc928"></rect><rect x="13" y="5" width="8" height="14" rx="2" fill="#ff8ab8"></rect>', 22, 2.4) + 'Collection', stage);
+  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = showCollection;
   if (PROF.unlocked.some(x => !PROF.seen.includes(x))) { const d = el('span', 'ab', '', cb); css(d, {right: -4, top: -6, width: 16, height: 16, borderRadius: '50%', background: '#ff6b5e', border: '2.5px solid #2b2140'}); }
   const t1 = makeToken({name: 'Main Character', tribe: 'Influencer', atk: 5, hp: 7, tier: 6}); stage.appendChild(t1); css(t1, {left: 672, top: 250}); t1.style.transform = 'rotate(8deg)';
   const t2 = makeToken({name: 'Trash Panda', tribe: 'Feral', atk: 2, hp: 1, tier: 1}); stage.appendChild(t2); css(t2, {left: 120, top: 254}); t2.style.transform = 'rotate(-9deg)';
@@ -254,13 +253,36 @@ function rankChip(r, fs = 14) {
   const b = bracketOf(r);
   return el('div', 'rankchip', `<span class="rk" style="background:${b[2]}">${STAR(16)}</span><span style="font-size:${fs}px;padding-top:2px">${b[1]}</span><span style="font-size:${fs}px;padding-top:2px;color:#5a5270">${r.toLocaleString('en')}</span>`);
 }
+function collectionTabs(on) {
+  const tabs = el('div', 'ab colltabs', '', stage); css(tabs, {left: 30, top: 12});
+  for (const [k, label] of [['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`]]) {
+    const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs); b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : showCollection(); } };
+  }
+  const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
+}
+const TRIBE_ORDER = ['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'];
+const CARDS_ALL = () => window.LS_CARDS.filter(c => !c.token && c.name !== 'Follower');
+function showCards() {
+  clear(); G.screen = 'cards'; bg(true); AU.music('hold');
+  collectionTabs('cards');
+  const p = el('div', 'panel logpanel', '', stage); css(p, {left: 24, top: 64, width: W - 48, height: H - 76});
+  const nav = el('div', 'loghead', '', p); const tabs = el('div', 'logtabs', '', nav); tabs.style.justifyContent = 'flex-start';
+  const body = el('div', 'logbody', '', p);
+  const show = tribe => {
+    tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === tribe));
+    body.innerHTML = ''; body.scrollTop = 0;
+    for (const c of CARDS_ALL().filter(c => c.tribe === tribe).sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name))) {
+      const w = el('div', 'logcard', cardHTML(c), body); w.style.cursor = 'pointer'; w.onclick = () => showDetail(c, null);
+    }
+  };
+  for (const t of TRIBE_ORDER) { const b = el('button', 'logtab', t === 'Neutral' ? 'Neighbours' : TP[t] || t + 's', tabs); b.dataset.t = t; b.style.background = ''; b.style.borderColor = '#2b2140'; b.onclick = () => { sfx('pop'); show(t); }; }
+  show(TRIBE_ORDER[0]);
+}
 function showCollection() {
   clear(); G.screen = 'collection'; bg(true); AU.music('hold');
   PROF.seen = PROF.unlocked.slice(); saveProfile();
-  const t = el('div', 'ab bd', `Heroes <span style="font-size:15px;color:#5a5270">${PROF.unlocked.length} of ${HEROES.length} unlocked</span>`, stage);
-  css(t, {left: 30, top: 12, fontSize: '22px', background: '#fff', border: '3px solid #2b2140', borderRadius: '999px', padding: '6px 16px 2px', boxShadow: '0 0 0 3px #fff'});
+  collectionTabs('heroes');
   const rc = rankChip(PROF.rating, 13); stage.appendChild(rc); css(rc, {right: 130, top: 14});
-  const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
   const order = HEROES.map(h => h.slug).sort((a, b) => isUnlocked(b) - isUnlocked(a));
   order.forEach((slug, i) => {
     const h = HERO[slug], lock = !isUnlocked(slug), [c, g] = progressOf(slug);

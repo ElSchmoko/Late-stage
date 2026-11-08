@@ -806,7 +806,6 @@ class Fight {
   onKill(side, killer) {
     if (!side.b.includes(killer)) return;
     if (killer.is_('Speedrunner') && killer.speed_used < 1) { killer.speed_used++; perm(killer, killer.g, killer.g); }
-    if (killer.is_('Pro Gamer') && !killer.kill_used) { killer.kill_used = true; perm(killer, 4 * killer.g, 4 * killer.g); }
     if (killer.is_('Mosh Pit')) { const k = killer.w('Mosh Pit'); for (const o of side.b) if (isTribe(o, P) && o.hp > 0) perm(o, k, k); }
     if (isTribe(killer, T) && side.p) side.p.techie_kills += 1;
     if (isTribe(killer, T)) for (const v of side.b) if (v.is_('World Record')) { for (const o of side.b) if (isTribe(o, T) && o.hp > 0) perm(o, v.g, v.g); this.frame({type: 'trigger', src: v.id}); }
@@ -909,6 +908,7 @@ class Fight {
         const da = att.atk, dt = tgt.atk;
         const cleave = att.is_('Mosh Pit') ? neighbours(them.b, tgt) : [];
         hit(tgt, att.atk, att); hit(att, tgt.atk, tgt);
+        if (att.is_('Pro Gamer')) { const k = att.w('Pro Gamer'); perm(att, 3 * k, 2 * k); }
         for (const nb of cleave) { hit(nb, att.atk); if (nb.hp <= 0) { nb.killer = att; this.onKill(me, att); } }
         this.frame({type: 'attack', side: turn, att: att.id, tgt: tgt.id, da, dt});
         if (tgt.hp <= 0) { tgt.killer = att; this.onKill(me, att); }
