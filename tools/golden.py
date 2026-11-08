@@ -148,3 +148,16 @@ GOLD.update({  # v13
     'Block Party Host': 'End of turn: give each of your minions +4/+4 for each minion next to it.',
 })
 GOLD['Pro Gamer'] = 'Attacks twice. After this attacks, gain +6/+4 permanently.'
+GOLD.update({
+    'The Billionaire': 'End of turn: give your other Hustlers +2/+2 for each gold you have left (max 20).',
+    'Cancelled Celebrity': 'Rebrand. When it comes back, summon six Followers.',
+    'Apex Scavenger': 'End of turn, twice: give your other Ferals +X/+X, where X is half the Attack of the strongest minion in the Feed.',
+    'Pop Diva': 'Start of combat: give your Creatives +2/+2 for each Creative you have played this game.',
+    'The Algorithm': 'End of turn, twice: give each of your minions +1/+1 for each Collab on it.',
+    'Mohawk Legend': "Your Punks' start-of-combat effects trigger three times.",
+    'Renaissance Thinker': 'End of turn, twice: for each tribe you have, give a random minion of that tribe +2/+2.',
+    'Tech Founder': 'Every 3 gold you spend: give your Hustlers and Techies +2/+2.',
+    'Content Creator': 'After you play a Creative or an Influencer, get 4 Likes.',
+    'Wise Old Owl': 'End of turn, twice: give your Ferals and Philosophers +1/+1 for each tribe you have.',
+    'Punk Philosopher': 'When sold, and when it dies: give your Punks and Philosophers +6/+6 permanently.',
+})

@@ -10,7 +10,7 @@ class Lobby {
   constructor(seed, opts = {}) {
     this.rng = E.RNG(seed);
     this.tribes = opts.tribes || this.rng.shuffle(E.TRIBES.slice()).slice(0, 5);
-    this.pool = E.buildPool(this.tribes);
+    this.pool = E.buildPool(this.tribes, opts.deck || null);
     const styles = Object.keys(E.styles()).filter(s => this.tribes.includes(E.styles()[s][0]));
     const options = styles.concat(['BASE']);
     const chosen = this.rng.shuffle(options.slice()).slice(0, opts.human ? 7 : 8);

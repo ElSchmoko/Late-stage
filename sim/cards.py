@@ -481,3 +481,21 @@ for _c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS:
     if _c.name == 'Pro Gamer': _c.text = 'Attacks twice. After this attacks, gain +3/+2 permanently.'
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
 TOKENS = [Card('Follower', I, 1, 1, 1, '-', 'A loyal fan.', 'Liked. Shared. Forgot.', kind='stat')]
+
+
+# Legendary cards (Nov 8): unlocked at 1000 rating, chosen into the Feed pool on the Collection screen; one per tribe.
+def _leg(name, tribe, tier, atk, hp, text, flavour, tribe2=None, **kw):
+    c = Card(name, tribe, tier, atk, hp, 'LG', text, flavour, **kw); c.legendary = True; c.tribe2 = tribe2; return c
+LEGENDS = [
+    _leg('The Billionaire', H, 5, 6, 8, 'End of turn: give your other Hustlers +1/+1 for each gold you have left (max 10).', 'Self-made. With some help from Dad.'),
+    _leg('Cancelled Celebrity', I, 4, 5, 5, 'Rebrand. When it comes back, summon three Followers.', 'Taking a break. Back next week.', rebrand=True),
+    _leg('Apex Scavenger', F, 5, 4, 7, 'End of turn: give your other Ferals +X/+X, where X is half the Attack of the strongest minion in the Feed.', 'Eats first. Eats last.'),
+    _leg('Pop Diva', C, 5, 5, 7, 'Start of combat: give your Creatives +1/+1 for each Creative you have played this game.', 'One name. Twelve outfits.'),
+    _leg('The Algorithm', T, 5, 5, 7, 'End of turn: give each of your minions +1/+1 for each Collab on it.', 'Recommended for you.'),
+    _leg('Mohawk Legend', P, 5, 6, 6, "Your Punks' start-of-combat effects trigger twice.", 'Was here before it was cool.'),
+    _leg('Renaissance Thinker', PH, 4, 4, 6, 'End of turn: for each tribe you have, give a random minion of that tribe +2/+2.', 'Painter, inventor, opinions.'),
+    _leg('Tech Founder', H, 4, 5, 6, 'Every 3 gold you spend: give your Hustlers and Techies +1/+1.', 'Disrupting breakfast.', tribe2=T),
+    _leg('Content Creator', I, 4, 4, 6, 'After you play a Creative or an Influencer, get 2 Likes.', 'Link in bio.', tribe2=C),
+    _leg('Wise Old Owl', F, 5, 4, 8, 'End of turn: give your Ferals and Philosophers +1/+1 for each tribe you have.', 'Who? Exactly.', tribe2=PH),
+    _leg('Punk Philosopher', P, 5, 6, 6, 'When sold, and when it dies: give your Punks and Philosophers +3/+3 permanently.', 'Lives in a barrel. Plays in a band.', tribe2=PH),
+]

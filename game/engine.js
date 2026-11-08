@@ -21,7 +21,7 @@ const TARGETED_FI = new Set(['Art Student', 'Venture Capitalist']);
 let CARDS = [], BY_NAME = {}, BY_TRIBE = {}, STYLES = {}, TOKENS = {};
 function load(cards, styles) {
   CARDS = cards; BY_NAME = {}; BY_TRIBE = {}; STYLES = styles;
-  for (const c of cards) { BY_NAME[c.name] = c; if (c.token) { TOKENS[c.name] = c; continue; } (BY_TRIBE[c.tribe] = BY_TRIBE[c.tribe] || []).push(c); }
+  for (const c of cards) { BY_NAME[c.name] = c; if (c.token) { TOKENS[c.name] = c; continue; } for (const t of [c.tribe, c.tribe2]) if (t) (BY_TRIBE[t] = BY_TRIBE[t] || []).push(c); }
 }
 
 // ---------- rng ----------
@@ -54,7 +54,7 @@ class M {
     else { Object.assign(this, {name: card.name, tribe: card.tribe, style: card.style, tier: card.tier, atk: card.atk, hp: card.hp,
       taunt: card.taunt, shield: card.shield, toxic: card.toxic, rebrand: card.rebrand, twice: card.twice}); }
     this.extras = []; this.sell_bonus = 0; this.turns_on_board = 0; this.ta = 0; this.th = 0;
-    this.id = UID++; this.orig = null; this.fb = 0; this.golden = false; this.tribe2 = null;
+    this.id = UID++; this.orig = null; this.fb = 0; this.golden = false; this.tribe2 = card && card.tribe2 || null;
   }
   is_(n) { return this.name === n || this.extras.includes(n); }
   n(n) { return (this.name === n ? 1 : 0) + this.extras.filter(x => x === n).length; }
@@ -75,8 +75,11 @@ const wsum = (b, n) => b.reduce((s, m) => s + m.w(n), 0);
 const skillOf = r => Math.max(0, Math.min(1, r / 5000));
 
 // ---------- pool ----------
-function buildPool(tribes) {
-  const all = tribes.flatMap(t => BY_TRIBE[t]).concat(BY_TRIBE[N]);
+// The Feed pool: each tribe has up to 3 cards per tier, chosen on the Collection screen (deck = Set of names; null = default).
+const DEFAULT_OFF = new Set(['Unboxing Streamer', 'Loot Box']);
+const inDeck = (c, deck) => c.tribe === N || (deck ? deck.has(c.name) : !c.legendary && !DEFAULT_OFF.has(c.name));
+function buildPool(tribes, deck = null) {
+  const all = [...new Set(tribes.flatMap(t => BY_TRIBE[t]).filter(c => inDeck(c, deck)).concat(BY_TRIBE[N]))];
   const pool = {};
   for (let t = 1; t <= 6; t++) { const cs = all.filter(c => c.tier <= t); pool[t] = [cs, cs.map(c => COPIES[c.tier])]; }
   return pool;
@@ -181,11 +184,12 @@ class Player {
     const cons = this.board.filter(m => m.is_('Consultant')), step = cons.some(m => m.golden) ? 2 : cons.length ? 3 : 4;
     for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
       for (const m of doubled(this.board.slice())) if (m.is_('Thought Leader')) for (const o of this.board) if (o !== m && o.tribe === H) this.buff(o, 1, 1, m);
+    for (const tf of this.board.filter(m => m.is_('Tech Founder'))) for (let k = 0; k < Math.floor(this.spent / 3) - Math.floor(before / 3); k++) for (const o of this.board) if (isTribe(o, H) || isTribe(o, T)) this.buff(o, tf.g, tf.g, tf);
     for (const c of cons) for (let k = 0; k < Math.floor(this.spent / 3) - Math.floor(before / 3); k++) for (const o of this.board) if (o !== c && o.tribe === H) this.buff(o, c.g, c.g, c);   // Consultant's own trigger
   }
   carry() { const c = this.board.filter(m => !m.follower); return maxBy(c.length ? c : this.board, m => [m.stats(), this.value(m)]); }
   discoverOptions(tribe, tier) {
-    const cards = tribe ? BY_TRIBE[tribe].filter(c => c.tier <= this.tier) : this.pool[6][0].filter(c => c.tier === tier);
+    const inPool = new Set(this.pool[6][0]), cards = tribe ? BY_TRIBE[tribe].filter(c => c.tier <= this.tier && inPool.has(c)) : this.pool[6][0].filter(c => c.tier === tier);
     const w = tribe ? cards.map(c => COPIES[c.tier]) : null;
     return this.rng.choices(cards, w, 3);
   }
@@ -220,6 +224,7 @@ class Player {
   }
   afterPlay(card, played, gold) {
     if (card.tribe === C) { this.creativesThisTurn += 1; this.creativesTotal = (this.creativesTotal || 0) + 1; }
+    if (isTribe(card, C) || isTribe(card, I)) for (const x of this.board) if (x !== played && x.is_('Content Creator')) this.addLikes(2 * x.g, x);
     if (played && played.name === 'Record Label' && played.rl0 == null) played.rl0 = this.creativesTotal;
     const reps = card.tribe === C ? 1 + this.board.reduce((k, o) => k + o.w('World Tour'), 0) : 1;   // World Tour: Creative-play effects trigger twice
     for (let rep = 0; rep < reps; rep++) {
@@ -324,6 +329,7 @@ class Player {
     this.afterSell(m);
   }
   whenSold(m, right) {
+    if (m.name === 'Punk Philosopher') for (const o of this.board) if (isTribe(o, P) || isTribe(o, PH)) this.buff(o, 3 * m.g, 3 * m.g, m);
     const n = m.name, g = m.g;
     if (n === 'Anarchist Barista') { this.bonus_next += g; this.note('gold_next', {n: g}); }
     else if (n === 'Zine Maker' && right) this.buff(right, 4 * g, 4 * g);
@@ -367,6 +373,11 @@ class Player {
       } else if (n === 'Block Party Host') { for (const o of b) { const k = 2 * neighbours(b, o).length; if (k) this.buff(o, k, k, m); } }
       else if (n === 'Unicorn Startup') { const g = this.spent_this_turn >> 1; if (g) for (const o of b) if (o !== m && o.tribe === H) this.buff(o, g, g, m); }
       else if (n === 'Windowsill Succulent') { if (b.some(o => o !== m && o.tribe === F)) this.buff(m, 1, 1, m); }
+      else if (n === 'The Billionaire') { const k = Math.min(10, this.gold[0]); if (k) for (const o of b) if (o !== m && isTribe(o, H)) this.buff(o, k, k, m); }
+      else if (n === 'Apex Scavenger') { const feed = this.getFeed ? this.getFeed() : this.feedRef; if (feed && feed.length) { const k = Math.floor(Math.max(...feed.map(x => x.card.atk + (x.a || 0))) / 2); if (k) for (const o of b) if (o !== m && isTribe(o, F)) this.buff(o, k, k, m); } }
+      else if (n === 'The Algorithm') { for (const o of b) if (o.extras.length) this.buff(o, o.extras.length, o.extras.length, m); }
+      else if (n === 'Renaissance Thinker') { const by = {}; for (const o of b) for (const t of [o.tribe, o.tribe2]) if (t && t !== N && !o.follower) (by[t] = by[t] || []).push(o); for (const t in by) this.buff(this.rng.choice(by[t]), 2, 2, m); }
+      else if (n === 'Wise Old Owl') { const k = tribeCount(b); for (const o of b) if (isTribe(o, F) || isTribe(o, PH)) this.buff(o, k, k, m); }
       else if (n === 'Record Label') { const k = (this.creativesTotal || 0) - (m.rl0 ?? 0), cr = b.filter(o => o !== m && o.tribe === C); if (k && cr.length) this.buff(this.rng.choice(cr), k, k, m); }
       else if (n === 'Plant Parent') { const fs = this.rng.shuffle(b.filter(o => o !== m && o.tribe === F)).slice(0, 2); for (const o of fs) this.buff(o, 1, 1, m); }
       else if (n === 'Utilitarian') { const os = b.filter(o => o !== m && isTribe(o, PH)).sort((x, y) => x.atk - y.atk).slice(0, 3); for (const o of os) this.buff(o, 2, 1, m); }
@@ -755,12 +766,14 @@ class Fight {
     const reach = (m, r) => { const i = b.indexOf(m); return b.filter((o, j) => o !== m && Math.abs(j - i) <= r); };
     // Brand Ambassador: the bonus holds for this whole combat, so Followers summoned later get it too (see combatFollower)
     for (const m of b.slice()) if (m.name === 'Brand Ambassador') { const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); me.baff = (me.baff || 0) + kk; for (const f of fs) { f.atk += kk; f.hp += kk; } ev(m, 'give', fs); }
+    for (const m of b) if (m.name === 'Pop Diva' && me.p && !me.p.ghost) { const k = m.g * (me.p.creativesTotal || 0); const cs = b.filter(o => isTribe(o, C)); for (const o of cs) { o.atk += k; o.hp += k; } if (k) ev(m, 'give', cs); }
     const bc = b.filter(m => m.is_('Blue Checkmark'));
     for (const m of b.slice()) if (m.name === 'Package Hoarder') { const nb = reach(m, m.g); for (const o of nb) { o.taunt = true; o.atk += 2 * m.g; o.hp += 2 * m.g; } if (nb.length) ev(m, 'give', nb); }
     const gurus = b.filter(m => m.is_('Enlightened Guru'));
     if (gurus.length) { const left = gurus.some(m => m.golden) ? 4 : 2; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) { o.cap = 3; o.capLeft = left; } }
-    for (const m of b.slice()) {
-      const n = m.name, g = m.g;
+    const legend = b.reduce((k, o) => k + o.w('Mohawk Legend'), 0);
+    for (const m0 of b.slice()) for (let rep = 0; rep < (isTribe(m0, P) ? 1 + legend : 1); rep++) {
+      const m = m0, n = m.name, g = m.g;
       if (m.n('Robot Vacuum') && e.length) for (let i = 0; i < m.n('Robot Vacuum'); i++) { const live = e.filter(x => x.hp > 0); if (live.length) { const t = minBy(live, x => x.hp); hit(t, 2); ev(m, 'shot', [t]); } }
       if (n === 'Corporate Raider' && e.length) { for (let i = 0; i < g; i++) { const live = e.filter(x => x.hp > 0); if (!live.length) break; const t = minBy(live, x => x.hp); hit(t, 6); if (t.hp <= 0 && me.p && !me.p.ghost) me.p.bonus_next += 1; ev(m, 'shot', [t]); } }
       else if (n === 'Paparazzi') { const ts = b.filter(o => isTribe(o, I)).sort((x, y) => y.atk - x.atk).slice(0, 2 * g); for (const t of ts) { t.shield = true; t.atk += 2; t.hp += 2; } if (ts.length) ev(m, 'give', ts); }
@@ -838,6 +851,7 @@ class Fight {
           if (n === 'Reply Guy') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'Comment Section') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
           else if (n === 'Brand Ambassador') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
+          else if (n === 'Punk Philosopher') { for (const o of b) if (isTribe(o, P) || isTribe(o, PH)) perm(o, 3 * g, 3 * g); legacy = true; }
           else if (n === 'Compost Heap') { if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(F, g, g); legacy = true; }
           else if (n === 'Open Mic Poet') { const k = 2; for (const o of nbs) { o.atk += k * g; o.hp += k * g; } legacy = true; }
           else if (n === 'Golden Parachute Exec' && side.p && !side.p.ghost) { side.p.bonus_next += 2 * g; legacy = true; }
@@ -869,6 +883,7 @@ class Fight {
           const r = Object.assign(Object.create(Object.getPrototypeOf(m)), m);
           r.hp = 1; r.rebrand = false; r.extras = m.extras.slice(); r.hits = 0; r.id = UID++; r.orig = m.orig;
           b.splice(Math.min(idx, b.length), 0, r); this.frame({type: 'rebrand', side: k, id: r.id});
+          if (r.name === 'Cancelled Celebrity') for (let i = 0; i < 3 * r.g; i++) combatFollower(side, b.indexOf(r) + 1);
           // Scavengers: "when it comes back" / "after a friendly Feral comes back"
           if (r.is_('Trash Panda')) { const os = b.filter(o => o !== r && isTribe(o, F)); for (const o of os) { o.atk += r.g; o.hp += r.g; } if (os.length) this.frame({type: 'trigger', src: r.id}); }
         }
@@ -928,6 +943,6 @@ class Fight {
 
 const damageCap = turn => turn <= 3 ? 5 : turn <= 7 ? 10 : 15;
 
-root.LSEngine = {H, I, F, C, T, P, PH, N, TRIBES, FEED_SIZE, LEVEL_COST, CURVE, TARGETED_FI, HERO_POWERS, skillOf, tune: o => { if ('STYLE_PULL' in o) STYLE_PULL = o.STYLE_PULL; ({DOOM_EVERY = DOOM_EVERY, COACH = COACH, GYM_LIKES = GYM_LIKES, COMPLAIN_EVERY = COMPLAIN_EVERY, MINI_MAX = MINI_MAX, MINI_BUFF = MINI_BUFF, GYM_EVERY = GYM_EVERY} = o); if (o.costs) for (const k in o.costs) HERO_POWERS[k].cost = o.costs[k]; }, tuning: () => ({DOOM_EVERY, COACH, GYM_LIKES, COMPLAIN_EVERY, MINI_MAX, MINI_BUFF, GYM_EVERY}), load, RNG, M, Player, Fight, buildPool, damageCap,
+root.LSEngine = {inDeck, DEFAULT_OFF, H, I, F, C, T, P, PH, N, TRIBES, FEED_SIZE, LEVEL_COST, CURVE, TARGETED_FI, HERO_POWERS, skillOf, tune: o => { if ('STYLE_PULL' in o) STYLE_PULL = o.STYLE_PULL; ({DOOM_EVERY = DOOM_EVERY, COACH = COACH, GYM_LIKES = GYM_LIKES, COMPLAIN_EVERY = COMPLAIN_EVERY, MINI_MAX = MINI_MAX, MINI_BUFF = MINI_BUFF, GYM_EVERY = GYM_EVERY} = o); if (o.costs) for (const k in o.costs) HERO_POWERS[k].cost = o.costs[k]; }, tuning: () => ({DOOM_EVERY, COACH, GYM_LIKES, COMPLAIN_EVERY, MINI_MAX, MINI_BUFF, GYM_EVERY}), load, RNG, M, Player, Fight, buildPool, damageCap,
   byName: n => BY_NAME[n], byTribe: t => BY_TRIBE[t], styles: () => STYLES};
 })(typeof window !== 'undefined' ? window : globalThis);

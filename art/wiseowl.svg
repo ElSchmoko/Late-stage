@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M50 206 Q40 130 100 110 Q160 130 150 206 Z" fill="#c98a4a"/>
+<path d="M74 206 Q70 150 100 140 Q130 150 126 206 Z" fill="#fff6dc"/>
+<circle cx="100" cy="86" r="50" fill="#c98a4a"/>
+<path d="M58 46 L66 70 L78 52 Z" fill="#8a5a3a"/>
+<path d="M142 46 L134 70 L122 52 Z" fill="#8a5a3a"/>
+<circle cx="80" cy="88" r="17" fill="#fff6dc"/>
+<circle cx="120" cy="88" r="17" fill="#fff6dc"/>
+<circle cx="80" cy="88" r="15" fill="none"/>
+<circle cx="120" cy="88" r="15" fill="none"/>
+<path d="M95 88 L105 88" fill="none"/>
+<circle cx="80" cy="90" r="6" fill="#2b2140" stroke="none"/>
+<circle cx="120" cy="90" r="6" fill="#2b2140" stroke="none"/>
+<path d="M94 104 L106 104 L100 116 Z" fill="#ff8a3d"/>
+<rect x="140" y="176" width="46" height="26" rx="3" fill="#b18cff"/>
+<path d="M30 196 L36 184 M40 198 L44 186" fill="none" stroke="#2ecb6e" stroke-width="6"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

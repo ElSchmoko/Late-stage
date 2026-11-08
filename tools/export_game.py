@@ -18,11 +18,12 @@ def gold_face(c):
     return g, max(10.5, round(fit, 1))
 cards = []
 SLUG['Pigeon'] = 'pigeon'; SLUG['Follower'] = 'follower'
-for c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS + TOKENS:
+from cards import LEGENDS
+for c in [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS + TOKENS + LEGENDS:
     cards.append(dict(name=c.name, tribe=c.tribe, tier=c.tier, atk=c.atk, hp=c.hp, style=c.style, text=text_of(c), face=face_text(c),
                       flavour=flavour_of(c), taunt=c.taunt, shield=c.shield, toxic=c.toxic, rebrand=c.rebrand, collab=c.collab,
                       kind=c.kind, sellbait=c.sellbait, discover=c.discover, twice=c.twice, art=SLUG[c.name], fit=FIT.get(c.name, 13),
-                      html=fmt(face_text(c)), full_html=fmt(text_of(c)), gold_html=fmt(GOLD.get(c.name, text_of(c))), gold_face=fmt(gold_face(c)[0]), gold_fit=gold_face(c)[1], token=c in TOKENS))
+                      html=fmt(face_text(c)), full_html=fmt(text_of(c)), gold_html=fmt(GOLD.get(c.name, text_of(c))), gold_face=fmt(gold_face(c)[0]), gold_fit=gold_face(c)[1], token=c in TOKENS, legendary=getattr(c, 'legendary', False), tribe2=getattr(c, 'tribe2', None)))
 heroes = [dict(slug=h[0], name=h[1], power=h[2], cost=h[3], effect=h[4], effect_html=fmt(h[4]), push=h[5], boundaries=h[6], unlock=h[7], col=h[8]) for h in HEROES]
 art = {}
 A = S / 'art'
