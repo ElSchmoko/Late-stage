@@ -276,3 +276,4 @@ SHORT.update({
     'Nature Is Healing': 'After you Scroll, your other Ferals get +2/+2 (four times per turn).',
     'The Cynic': 'Attention Seeker. After this takes damage, your other Philosophers get +1/+1 permanently.',
 })
+SHORT['Pro Gamer'] = 'Attacks twice. After this attacks, gain +3/+2 permanently.'
