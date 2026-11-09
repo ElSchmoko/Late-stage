@@ -9,7 +9,7 @@ const STY = LS_STYLES, TRIBES = E.TRIBES;
 const TURN = {1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11}, LATE = 3;
 const mode = process.argv[2];
 // --expert: every bot plays the expert layer (synergy buying, sell plays, positioning), so results reflect strong boards
-const EXPERT = process.argv.includes('--expert');
+const EXPERT = process.argv.includes('--expert'), PROBOT = process.argv.includes('--pro');
 
 function stylesOf(t) { return Object.keys(STY).filter(s => STY[s][0] === t); }
 function setup(seed, cardTribe, own, forceStyle) {
@@ -19,7 +19,7 @@ function setup(seed, cardTribe, own, forceStyle) {
   const off = others[seed % others.length];
   const botTribe = cardTribe === 'Neutral' ? others[(seed >> 1) % others.length] : own ? cardTribe : off;
   const tribes = [...new Set([cardTribe === 'Neutral' ? botTribe : cardTribe, botTribe].concat(r.shuffle(others.slice())))].slice(0, 5);
-  const L = new LSLobby(seed, {tribes, skill: 0, expert: EXPERT});
+  const L = new LSLobby(seed, {tribes, skill: 0, expert: EXPERT, pro: PROBOT});
   const p = L.players[0], sts = stylesOf(botTribe), st = forceStyle || sts[seed % sts.length];
   p.style_code = st; p.style = st; p.tribe = STY[st][0];
   return {L, p};
@@ -94,7 +94,7 @@ if (mode === 'styles') {
     const S = k => st[k] = st[k] || {places: [], ph: {early: [0, 0], mid: [0, 0], late: [0, 0], end: [0, 0]}};   // [wins, losses] (draws left out)
     track = label === 'skill0';
     for (let i = 0; i < N; i++) {
-      const L = new LSLobby(700000 + i, {skill, expert: EXPERT});
+      const L = new LSLobby(700000 + i, {skill, expert: EXPERT, pro: PROBOT});
       while (!L.over() && L.turn < 30) {
         L.botTurns();
         if (track) for (const p of L.alive()) for (const m of p.board) if (m.c) U(m.c.name).boardTurns++;

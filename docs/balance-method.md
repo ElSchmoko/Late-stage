@@ -143,3 +143,36 @@ node game/balance/sim.js cards 150 Hustler,Influencer --expert > cards.json
 
   The largest Stoics board grows from 1,815 to 2,963. The style order barely moves: Main Character (5.02) and Followers (4.82) are still last, and Overgrowth, Sellouts, Scavengers and Sabotage still lead.
 - Noise: two 150-lobby card runs disagree by up to ±0.4 on a single card. Recheck any single-card decision at 450 lobbies or more with `--card=`.
+
+## 15 · Pro bot for the simulation (`--pro`, Nov 9)
+
+A stronger bot for the balance runs, built on the expert bot without any training runs (the workspace has 2 CPU cores).
+
+| Part | What it does | Measured effect |
+| --- | --- | --- |
+| Levelling curve | Levels two turns later than the old curve (tier 3 on turn 6, 4 on 8, 5 on 10, 6 on 12). Holds a level when behind and low on health. | The big gain. One turn later: 4.38 vs 4.62 against the expert. Two: 4.15 vs 4.85. Three: 4.18. Four: 4.29. One turn earlier: 4.98. |
+| Style plans | Each style has a list of core cards and payoffs (`PLANS` in the engine). Cards on the plan are worth more. The bot switches plans when its board drifts into another style. | Neutral within noise. Kept for the plan switching. |
+| Lookahead | Plays the board's own engines three turns forward on a copy to value spirals. Covers end of turn and Likes; play, sell and Scroll engines aren't covered yet. | Neutral within noise. |
+| Positioning | Death payoffs (Legacy, Rebrand, death triggers) go left, then the expert bot's simulated-fight check of a few orders. | Neutral within noise. |
+| Levelling early when ahead | Tested, switched off. | Slightly worse. |
+
+**Head to head** (`game/balance/h2h.js`): 150 lobbies, each played twice with the seats swapped. The pro bot places 4.25 against 4.75 for the expert bot, at about 6 ms per bot turn. The noise on one result is about ±0.06.
+
+**Caveat:** pro bots finish in the top 4 more often, but win only 9–14% of games, about the fair share. They level later and reach tier-6 payoffs less often. A bot that also wins more needs a later catch-up rule; that's the next step.
+
+**Styles with every bot on `--pro`** (1,000 lobbies; the halves disagree by up to 0.7, so treat these as direction only):
+
+| Style | Expert bots | Pro bots |
+| --- | --- | --- |
+| Overgrowth | 4.12 | 3.87 |
+| Sabotage | 4.42 | 4.01 |
+| Gamers | 4.52 | 4.08 |
+| Scavengers | 4.20 | 4.11 |
+| Big Ideas | 4.34 | 5.15 |
+| Stoics | 4.28 | 5.23 |
+| Main Character | 4.85 | 5.35 |
+| Sellouts | 4.45 | 5.80 |
+
+With slower levelling, early-game styles gain. Builds whose payoff is at tier 5–6 lose: Sellouts, Big Ideas, Stoics, Main Character. The big-stats reference bot has no tribe, so the plans don't help it, and it is no longer a fair reference in `--pro` runs.
+
+Usage: `node game/balance/sim.js styles 3200 0 --pro`, and `node game/balance/h2h.js 150 1 exp [parts off] [PRO=values]`.

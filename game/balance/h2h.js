@@ -4,6 +4,7 @@ globalThis.window = globalThis; const G = process.env.GAME || '/home/claude/late
 require(G + 'data.js'); require(G + 'engine.js'); require(G + 'lobby.js'); const E = LSEngine; E.load(LS_CARDS, LS_STYLES);
 const N = +process.argv[2] || 100, PS = +process.argv[3], REF = process.argv[4] || 'exp';
 for (const k of (process.argv[5] || '').split(',').filter(Boolean)) E.PRO.off[k] = true;
+for (const kv of (process.argv[6] || '').split(',').filter(Boolean)) { const [k, v] = kv.split('='); E.PRO[k] = +v; }
 const pl = {pro: [], ref: []}; let tPro = 0, nPro = 0;
 for (let i = 0; i < N; i++) for (const par of [0, 1]) {
   const L = new LSLobby(52000 + i, {skill: 0});
@@ -21,4 +22,4 @@ for (let i = 0; i < N; i++) for (const par of [0, 1]) {
   for (const p of L.players) pl[p.isPro ? 'pro' : 'ref'].push(p.place || 1);
 }
 const avg = a => a.reduce((x, y) => x + y, 0) / a.length, se = a => Math.sqrt(avg(a.map(x => (x - avg(a)) ** 2)) / a.length);
-console.log(`[${process.argv[5] || ''}] pro ${PS} vs ${REF}: pro ${avg(pl.pro).toFixed(2)}±${se(pl.pro).toFixed(2)}  ref ${avg(pl.ref).toFixed(2)}  top1 pro ${(pl.pro.filter(x => x === 1).length / pl.pro.length * 100).toFixed(0)}%  | ${(tPro / nPro).toFixed(1)} ms/turn`);
+console.log(`[${process.argv[5] || ""} ${process.argv[6] || ""}] pro ${PS} vs ${REF}: pro ${avg(pl.pro).toFixed(2)}±${se(pl.pro).toFixed(2)}  ref ${avg(pl.ref).toFixed(2)}  top1 pro ${(pl.pro.filter(x => x === 1).length / pl.pro.length * 100).toFixed(0)}%  | ${(tPro / nPro).toFixed(1)} ms/turn`);
