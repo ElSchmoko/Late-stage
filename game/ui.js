@@ -233,7 +233,7 @@ const ffLabel = () => `${ico('<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4a1.
 function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sfx('pop'); }
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
-  soundButton(790, 12, false); changelogButton(740, 12); setTimeout(legendPopup, 500);
+  soundButton(790, 12, false); changelogButton(740, 12); statsButton(690, 12); setTimeout(legendPopup, 500);
   const t = el('div', 'ab', `<h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 74, textAlign: 'center'});
   anim(t.querySelector('h1'), [{transform: 'scale(.6) rotate(-6deg)', opacity: 0}, {transform: 'scale(1.06) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 700, easing: 'ease-out', raw: true});
@@ -415,6 +415,7 @@ function startRun(slug) {
   G.lobby = new window.LSLobby(G.seed, {human: true, heroSlug: slug, boundaries: h.boundaries, tribes: G.tribes, rating: PROF.rating, deck: deckSet()});
   G.me = G.lobby.human; G.me.rating = PROF.rating; G.hand = []; G.feed = []; G.heroSlug = slug; G.firstTurn = true; G.streak = 0; G.minHealth = 99; G.saved = false; NEW_UNLOCKS = [];
   G.me.board = [];
+  RUN.start();
   newTurn();
 }
 function drawFeed(keep) {
@@ -424,7 +425,7 @@ function drawFeed(keep) {
 }
 function newTurn() {
   const me = G.me, L = G.lobby;
-  me.beginTurn(); me.log = me.log.filter(e => e.type === 'likes');
+  me.beginTurn(); me.log = me.log.filter(e => e.type === 'likes'); RUN.turn();
   G.heroUsed = false;
   const kept = G.saved && G.feed.length;
   drawFeed(G.saved); G.saved = false;
@@ -661,7 +662,7 @@ function goldTick(delta) {
 async function buy(f, toBoardAt = null) {
   if (G.busy || !G.feed.includes(f) || !canBuy(f)) return;   // the Feed may have changed (Scroll) since this card was picked up
   const me = G.me, cst = costOf(f);
-  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++; sfx('buy');
+  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++; RUN.act('buy', f.card.name); sfx('buy');
   G.feed.splice(G.feed.indexOf(f), 1);
   const hc = {card: f.card, a: f.a, h: f.h, key: Math.random()};
   const t = S.feedTok.get(f.key);
@@ -720,7 +721,7 @@ async function sell(m) {
   if (G.busy) return;
   const me = G.me, t = S.tok.get(m.id), g = me.sellValue(m);
   const c = t ? center(rectOf(t)) : [420, 210];
-  me.sell(m, me.gold); sfx('sell');
+  RUN.act('sell', m.name); me.sell(m, me.gold); sfx('sell');
   if (t) { t._leaving = true; t.style.transition = 'none';
     anim(t, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.2) rotate(-12deg)', offset: .3}, {transform: 'scale(0) rotate(200deg)', opacity: 0}], {duration: 380, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); }
   coinFly(c, center(rectOf(S.gold)), g); setTimeout(() => goldTick(g), 450);
@@ -734,7 +735,7 @@ async function sell(m) {
 async function scroll() {
   if (G.busy) return; const me = G.me, sc = me.scrollCost();
   if (me.gold[0] < sc) { shake(S.scroll); toast('Not enough gold'); return; }
-  me.payScroll(); if (sc) goldTick(-sc); G.saved = false; PROF.stats.scrolls++; sfx('scroll');
+  me.payScroll(); if (sc) goldTick(-sc); G.saved = false; PROF.stats.scrolls++; RUN.act('roll'); sfx('scroll');
   anim(S.scroll.querySelector('.spin'), [{transform: 'translate(18px,17px) scale(1.34) rotate(0)'}, {transform: 'translate(18px,17px) scale(1.34) rotate(360deg)'}], {duration: 420, raw: true});
   const old = [...S.feedTok.values()]; S.feedTok.clear();
   old.forEach((t, i) => { t._leaving = true; t.style.transition = 'none'; anim(t, [{transform: 'translateY(0) rotate(0)'}, {transform: `translateY(-90px) rotate(${i % 2 ? 15 : -15}deg)`, opacity: 0}], {duration: 220, delay: i * 25, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); });
@@ -772,7 +773,7 @@ async function levelUp() {
   if (G.busy) return; const me = G.me, lc = me.levelCost();
   if (lc === null) return;
   if (me.gold[0] < lc) { shake(S.shield); toast(`Level up costs ${lc} gold`); return; }
-  me.gold[0] -= lc; me.gainSpend(lc); me.tier += 1; me.turns_at_tier = 0; goldTick(-lc);
+  me.gold[0] -= lc; me.gainSpend(lc); me.tier += 1; me.turns_at_tier = 0; goldTick(-lc); RUN.act('level');
   if (me.tier === 6) { PROF.flags.tier6 = true; checkUnlocks(); }
   sfx('levelup'); AU.intensity(tierLevel());
   renderChrome();
@@ -1018,6 +1019,7 @@ async function ready() {
   G.busy = true;
   const me = G.me;
   me.spent_this_turn = me.spent - me.spent_start;
+  RUN.ready();
   me.log = [];
   me.endOfTurn();
   anim(S.ready, [{transform: 'translateY(0)'}, {transform: 'translateY(6px)'}, {transform: 'translateY(0)'}], {duration: 200, raw: true}); sfx('ready');
@@ -1025,7 +1027,7 @@ async function ready() {
   me.log = [];
   G.firstTurn = false;
   G.lobby.botTurns();
-  const rec = G.lobby.fightRound();
+  const rec = G.lobby.fightRound(); RUN.fight(rec);
   if (rec) await playCombat(rec); else { toast('Bye round: nobody to fight', 1400); await sleep(1200); }
   G.busy = false;
   if (G.lobby.over()) return showEnd();
@@ -1236,7 +1238,135 @@ function diffBursts(prev, next) {
 function findTok(id) { return CombatEls().get(id); }
 let _ce = null; function CombatEls() { return _ce || new Map(); }
 // ---------------------------------------------------------------- end of run
+// ---------------------------------------------------------------- run log, stats page and save codes
+// Every run is recorded turn by turn (state at Ready, actions, fight result) and kept on the phone: the last 30 runs.
+// The Stats page shows what the log says about how you play; the save code copies the whole profile (rating, unlocks,
+// pool, logs) as text, to restore on another phone.
+const RUN = {
+  cur: null, t: null,
+  start() { this.cur = {v: 1, at: Date.now(), hero: G.heroSlug, tribes: G.tribes.slice(), rating: PROF.rating, turns: []}; },
+  turn() { if (!this.cur) return; const me = G.me; this.t = {n: me.turn, hp: me.health, bd: me.boundaries, tier: me.tier, gold: me.gold[0], buy: [], sell: [], roll: 0, lvl: 0}; this.cur.turns.push(this.t); },
+  act(k, name) { const t = this.t; if (!t) return; if (k === 'roll') t.roll++; else if (k === 'level') t.lvl++; else t[k].push(name); },
+  ready() { const t = this.t; if (!t) return; const me = G.me; t.left = me.gold[0]; t.tierEnd = me.tier; t.saved = !!G.saved;
+    t.board = me.board.map(m => [m.name, m.atk, m.hp, m.golden ? 1 : 0]); t.hand = G.hand.map(h => h.card.name); },
+  fight(rec) { const t = this.t; if (!t) return; if (!rec) { t.res = 'bye'; return; } const me = G.me; t.res = rec.winner === me ? 'W' : rec.loser === me ? 'L' : 'D'; t.dmg = rec.dmg; t.opp = (rec.a === me ? rec.b : rec.a) ? (rec.a === me ? rec.b : rec.a).hero : 'ghost'; },
+  /** Small per-run summary kept for every game (the full logs keep only the last 30): tier turns, actions, tribe, hired cards. */
+  summary() {
+    const r = this.cur; if (!r || !r.turns.length) return {};
+    const lv = [3, 4, 5, 6].map(t => { const x = r.turns.find(q => (q.tierEnd || q.tier) >= t); return x ? x.n : 0; });
+    let h = 0, ro = 0, se = 0; const c = {};
+    for (const x of r.turns) { h += x.buy.length; ro += x.roll; se += x.sell.length; for (const n of x.buy) c[n] = (c[n] || 0) + 1; }
+    const last = [...r.turns].reverse().find(x => x.board && x.board.length), tc = {};
+    if (last) for (const [n] of last.board) { const k = CARD[n] && CARD[n].tribe; if (k && k !== 'Neutral') tc[k] = (tc[k] || 0) + 1; }
+    const tr = (Object.entries(tc).sort((a, b) => b[1] - a[1])[0] || [null])[0];
+    return {lv, n: r.turns.length, h, ro, se, tr, c};
+  },
+  end(place, d) { if (!this.cur) return; this.cur.place = place; this.cur.d = d; PROF.runs = (PROF.runs || []).concat([this.cur]).slice(-30); this.cur = this.t = null; saveProfile(); },
+};
+function statsButton(x, y) {
+  const b = el('button', 'tribebtn', ico('<path d="M5 20V12M10 20V6M15 20v-9M20 20V9" stroke-width="3"></path>', 22, 2.4), stage);
+  css(b, {left: x, top: y, display: 'flex', padding: '5px'}); b.setAttribute('aria-label', 'Stats and backup'); b.onclick = () => showStats();
+}
+function playStyle(runs) {
+  const lv = [[], [], [], []]; let h = 0, ro = 0, se = 0, n = 0; const tribes = {}, cards = {};
+  for (const r of runs) {
+    if (!r.lv) continue;
+    r.lv.forEach((t, i) => { if (t) lv[i].push(t); }); h += r.h; ro += r.ro; se += r.se; n += r.n;
+    if (r.tr) tribes[r.tr] = (tribes[r.tr] || 0) + 1;
+    for (const k in r.c) cards[k] = (cards[k] || 0) + r.c[k];
+  }
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  return {lv: lv.map(avg), hires: n ? h / n : null, rolls: n ? ro / n : null, sells: n ? se / n : null,
+    tribe: (Object.entries(tribes).sort((a, b) => b[1] - a[1])[0] || [null])[0], cards: Object.entries(cards).sort((a, b) => b[1] - a[1]).filter(([k]) => CARD[k]).slice(0, 5)};
+}
+function placeChart(rec) {
+  if (!rec.length) return '<p class="kwl" style="color:#5a5270;margin-top:30px">Play a run to see it here.</p>';
+  if (rec.length <= 50) {   // bars: taller is better
+    const lab = rec.length <= 20;
+    return `<div class="bars${lab ? '' : ' thin'}">${rec.map(r => `<span style="height:${(9 - r.place) * 10}px;background:${r.place === 1 ? '#ffc928' : r.place <= 4 ? '#2ecb6e' : '#c9c2d6'}">${lab ? `<em>${r.place}</em>` : ''}</span>`).join('')}</div>`;
+  }
+  // all games: rolling average place as a line (1st at the top), with the top-4 zone shaded
+  const W2 = 436, H2 = 68, k = Math.max(5, Math.round(rec.length / 25)), pts = [];
+  for (let i = 0; i < rec.length; i++) { const w = rec.slice(Math.max(0, i - k + 1), i + 1); pts.push(w.reduce((a, r) => a + r.place, 0) / w.length); }
+  const x = i => 4 + (W2 - 8) * i / Math.max(1, pts.length - 1), y = v => 4 + (H2 - 8) * (v - 1) / 7;
+  const d = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="line" width="${W2}" height="${H2 + 14}" viewBox="0 0 ${W2} ${H2 + 14}" aria-label="Average place over ${rec.length} games">
+    <rect x="0" y="${y(1) - 4}" width="${W2}" height="${y(4.5) - y(1) + 4}" rx="8" fill="#e3f7ea"></rect>
+    ${[1, 4, 8].map(v => `<text x="${W2 - 2}" y="${y(v) + 4}" text-anchor="end" font-size="10" font-weight="800" fill="#5a5270">${v}</text>`).join('')}
+    <path d="${d}" fill="none" stroke="#2b2140" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+    <text x="4" y="${H2 + 12}" font-size="10" font-weight="800" fill="#5a5270">game 1</text><text x="${W2 - 2}" y="${H2 + 12}" text-anchor="end" font-size="10" font-weight="800" fill="#5a5270">game ${rec.length}</text></svg>`;
+}
+function showStats(range = 10) {
+  clear(); G.screen = 'stats'; bg(true); AU.music('hold');
+  const t = el('div', 'ab bd', 'Stats', stage); css(t, {left: 30, top: 12, fontSize: '22px', background: '#fff', border: '3px solid #2b2140', borderRadius: '999px', padding: '6px 16px 2px', boxShadow: '0 0 0 3px #fff'});
+  const tabs = el('div', 'ab logtabs statrange', '', stage); css(tabs, {left: 132, top: 15});
+  for (const [v, lab] of [[10, 'Last 10'], [20, '20'], [50, '50'], [0, 'All']]) { const b = el('button', 'logtab' + (v === range ? ' on' : ''), lab, tabs); b.onclick = () => { if (v !== range) { sfx('pop'); showStats(v); } }; }
+  const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
+  const sv = el('button', 'btn', ico('<path d="M12 4v10M7 10l5 5 5-5M5 19h14" stroke-width="2.8"></path>', 20) + 'Save code', stage); css(sv, {left: 572, top: 10, width: 148, height: 40, fontSize: '16px', background: '#ffc928'}); sv.onclick = showBackup;
+  const all = PROF.history || [], rec = range ? all.slice(-range) : all, n = rec.length;
+  const pct = x => n ? Math.round(100 * x / n) + '%' : '–', ap = n ? (rec.reduce((a, r) => a + r.place, 0) / n).toFixed(1) : '–';
+  const b = bracketOf(PROF.rating);
+  const tiles = el('div', 'ab stattiles', `<div class="tile wide"><span class="rk" style="background:${b[2]}">${STAR(20)}</span><div><b>${PROF.rating.toLocaleString('en')}</b><i>${b[1]} · best ${PROF.peak.toLocaleString('en')}</i></div></div>
+    <div class="tile"><b>${n}</b><i>runs</i></div><div class="tile"><b>${ap}</b><i>average place</i></div>
+    <div class="tile"><b>${pct(rec.filter(r => r.place <= 4).length)}</b><i>top 4</i></div><div class="tile"><b>${pct(rec.filter(r => r.place === 1).length)}</b><i>wins</i></div>`, stage);
+  css(tiles, {left: 30, top: 66, width: 300});
+  const chart = el('div', 'ab panel statchart', `<p class="bd">${range ? `Last ${n} runs` : `All ${n} runs · average place`}</p>${placeChart(rec)}`, stage);
+  css(chart, {left: 346, top: 66, width: 468, height: 122});
+  const ps = playStyle(rec), f = x => x == null ? '–' : x.toFixed(1);
+  const how = el('div', 'ab panel stathow', `<p class="bd">How you play</p>
+    <div class="lvl">${[3, 4, 5, 6].map((tt, i) => `<div><span class="stars">${STAR(11).repeat(tt)}</span><b>${ps.lv[i] == null ? '–' : 'turn ' + f(ps.lv[i])}</b></div>`).join('')}</div>
+    <div class="nums"><div><b>${f(ps.hires)}</b><i>hires / turn</i></div><div><b>${f(ps.rolls)}</b><i>Scrolls / turn</i></div><div><b>${f(ps.sells)}</b><i>sells / turn</i></div>
+    <div><b>${ps.tribe ? `<i class="dot" style="background:${TC[ps.tribe]}"></i>${TP[ps.tribe] || ps.tribe}` : '–'}</b><i>favourite tribe</i></div></div>
+    <div class="favs"><i>Most hired</i></div>`, stage);
+  css(how, {left: 346, top: 198, width: 468, height: 178});
+  const favs = how.querySelector('.favs');
+  if (!ps.cards.length) el('span', 'none', '–', favs);
+  for (const [name, k] of ps.cards) {
+    const c = CARD[name], bt = el('button', 'fav', `<span class="pic" style="background:${TC[c.tribe]}"><img src="${ART[c.art]}" alt=""></span><span class="cnt">×${k}</span>`, favs);
+    bt.setAttribute('aria-label', `${name}, hired ${k} times`); bt.title = name; bt.onclick = () => showDetail(c, null);
+  }
+}
+async function packSave() {
+  const json = JSON.stringify(PROF);
+  try { const cs = new Blob([json]).stream().pipeThrough(new CompressionStream('gzip')); const buf = new Uint8Array(await new Response(cs).arrayBuffer());
+    let bin = ''; for (let i = 0; i < buf.length; i += 8192) bin += String.fromCharCode(...buf.subarray(i, i + 8192)); return 'LS1:' + btoa(bin);
+  } catch (e) { return 'LS0:' + btoa(unescape(encodeURIComponent(json))); }
+}
+async function unpackSave(code) {
+  code = code.trim().replace(/\s+/g, '');
+  if (code.startsWith('LS0:')) return JSON.parse(decodeURIComponent(escape(atob(code.slice(4)))));
+  if (!code.startsWith('LS1:')) throw new Error('not a save code');
+  const bin = atob(code.slice(4)), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  return JSON.parse(await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text());
+}
+async function showBackup() {
+  sfx('open');
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
+  const p = el('div', 'panel backup', '', ov); css(p, {left: 92, top: 22, width: 660, height: 346});
+  const code = await packSave();
+  p.innerHTML = `<p class="bd" style="margin:0;font-size:22px">Your save code</p>
+    <p class="hint">Everything in one line: rating, heroes, cards, card pool and run logs. Keep it somewhere safe, or paste it on a new phone.</p>
+    <div class="row"><textarea class="code" readonly aria-label="Save code">${code}</textarea><button class="btn copy">Copy</button></div>
+    <p class="bd" style="margin:14px 0 0;font-size:18px">Restore from a code</p>
+    <div class="row"><textarea class="code in" placeholder="Paste a save code" aria-label="Paste a save code"></textarea><button class="btn load">Restore</button></div>
+    <p class="hint warn"></p><button class="btn close">Close</button>`;
+  const ta = p.querySelector('.code'), warn = p.querySelector('.warn');
+  p.querySelector('.copy').onclick = async () => { try { await navigator.clipboard.writeText(code); } catch (e) { ta.select(); document.execCommand('copy'); } sfx('coin'); toast('Save code copied'); };
+  p.querySelector('.load').onclick = async () => {
+    const lb = p.querySelector('.load');
+    try {
+      const d = await unpackSave(p.querySelector('.in').value);
+      if (d.rating == null) throw new Error('bad');
+      if (lb.dataset.sure !== '1') { lb.dataset.sure = '1'; lb.textContent = 'Replace?'; lb.style.background = '#ff6b5e'; warn.textContent = `This replaces your current save (${PROF.rating.toLocaleString('en')} rating) with one at ${d.rating.toLocaleString('en')}. Tap again to confirm.`; return; }
+      localStorage.setItem(PKEY, JSON.stringify(d)); location.reload();
+    } catch (e) { sfx('error'); warn.textContent = 'That code could not be read. Copy the whole line, including LS1: at the start.'; }
+  };
+  p.querySelector('.close').onclick = () => ov.remove(); ov.querySelector('.dim').onclick = () => ov.remove();
+  anim(p, [{transform: 'translateY(30px) scale(.96)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 240, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+}
+
 // ---------------------------------------------------------------- card change log
+
 // Data: game/changelog.js (tools/changelog.py). Each change shows the card face before and after.
 const LOG = window.LS_CHANGELOG || [];
 const LOGICO = (s = 22) => ico('<rect x="5" y="3" width="14" height="18" rx="2.5" fill="#ffffff"></rect><path d="M9 8h6M9 12h6M9 16h3.5"></path>', s, 2.4);
@@ -1339,7 +1469,7 @@ function showEnd() {
     G.rated = true;
     PROF.rating = after; PROF.peak = Math.max(PROF.peak, after); PROF.games++; if (me.place <= 4) PROF.top4++; if (me.place === 1) PROF.wins++;
     if (me.place <= 4 && (G.minHealth ?? 99) <= 10) PROF.flags.comeback = true;
-    PROF.history.push({t: Date.now(), hero: G.heroSlug, place: me.place, d: after - before}); PROF.history = PROF.history.slice(-50);
+    PROF.history.push(Object.assign({t: Date.now(), hero: G.heroSlug, place: me.place, d: after - before}, RUN.summary())); PROF.history = PROF.history.slice(-3000); RUN.end(me.place, after - before);
     checkUnlocks();
   }
   const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">${me.conceded ? 'CONCEDED' : 'RUN OVER'} · ROUND ${L.turn}</p>
@@ -1387,6 +1517,6 @@ function showUnlocks(list) {
   ov.onpointerup = () => { ov.remove(); showUnlocks(list); };
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup()}};
 showTitle();
 })();

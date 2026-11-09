@@ -277,3 +277,44 @@ button{font:inherit;color:inherit}
 .tierrow.legrow{background:linear-gradient(90deg,#fff6dc,#fff);padding-top:10px}.legat{font-family:'Baloo 2',sans-serif;font-size:13px;color:#5a5270}.tierrow.legrow .gem{width:22px;height:22px}
 .logcard.pick:not(.on):not(.locked):has(.legend){filter:grayscale(.25);opacity:.9}
 .card .meta.duo{gap:4px}.card .meta.duo .trb{font-size:9px;padding:0 5px}
+
+/* stats page */
+.stattiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stattiles .tile{background:#fff;border:3px solid var(--ink);border-radius:20px;box-shadow:0 0 0 3px #fff,3px 5px 0 3px var(--ink);padding:10px 14px 8px;display:flex;flex-direction:column;gap:2px}
+.stattiles .tile.wide{grid-column:span 2;flex-direction:row;align-items:center;gap:12px}
+.stattiles b{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;line-height:1}
+.stattiles i,.stathow i{font-style:normal;font-size:12px;font-weight:800;color:#5a5270}
+.stattiles .tile.wide div{display:flex;flex-direction:column}
+.stattiles .rk{width:40px;height:40px;border-radius:50%;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.statchart,.stathow{padding:10px 16px}
+.statchart>p,.stathow>p{margin:0;font-size:17px}.stathow>p span{font-family:inherit;font-size:12px;color:#5a5270;margin-left:6px}
+.statchart .bars{display:flex;align-items:flex-end;gap:6px;height:84px;margin-top:6px}
+.statchart .bars span{flex:1;max-width:22px;border:2.5px solid var(--ink);border-radius:7px 7px 3px 3px;position:relative}
+.statchart .bars em{position:absolute;left:0;right:0;top:-17px;text-align:center;font-style:normal;font-weight:800;font-size:11px}
+.stathow .lvl{display:flex;gap:10px;margin:8px 0 10px}
+.stathow .lvl div{flex:1;border:2.5px solid var(--ink);border-radius:14px;padding:4px 6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.stathow .lvl b{font-family:'Baloo 2',sans-serif;font-size:15px}
+.stathow .nums{display:flex;gap:8px}.stathow .nums div{flex:1;display:flex;flex-direction:column;min-width:0}
+.stathow .nums b{font-family:'Baloo 2',sans-serif;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.stathow .dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);display:inline-block;flex-shrink:0}
+/* save code */
+.backup{padding:18px 22px}.backup .hint{margin:4px 0 8px;font-size:13px;font-weight:700;color:#5a5270}.backup .warn{color:#d8433a;min-height:18px}
+.backup .row{display:flex;gap:12px;align-items:stretch}
+.backup .code{flex:1;height:58px;resize:none;border:3px solid var(--ink);border-radius:14px;padding:8px 10px;font:700 11px/1.35 ui-monospace,monospace;color:var(--ink);background:#fff6dc;word-break:break-all}
+.backup .code.in{background:#fff}
+.backup .btn{position:relative;width:118px;font-size:17px;flex-shrink:0}.backup .copy,.backup .load{background:#ffc928}
+.backup .close{position:absolute;right:22px;bottom:16px;width:100px;height:40px}
+.stathow .nums div:nth-child(-n+3){flex:.75}.stathow .nums div:nth-child(n+4){flex:1.35}
+.stathow .nums b{font-size:16px}
+.stathow .nums div:last-child b{white-space:normal;font-size:13.5px;line-height:1.1}.stathow .nums div:nth-child(-n+3){flex:.65}.stathow .nums i{line-height:1.15}
+
+.statrange .logtab{font-size:14px;padding:4px 12px 1px;box-shadow:0 0 0 3px #fff}
+.statchart .bars.thin{gap:2px}.statchart .bars.thin span{border-width:2px;border-radius:4px 4px 2px 2px}
+.statchart svg.line{display:block;margin-top:6px}
+.stathow .lvl{margin:6px 0 6px}
+.stathow .favs{display:flex;align-items:center;gap:10px;margin-top:8px}
+.stathow .favs>i{width:62px;line-height:1.1}
+.stathow .fav{position:relative;border:0;background:none;padding:0;cursor:pointer}
+.stathow .fav .pic{display:block;width:46px;height:46px;border-radius:50%;border:3px solid var(--ink);overflow:hidden;position:relative;box-shadow:0 0 0 2px #fff}
+.stathow .fav img{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:56px;height:56px}
+.stathow .fav .cnt{position:absolute;right:-8px;bottom:-4px;background:#ffc928;border:2px solid var(--ink);border-radius:999px;font:800 11px/1 'Baloo 2',sans-serif;padding:3px 5px 1px}
