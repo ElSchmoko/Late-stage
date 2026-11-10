@@ -236,6 +236,7 @@ GOLD.update({  # rewards track, batch 2
     'Parcel Locker': 'Start of combat: give the minions next to it Out of Office if they have none.',
     'Neighbourhood Watch': 'After an enemy minion attacks a minion next to it, deal 6 damage to that enemy minion.',
     'Sponsored Streamer': 'Clock In: next turn, gain 2 extra gold (twice per combat). Side Gig (2): give your Influencers and Techies +4/+4 permanently.',
+    'Housing Co-op': 'End of turn: give your other minions +4/+4 for each tribe you have (Neighbours count).',
     'Pension Fund': 'End of turn: gain +4/+4 permanently. When sold: give your other Hustlers and Ferals the stats it has gained.',
     'Startup Monk': 'End of turn, twice: remove your lowest-Attack other minion and give its stats to your other minions.',
     'Cover Band': 'Cleave. Start of combat: trigger the start-of-combat effects of the minions next to it twice.',

@@ -343,16 +343,18 @@ I went through every card that makes gold, refunds gold, lowers a cost or makes 
 | Rating | Legendaries |
 |---|---|
 | 1,000 | The Billionaire + Cancelled Celebrity |
-| 1,250 | Tech Founder |
-| 1,500 | Apex Scavenger + Pop Diva |
-| 1,750 | Content Creator |
-| 2,000 | The Algorithm + Mohawk Legend |
-| 2,250 | Wise Old Owl |
-| 2,500 | Renaissance Thinker (alone: 7 single-tribe legendaries, so one has no partner) |
-| 2,750 | Punk Philosopher |
-| 3,000 | Sponsored Streamer |
-| 3,300 | Pension Fund |
-| 3,600 | Cover Band |
-| 4,000 | Startup Monk |
+| 1,500 | Tech Founder |
+| 2,000 | Apex Scavenger + Pop Diva |
+| 2,500 | Content Creator |
+| 3,000 | The Algorithm + Mohawk Legend |
+| 3,500 | Wise Old Owl |
+| 4,000 | Renaissance Thinker + Housing Co-op |
+| 4,500 | Punk Philosopher |
+| 5,000 | Sponsored Streamer |
+| 5,500 | Pension Fund |
+| 6,000 | Cover Band |
+| 6,500 | Startup Monk |
 
-Art: night train on a brick viaduct through a European capital — Altbau blocks with mansard roofs, glass office towers, café arches under the viaduct, TV tower and dome in the far skyline, a park with a column monument at the end of the line. Windows flicker (TVs), people walk past lit windows, fog drifts in three layers and the train's headlight cuts through it.
+Housing Co-op (Neighbour legendary, ★5, 4/7): End of turn: give your other minions +2/+2 for each tribe you have (Neighbours count). Sim value 0.50 (Billionaire 0.65, Renaissance 0.75); +1/+1 tested at 0.26. Neighbours now follow the Feed pool like the other tribes: locked track Neighbours and the Neighbour legendary are only in when unlocked (and, for the legendary, picked).
+
+Art: night train along the top of a brick viaduct (bottom of the panel) through a European capital — Altbau blocks with mansard roofs, glass office towers, café arches under the viaduct, TV tower and dome in the far skyline, a park with a column monument at the end of the line. Windows flicker (TVs), people walk past lit windows, fog drifts in three layers and the train's headlight cuts through it.

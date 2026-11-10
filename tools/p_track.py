@@ -730,3 +730,19 @@ def _():
                   front=[*[sparkle(x, y, 4, Y) for x, y in [(70, 172), (130, 172), (100, 192)]]],
                   prop=[guitar(118, 168, 52, ORA), hand(104, 170, SKINS[0]), hand(166, 132, SKINS[0]),
                         lightning(30, 60, 1.4, Y), path('M22 118 L46 108 M24 136 L48 132', 'none')])
+
+
+@reg('housingcoop', 'Housing Co-op', 'Neutral')
+def _():
+    # a friendly apartment block, every window a different neighbour, a rooftop garden and a shared banner
+    o = [rect(26, 44, 148, 156, '#ffd9a8', 6), path('M18 48 L100 12 L182 48 Z', '#ff8a3d'), rect(84, 22, 32, 14, '#ffe08a', 3)]
+    o += [heart(100, 29, .45, RED)]
+    cols = ['#ff8ab8', '#8fd4ff', '#b5e05a', '#b18cff', '#4fd1c5', '#ffc928']
+    looks = [('happy', 'grin'), ('open', 'smile'), ('wink', 'smile'), ('calm', 'smile'), ('glasses', 'small'), ('happy', 'smile')]
+    for i in range(6):
+        x, y = 40 + (i % 3) * 42, 58 + (i // 3) * 50
+        o += [rect(x, y, 34, 38, cols[i], 6), *face(x + 17, y + 18, .42, *looks[i], skin=None)]
+        o += [rect(x - 3, y + 36, 40, 7, W, 2)]
+    o += [rect(84, 162, 32, 38, '#a0694a', 4), circ(110, 182, 3, Y), rect(34, 150, 44, 16, W, 4), heart(56, 158, .5, RED),
+          rect(124, 150, 44, 16, W, 4), heart(146, 158, .5, RED), path('M10 200 L190 200', 'none')]
+    return o

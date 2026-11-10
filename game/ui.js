@@ -40,6 +40,8 @@ const UNLOCK = {   // hero -> [goal, progress(profile)]
   h_overthinker: [1, P => +!!P.flags.fourTribes], h_lifecoach: [1, P => +!!P.flags.streak3], h_minimalist: [1, P => +!!P.flags.small],
   h_complainer: [1, P => +!!P.flags.comeback], h_ex: [80, P => P.stats.deaths]};
 const isUnlocked = slug => PROF.unlocked.includes(slug);
+/** The hero that stands for you outside a run (the rewards tracks): picked in Collection › Heroes, else the last one played. */
+const avatarHero = () => HERO[PROF.avatar] && isUnlocked(PROF.avatar) ? HERO[PROF.avatar] : HERO[G.heroSlug] || HERO[PROF.unlocked[0]] || HEROES[0];
 function progressOf(slug) { const u = UNLOCK[slug]; return u ? [Math.min(u[0], u[1](PROF)), u[0]] : [1, 1]; }
 let NEW_UNLOCKS = [];
 function checkUnlocks() {
@@ -263,7 +265,7 @@ function showTitle() {
   anim(b, [{transform: 'scale(.95)'}, {transform: 'scale(1.03)'}, {transform: 'scale(.95)'}], {duration: 1800, iterations: Infinity, raw: true});
   b.onclick = showHeroSelect;
   const cb = el('button', 'btn', ico('<rect x="3" y="5" width="8" height="14" rx="2" fill="#ffc928"></rect><rect x="13" y="5" width="8" height="14" rx="2" fill="#ff8ab8"></rect>', 22, 2.4) + 'Collection', stage);
-  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = showTrack;
+  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = () => showTrack('xp');
   if (PROF.unlocked.some(x => !PROF.seen.includes(x))) { const d = el('span', 'ab', '', cb); css(d, {right: -4, top: -6, width: 16, height: 16, borderRadius: '50%', background: '#ff6b5e', border: '2.5px solid #2b2140'}); }
   const t1 = makeToken({name: 'Main Character', tribe: 'Influencer', atk: 5, hp: 7, tier: 6}); stage.appendChild(t1); css(t1, {left: 672, top: 250}); t1.style.transform = 'rotate(8deg)';
   const t2 = makeToken({name: 'Trash Panda', tribe: 'Feral', atk: 2, hp: 1, tier: 1}); stage.appendChild(t2); css(t2, {left: 120, top: 254}); t2.style.transform = 'rotate(-9deg)';
@@ -277,8 +279,9 @@ function rankChip(r, fs = 14) {
 }
 function collectionTabs(on) {
   const tabs = el('div', 'ab colltabs', '', stage); css(tabs, {left: 30, top: 12});
-  for (const [k, label] of [['rewards', `Rewards <span>Lv ${rtLevel()}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
-    const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs); b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : k === 'rewards' ? showTrack() : showCollection(); } };
+  for (const [k, label] of [['levels', `Levels <span>${rtLevel()}/${RT_LEVELS}</span>`], ['rating', `Rating <span>${rmLevel()}/${RM_TRACK.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
+    const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs);
+    b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : k === 'levels' ? showTrack('xp') : k === 'rating' ? showNightLine() : showCollection(); } };
   }
   const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
 }
@@ -289,25 +292,26 @@ const PER_TIER = 3;
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
 function deckSet() {
   if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
-  return new Set(PROF.deck.filter(n => CARD[n] && cardOpen(CARD[n])).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral').map(c => c.name)));
+  return new Set(PROF.deck.filter(n => CARD[n] && cardOpen(CARD[n])).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral' && !c.legendary && cardOpen(c)).map(c => c.name)));
 }
 const tribesOf = c => [c.tribe, c.tribe2].filter(Boolean);
 const inTribe = (c, t) => tribesOf(c).includes(t);
 function deckToggle(c) {
   const d = deckSet(), on = d.has(c.name);
   if (on) {
-    for (const t of tribesOf(c)) if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length <= 1) return 'last';
+    if (!c.legendary) for (const t of tribesOf(c)) if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length <= 1) return 'last';
     PROF.deck = PROF.deck.filter(n => n !== c.name);
   } else {
     if (!cardOpen(c)) return 'locked';
     for (const t of tribesOf(c)) {
-      if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length >= PER_TIER) return 'full';
+      if (t !== 'Neutral' && CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length >= PER_TIER) return 'full';
       if (c.legendary && CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name))) return 'legend';
     }
     PROF.deck.push(c.name);
   }
   saveProfile(); return 'ok';
 }
+const locked0 = c => !cardOpen(c);
 const LOCK = ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 26);
 function showCards(tribe = 'Hustler') {
   clear(); G.screen = 'cards'; bg(true); AU.music('hold');
@@ -320,11 +324,11 @@ function showCards(tribe = 'Hustler') {
     const st = body.scrollTop; body.innerHTML = ''; const d = deckSet(), neutral = tribe === 'Neutral';
     const all = CARDS_ALL().filter(c => inTribe(c, tribe));
     const addCard = (c, row) => {
-      const on = neutral || d.has(c.name), locked = !cardOpen(c);
+      const fixed = neutral && !c.legendary, on = (fixed && !locked0(c)) || d.has(c.name), locked = !cardOpen(c);
       const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
-      if (on && !neutral) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
+      if (on && !fixed) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
       if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', c.legendary ? `Rating ${(RM_AT[c.name] || 0).toLocaleString('en')}` : `Rewards Lv ${RT_CARD_LV[c.name] || c.track || ''}`, w); }
-      w.onclick = () => showDetail(c, null, neutral || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
+      w.onclick = () => showDetail(c, null, fixed || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
         const r = deckToggle(c);
         if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
         sfx('error'); show(tribe, true);
@@ -333,7 +337,7 @@ function showCards(tribe = 'Hustler') {
         else if (rr) { rr.classList.add('flash'); toast(r === 'last' ? 'Keep at least one per tier' : `${PER_TIER} per tier`); }
       }}]);
     };
-    if (!neutral) {   // legendaries first, in their own row; they still take a slot in their tier
+    if (all.some(c => c.legendary)) {   // legendaries first, in their own row; they still take a slot in their tier
       const lg = all.filter(c => c.legendary), on = lg.filter(c => d.has(c.name)).length;
       const row = el('div', 'tierrow legrow', `<div class="tierlab"><span class="gem${on ? ' on' : ''}"></span></div>`, body);
       for (const c of lg) addCard(c, row);
@@ -381,7 +385,8 @@ function showCollection() {
       ${lock ? `<div class="prog" style="position:absolute;left:12px;right:12px;top:120px"><i style="width:${Math.round(100 * c / g)}%;${c ? '' : 'border:0'}"></i></div><p class="bd" style="position:absolute;left:0;right:0;top:134px;margin:0;text-align:center;font-size:10.5px;color:#5a5270">${g > 1 ? `${c} / ${g}` : 'LOCKED'}</p>
         <span style="position:absolute;right:6px;top:4px">${ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 22)}</span>`
         : `<p style="position:absolute;left:4px;right:4px;top:108px;margin:0;text-align:center;font-size:11px;font-weight:800;color:#5a5270;line-height:1.15">${h.power}</p>`}`, stage);
-    css(b, {left: x, top: y, width: 118, height: 150}); b.setAttribute('aria-label', h.name + (lock ? ' (locked)' : ''));
+    css(b, {left: x, top: y, width: 118, height: 150}); b.setAttribute('aria-label', h.name + (lock ? ' (locked)' : '') + (slug === avatarHero().slug ? ', your avatar' : ''));
+    if (!lock && slug === avatarHero().slug && PROF.avatar) el('span', 'avbadge bd', 'You', b);
     anim(b, [{transform: 'translateY(30px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 360, delay: 30 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
     b.onclick = () => showHeroCard(slug);
   });
@@ -395,6 +400,12 @@ function showHeroCard(slug) {
   css(txt, {left: 420, top: 70, width: 380});
   anim(card, [{transform: 'scale(.4) rotate(-8deg)', opacity: 0}, {transform: 'scale(.92)', opacity: 1}], {duration: 300, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
   ov.onpointerup = () => ov.remove();
+  if (!lock) {   // pick this hero as your avatar
+    const mine = PROF.avatar === slug, av = el('button', 'btn avbtn', mine ? `${ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 18, 3.4)} Your avatar` : 'Use as avatar', ov);
+    css(av, {left: 420, top: 300, width: 200, height: 46, fontSize: '18px', background: mine ? '#fff' : '#ffc928'});
+    av.onpointerup = e => e.stopPropagation();
+    av.onclick = () => { if (mine) return; PROF.avatar = slug; saveProfile(); sfx('buy'); toast(`${h.name} is your avatar`); ov.remove(); showCollection(); };
+  }
 }
 
 // ---------------------------------------------------------------- hero select
@@ -1586,17 +1597,17 @@ const RM_TRACK = (() => {
   const L = (name, tribe, tier, tribe2) => ({name, tribe, tribe2, tier, legendary: true});
   const S = [
     [1000, L('The Billionaire', H, 5), L('Cancelled Celebrity', I, 4)],
-    [1250, L('Tech Founder', H, 4, T)],
-    [1500, L('Apex Scavenger', F, 5), L('Pop Diva', C, 5)],
-    [1750, L('Content Creator', I, 4, C)],
-    [2000, L('The Algorithm', T, 5), L('Mohawk Legend', P, 5)],
-    [2250, L('Wise Old Owl', F, 5, PH)],
-    [2500, L('Renaissance Thinker', PH, 4)],
-    [2750, L('Punk Philosopher', P, 5, PH)],
-    [3000, L('Sponsored Streamer', I, 5, T)],
-    [3300, L('Pension Fund', H, 5, F)],
-    [3600, L('Cover Band', C, 5, P)],
-    [4000, L('Startup Monk', T, 6, PH)],
+    [1500, L('Tech Founder', H, 4, T)],
+    [2000, L('Apex Scavenger', F, 5), L('Pop Diva', C, 5)],
+    [2500, L('Content Creator', I, 4, C)],
+    [3000, L('The Algorithm', T, 5), L('Mohawk Legend', P, 5)],
+    [3500, L('Wise Old Owl', F, 5, PH)],
+    [4000, L('Renaissance Thinker', PH, 4), L('Housing Co-op', 'Neutral', 5)],
+    [4500, L('Punk Philosopher', P, 5, PH)],
+    [5000, L('Sponsored Streamer', I, 5, T)],
+    [5500, L('Pension Fund', H, 5, F)],
+    [6000, L('Cover Band', C, 5, P)],
+    [6500, L('Startup Monk', T, 6, PH)],
   ];
   return S.map(([at, ...cards], i) => ({lv: i + 1, at, legend: true, tribe: cards[0].tribe, cards}));
 })();
@@ -1708,10 +1719,10 @@ function rtToks(r, st, parent) {
 }
 const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
 
-function showTrack(kind = PROF.rtTab || 'xp') {
+function showTrack(kind = 'xp') {
   if (kind === 'rating') return showNightLine();
   clear(); G.screen = 'rewards'; bg(true); AU.music('hold');
-  collectionTabs('rewards'); trackSwitch('xp');
+  collectionTabs('levels');
   const P = rtProgress(), done = P.level >= RT_LEVELS, nxt = RT_TRACK[Math.min(P.level, RT_LEVELS - 1)];
   PROF.rtSeen = Math.max(PROF.rtSeen || 0, P.level); saveProfile();
   const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
@@ -1753,7 +1764,7 @@ function showTrack(kind = PROF.rtTab || 'xp') {
   const pe = inner.querySelector('.rpart'), [ex, ey] = pos(RT_TRACK[RT_LEVELS - 1]);
   let pt = {x: ex, y: ey};
   if (pe) { pe.style.display = ''; pt = pe.getPointAtLength(pe.getTotalLength() * frac); pe.style.display = 'none'; }
-  const hero = HERO[G.heroSlug] || HERO[PROF.unlocked[0]] || HEROES[0];
+  const hero = avatarHero();
   const peg = el('div', 'rt-peg', `<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>${P.need ? `<span class="bd">${P.xp}/${P.need}</span>` : ''}`, inner);
   css(peg, {left: pt.x, top: pt.y});
   anim(peg.firstChild, [{translate: '0 0'}, {translate: '0 -5px'}, {translate: '0 0'}], {duration: 1400, iterations: Infinity, easing: 'ease-in-out', raw: true});
@@ -1762,7 +1773,7 @@ function showTrack(kind = PROF.rtTab || 'xp') {
 
 // ---------------------------------------------------------------- the Night Line: a night train through the city, one station per rating reward
 // Side view, scrolls sideways. Layers back to front: sky, far skyline, fog, houses, fog, viaduct with café arches, stations, train + headlight, cards.
-const RM_X0 = 190, RM_X1 = 400, RM_SP = 270, RM_H = 306, RM_DECK = 214;
+const RM_X0 = 190, RM_X1 = 400, RM_SP = 270, RM_H = 306, RM_DECK = 282;
 const rmX = r => r.lv ? RM_X1 + (r.lv - 1) * RM_SP : RM_X0;
 const RM_W = RM_X1 + (RM_TRACK.length - 1) * RM_SP + 420;
 /** Where the front of the train is for a rating: between the start and the first station, then station to station. */
@@ -1780,7 +1791,7 @@ const rmBar = (P, w) => `<div class="rt-xp rm-xp" style="width:${w}px"><i style=
 /** The city, drawn once per visit. A seeded random keeps it the same every time. */
 function rmCity() {
   let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }, pick = a => a[Math.floor(rnd() * a.length)];
-  const INK = '#171230', BASE = RM_H;
+  const INK = '#171230', BASE = RM_DECK + 4;
   let clip = 0;
   // a window: dark, lamp-lit, office-lit, a TV flickering, or someone walking past
   const win = (x, y, w, h, office) => {
@@ -1794,7 +1805,7 @@ function rmCity() {
   };
   // 19th-century block: floors with cornices, tall windows, a mansard roof with dormers
   const altbau = (x, w, h) => {
-    const top = BASE - h, col = pick(['#5b4a7a', '#4e4470', '#64506e', '#4b5274', '#6a5468']), fl = 4, fh = 26, cols = Math.floor((w - 14) / 22);
+    const top = BASE - h, col = pick(['#5b4a7a', '#4e4470', '#64506e', '#4b5274', '#6a5468']), fh = 26, shop = BASE - 38, fl = Math.floor((shop - top - 30) / fh), cols = Math.floor((w - 14) / 22);
     let s = `<path d="M${x} ${BASE}V${top + 22}h${w}V${BASE}z" fill="${col}" stroke="${INK}" stroke-width="2.5"/>`;
     s += `<path d="M${x + 4} ${top + 22}L${x + 12} ${top}h${w - 24}l8 22z" fill="#3a2f55" stroke="${INK}" stroke-width="2.5"/>`;
     for (let d = 0; d < Math.max(1, cols - 1); d += 2) s += `<path d="M${x + 18 + d * 22} ${top + 20}v-9h12v9" fill="#3a2f55" stroke="${INK}" stroke-width="2"/>` + win(x + 20 + d * 22, top + 13, 8, 7);
@@ -1803,61 +1814,56 @@ function rmCity() {
       s += `<path d="M${x - 2} ${y - 3}h${w + 4}" stroke="${INK}" stroke-width="2"/>`;
       for (let c = 0; c < cols; c++) s += win(x + 10 + c * 22 + (w - 14 - cols * 22) / 2, y + 3, 11, 17);
     }
+    // ground floor: a café with an awning, warm windows and guests, or a closed shop
+    s += `<path d="M${x - 2} ${shop - 3}h${w + 4}" stroke="${INK}" stroke-width="2.5"/>`;
+    const dx = x + w / 2 - 7, ww = (w - 34) / 2;
+    if (rnd() < .5) {
+      const aw = pick([['#ff6b5e', '#fff'], ['#2ecb6e', '#fff'], ['#ffc928', '#fff']]);
+      s += `<rect x="${x + 6}" y="${shop + 9}" width="${ww}" height="22" rx="3" fill="url(#rmcafe)" stroke="${INK}" stroke-width="2"/><rect x="${x + w - 6 - ww}" y="${shop + 9}" width="${ww}" height="22" rx="3" fill="url(#rmcafe)" stroke="${INK}" stroke-width="2"/>`;
+      for (const gx of [x + 6 + ww * .35, x + w - 6 - ww * .55]) s += `<circle cx="${gx}" cy="${shop + 20}" r="3.6" fill="#6a4232"/><path d="M${gx - 5} ${shop + 31}q5 -8 10 0z" fill="#6a4232"/>`;
+      s += `<rect x="${dx}" y="${shop + 9}" width="14" height="${BASE - shop - 9}" fill="#ffcf73" stroke="${INK}" stroke-width="2"/>`;
+      s += `<path d="M${x + 2} ${shop}h${w - 4}l-4 9H${x + 6}z" fill="${aw[0]}" stroke="${INK}" stroke-width="2"/>`;
+      for (let k = x + 10; k < x + w - 8; k += 10) s += `<path d="M${k} ${shop + 1}l-1 7" stroke="${aw[1]}" stroke-width="3.5"/>`;
+      s += `<ellipse cx="${x + w / 2}" cy="${BASE - 4}" rx="${w * .7}" ry="14" fill="url(#rmspill)"/>`;
+    } else s += `<rect x="${x + 6}" y="${shop + 7}" width="${ww}" height="22" rx="3" fill="${pick(['#2a2350', '#3a5fc4', '#2a2350'])}" stroke="${INK}" stroke-width="2"/><rect x="${x + w - 6 - ww}" y="${shop + 7}" width="${ww}" height="22" rx="3" fill="#2a2350" stroke="${INK}" stroke-width="2"/><rect x="${dx}" y="${shop + 7}" width="14" height="${BASE - shop - 7}" fill="#3a2f55" stroke="${INK}" stroke-width="2"/>`;
     return s;
   };
   // glass tower: a grid of small office windows, whole lit floors here and there
   const tower = (x, w, h) => {
     const top = BASE - h; let s = `<rect x="${x}" y="${top}" width="${w}" height="${h}" fill="#2f3b63" stroke="${INK}" stroke-width="2.5"/><rect x="${x + w * .35}" y="${top - 12}" width="${w * .3}" height="12" fill="#2f3b63" stroke="${INK}" stroke-width="2"/>`;
     s += `<rect x="${x + 3}" y="${top + 3}" width="${w * .28}" height="${h - 6}" fill="#fff" opacity=".05"/>`;
-    for (let y = top + 8; y < RM_DECK - 4; y += 11) {
+    for (let y = top + 8; y < BASE - 30; y += 11) {
       const floorLit = rnd() < .22;
       for (let xx = x + 6; xx < x + w - 10; xx += 11) s += floorLit ? `<rect x="${xx}" y="${y}" width="8" height="6" fill="${pick(['#e6f4ff', '#cde8ff'])}"/>` : win(xx, y, 8, 6, true);
     }
+    s += `<rect x="${x + 6}" y="${BASE - 24}" width="${w - 12}" height="24" fill="#cfe6ff" stroke="${INK}" stroke-width="2"/><path d="M${x + w / 2} ${BASE - 24}V${BASE}" stroke="${INK}" stroke-width="2"/>`;   // lit lobby
     return s;
   };
   // far skyline: soft silhouettes, a TV tower and a dome
   let far = '';
   for (let x = -20; x < RM_W; ) {
-    const w = 40 + rnd() * 60, h = 70 + rnd() * 110, y = 250 - h;
+    const w = 40 + rnd() * 60, h = 90 + rnd() * 120, y = BASE - 20 - h;
     far += `<rect x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(0)}" height="${h + 60}" fill="#2a2452"/>`;
     for (let k = 0; k < 4; k++) if (rnd() < .6) far += `<rect x="${(x + 6 + rnd() * (w - 14)).toFixed(0)}" y="${(y + 8 + rnd() * (h - 20)).toFixed(0)}" width="4" height="4" fill="#5f5596"/>`;
     x += w + rnd() * 16;
   }
-  const tvTower = x => `<path d="M${x - 3} 250V58h6V250z" fill="#2a2452"/><circle cx="${x}" cy="74" r="13" fill="#2a2452"/><path d="M${x - 1} 58V22h2V58z" fill="#2a2452"/><circle class="rm-blink" cx="${x}" cy="21" r="2.5" fill="#ff6b5e"/>`;
-  const dome = x => `<path d="M${x - 46} 250V150h92V250z" fill="#2a2452"/><path d="M${x - 34} 150a34 36 0 0 1 68 0z" fill="#2a2452"/><path d="M${x - 2} 114v-12h4v12z" fill="#2a2452"/><path d="M${x - 6} 104h12" stroke="#2a2452" stroke-width="3"/>`;
+  const tvTower = x => `<path d="M${x - 3} ${BASE}V58h6V${BASE}z" fill="#2a2452"/><circle cx="${x}" cy="74" r="13" fill="#2a2452"/><path d="M${x - 1} 58V22h2V58z" fill="#2a2452"/><circle class="rm-blink" cx="${x}" cy="21" r="2.5" fill="#ff6b5e"/>`;
+  const dome = x => `<path d="M${x - 46} ${BASE}V190h92V${BASE}z" fill="#2a2452"/><path d="M${x - 34} 190a34 36 0 0 1 68 0z" fill="#2a2452"/><path d="M${x - 2} 154v-12h4v12z" fill="#2a2452"/><path d="M${x - 6} 144h12" stroke="#2a2452" stroke-width="3"/>`;
   far += tvTower(700) + dome(1500) + tvTower(2620) + dome(3240);
   // houses, side by side
   let mid = '';
   for (let x = -30; x < RM_W; ) {
-    const t = rnd(), isTower = t < .26, w = isTower ? 64 + rnd() * 30 : 96 + rnd() * 40, h = isTower ? 210 + rnd() * 50 : 150 + rnd() * 34;
+    const t = rnd(), isTower = t < .26, w = isTower ? 64 + rnd() * 30 : 96 + rnd() * 40, h = isTower ? 230 + rnd() * 40 : 160 + rnd() * 40;
     mid += isTower ? tower(x, w, h) : altbau(x, w, h);
     x += w + 4 + rnd() * 10;
   }
-  // the viaduct: brick deck on arches; some arches are cafés with warm light, little tables and someone at the counter
-  const deck = RM_DECK + 2;
-  let via = `<rect x="-10" y="${deck}" width="${RM_W + 20}" height="16" fill="#7a4250" stroke="${INK}" stroke-width="3"/><path d="M-10 ${deck + 8}H${RM_W + 10}" stroke="#5e2f3c" stroke-width="2"/>`;
-  via += `<path d="M-10 ${deck - 1}H${RM_W + 10}" stroke="#c9c2d6" stroke-width="3"/>`;
-  via = `<defs><linearGradient id="rmcafe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe3a0"/><stop offset="1" stop-color="#ffa944"/></linearGradient>
-    <radialGradient id="rmspill"><stop offset="0" stop-color="#ffc56a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc56a" stop-opacity="0"/></radialGradient></defs>` + via;
-  via += `<rect x="-10" y="${BASE - 8}" width="${RM_W + 20}" height="12" fill="#1c1636"/><path d="M-10 ${BASE - 8}H${RM_W + 10}" stroke="${INK}" stroke-width="2.5"/>`;
-  for (let x = 0, i = 0; x < RM_W; x += 66, i++) {
-    const cafe = i % 3 === 1, ax = x + 16, aw = 50, ay = deck + 16, foot = BASE - 8, spring = ay + 28;
-    via += `<rect x="${x}" y="${ay}" width="16" height="${foot - ay}" fill="#7a4250" stroke="${INK}" stroke-width="2.5"/><path d="M${x + 3} ${ay + 20}h10M${x + 3} ${ay + 40}h10M${x + 3} ${ay + 60}h10" stroke="#5e2f3c" stroke-width="2"/>`;
-    via += `<path d="M${ax} ${ay}h${aw}v${foot - ay}h-${aw}z" fill="#6a3946"/>`;
-    const open = `M${ax + 3} ${foot}V${spring}a${aw / 2 - 3} ${aw / 2 - 5} 0 0 1 ${aw - 6} 0V${foot}z`;
-    if (cafe) {
-      via += `<ellipse cx="${ax + aw / 2}" cy="${foot + 2}" rx="56" ry="12" fill="url(#rmspill)"/>`;
-      via += `<path d="${open}" fill="url(#rmcafe)" stroke="${INK}" stroke-width="2.5"/>`;
-      via += `<path d="M${ax + 8} ${foot - 14}h${aw - 16}" stroke="#a8652a" stroke-width="3"/>`;   // counter
-      via += `<circle cx="${ax + 17}" cy="${foot - 23}" r="4.5" fill="#6a4232"/><path d="M${ax + 11} ${foot - 14}q6 -9 12 0z" fill="#6a4232"/><circle cx="${ax + 33}" cy="${foot - 22}" r="4" fill="#6a4232"/><path d="M${ax + 28} ${foot - 14}q5 -8 10 0z" fill="#6a4232"/>`;
-      via += `<path d="M${ax + aw / 2} ${spring - 18}v8" stroke="${INK}" stroke-width="1.5"/><circle cx="${ax + aw / 2}" cy="${spring - 8}" r="3" fill="#fff6c2"/>`;
-      via += `<path d="${open}" fill="none" stroke="${INK}" stroke-width="2.5"/><path d="M${ax + 3} ${spring}h${aw - 6}M${ax + aw / 2} ${spring}V${foot - 14}" stroke="${INK}" stroke-width="2"/>`;
-      via += `<rect x="${ax + 7}" y="${ay + 4}" width="${aw - 14}" height="9" rx="3" fill="#ff6b5e" stroke="${INK}" stroke-width="2"/>`;
-      // a table and two chairs out front
-      const tx = ax + aw + 8;
-      via += `<path d="M${tx - 7} ${foot - 9}h14M${tx} ${foot - 9}v9M${tx - 13} ${foot}v-8h4M${tx + 13} ${foot}v-8h-4" stroke="${INK}" stroke-width="2.2" fill="none"/>`;
-    } else via += `<path d="${open}" fill="#211a3c" stroke="${INK}" stroke-width="2.5"/>`;
-  }
+  // the top of the viaduct along the bottom: rails, a stone coping and the brickwork
+  const deck = RM_DECK;
+  let via = `<defs><linearGradient id="rmcafe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe3a0"/><stop offset="1" stop-color="#ffa944"/></linearGradient>
+    <radialGradient id="rmspill"><stop offset="0" stop-color="#ffc56a" stop-opacity=".45"/><stop offset="1" stop-color="#ffc56a" stop-opacity="0"/></radialGradient></defs>`;
+  via += `<rect x="-10" y="${deck + 4}" width="${RM_W + 20}" height="${RM_H - deck}" fill="#7a4250" stroke="${INK}" stroke-width="3"/>`;
+  for (let r = 0; r < 3; r++) { const y = deck + 10 + r * 6; via += `<path d="M-10 ${y}H${RM_W + 10}" stroke="#5e2f3c" stroke-width="1.5"/>`; for (let x = (r % 2) * 9; x < RM_W; x += 18) via += `<path d="M${x} ${y}v6" stroke="#5e2f3c" stroke-width="1.5"/>`; }
+  via += `<rect x="-10" y="${deck}" width="${RM_W + 20}" height="6" fill="#b8aac8" stroke="${INK}" stroke-width="2.5"/><path d="M-10 ${deck - 1}H${RM_W + 10}" stroke="#d8d0e6" stroke-width="2.5"/>`;
   // a little park with a monument where the line ends: trees, a lamp, a column with a golden figure
   const px = RM_W - 210;
   let park = `<path d="M${px - 30} ${deck - 2}q130 -14 260 0v${BASE - deck + 2}h-260z" fill="#24406a"/>`;
@@ -1886,7 +1892,7 @@ const rmStation = (r, st) => `<div class="rm-stn ${st}" style="left:${rmX(r)}px"
 
 function showNightLine() {
   clear(); G.screen = 'nightline'; bg(true); AU.music('hold');
-  collectionTabs('rewards'); trackSwitch('rating');
+  collectionTabs('rating');
   const P = rmProgress(), done = !P.next, nxt = P.next || RM_TRACK[RM_TRACK.length - 1];
   const side = el('div', 'panel rt-side rm-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
   const b = bracketOf(PROF.rating);
@@ -1908,27 +1914,19 @@ function showNightLine() {
     <i class="rm-fog f3"></i><i class="rm-haze"></i>`;
   for (const r of RM_TRACK) inner.insertAdjacentHTML('beforeend', rmStation(r, rtState(r, P.lv)));
   // the train, its headlight cutting through the fog, and your hero in the cab
-  const hero = HERO[G.heroSlug] || HERO[PROF.unlocked[0]] || HEROES[0];
+  const hero = avatarHero();
   const train = el('div', 'rm-train', `<i class="rm-beam"></i><i class="rm-beamfog"></i>${RM_TRAIN}<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>`, inner);
   css(train, {left: tx, top: C.deck - 51});
   anim(train.querySelector('.rm-trainsvg'), [{translate: '0 0'}, {translate: '0 -1px'}, {translate: '0 0'}], {duration: 380, iterations: Infinity, raw: true});
   // the rewards float above each station
   for (const r of RM_TRACK) {
-    const st = rtState(r, P.lv), g = el('div', `rt-grp rm-grp ${st}`, '', inner); css(g, {left: rmX(r), top: 28});
+    const st = rtState(r, P.lv), g = el('div', `rt-grp rm-grp ${st}`, '', inner); css(g, {left: rmX(r), top: 54});
     rtToks(r, st, g);
   }
   // far skyline drifts slower than the street
   const far = inner.querySelector('.rm-far'), f1 = inner.querySelector('.f1');
   body.onscroll = () => { const s = body.scrollLeft; far.style.transform = `translateX(${s * .45}px)`; f1.style.translate = `${s * .2}px 0`; };
   body.scrollLeft = Math.max(0, tx - 230); body.onscroll();
-}
-/** Levels / Night Line switch above the Rewards screen. */
-function trackSwitch(on) {
-  const sw = el('div', 'ab logtabs rm-switch', '', stage); css(sw, {left: 432, top: 15});
-  for (const [k, lab] of [['xp', 'Levels'], ['rating', 'Night Line']]) {
-    const b = el('button', 'logtab' + (k === on ? ' on' : ''), lab, sw);
-    b.onclick = () => { if (k !== on) { sfx('pop'); PROF.rtTab = k; saveProfile(); k === 'xp' ? showTrack('xp') : showNightLine(); } };
-  }
 }
 /** After a run: a pop-up for each Night Line station passed but not shown yet. */
 function rmAfterRun() {

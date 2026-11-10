@@ -606,5 +606,6 @@ LEGENDS += [
     _legt(29, 'Pension Fund', H, 5, 3, 7, 'End of turn: gain +2/+2 permanently. When sold: give your other Hustlers and Ferals the stats it has gained.', 'Matures in 40 years. Or never.', tribe2=F),
     _legt(37, 'Startup Monk', T, 6, 5, 8, 'End of turn: remove your lowest-Attack other minion and give its stats to your other minions.', 'Meditates. Then lays off half the team.', tribe2=PH),
     _legt(45, 'Cover Band', C, 5, 5, 6, 'Cleave. Start of combat: trigger the start-of-combat effects of the minions next to it.', 'Only the hits. Louder.', tribe2=P),
+    _leg('Housing Co-op', N, 5, 4, 7, 'End of turn: give your other minions +2/+2 for each tribe you have (Neighbours count).', 'Waitlist: eleven years. Worth it.'),
 ]
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS

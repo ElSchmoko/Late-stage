@@ -86,9 +86,9 @@ const skillOf = r => Math.max(0, Math.min(1, r / 5000));
 // ---------- pool ----------
 // The Feed pool: each tribe has up to 3 cards per tier, chosen on the Collection screen (deck = Set of names; null = default).
 const DEFAULT_OFF = new Set(['Unboxing Streamer', 'Loot Box']);
-const inDeck = (c, deck) => c.tribe === N || (deck ? deck.has(c.name) : !c.legendary && !c.track && !DEFAULT_OFF.has(c.name));
+const inDeck = (c, deck) => deck ? deck.has(c.name) : !c.legendary && !c.track && !DEFAULT_OFF.has(c.name);
 function buildPool(tribes, deck = null) {
-  const all = [...new Set(tribes.flatMap(t => BY_TRIBE[t]).filter(c => inDeck(c, deck)).concat(BY_TRIBE[N]))];
+  const all = [...new Set(tribes.flatMap(t => BY_TRIBE[t]).filter(c => inDeck(c, deck)).concat(BY_TRIBE[N].filter(c => inDeck(c, deck))))];
   const pool = {};
   for (let t = 1; t <= 6; t++) { const cs = all.filter(c => c.tier <= t); pool[t] = [cs, cs.map(c => COPIES[c.tier])]; }
   return pool;
@@ -495,6 +495,7 @@ class Player {
       else if (n === 'The Billionaire') { const k = Math.min(10, this.gold[0]); if (k) for (const o of b) if (o !== m && isTribe(o, H)) this.buff(o, k, k, m); }
       else if (n === 'Apex Scavenger') { const feed = this.getFeed ? this.getFeed() : this.feedRef; if (feed && feed.length) { const k = Math.floor(Math.max(...feed.map(x => x.card.atk + (x.a || 0))) / 2); if (k) for (const o of b) if (o !== m && isTribe(o, F)) this.buff(o, k, k, m); } }
       else if (n === 'The Algorithm') { for (const o of b) if (o.extras.length) this.buff(o, o.extras.length, o.extras.length, m); }
+      else if (n === 'Housing Co-op') { const ts = new Set(); for (const o of b) if (!o.follower) for (const t of [o.tribe, o.tribe2]) if (t) ts.add(t); for (const o of b) if (o !== m) this.buff(o, 2 * ts.size, 2 * ts.size, m); }
       else if (n === 'Renaissance Thinker') { const by = {}; for (const o of b) for (const t of [o.tribe, o.tribe2]) if (t && t !== N && !o.follower) (by[t] = by[t] || []).push(o); for (const t in by) this.buff(this.rng.choice(by[t]), 2, 2, m); }
       else if (n === 'Wise Old Owl') { const k = tribeCount(b); for (const o of b) if (isTribe(o, F) || isTribe(o, PH)) this.buff(o, k, k, m); }
       else if (n === 'Record Label') { const k = (this.creativesTotal || 0) - (m.rl0 ?? 0), cr = b.filter(o => o !== m && isTribe(o, C)); if (k && cr.length) this.buff(this.rng.choice(cr), k, k, m); }
