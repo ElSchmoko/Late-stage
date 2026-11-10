@@ -254,8 +254,9 @@ const ffLabel = () => `${ico('<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11V4a1.
 function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sfx('pop'); }
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
-  soundButton(790, 12, false); changelogButton(740, 12); statsButton(690, 12); setTimeout(legendPopup, 500);
-  if (SEASON_NEW) { SEASON_NEW = false; setTimeout(() => toast('New season! Rating, rewards track and cards start over. Your heroes stay.', 4200), 900); }
+  soundButton(790, 12, false); changelogButton(740, 12); statsButton(690, 12);
+  if (!(PROF.flags || {})[TOUR_FLAG]) setTimeout(() => G.screen === 'title' && showTour(), 600); else setTimeout(legendPopup, 500);
+  SEASON_NEW = false;
   const t = el('div', 'ab', `<h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 74, textAlign: 'center'});
   anim(t.querySelector('h1'), [{transform: 'scale(.6) rotate(-6deg)', opacity: 0}, {transform: 'scale(1.06) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 700, easing: 'ease-out', raw: true});
@@ -369,6 +370,45 @@ function legendPopup() {
   const later = el('button', 'btn', 'Later', ov); css(later, {left: 460, top: 322, width: 120, height: 42, fontSize: '17px'});
   go.onclick = () => { ov.remove(); showCards(fresh[0].tribe); }; later.onclick = () => ov.remove();
   sfx('triple');
+}
+// ---------------------------------------------------------------- what's new: the two tracks and the season reset (shown once to every player)
+const TOUR_FLAG = 'tourTracks1';
+function showTour() {
+  PROF.flags = PROF.flags || {};
+  const hero = avatarHero(), back = PROF.games > 0;   // the reset page is only for players who played before it
+  const dot = c => `<i style="background:${c}"></i>`;
+  const pages = [
+    back && {cap: 'New season', title: 'A fresh start', art: `<div class="tour-reset"><div class="tour-zero"><span class="bd">0</span><small>rating</small></div>
+        <div class="tour-kept">${PROF.unlocked.slice(0, 4).map(sl => `<span class="av" style="background:${HERO[sl].col}"><img src="${ART[sl]}" alt=""></span>`).join('')}<b class="bd">Kept</b></div></div>`,
+      text: 'Everyone starts over: rating, unlocked cards and your Feed pool are back to day one.', bul: ['Your heroes stay unlocked', 'Old runs stay in your stats']},
+    {cap: 'Track 1', title: 'Levels', art: `<div class="tour-road"><svg width="200" height="150" viewBox="0 0 200 150" aria-hidden="true"><path d="M40 0C40 50 160 60 160 150" fill="none" stroke="#2b2140" stroke-width="34" stroke-linecap="round"/><path d="M40 0C40 50 160 60 160 150" fill="none" stroke="#fff" stroke-width="27" stroke-linecap="round"/><path d="M40 0C40 40 80 52 98 62" fill="none" stroke="#ffc928" stroke-width="16" stroke-linecap="round"/></svg>
+        <span class="tour-node bd" style="left:30px;top:16px">1</span><span class="tour-node bd lk" style="left:140px;top:110px">2</span>
+        <span class="tour-q" style="left:118px;top:20px;background:${TC.Hustler}">?</span><span class="tour-q" style="left:30px;top:96px;background:${TC.Influencer}">?</span><span class="rt-xpchip tour-xp">+110 XP</span></div>`,
+      text: 'Every run gives XP, more for a better place. Each level unlocks new cards for your tribes.', bul: ['36 levels, two cards each', 'Rewards stay a surprise until they are next']},
+    {cap: 'Track 2', title: 'Rating', art: `<div class="tour-night"><i class="moon"></i><div class="tour-city"></div><div class="tour-deck"></div><div class="tour-train">${RM_TRAIN}<span class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></span></div><span class="rm-sign bd tour-sign">${STAR(11)}1,000</span><i class="tour-beam"></i></div>`,
+      text: 'Legendaries now ride the night train. A new station every 500 rating, from 1,000 to 6,500.', bul: ['Your best rating this season counts', 'A dip never takes a legendary back']},
+    {cap: 'New', title: 'Your avatar', art: `<div class="tour-avs">${PROF.unlocked.slice(0, 3).map((sl, i) => `<span class="av${sl === hero.slug ? ' me' : ''}" style="background:${HERO[sl].col}"><img src="${ART[sl]}" alt="">${sl === hero.slug ? '<b class="avbadge bd">You</b>' : ''}</span>`).join('')}</div>`,
+      text: 'Pick the hero that stands for you on both tracks: Collection › Heroes › Use as avatar.', bul: ['Any unlocked hero', 'Change it whenever you like']},
+  ].filter(Boolean);
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.84)';
+  const p = el('div', 'panel tour', '', ov); css(p, {left: 112, top: 34, width: 620, height: 322});
+  let i = 0;
+  const done = () => { PROF.flags[TOUR_FLAG] = true; saveProfile(); ov.remove(); setTimeout(legendPopup, 300); };
+  const draw = dir => {
+    const pg = pages[i], last = i === pages.length - 1;
+    p.innerHTML = `<div class="tour-art">${pg.art}</div><div class="tour-txt"><p class="rt-cap">${pg.cap}</p><p class="bd tour-t">${pg.title}</p><p class="tour-p">${pg.text}</p>
+      <ul>${pg.bul.map(b => `<li>${b}</li>`).join('')}</ul></div>
+      <div class="tour-foot"><div class="tour-dots">${pages.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+      ${i ? '<button class="btn tour-back">Back</button>' : '<button class="btn tour-skip">Skip</button>'}<button class="btn tour-next">${last ? "Let's go" : 'Next'}</button></div>`;
+    anim(p.querySelector('.tour-art'), [{transform: `translateX(${dir * 30}px)`, opacity: 0}, {transform: 'none', opacity: 1}], {duration: 260, easing: 'ease-out', raw: true});
+    anim(p.querySelector('.tour-txt'), [{transform: `translateX(${dir * 20}px)`, opacity: 0}, {transform: 'none', opacity: 1}], {duration: 260, delay: 40, fill: 'backwards', easing: 'ease-out', raw: true});
+    p.querySelector('.tour-next').onclick = () => { sfx('pop'); if (last) done(); else { i++; draw(1); } };
+    const bk = p.querySelector('.tour-back'); if (bk) bk.onclick = () => { sfx('pop'); i--; draw(-1); };
+    const sk = p.querySelector('.tour-skip'); if (sk) sk.onclick = () => { sfx('pop'); done(); };
+  };
+  draw(0);
+  anim(p, [{transform: 'translateY(30px) scale(.96)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 280, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+  sfx('open');
 }
 function showCollection() {
   clear(); G.screen = 'collection'; bg(true); AU.music('hold');
@@ -1985,6 +2025,6 @@ function rtAfterRun() {
   if (added.length) setTimeout(() => toast(`${added.join(' and ')} joined your Feed pool`, 2600), 1800);
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), tour: () => showTour(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();

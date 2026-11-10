@@ -488,3 +488,43 @@ button{font:inherit;color:inherit}
 .rm-haze{background:linear-gradient(transparent 48%,rgba(178,168,226,.14) 66%,rgba(205,198,240,.26) 84%,rgba(205,198,240,.1) 92%,transparent 93%)}
 .avbadge{position:absolute;left:50%;top:-10px;transform:translateX(-50%);background:#ffc928;border:2.5px solid var(--ink);border-radius:999px;padding:2px 10px 0;font-size:12px;box-shadow:0 0 0 2.5px #fff;z-index:2}
 .avbtn{display:flex;align-items:center;justify-content:center;gap:6px}
+/* what's new tour */
+.tour{padding:0;overflow:hidden}
+.tour-art{position:absolute;left:18px;top:18px;width:250px;height:226px;border:3px solid var(--ink);border-radius:18px;background:#fff6dc;overflow:hidden}
+.tour-txt{position:absolute;left:290px;top:22px;right:24px}
+.tour-t{margin:2px 0 0;font-size:30px;line-height:1}
+.tour-p{margin:10px 0 0;font-size:15px;font-weight:800;line-height:1.3;color:var(--ink)}
+.tour-txt ul{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.tour-txt li{position:relative;padding-left:22px;font-size:13.5px;font-weight:800;color:#5a5270}
+.tour-txt li::before{content:'';position:absolute;left:2px;top:3px;width:11px;height:11px;border-radius:50%;background:#2ecb6e;border:2.5px solid var(--ink)}
+.tour-foot{position:absolute;left:18px;right:22px;bottom:16px;height:44px;display:flex;align-items:center;gap:12px}
+.tour-dots{flex:1;display:flex;gap:7px}.tour-dots i{width:10px;height:10px;border-radius:50%;border:2.5px solid var(--ink);background:#fff}.tour-dots i.on{background:#ffc928;width:26px;border-radius:999px}
+.tour-foot .btn{position:relative;height:42px;font-size:17px;padding:0 18px}.tour-next{background:#2ecb6e !important;min-width:118px}
+.tour .av{position:relative;display:inline-block;width:54px;height:54px;border-radius:50%;border:3px solid var(--ink);overflow:hidden;box-shadow:0 0 0 2.5px #fff}
+.tour .av img{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);width:66px;height:66px}
+.tour-reset{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.tour-zero{display:flex;flex-direction:column;align-items:center;width:96px;height:96px;border-radius:50%;background:#c9c2d6;border:3px solid var(--ink);justify-content:center;box-shadow:3px 5px 0 var(--ink)}
+.tour-zero span{font-size:46px;line-height:.9;padding-top:6px}.tour-zero small{font-weight:800;font-size:12px;color:#5a5270}
+.tour-kept{display:flex;align-items:center;gap:0}.tour-kept .av{width:40px;height:40px;margin-left:-8px}.tour-kept .av img{width:50px;height:50px}
+.tour-kept b{margin-left:8px;background:#2ecb6e;border:2.5px solid var(--ink);border-radius:999px;padding:2px 10px 0;font-size:14px}
+.tour-road{position:absolute;inset:0;background:#fffaf0}.tour-road svg{position:absolute;left:25px;top:40px}
+.tour-node{position:absolute;width:44px;height:44px;margin:40px 0 0 25px;border-radius:50%;background:#2ecb6e;border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:20px;padding-top:3px;box-sizing:border-box}
+.tour-node.lk{background:#fff;color:#a59cb8}
+.tour-q{position:absolute;width:52px;height:52px;margin:40px 0 0 25px;border-radius:14px;border:3px solid var(--ink);box-shadow:0 0 0 2.5px #fff;font:800 28px/52px 'Baloo 2',sans-serif;text-align:center;color:rgba(255,255,255,.9);filter:saturate(.5)}
+.tour-xp{position:absolute;left:12px;top:12px;margin:0}
+.tour-night{position:absolute;inset:0;background:linear-gradient(#120e2b,#2a2150 70%,#4a3b6e)}
+.tour-night .moon{position:absolute;right:26px;top:20px;width:26px;height:26px;border-radius:50%;background:#fff6d6;box-shadow:0 0 30px 10px rgba(255,236,190,.2)}
+.tour-city{position:absolute;left:0;right:0;bottom:26px;height:120px;background:
+  linear-gradient(#ffcf73,#ffcf73) 30px 40px/8px 12px no-repeat,linear-gradient(#cfe6ff,#cfe6ff) 120px 30px/6px 6px no-repeat,linear-gradient(#ffcf73,#ffcf73) 190px 60px/8px 12px no-repeat,linear-gradient(#cfe6ff,#cfe6ff) 132px 52px/6px 6px no-repeat,
+  linear-gradient(#5b4a7a,#5b4a7a) 10px 30px/76px 90px no-repeat,linear-gradient(#2f3b63,#2f3b63) 100px 0/56px 120px no-repeat,linear-gradient(#4e4470,#4e4470) 166px 44px/80px 76px no-repeat}
+.tour-deck{position:absolute;left:0;right:0;bottom:0;height:26px;background:#7a4250;border-top:6px solid #b8aac8}
+.tour-train{position:absolute;left:-60px;bottom:24px;transform:scale(.72);transform-origin:left bottom}
+.tour-train svg{display:block}.tour-train .av{position:absolute;left:168px;top:-30px;width:40px;height:40px}.tour-train .av img{width:50px;height:50px}
+.tour-sign{position:absolute;right:16px;top:82px;transform:none;left:auto}
+.tour-beam{position:absolute;left:162px;bottom:18px;width:90px;height:60px;clip-path:polygon(0 70%,100% 20%,100% 100%,0 80%);background:linear-gradient(90deg,rgba(255,240,196,.75),transparent);filter:blur(3px)}
+.tour-avs{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px;background:#fffaf0}
+.tour-avs .av{width:62px;height:62px;overflow:visible}.tour-avs .av img{width:76px;height:76px;border-radius:0 0 50% 50%}
+.tour-avs .av.me{width:78px;height:78px;box-shadow:0 0 0 3px #fff,0 0 0 7px #ffc928,0 0 0 9.5px var(--ink)}
+.tour-avs .av.me img{width:94px;height:94px}.tour-avs .avbadge{top:-24px}
+.tour-train .rm-trainsvg{position:relative;left:0;top:0}.tour-train{left:-40px;bottom:22px}.tour-train .av{left:186px;top:-34px}
+.tour-beam{left:128px;bottom:20px}
