@@ -243,7 +243,7 @@ function showTitle() {
   anim(b, [{transform: 'scale(.95)'}, {transform: 'scale(1.03)'}, {transform: 'scale(.95)'}], {duration: 1800, iterations: Infinity, raw: true});
   b.onclick = showHeroSelect;
   const cb = el('button', 'btn', ico('<rect x="3" y="5" width="8" height="14" rx="2" fill="#ffc928"></rect><rect x="13" y="5" width="8" height="14" rx="2" fill="#ff8ab8"></rect>', 22, 2.4) + 'Collection', stage);
-  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = showCollection;
+  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = showTrack;
   if (PROF.unlocked.some(x => !PROF.seen.includes(x))) { const d = el('span', 'ab', '', cb); css(d, {right: -4, top: -6, width: 16, height: 16, borderRadius: '50%', background: '#ff6b5e', border: '2.5px solid #2b2140'}); }
   const t1 = makeToken({name: 'Main Character', tribe: 'Influencer', atk: 5, hp: 7, tier: 6}); stage.appendChild(t1); css(t1, {left: 672, top: 250}); t1.style.transform = 'rotate(8deg)';
   const t2 = makeToken({name: 'Trash Panda', tribe: 'Feral', atk: 2, hp: 1, tier: 1}); stage.appendChild(t2); css(t2, {left: 120, top: 254}); t2.style.transform = 'rotate(-9deg)';
@@ -257,20 +257,19 @@ function rankChip(r, fs = 14) {
 }
 function collectionTabs(on) {
   const tabs = el('div', 'ab colltabs', '', stage); css(tabs, {left: 30, top: 12});
-  for (const [k, label] of [['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`]]) {
-    const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs); b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : showCollection(); } };
+  for (const [k, label] of [['rewards', `Rewards <span>Lv ${rtLevel()}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
+    const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs); b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : k === 'rewards' ? showTrack() : showCollection(); } };
   }
   const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
 }
 const TRIBE_ORDER = ['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'];
 const CARDS_ALL = () => window.LS_CARDS.filter(c => !c.token && c.name !== 'Follower');
-// ---- the Feed pool ("deck"): 3 cards per tier per tribe, 1 legendary per tribe; legendaries unlock at 1000 rating
+// ---- the Feed pool ("deck"): 3 cards per tier per tribe, 1 legendary per tribe; legendaries unlock on the rewards track (or at 1000 rating before it existed)
 const LEGEND_AT = 1000, PER_TIER = 3;
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
-const legendsOpen = () => PROF.peak >= LEGEND_AT || PROF.rating >= LEGEND_AT;
 function deckSet() {
   if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
-  return new Set(PROF.deck.filter(n => CARD[n] && (!CARD[n].legendary || legendsOpen())).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral').map(c => c.name)));
+  return new Set(PROF.deck.filter(n => CARD[n] && (!CARD[n].legendary || legendOpen(CARD[n]))).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral').map(c => c.name)));
 }
 const tribesOf = c => [c.tribe, c.tribe2].filter(Boolean);
 const inTribe = (c, t) => tribesOf(c).includes(t);
@@ -280,7 +279,7 @@ function deckToggle(c) {
     for (const t of tribesOf(c)) if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length <= 1) return 'last';
     PROF.deck = PROF.deck.filter(n => n !== c.name);
   } else {
-    if (c.legendary && !legendsOpen()) return 'locked';
+    if (c.legendary && !legendOpen(c)) return 'locked';
     for (const t of tribesOf(c)) {
       if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length >= PER_TIER) return 'full';
       if (c.legendary && CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name))) return 'legend';
@@ -301,10 +300,10 @@ function showCards(tribe = 'Hustler') {
     const st = body.scrollTop; body.innerHTML = ''; const d = deckSet(), neutral = tribe === 'Neutral';
     const all = CARDS_ALL().filter(c => inTribe(c, tribe));
     const addCard = (c, row) => {
-      const on = neutral || d.has(c.name), locked = c.legendary && !legendsOpen();
+      const on = neutral || d.has(c.name), locked = c.legendary && !legendOpen(c);
       const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
       if (on && !neutral) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-      if (locked) el('span', 'lock', LOCK, w);
+      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', `Rewards Lv ${RT_LEG_LV[c.name] || ''}`, w); }
       w.onclick = () => showDetail(c, null, neutral || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
         const r = deckToggle(c);
         if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
@@ -316,7 +315,7 @@ function showCards(tribe = 'Hustler') {
     };
     if (!neutral) {   // legendaries first, in their own row; they still take a slot in their tier
       const lg = all.filter(c => c.legendary), on = lg.filter(c => d.has(c.name)).length;
-      const row = el('div', 'tierrow legrow', `<div class="tierlab"><span class="gem${on ? ' on' : ''}"></span>${legendsOpen() ? '' : `<b class="legat">${LEGEND_AT.toLocaleString('en')}</b>`}</div>`, body);
+      const row = el('div', 'tierrow legrow', `<div class="tierlab"><span class="gem${on ? ' on' : ''}"></span></div>`, body);
       for (const c of lg) addCard(c, row);
     }
     for (let t = 1; t <= 6; t++) {
@@ -333,8 +332,7 @@ function showCards(tribe = 'Hustler') {
 }
 // New legendary cards: one pop-up per newly unlocked batch, with a three-step tutorial the first time.
 function legendPopup() {
-  if (!legendsOpen()) return;
-  const seen = PROF.legSeen || [], fresh = LEGENDS().filter(c => !seen.includes(c.name)); if (!fresh.length) return;
+  const seen = PROF.legSeen || [], fresh = LEGENDS().filter(c => legendOpen(c) && !seen.includes(c.name)); if (!fresh.length) return;
   PROF.legSeen = seen.concat(fresh.map(c => c.name)); const first = !PROF.flags.legendTut; PROF.flags.legendTut = true; saveProfile();
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.85)';
   const head = el('p', 'ab bd', 'New legendary cards!', ov); css(head, {left: 0, right: 0, top: 14, margin: 0, textAlign: 'center', fontSize: '34px', color: '#ffc928', webkitTextStroke: '2px #2b2140'});
@@ -381,7 +379,7 @@ function showHeroCard(slug) {
 
 // ---------------------------------------------------------------- hero select
 function showHeroSelect() {
-  clear(); G.screen = 'heroes'; bg(false); G.rated = false; AU.music('hold');
+  clear(); G.screen = 'heroes'; bg(false); G.rated = false; G.xpGain = 0; AU.music('hold');
   const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
   G.seed = seed;
   const rng = E.RNG(seed);
@@ -442,7 +440,7 @@ const LAYOUTS = {
     arc: 3, sellMaxY: 140, boardMinY: {feed: 172, other: 158}, boardMaxY: 270, handTop: 268, hand: {cx: 465, spread: 470, w: 84, max: 92},
     cTop: [72, 200], cY: [86, 214], cx0: 114, cw: 616},
   // Fat Finger Mode: four bands, no overlaps. Lobby strip 4-38 (plus Tribes and Menu), Feed 42-146, board 152-256, hand 262-390.
-  // Hero, Level Up and Hero Power sit left of the hand; Gold, Scroll, Save and Ready on the right rail (x >= 750).
+  // Hero, Promote and Hero Power sit left of the hand; Gold, Scroll, Save and Ready on the right rail (x >= 750).
   ff: {ff: true, tok: 88, x0: 8, w: 728, feedY: 50, boardY: 160, handY: 262, arc: 1, fgap: 28, bgap: 20, feedTop: 42, boardTop: 152, rowH: 104,
     sellMaxY: 146, boardMinY: {feed: 160, other: 148}, boardMaxY: 258, handTop: 260, hand: {cx: 489, avail: 454, w: 96, max: 100},
     cTop: [86, 214], cY: [94, 222], cx0: 100, cw: 736},
@@ -523,7 +521,7 @@ function renderChrome() {
     (lc === null ? '<span class="ab" style="left:0;right:0;top:52px;text-align:center;font-size:13px;letter-spacing:.12em">MAX TIER</span>' :
     `<span class="ab" style="left:0;right:0;top:40px;text-align:center;font-size:11px;letter-spacing:.1em">LEVEL UP</span><span class="ab" style="left:19px;top:56px;width:54px;height:28px;background:#fff;border:2.5px solid #2b2140;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:4px">${ico('<circle cx="12" cy="12" r="10" fill="#2ecb6e"></circle><path d="M12 17V7.5M7.8 11.5L12 7.3l4.2 4.2"></path>', 18, 2.6)}<span class="coin" style="position:static;width:21px;height:21px;font-size:12px;box-shadow:none">${lc}</span></span>`);
   S.shield.classList.toggle('off', lc !== null && me.gold[0] < lc);
-  S.shield.setAttribute('aria-label', lc === null ? `Tier ${me.tier}, max` : `Tier ${me.tier}. Level up for ${lc} gold`);
+  S.shield.setAttribute('aria-label', lc === null ? `Tier ${me.tier}, max` : `Tier ${me.tier}. Promote for ${lc} gold`);
   // gold
   S.gold.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#2b2140" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#ffc928"></circle><circle cx="12" cy="12" r="5" stroke="#d99a12" stroke-width="2.4"></circle></svg><span style="padding-top:3px">${me.gold[0]}</span>`;
   S.bonus.style.display = me.bonus_next ? 'block' : 'none'; S.bonus.textContent = `+${me.bonus_next} next turn`;
@@ -772,7 +770,7 @@ function toggleSave() {
 async function levelUp() {
   if (G.busy) return; const me = G.me, lc = me.levelCost();
   if (lc === null) return;
-  if (me.gold[0] < lc) { shake(S.shield); toast(`Level up costs ${lc} gold`); return; }
+  if (me.gold[0] < lc) { shake(S.shield); toast(`Promoting costs ${lc} gold`); return; }
   me.gold[0] -= lc; me.gainSpend(lc); me.tier += 1; me.turns_at_tier = 0; goldTick(-lc); RUN.act('level');
   if (me.tier === 6) { PROF.flags.tier6 = true; checkUnlocks(); }
   sfx('levelup'); AU.intensity(tierLevel());
@@ -1470,6 +1468,7 @@ function showEnd() {
     PROF.rating = after; PROF.peak = Math.max(PROF.peak, after); PROF.games++; if (me.place <= 4) PROF.top4++; if (me.place === 1) PROF.wins++;
     if (me.place <= 4 && (G.minHealth ?? 99) <= 10) PROF.flags.comeback = true;
     PROF.history.push(Object.assign({t: Date.now(), hero: G.heroSlug, place: me.place, d: after - before}, RUN.summary())); PROF.history = PROF.history.slice(-3000); RUN.end(me.place, after - before);
+    G.xpGain = rtAwardRun(me.place);
     checkUnlocks();
   }
   const p = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">${me.conceded ? 'CONCEDED' : 'RUN OVER'} · ROUND ${L.turn}</p>
@@ -1491,7 +1490,7 @@ function showEnd() {
   cnt.style.display = 'inline-block';
   const bA = bracketOf(before), bB = bracketOf(after);
   const right = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">RATING</p>
-    <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px"><span class="bd rnum" style="font-size:36px">${before.toLocaleString('en')}</span><span class="bd" style="font-size:22px;color:${delta >= 0 ? '#14a052' : '#ff6b5e'}">${delta >= 0 ? '+' : '−'}${Math.abs(delta)}</span></div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px"><span class="bd rnum" style="font-size:36px">${before.toLocaleString('en')}</span><span class="bd" style="font-size:22px;color:${delta >= 0 ? '#14a052' : '#ff6b5e'}">${delta >= 0 ? '+' : '−'}${Math.abs(delta)}</span>${G.xpGain ? `<span class="rt-xpchip">+${G.xpGain} XP</span>` : ''}</div>
     <div class="rcw" style="margin-top:4px"></div>
     <p class="bd" style="margin:12px 0 0;font-size:13px;letter-spacing:.12em;color:#5a5270">YOUR FINAL BOARD</p><div class="fb" style="position:relative;height:84px;margin-top:10px"></div>`, stage);
   css(right, {left: 430, top: 22, width: 384, height: 266, padding: '18px 22px'});
@@ -1504,10 +1503,10 @@ function showEnd() {
   me.board.forEach((m, i) => { const t = makeToken(m); fb.appendChild(t); css(t, {left: i * 49 + 2, top: 4}); t.style.transform = 'scale(.68)'; t.style.transformOrigin = 'top left'; });
   const again = el('button', 'btn', 'Play again', stage); css(again, {left: 438, top: 314, width: 176, height: 48, background: '#2ecb6e', fontSize: '21px'}); again.onclick = showHeroSelect;
   const menu = el('button', 'btn', 'Main menu', stage); css(menu, {left: 634, top: 314, width: 172, height: 48, fontSize: '18px'}); menu.onclick = showTitle;
-  if (NEW_UNLOCKS.length) setTimeout(() => showUnlocks(NEW_UNLOCKS.splice(0)), 1400);
+  if (NEW_UNLOCKS.length) setTimeout(() => showUnlocks(NEW_UNLOCKS.splice(0)), 1400); else setTimeout(rtAfterRun, 1600);
 }
 function showUnlocks(list) {
-  if (!list.length) return;
+  if (!list.length) { rtAfterRun(); return; }
   const slug = list.shift(), h = HERO[slug];
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.8)';
   const head = el('div', 'ab bd', '<span style="display:inline-block;background:#ffc928;border:3px solid #2b2140;border-radius:999px;padding:6px 18px 2px;box-shadow:0 0 0 3px #fff;font-size:22px">New hero unlocked!</span>', ov); css(head, {left: 0, right: 0, top: 14, textAlign: 'center'});
@@ -1517,6 +1516,224 @@ function showUnlocks(list) {
   ov.onpointerup = () => { ov.remove(); showUnlocks(list); };
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup()}};
+// ---------------------------------------------------------------- rewards track: runs give XP, XP levels up the track, levels unlock cards
+// The order of the 45 levels is explained in docs/card-plan-v14.md. Cards that are not in the game yet show as "?" placeholders.
+const RT_XP_PLACE = [110, 95, 85, 75, 60, 50, 45, 40];          // XP for finishing 1st..8th
+const rtCost = lv => 200 + 20 * (lv - 1);                        // XP needed for level lv: 200 … 1,080 (about 410 runs in all)
+const RT_TRACK = (() => {
+  const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher', N = 'Neutral';
+  const two = (tribe, a, ta, b, tb) => ({tribe, cards: [{name: a, tribe, tier: ta}, {name: b, tribe, tier: tb}]});
+  const leg = (name, tribe, tribe2, tier) => ({tribe, legend: true, cards: [{name, tribe, tribe2, tier, legendary: true}]});
+  const set = [['The Billionaire', H, 5], ['Cancelled Celebrity', I, 4], ['Apex Scavenger', F, 5], ['Pop Diva', C, 5], ['The Algorithm', T, 5], ['Mohawk Legend', P, 5], ['Renaissance Thinker', PH, 4]];
+  const L = [
+    two(H, 'Performance Review', 2, 'Loyalty Card', 3), two(I, 'Thirst Trap', 2, 'Bot Farm', 3), two(F, 'Magpie', 2, 'Allotment', 3),
+    two(C, 'Ghostwriter', 2, 'Encore', 3), two(T, 'Bluetooth Speaker', 2, 'Clutch Player', 3), two(P, 'Gig Poster', 2, 'Banner Drop', 3),
+    two(PH, 'Breathwork Coach', 2, 'Debate Club', 3),
+    two(H, 'Delivery Rider', 1, 'Five-Star Rating', 2), two(H, 'Task Rabbit', 3, 'Double Shift', 4),
+    {set: true, legend: true, cards: set.map(([name, tribe, tier]) => ({name, tribe, tier, legendary: true}))},
+    two(H, 'Ghost Kitchen', 5, 'Platform Monopoly', 6),
+    two(I, 'Reaction Streamer', 1, 'Donation Goal', 2), two(I, 'Raid Party', 3, 'Subathon', 4), two(I, 'Hype Train', 5, 'Streamer House', 6),
+    two(H, 'Cashback Card', 4, 'Recruitment Agency', 5), two(I, 'Paid Verification', 4, 'Fan Convention', 5),
+    leg('Tech Founder', H, T, 4),
+    two(F, 'Tulip Bulb', 1, 'Hedgehog', 2), two(F, 'Bat Colony', 3, 'Hibernating Bear', 4), two(F, 'Cicada Swarm', 5, 'Seed Vault', 6),
+    leg('Wise Old Owl', F, PH, 5),
+    two(T, 'Pop-Up Ad', 1, 'Battle Pass', 2), two(T, 'Data Broker', 3, 'Auto-Renewal', 4), two(T, 'App Store', 5, 'Data Centre', 6),
+    leg('Sponsored Streamer', I, T, 5),
+    two(F, 'Fox Den', 4, 'Botanical Garden', 5), two(T, 'LAN Party', 4, 'Smart Doorbell', 5),
+    two(P, 'Pogo Dancer', 1, 'Circle Pit', 2),
+    leg('Pension Fund', H, F, 5),
+    two(P, 'Bouncer', 3, 'Crowd Surfer', 4), two(P, 'Wall of Death', 5, 'Festival Pit', 6),
+    two(P, 'Bootleg Merch', 4, 'Sound System', 5),
+    leg('Punk Philosopher', P, PH, 5),
+    two(PH, 'Van Lifer', 1, 'Digital Detox', 2), two(PH, 'Declutter Coach', 3, 'Silent Retreat', 4), two(PH, 'Capsule Wardrobe', 5, 'The Void', 6),
+    leg('Startup Monk', T, PH, 6),
+    two(PH, 'Tenured Professor', 4, 'TED Talk', 5), two(N, 'Parcel Locker', 3, 'Neighbourhood Watch', 5),
+    two(C, 'Wedding Band', 1, 'Sampler', 2),
+    leg('Content Creator', I, C, 4),
+    two(C, 'Tribute Act', 3, 'Plagiarist', 4), two(C, 'AI Art Generator', 5, 'Mashup Artist', 6),
+    two(C, 'Biopic', 4, 'Crossover Hit', 5),
+    leg('Cover Band', C, P, 5),
+  ];
+  return L.map((r, i) => Object.assign(r, {lv: i + 1, cost: rtCost(i + 1)}));
+})();
+const RT_LEVELS = RT_TRACK.length;
+const RT_LEG_LV = {};   // legendary card -> track level that unlocks it
+for (const r of RT_TRACK) if (r.legend) for (const c of r.cards) RT_LEG_LV[c.name] = r.lv;
+/** Level and progress for a total XP amount. */
+function rtProgressOf(total) {
+  let level = 0, xp = total;
+  while (level < RT_LEVELS && xp >= rtCost(level + 1)) { xp -= rtCost(level + 1); level++; }
+  return {level, xp: level < RT_LEVELS ? xp : 0, need: level < RT_LEVELS ? rtCost(level + 1) : 0};
+}
+const rtProgress = () => rtProgressOf(PROF.xp || 0);
+const rtLevel = () => rtProgress().level;
+// Profiles from before the track get the XP their past runs would have earned, without replaying every level-up.
+if (PROF.xp == null) { PROF.xp = (PROF.history || []).reduce((s, h) => s + (RT_XP_PLACE[(h.place || 8) - 1] || 40), 0); PROF.rtSeen = rtLevel(); saveProfile(); }
+/** Legendaries open from the track; profiles that reached 1,000 rating before the track keep them all. */
+const legendOpen = c => PROF.peak >= LEGEND_AT || PROF.rating >= LEGEND_AT || rtLevel() >= (RT_LEG_LV[c.name] || 99);
+const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
+const tribeName = t => t === 'Neutral' ? 'Neighbours' : TP[t] || t;
+const rtTitle = r => r.set ? 'Legendaries for every tribe' : r.legend ? r.cards[0].name : r.cards.map(c => c.name).join(' & ');
+const rtSub = r => r.set ? 'Legendary' : r.legend ? `Legendary · ${r.cards[0].tribe} + ${r.cards[0].tribe2}` : tribeName(r.tribe);
+const rtReal = c => CARD[c.name] && !CARD[c.name].token;   // the card exists in the game already
+
+// ---- scenery: three small props per stop, themed after the tribe it unlocks
+const RT_PROPS = (() => {
+  const g = s => `<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="#2b2140" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`;
+  return {
+    Hustler: [
+      g('<rect x="16" y="6" width="32" height="54" rx="3" fill="#b8ecc9"/><path d="M24 14h4M36 14h4M24 24h4M36 24h4M24 34h4M36 34h4"/><rect x="27" y="46" width="10" height="14" fill="#14a052"/>'),
+      g('<path d="M12 44v8c0 4 9 7 20 7s20-3 20-7v-8" fill="#e0a800"/><ellipse cx="32" cy="44" rx="20" ry="7" fill="#ffc928"/><path d="M18 30v8c0 4 6 6 14 6s14-2 14-6v-8" fill="#e0a800"/><ellipse cx="32" cy="30" rx="14" ry="6" fill="#ffc928"/>'),
+      g('<path d="M24 22v-6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6" fill="none"/><rect x="8" y="22" width="48" height="34" rx="6" fill="#a0694a"/><path d="M8 36h48"/><rect x="28" y="32" width="8" height="8" rx="2" fill="#ffc928"/>')],
+    Influencer: [
+      g('<rect x="18" y="4" width="28" height="56" rx="7" fill="#fff"/><path d="M32 42c-7-5-11-8-11-13a5.5 5.5 0 0 1 11-2 5.5 5.5 0 0 1 11 2c0 5-4 8-11 13z" fill="#ff6b5e"/><path d="M28 10h8"/>'),
+      g('<path d="M32 42v18M22 60h20"/><circle cx="32" cy="24" r="18" fill="none" stroke-width="10"/><circle cx="32" cy="24" r="18" fill="none" stroke="#fff6c2" stroke-width="4"/>'),
+      g('<path d="M6 10h52v30H28l-11 11V40H6z" fill="#ff8ab8"/><path d="M32 33c-5-3-8-6-8-9a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 3-3 6-8 9z" fill="#fff" stroke-width="2.5"/>')],
+    Feral: [
+      g('<path d="M32 60V36" stroke-width="6"/><circle cx="32" cy="25" r="20" fill="#9bd65a"/><circle cx="24" cy="20" r="4" fill="#d4e24a" stroke="none"/><circle cx="40" cy="30" r="3" fill="#d4e24a" stroke="none"/>'),
+      g('<path d="M5 58c-2-10 6-17 13-14 2-9 15-11 19-2 9-4 20 3 17 11 6 2 6 5 4 5z" fill="#7cc24a"/><circle cx="22" cy="48" r="2.5" fill="#ff6b5e" stroke="none"/><circle cx="40" cy="44" r="2.5" fill="#ff6b5e" stroke="none"/>'),
+      g('<path d="M22 16l-4-10 9 6M42 16l4-10-9 6" fill="#9aa7b8"/><path d="M14 22h36l-4 38H18z" fill="#9aa7b8"/><rect x="10" y="14" width="44" height="9" rx="3" fill="#6f7d92"/><path d="M27 30v22M37 30v22"/>')],
+    Creative: [
+      g('<path d="M20 61l12-50 12 50M25 50h14" fill="none"/><rect x="10" y="8" width="44" height="32" rx="3" fill="#fff"/><path d="M16 34l9-11 6 6 7-9 10 14z" fill="#b18cff"/><circle cx="44" cy="16" r="3" fill="#ffc928"/>'),
+      g('<path d="M24 46V13l26-7v34" fill="none" stroke-width="4"/><ellipse cx="17" cy="47" rx="9" ry="7" fill="#b18cff"/><ellipse cx="43" cy="41" rx="9" ry="7" fill="#b18cff"/>'),
+      g('<path d="M32 8C16 8 6 20 6 32s10 24 22 24c6 0 7-6 3-10s0-8 6-8h10c8 0 12-6 12-12C59 16 46 8 32 8z" fill="#ffe08a"/><circle cx="19" cy="27" r="4.5" fill="#ff6b5e"/><circle cx="31" cy="18" r="4.5" fill="#5ab8ff"/><circle cx="44" cy="23" r="4.5" fill="#2ecb6e"/>')],
+    Techie: [
+      g('<path d="M18 34V12M46 34V12"/><path d="M23 24a13 13 0 0 1 18 0M27.5 29a6 6 0 0 1 9 0" fill="none"/><rect x="8" y="34" width="48" height="20" rx="6" fill="#5ab8ff"/><circle cx="18" cy="44" r="2.5" fill="#2ecb6e"/><circle cx="27" cy="44" r="2.5" fill="#2ecb6e"/>'),
+      g('<path d="M8 14a30 30 0 0 0 40 40z" fill="#e8f4ff"/><path d="M28 34l15-15"/><circle cx="45" cy="17" r="4.5" fill="#5ab8ff"/><path d="M26 61h22l-5-10H31z" fill="#9aa7b8"/>'),
+      g('<rect x="16" y="4" width="32" height="56" rx="4" fill="#3d4a66"/><path d="M16 22h32M16 40h32M30 13h12M30 31h12M30 49h12"/><circle cx="23" cy="13" r="2.5" fill="#2ecb6e"/><circle cx="23" cy="31" r="2.5" fill="#ffc928"/><circle cx="23" cy="49" r="2.5" fill="#2ecb6e"/>')],
+    Punk: [
+      g('<rect x="10" y="8" width="44" height="52" rx="5" fill="#3a3045"/><circle cx="32" cy="38" r="14" fill="#6a5d7a"/><circle cx="32" cy="38" r="5" fill="#2b2140"/><path d="M16 17h10M38 17h2M44 17h2" stroke="#ff8a3d"/>'),
+      g('<rect x="21" y="20" width="22" height="40" rx="6" fill="#ff8a3d"/><rect x="27" y="11" width="10" height="9" rx="2" fill="#fff"/><path d="M45 12l7-4M46 17h8M45 22l7 4"/><path d="M21 34h22" /><path d="M27 42l4 8 4-6 3 5" stroke="#fff" stroke-width="2.5" fill="none"/>'),
+      g('<rect x="6" y="16" width="52" height="42" rx="2" fill="#e8b89c"/><path d="M6 30h52M6 44h52M22 16v14M42 16v14M32 30v14M16 44v14M48 44v14"/><path d="M34 18l-10 18h10l-6 18 16-24H34l6-12z" fill="#ffc928" stroke-width="2.5"/>')],
+    Philosopher: [
+      g('<rect x="12" y="6" width="40" height="9" rx="2" fill="#fff"/><rect x="17" y="15" width="30" height="37" fill="#e3f8f5"/><path d="M25 17v33M32 17v33M39 17v33"/><rect x="10" y="52" width="44" height="9" rx="2" fill="#fff"/>'),
+      g('<rect x="10" y="46" width="46" height="12" rx="2" fill="#4fd1c5"/><rect x="14" y="34" width="40" height="12" rx="2" fill="#ff8ab8"/><rect x="8" y="22" width="42" height="12" rx="2" fill="#ffc928"/><path d="M14 22l4-14 6 14" fill="#fff"/>'),
+      g('<path d="M32 4a17 17 0 0 0-10 30c3 3 4 6 4 10h12c0-4 1-7 4-10A17 17 0 0 0 32 4z" fill="#fff1a6"/><path d="M26 50h12M28 57h8M27 26l5 6 5-6"/>')],
+    Neutral: [
+      g('<path d="M8 30L32 10l24 20v30H8z" fill="#f2ead9"/><rect x="27" y="40" width="11" height="20" fill="#c88a5a"/><rect x="14" y="34" width="9" height="9" fill="#8fd4ff"/><rect x="42" y="34" width="9" height="9" fill="#8fd4ff"/>'),
+      g('<path d="M8 60V30l5-6 5 6v30M26 60V30l5-6 5 6v30M44 60V30l5-6 5 6v30" fill="#fff"/><path d="M4 38h56M4 50h56"/>'),
+      g('<rect x="14" y="20" width="36" height="40" rx="3" fill="#ffc928"/><path d="M14 32h36M32 20v40"/><path d="M24 20l8-10 8 10" fill="#ff8ab8"/>')],
+    Legend: [
+      g('<path d="M20 8h24v15a12 12 0 0 1-24 0z" fill="#ffc928"/><path d="M20 13h-8c0 8 4 12 10 13M44 13h8c0 8-4 12-10 13" fill="none"/><path d="M32 35v10"/><path d="M22 60h20l-3-15H25z" fill="#e0a800"/>'),
+      g('<path d="M32 4l8 17 19 3-14 13 4 19-17-9-17 9 4-19L5 24l19-3z" fill="#ffd84a"/>'),
+      g('<path d="M10 60l14-44h16l14 44z" fill="#fff6c2" stroke-dasharray="4 5"/><rect x="20" y="6" width="24" height="12" rx="4" fill="#3a3045"/>')],
+  };
+})();
+const RT_GROUND = {Hustler: '#bfe9cd', Influencer: '#ffd3e4', Feral: '#e6efa6', Creative: '#ddd0ff', Techie: '#c6e5ff', Punk: '#ffd2b3', Philosopher: '#bdeee9', Neutral: '#efe7d7', Legend: '#ffeaa0'};
+
+const RT_SIL = '<svg class="rt-sil" viewBox="0 0 68 68" aria-hidden="true"><circle cx="34" cy="27" r="13"/><path d="M7 72c2-17 13-26 27-26s25 9 27 26z"/></svg>';
+const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
+function rtTok(c, state, o = {}) {
+  const real = rtReal(c), t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
+  t.style.background = c.tribe2 ? `linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[c.tribe2]} 50%)` : TC[c.tribe];
+  t.innerHTML = `<div class="clip">${real ? `<img src="${artOf(c.name)}" alt="" draggable="false">` : RT_SIL + '<span class="rt-q">?</span>'}${c.legendary ? '<i class="foil"></i>' : ''}</div>`
+    + (c.tier && !o.noStars ? `<div class="tier">${STAR(13).repeat(c.tier)}</div>` : '')
+    + (state === 'done' && !o.noTick ? `<span class="rt-got">${RT_TICK}</span>` : '');
+  t.setAttribute('role', 'button'); t.setAttribute('aria-label', c.name);
+  t.onclick = e => { e.stopPropagation(); if (real) showDetail(CARD[c.name], null); else { sfx('pop'); toast(`${c.name}: coming in a future update`); } };
+  return t;
+}
+function rtToks(r, st, parent) {
+  const box = el('div', 'rt-toks' + (r.set ? ' fan' : ''), '', parent);
+  if (r.set) r.cards.forEach((c, i) => { const t = rtTok(c, st, {noStars: true, noTick: true}); t.style.zIndex = 10 - Math.abs(i - 3); t.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 3}px)`; box.appendChild(t); });
+  else r.cards.forEach(c => box.appendChild(rtTok(c, st)));
+  return box;
+}
+const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
+
+function showTrack() {
+  clear(); G.screen = 'rewards'; bg(true); AU.music('hold');
+  collectionTabs('rewards');
+  const P = rtProgress(), done = P.level >= RT_LEVELS, nxt = RT_TRACK[Math.min(P.level, RT_LEVELS - 1)];
+  PROF.rtSeen = Math.max(PROF.rtSeen || 0, P.level); saveProfile();
+  const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
+  side.innerHTML = `<div class="rt-lvl"><span class="bd">${P.level}</span></div><p class="bd rt-lvlt">Level ${P.level}<small>of ${RT_LEVELS}</small></p>
+    ${rtXpBar(P, 186)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} … 8th +${RT_XP_PLACE[7]} XP</p>
+    <p class="rt-cap">${done ? 'All levels done' : `Next: Level ${nxt.lv}`}</p><div class="rt-nextrow"></div><p class="rt-nextl">${rtTitle(nxt)}<br><span>${rtSub(nxt)}</span></p>`;
+  rtToks(nxt, done ? 'done' : 'next', side.querySelector('.rt-nextrow'));
+  const p = el('div', 'panel rt-roadp', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
+  const body = el('div', 'rt-scroll', '', p);
+  const ROW = 150, TOP = 132, XL = 214, XR = 326, Wd = 540, Hd = TOP + (RT_LEVELS - 1) * ROW + 90;
+  const pos = r => r.lv ? [r.lv % 2 ? XL : XR, TOP + (r.lv - 1) * ROW] : [XL, 58];   // level 0 = the start, just above level 1
+  const inner = el('div', 'rt-inner', '', body); css(inner, {width: Wd, height: Hd});
+  const seg = (a, b) => { const [x1, y1] = pos(a), [x2, y2] = pos(b); return `M${x1} ${y1}C${x1} ${y1 + ROW * .62} ${x2} ${y2 - ROW * .62} ${x2} ${y2}`; };
+  let all = '', path = '';
+  for (let i = 0; i < RT_TRACK.length - 1; i++) { const s = seg(RT_TRACK[i], RT_TRACK[i + 1]); all += s; if (i + 1 < P.level) path += s; }
+  // the start of the road leads in from the top; level 0 sits just above level 1
+  const start = {lv: 0}, first = seg(start, RT_TRACK[0]);
+  const part = P.level === 0 ? first : done ? '' : seg(RT_TRACK[P.level - 1], RT_TRACK[P.level]), frac = P.need ? P.xp / P.need : 1;
+  for (const r of RT_TRACK) {   // scenery goes in first, under the road
+    const [x, y] = pos(r), left = r.lv % 2, key = r.legend ? 'Legend' : r.tribe, set = RT_PROPS[key], st = rtState(r, P.level);
+    const sc = el('div', `rt-scene ${st}`, '', inner);
+    css(sc, left ? {left: x + 48, top: y - 74} : {left: x - 48 - 200, top: y - 74});
+    const [a, b, c] = [0, 1, 2].map(k => set[(r.lv + k) % 3]), side = left ? 'left' : 'right';
+    sc.innerHTML = `<i class="rt-ground" style="background:${RT_GROUND[key]}"></i><span class="pr big" style="${side}:30px">${a}</span><span class="pr mid" style="${side}:96px">${b}</span><span class="pr small" style="${side}:148px">${c}</span>`;
+  }
+  inner.insertAdjacentHTML('beforeend', `<svg class="rt-road" width="${Wd}" height="${Hd}" aria-hidden="true">
+    <path d="${first + all}" class="r0"/><path d="${first + all}" class="r1"/><path d="${first + all}" class="r2"/>
+    <path d="${P.level ? first + path : ''}" class="r3"/>${part ? `<path d="${part}" class="r3" pathLength="1" stroke-dasharray="${frac} 2"/><path d="${part}" class="rpart" style="display:none"/>` : ''}</svg>`);
+  for (const r of RT_TRACK) {
+    const [x, y] = pos(r), st = rtState(r, P.level), left = r.lv % 2;
+    const n = el('div', `rt-node ${st}${r.legend ? ' leg' : ''}${r.set ? ' set' : ''}`, `<span class="bd">${r.lv}</span>`, inner);
+    css(n, {left: x, top: y}); if (st === 'done' && !r.legend) n.style.background = TC[r.tribe];
+    if (st === 'done') el('i', 'rt-ok', RT_TICK, n);
+    const g = el('div', `rt-grp ${left ? 'l' : 'r'} ${st}`, '', inner); css(g, left ? {right: Wd - x + 46, top: y - 50} : {left: x + 46, top: y - 50});
+    rtToks(r, st, g);
+    el('p', 'rt-glab', `<b>${rtTitle(r)}</b><span>${rtSub(r)}</span>`, g);
+  }
+  // your hero rides the road like a board-game peg
+  const pe = inner.querySelector('.rpart'), [ex, ey] = pos(RT_TRACK[RT_LEVELS - 1]);
+  let pt = {x: ex, y: ey};
+  if (pe) { pe.style.display = ''; pt = pe.getPointAtLength(pe.getTotalLength() * frac); pe.style.display = 'none'; }
+  const hero = HERO[G.heroSlug] || HERO[PROF.unlocked[0]] || HEROES[0];
+  const peg = el('div', 'rt-peg', `<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>${P.need ? `<span class="bd">${P.xp}/${P.need}</span>` : ''}`, inner);
+  css(peg, {left: pt.x, top: pt.y});
+  anim(peg.firstChild, [{translate: '0 0'}, {translate: '0 -5px'}, {translate: '0 0'}], {duration: 1400, iterations: Infinity, easing: 'ease-in-out', raw: true});
+  body.scrollTop = Math.max(0, (P.level ? pos(RT_TRACK[P.level - 1])[1] : 0) - 74);
+}
+
+// ---------------------------------------------------------------- reward moment, after the end screen: one pop-up per new level
+function rtCardHTML(c) {
+  if (rtReal(c)) return cardHTML(CARD[c.name]);
+  const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();
+  const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${TC[tr]} 50%,${TC[c.tribe2]} 50%)` : `background-color:${TC[tr]}`;
+  return `<div class="card rt-card${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}">${RT_SIL}<span class="rt-q">?</span></div>${c.legendary ? '<i class="foil"></i>' : ''}
+    <p class="nm" style="font-size:${c.name.length > 15 ? 17 : 21}px">${c.name}</p><div class="meta"><span class="trb" style="background:${TC[tr]}">${lab}</span>${c.tier ? fmtStars(c.tier, 16) : ''}</div>
+    <p class="txt" style="font-size:14px;color:#8f86a6">Coming in a future update.</p><div class="sa">?</div><div class="sh">?</div></div>`;
+}
+function rtLevelUp(lv, onDone) {
+  const r = RT_TRACK[lv - 1], P = rtProgress();
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.84)';
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level up! Level ${lv}</span>`, ov); css(head, {left: 0, right: 0, top: 12, textAlign: 'center'});
+  const sub = el('p', 'ab bd', r.set ? 'A legendary card for every tribe' : rtSub(r), ov); css(sub, {left: 0, right: 0, top: 62, margin: 0, textAlign: 'center', color: '#fff', fontSize: '19px'});
+  if (r.set) {
+    const fan = el('div', 'ab legfan', '', ov); css(fan, {left: 0, right: 0, top: 96, height: 180});
+    r.cards.forEach((c, i) => { const w = el('div', 'logcard', rtCardHTML(c), fan); w.style.marginLeft = i ? '-58px' : '0'; w.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 4}px)`; anim(w, [{opacity: 0, transform: 'translateY(60px) scale(.6)'}, {opacity: 1}], {duration: 380, delay: 90 * i, fill: 'backwards', raw: true}); });
+  } else r.cards.forEach((c, i) => {
+    const w = el('div', 'ab rt-flip', `<div class="rt-back"><span class="bd">LATE<br>STAGE</span></div><div class="rt-front">${rtCardHTML(c)}</div>`, ov);
+    const n = r.cards.length, x = 422 - 120 + (i - (n - 1) / 2) * 186;
+    css(w, {left: x, top: 92}); w.style.setProperty('--rot', `${(i - (n - 1) / 2) * 6}deg`);
+    anim(w, [{transform: 'translateY(260px) rotate(-20deg) scale(.5)', opacity: 0}, {transform: `translateY(0) rotate(var(--rot)) scale(.58)`, opacity: 1}], {duration: 420, delay: 200 + i * 140, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    w.style.transform = `rotate(var(--rot)) scale(.58)`;
+    setTimeout(() => { w.classList.add('on'); sfx('pop'); }, 900 + i * 260);
+  });
+  const bar = el('div', 'ab rt-gain', `${rtXpBar(P, 280)}`, ov); css(bar, {left: 0, right: 0, top: 308});
+  const ok = el('button', 'btn', 'Nice!', ov); css(ok, {left: 300, top: 342, width: 120, height: 40, background: '#2ecb6e', fontSize: '20px'});
+  const tr = el('button', 'btn', 'See the track', ov); css(tr, {left: 436, top: 344, width: 150, height: 36, fontSize: '15px'});
+  setTimeout(() => confetti(422, 120, 40), 900); sfx('unlock');
+  ok.onclick = () => { ov.remove(); onDone && onDone(); };
+  tr.onclick = () => { ov.remove(); showTrack(); };
+}
+/** After a run: XP for the placing, then a pop-up for each level not shown yet. */
+function rtAwardRun(place) { const g = RT_XP_PLACE[place - 1] || RT_XP_PLACE[7]; PROF.xp = (PROF.xp || 0) + g; return g; }
+function rtAfterRun() {
+  if (G.screen !== 'end') return;
+  const lvl = rtLevel(), seen = PROF.rtSeen || 0;
+  if (lvl <= seen) return;
+  PROF.rtSeen = seen + 1; saveProfile();
+  rtLevelUp(seen + 1, rtAfterRun);
+}
+
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack(), levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();
