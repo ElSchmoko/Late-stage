@@ -255,7 +255,7 @@ function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sf
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false); changelogButton(740, 12); statsButton(690, 12);
-  if (!(PROF.flags || {})[TOUR_FLAG]) setTimeout(() => G.screen === 'title' && showTour(), 600); else setTimeout(legendPopup, 500);
+  if (!(PROF.flags || {})[TOUR_FLAG]) setTimeout(() => G.screen === 'title' && showTour(), 700); else setTimeout(legendPopup, 500);
   SEASON_NEW = false;
   const t = el('div', 'ab', `<h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 74, textAlign: 'center'});
@@ -371,44 +371,27 @@ function legendPopup() {
   go.onclick = () => { ov.remove(); showCards(fresh[0].tribe); }; later.onclick = () => ov.remove();
   sfx('triple');
 }
-// ---------------------------------------------------------------- what's new: the two tracks and the season reset (shown once to every player)
-const TOUR_FLAG = 'tourTracks1';
+// ---------------------------------------------------------------- what's new: a short walk through the two track screens (once per player)
+const TOUR_FLAG = 'tourTracks2';
+/** A small explainer bubble under a collection tab, with a pulsing ring on the tab. */
+function coach(tabIdx, html, label, onNext) {
+  const tab = stage.querySelectorAll('.colltabs .logtab')[tabIdx]; if (!tab) return;
+  const r = tab.getBoundingClientRect(), sr = stage.getBoundingClientRect(), k = sr.width / W;
+  const x = (r.left - sr.left) / k, y = (r.top - sr.top) / k, w = r.width / k, h = r.height / k;
+  const ring = el('div', 'ab coach-ring', '', stage); css(ring, {left: x - 6, top: y - 6, width: w + 12, height: h + 12});
+  const b = el('div', 'ab coach', `<i class="coach-tip" style="left:${Math.max(20, Math.min(236, x + w / 2 - Math.max(18, x - 10)))}px"></i>${html}<button class="btn coach-ok">${label}</button>`, stage);
+  css(b, {left: Math.max(18, x - 10), top: y + h + 14, width: 270});
+  anim(b, [{transform: 'translateY(-8px)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 260, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+  b.querySelector('.coach-ok').onclick = () => { sfx('pop'); ring.remove(); b.remove(); onNext(); };
+}
 function showTour() {
   PROF.flags = PROF.flags || {};
-  const hero = avatarHero(), back = PROF.games > 0;   // the reset page is only for players who played before it
-  const dot = c => `<i style="background:${c}"></i>`;
-  const pages = [
-    back && {cap: 'New season', title: 'A fresh start', art: `<div class="tour-reset"><div class="tour-zero"><span class="bd">0</span><small>rating</small></div>
-        <div class="tour-kept">${PROF.unlocked.slice(0, 4).map(sl => `<span class="av" style="background:${HERO[sl].col}"><img src="${ART[sl]}" alt=""></span>`).join('')}<b class="bd">Kept</b></div></div>`,
-      text: 'Everyone starts over: rating, unlocked cards and your Feed pool are back to day one.', bul: ['Your heroes stay unlocked', 'Old runs stay in your stats']},
-    {cap: 'Track 1', title: 'Levels', art: `<div class="tour-road"><svg width="200" height="150" viewBox="0 0 200 150" aria-hidden="true"><path d="M40 0C40 50 160 60 160 150" fill="none" stroke="#2b2140" stroke-width="34" stroke-linecap="round"/><path d="M40 0C40 50 160 60 160 150" fill="none" stroke="#fff" stroke-width="27" stroke-linecap="round"/><path d="M40 0C40 40 80 52 98 62" fill="none" stroke="#ffc928" stroke-width="16" stroke-linecap="round"/></svg>
-        <span class="tour-node bd" style="left:30px;top:16px">1</span><span class="tour-node bd lk" style="left:140px;top:110px">2</span>
-        <span class="tour-q" style="left:118px;top:20px;background:${TC.Hustler}">?</span><span class="tour-q" style="left:30px;top:96px;background:${TC.Influencer}">?</span><span class="rt-xpchip tour-xp">+110 XP</span></div>`,
-      text: 'Every run gives XP, more for a better place. Each level unlocks new cards for your tribes.', bul: ['36 levels, two cards each', 'Rewards stay a surprise until they are next']},
-    {cap: 'Track 2', title: 'Rating', art: `<div class="tour-night"><i class="moon"></i><div class="tour-city"></div><div class="tour-deck"></div><div class="tour-train">${RM_TRAIN}<span class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></span></div><span class="rm-sign bd tour-sign">${STAR(11)}1,000</span><i class="tour-beam"></i></div>`,
-      text: 'Legendaries now ride the night train. A new station every 500 rating, from 1,000 to 6,500.', bul: ['Your best rating this season counts', 'A dip never takes a legendary back']},
-    {cap: 'New', title: 'Your avatar', art: `<div class="tour-avs">${PROF.unlocked.slice(0, 3).map((sl, i) => `<span class="av${sl === hero.slug ? ' me' : ''}" style="background:${HERO[sl].col}"><img src="${ART[sl]}" alt="">${sl === hero.slug ? '<b class="avbadge bd">You</b>' : ''}</span>`).join('')}</div>`,
-      text: 'Pick the hero that stands for you on both tracks: Collection › Heroes › Use as avatar.', bul: ['Any unlocked hero', 'Change it whenever you like']},
-  ].filter(Boolean);
-  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.84)';
-  const p = el('div', 'panel tour', '', ov); css(p, {left: 112, top: 34, width: 620, height: 322});
-  let i = 0;
-  const done = () => { PROF.flags[TOUR_FLAG] = true; saveProfile(); ov.remove(); setTimeout(legendPopup, 300); };
-  const draw = dir => {
-    const pg = pages[i], last = i === pages.length - 1;
-    p.innerHTML = `<div class="tour-art">${pg.art}</div><div class="tour-txt"><p class="rt-cap">${pg.cap}</p><p class="bd tour-t">${pg.title}</p><p class="tour-p">${pg.text}</p>
-      <ul>${pg.bul.map(b => `<li>${b}</li>`).join('')}</ul></div>
-      <div class="tour-foot"><div class="tour-dots">${pages.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
-      ${i ? '<button class="btn tour-back">Back</button>' : '<button class="btn tour-skip">Skip</button>'}<button class="btn tour-next">${last ? "Let's go" : 'Next'}</button></div>`;
-    anim(p.querySelector('.tour-art'), [{transform: `translateX(${dir * 30}px)`, opacity: 0}, {transform: 'none', opacity: 1}], {duration: 260, easing: 'ease-out', raw: true});
-    anim(p.querySelector('.tour-txt'), [{transform: `translateX(${dir * 20}px)`, opacity: 0}, {transform: 'none', opacity: 1}], {duration: 260, delay: 40, fill: 'backwards', easing: 'ease-out', raw: true});
-    p.querySelector('.tour-next').onclick = () => { sfx('pop'); if (last) done(); else { i++; draw(1); } };
-    const bk = p.querySelector('.tour-back'); if (bk) bk.onclick = () => { sfx('pop'); i--; draw(-1); };
-    const sk = p.querySelector('.tour-skip'); if (sk) sk.onclick = () => { sfx('pop'); done(); };
-  };
-  draw(0);
-  anim(p, [{transform: 'translateY(30px) scale(.96)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 280, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
-  sfx('open');
+  const reset = PROF.games > 0 ? '<p class="coach-new">New season: rating and cards start over. Your heroes stay.</p>' : '';
+  showTrack('xp');
+  coach(0, `${reset}<p><b>Levels.</b> Every run gives XP. Each level unlocks new cards.</p>`, 'Next', () => {
+    showNightLine();
+    coach(1, '<p><b>Rating.</b> Legendaries unlock every 500 rating. Your best this season counts.</p>', 'Got it', () => { PROF.flags[TOUR_FLAG] = true; saveProfile(); });
+  });
 }
 function showCollection() {
   clear(); G.screen = 'collection'; bg(true); AU.music('hold');
@@ -1735,13 +1718,13 @@ const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
 /** A reward on the track. Locked rewards stay a mystery: only the tribe colour (or the legendary frame) shows;
  *  unlocked cards and the next level's cards show the real card. */
 function rtTok(c, state, o = {}) {
-  const show = rtReal(c) && (state === 'done' || state === 'next'), t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
+  const show = rtReal(c) && state === 'done', t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
   paintTribe(t, c.tribe, c.tribe2);
   t.innerHTML = `<div class="clip">${show ? `<img src="${artOf(c.name)}" alt="" draggable="false">` : RT_SIL + '<span class="rt-q">?</span>'}${c.legendary ? '<i class="foil"></i>' : ''}</div>`
     + (show && c.tier && !o.noStars ? `<div class="tier">${STAR(13).repeat(c.tier)}</div>` : '')
     + (state === 'done' && !o.noTick ? `<span class="rt-got">${RT_TICK}</span>` : '');
   t.setAttribute('role', 'button'); t.setAttribute('aria-label', show ? c.name : 'Mystery card');
-  t.onclick = e => { e.stopPropagation(); if (show) showDetail(CARD[c.name], null); else { sfx('pop'); toast(o.lv ? `A surprise, unlocked at level ${o.lv}` : 'A surprise'); } };
+  t.onclick = e => { e.stopPropagation(); if (show) showDetail(CARD[c.name], null); else { sfx('pop'); toast(o.lv ? `A surprise, unlocked at ${o.lv}` : 'A surprise'); } };
   return t;
 }
 /** Small label under a milestone: just the tribe, or the legendary. */
@@ -1751,12 +1734,15 @@ function rtTag(r) {
   const dot = r.legend && t2 ? `background:linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[t2]} 50%)` : r.set ? 'background:conic-gradient(#14a052,#ff8ab8,#d4e24a,#b18cff,#5ab8ff,#ff8a3d,#4fd1c5,#14a052)' : `background:${col}`;
   return `<span class="rt-tag${r.legend ? ' leg' : ''}"><i style="${dot}"></i>${r.legend ? 'Legendary' : tribeName(r.tribe)}</span>`;
 }
+const rtWhen = r => r.at ? `${r.at.toLocaleString('en')} rating` : `level ${r.lv}`;
 function rtToks(r, st, parent) {
   const box = el('div', 'rt-toks' + (r.set ? ' fan' : ''), '', parent);
-  if (r.set) r.cards.forEach((c, i) => { const t = rtTok(c, st, {noStars: true, noTick: true, lv: r.lv}); t.style.zIndex = 10 - Math.abs(i - 3); t.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 3}px)`; box.appendChild(t); });
-  else r.cards.forEach(c => box.appendChild(rtTok(c, st, {lv: r.lv})));
+  if (r.set) r.cards.forEach((c, i) => { const t = rtTok(c, st, {noStars: true, noTick: true, lv: rtWhen(r)}); t.style.zIndex = 10 - Math.abs(i - 3); t.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 3}px)`; box.appendChild(t); });
+  else r.cards.forEach(c => box.appendChild(rtTok(c, st, {lv: rtWhen(r)})));
   return box;
 }
+/** Side panel: the latest unlock with its names; before the first unlock, the first reward as a mystery. */
+const rtLatest = (last, first, capL, capN) => `<div class="rt-nexthead"><p class="rt-cap">${last ? capL(last) : capN(first)}</p>${rtTag(last || first)}</div><div class="rt-nextrow"></div><p class="rt-nextl">${last ? rtTitle(last) : 'A surprise'}</p>`;
 const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
 
 function showTrack(kind = 'xp') {
@@ -1768,8 +1754,8 @@ function showTrack(kind = 'xp') {
   const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
   side.innerHTML = `<div class="rt-head"><div class="rt-lvl"><span class="bd">${P.level}</span></div><p class="bd rt-lvlt">Level ${P.level}<small>of ${RT_LEVELS}</small></p></div>
     ${rtXpBar(P, 182)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} … 8th +${RT_XP_PLACE[7]} XP</p>
-    <div class="rt-nexthead"><p class="rt-cap">${done ? 'All done' : `Next · Lv ${nxt.lv}`}</p>${rtTag(nxt)}</div><div class="rt-nextrow"></div><p class="rt-nextl">${rtTitle(nxt)}</p>`;
-  rtToks(nxt, done ? 'done' : 'next', side.querySelector('.rt-nextrow'));
+    ${rtLatest(P.level ? RT_TRACK[P.level - 1] : null, nxt, r => `Latest · Lv ${r.lv}`, r => `Next · Lv ${r.lv}`)}`;
+  rtToks(P.level ? RT_TRACK[P.level - 1] : nxt, P.level ? 'done' : 'next', side.querySelector('.rt-nextrow'));
   const p = el('div', 'panel rt-roadp', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
   const body = el('div', 'rt-scroll', '', p);
   const ROW = 164, TOP = 136, XL = 226, XR = 314, Wd = 540, Hd = TOP + (RT_LEVELS - 1) * ROW + 90;
@@ -1938,8 +1924,8 @@ function showNightLine() {
   const b = bracketOf(PROF.rating);
   side.innerHTML = `<div class="rt-head"><div class="rt-lvl rm-badge"><span class="bd">${P.lv}</span></div><p class="bd rt-lvlt">Station ${P.lv}<small>of ${RM_TRACK.length}</small></p></div>
     ${rmBar(P, 182)}<p class="rt-per">Your best rating this season counts</p>
-    <div class="rt-nexthead"><p class="rt-cap">${done ? 'All aboard' : `Next · ${nxt.at.toLocaleString('en')}`}</p>${rtTag(nxt)}</div><div class="rt-nextrow"></div><p class="rt-nextl">${rtTitle(nxt)}</p>`;
-  rtToks(nxt, done ? 'done' : 'next', side.querySelector('.rt-nextrow'));
+    ${rtLatest(P.lv ? RM_TRACK[P.lv - 1] : null, nxt, r => `Latest · ${r.at.toLocaleString('en')}`, r => `Next · ${r.at.toLocaleString('en')}`)}`;
+  rtToks(P.lv ? RM_TRACK[P.lv - 1] : nxt, P.lv ? 'done' : 'next', side.querySelector('.rt-nextrow'));
   const p = el('div', 'panel rt-roadp rm-panel', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
   const body = el('div', 'rm-scroll', '', p);
   const inner = el('div', 'rm-inner', '', body); css(inner, {width: RM_W, height: RM_H});
