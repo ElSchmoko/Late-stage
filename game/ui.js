@@ -22,6 +22,17 @@ function loadProfile() {
 }
 function saveProfile() { try { localStorage.setItem(PKEY, JSON.stringify(PROF)); } catch (e) {} }
 const PROF = loadProfile();
+// Season reset (Nov 10): rating, rewards-track progress and unlocked cards start over for every profile; heroes stay unlocked.
+// Bump SEASON to run it again. Restoring an older save code runs it on the next load as well.
+const SEASON = 1;
+let SEASON_NEW = false;
+if ((PROF.season || 0) < SEASON) {
+  const fresh = (PROF.games || 0) === 0;
+  Object.assign(PROF, {season: SEASON, rating: START_RATING, peak: START_RATING, xp: 0, rtSeen: 0, legSeen: []});
+  delete PROF.deck;   // the Feed pool goes back to the starting cards
+  if (PROF.flags) delete PROF.flags.legendTut;
+  saveProfile(); SEASON_NEW = !fresh;
+}
 const BRACKETS = [[0, 'Unpaid Intern', '#c9c2d6'], [1000, 'Junior Associate', '#8fd4ff'], [2000, 'Middle Management', '#4fd1c5'], [3000, 'Director', '#b18cff'], [4000, 'Vice President', '#ff8ab8'], [5000, 'C-Suite', '#ff8a3d'], [6500, 'Billionaire', '#ffc928']];
 const bracketOf = r => BRACKETS.reduce((b, x) => (r >= x[0] ? x : b), BRACKETS[0]);
 const UNLOCK = {   // hero -> [goal, progress(profile)]
@@ -242,6 +253,7 @@ function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sf
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false); changelogButton(740, 12); statsButton(690, 12); setTimeout(legendPopup, 500);
+  if (SEASON_NEW) { SEASON_NEW = false; setTimeout(() => toast('New season! Rating, rewards track and cards start over. Your heroes stay.', 4200), 900); }
   const t = el('div', 'ab', `<h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 74, textAlign: 'center'});
   anim(t.querySelector('h1'), [{transform: 'scale(.6) rotate(-6deg)', opacity: 0}, {transform: 'scale(1.06) rotate(1deg)', opacity: 1, offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 700, easing: 'ease-out', raw: true});
