@@ -162,3 +162,20 @@ GOLD.update({
     'Punk Philosopher': 'When sold, and when it dies: give your Punks and Philosophers +6/+6 permanently.',
 })
 GOLD.update({'Zine Maker': 'When sold: give the minion to its right +6/+6.', 'Speedrunner': 'After this kills a minion, gain +2/+2 permanently.'})
+GOLD.update({  # rewards track, batch 1 (levels 1-7)
+    'Performance Review': 'End of turn, twice: take +1/+1 from the minion to its right and give your other Hustlers +1/+1.',
+    'Loyalty Card': 'Every 4 gold you spend: give the minion to its left +6/+6.',
+    'Thirst Trap': 'Start of combat: give two other friendly minions "Legacy: get 2 Likes."',
+    'Bot Farm': 'End of turn: if you have space, summon four 1/1 Followers (3 times per game).',
+    'Magpie': 'Your first Scroll each turn costs 2 less.',
+    'Allotment': 'End of turn, twice: give a random other Feral +1/+1 for each Feral you have (max +3).',
+    'Ghostwriter': 'After a friendly minion dies, give the Creative to its right +2/+2 permanently.',
+    'Encore': 'When sold: get two copies of the last Creative you played (except Encore).',
+    'Bluetooth Speaker': 'Collab. Clock In: deal 1 damage to all enemy minions. This damage is never Toxic.',
+    'Clutch Player': 'Out of Office. While this is your last minion alive, it has Toxic and attacks twice.',
+    'Gig Poster': 'When sold: next turn, the first Punk you hire costs 2 less.',
+    'Banner Drop': 'Start of combat: deal 8 damage to each enemy Attention Seeker.',
+    'Breathwork Coach': 'Attention Seeker. After a friendly Attention Seeker survives damage, give it +2 Attack permanently.',
+    'Debate Club': 'End of turn, twice: give the minions next to it +3/+3 for the next combat, or +4/+4 if they are from different tribes.',
+    'Crust Punk': "Your Punks' start-of-combat damage to enemy minions is increased by 4.",
+})

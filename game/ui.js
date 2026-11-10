@@ -118,9 +118,17 @@ function tokenHTML(m, o = {}) {
   s += `<div class="st at${o.upA ? ' up' : ''}${o.tmp ? ' tmp' : ''}">${atk}</div><div class="st hp${o.upH ? ' up' : ''}${o.tmp ? ' tmp' : ''}${o.hurt ? ' hurt' : ''}">${hp}</div>`;
   return s;
 }
+/** Tribe background for a portrait: two-tribe cards get the diagonal split, with the usual dot pattern on top. */
+const DOTS = 'radial-gradient(rgba(43,33,64,.16) 1.4px,transparent 1.7px)';
+const tribe2Of = name => (CARD[name] && CARD[name].tribe2) || null;
+const tribeBgCss = (tribe, tribe2, dot = 8) => tribe2 ? `background-image:${DOTS},linear-gradient(135deg,${TC[tribe]} 50%,${TC[tribe2]} 50%);background-size:${dot}px ${dot}px,100% 100%` : `background-color:${TC[tribe] || '#ffc928'}`;
+function paintTribe(e, tribe, tribe2, dot = 8) {
+  if (tribe2) { e.style.backgroundColor = ''; e.style.backgroundImage = `${DOTS},linear-gradient(135deg,${TC[tribe]} 50%,${TC[tribe2]} 50%)`; e.style.backgroundSize = `${dot}px ${dot}px,100% 100%`; }
+  else { e.style.backgroundImage = ''; e.style.backgroundSize = ''; e.style.backgroundColor = TC[tribe] || '#ffc928'; }
+}
 function makeToken(m, o = {}) {
   const t = el('div', 'tok');
-  t.style.backgroundColor = TC[m.tribe] || '#ffc928';
+  paintTribe(t, m.tribe, tribe2Of(m.name));
   t.innerHTML = tokenHTML(m, o);
   t.classList.toggle('seek', !!m.taunt); t.classList.toggle('gold', !!m.golden);
   return t;
@@ -129,7 +137,7 @@ function updateToken(t, m, o = {}) {
   const prevA = t.querySelector('.st.at'), prevH = t.querySelector('.st.hp');
   const oldA = prevA ? +prevA.textContent : null, oldH = prevH ? +prevH.textContent : null;
   t.innerHTML = tokenHTML(m, o);
-  t.style.backgroundColor = TC[m.tribe] || '#ffc928';
+  paintTribe(t, m.tribe, tribe2Of(m.name));
   t.classList.toggle('seek', !!m.taunt); t.classList.toggle('gold', !!m.golden);
   const na = o.atk != null ? o.atk : m.atk, nh = o.hp != null ? o.hp : m.hp;
   if (oldA !== null && oldA !== na) anim(t.querySelector('.st.at'), [{transform: 'rotate(-6deg) scale(1.55)'}, {transform: 'rotate(-6deg) scale(1)'}], {duration: 320, easing: 'cubic-bezier(.34,1.56,.64,1)'});
@@ -269,7 +277,7 @@ const LEGEND_AT = 1000, PER_TIER = 3;
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
 function deckSet() {
   if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
-  return new Set(PROF.deck.filter(n => CARD[n] && (!CARD[n].legendary || legendOpen(CARD[n]))).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral').map(c => c.name)));
+  return new Set(PROF.deck.filter(n => CARD[n] && cardOpen(CARD[n])).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral').map(c => c.name)));
 }
 const tribesOf = c => [c.tribe, c.tribe2].filter(Boolean);
 const inTribe = (c, t) => tribesOf(c).includes(t);
@@ -279,7 +287,7 @@ function deckToggle(c) {
     for (const t of tribesOf(c)) if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length <= 1) return 'last';
     PROF.deck = PROF.deck.filter(n => n !== c.name);
   } else {
-    if (c.legendary && !legendOpen(c)) return 'locked';
+    if (!cardOpen(c)) return 'locked';
     for (const t of tribesOf(c)) {
       if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length >= PER_TIER) return 'full';
       if (c.legendary && CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name))) return 'legend';
@@ -300,10 +308,10 @@ function showCards(tribe = 'Hustler') {
     const st = body.scrollTop; body.innerHTML = ''; const d = deckSet(), neutral = tribe === 'Neutral';
     const all = CARDS_ALL().filter(c => inTribe(c, tribe));
     const addCard = (c, row) => {
-      const on = neutral || d.has(c.name), locked = c.legendary && !legendOpen(c);
+      const on = neutral || d.has(c.name), locked = !cardOpen(c);
       const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
       if (on && !neutral) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', `Rewards Lv ${RT_LEG_LV[c.name] || ''}`, w); }
+      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', `Rewards Lv ${c.track || RT_LEG_LV[c.name] || ''}`, w); }
       w.onclick = () => showDetail(c, null, neutral || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
         const r = deckToggle(c);
         if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
@@ -578,7 +586,7 @@ function renderAll(animateNew = true, gapAt = null) {
   G.hand.forEach((hc, i) => {
     let e = S.handEl.get(hc.key);
     const c = hc.card, p = handPos(i, G.hand.length);
-    if (!e) { e = el('div', 'hc' + (hc.golden ? ' golden' : ''), `<div class="pn" style="background-color:${TC[c.tribe]}"><img src="${ART[c.art]}" alt="" draggable="false"></div><p class="hn">${c.name}</p><div class="hs at">${c.atk * (hc.golden ? 2 : 1) + hc.a}</div><div class="hs hp">${c.hp * (hc.golden ? 2 : 1) + hc.h}</div>`, S.layer); S.handEl.set(hc.key, e); bindToken(e, 'hand', hc); css(e, {left: p.x, top: p.y + 40}); }
+    if (!e) { e = el('div', 'hc' + (hc.golden ? ' golden' : ''), `<div class="pn" style="${tribeBgCss(c.tribe, c.tribe2, 7)}"><img src="${ART[c.art]}" alt="" draggable="false"></div><p class="hn">${c.name}</p><div class="hs at">${c.atk * (hc.golden ? 2 : 1) + hc.a}</div><div class="hs hp">${c.hp * (hc.golden ? 2 : 1) + hc.h}</div>`, S.layer); S.handEl.set(hc.key, e); bindToken(e, 'hand', hc); css(e, {left: p.x, top: p.y + 40}); }
     e.style.transition = 'left .26s cubic-bezier(.22,1,.36,1), top .26s cubic-bezier(.22,1,.36,1), transform .26s';
     requestAnimationFrame(() => { css(e, {left: p.x, top: p.y}); e.style.transform = `rotate(${p.r}deg)`; });
     e._h = hc; hseen.add(hc.key);
@@ -660,7 +668,7 @@ function goldTick(delta) {
 async function buy(f, toBoardAt = null) {
   if (G.busy || !G.feed.includes(f) || !canBuy(f)) return;   // the Feed may have changed (Scroll) since this card was picked up
   const me = G.me, cst = costOf(f);
-  me.gold[0] -= cst; me.gainSpend(cst); goldTick(-cst); PROF.stats.hires++; RUN.act('buy', f.card.name); sfx('buy');
+  me.gold[0] -= cst; me.gainSpend(cst); me.hired(f.card); goldTick(-cst); PROF.stats.hires++; RUN.act('buy', f.card.name); sfx('buy');
   G.feed.splice(G.feed.indexOf(f), 1);
   const hc = {card: f.card, a: f.a, h: f.h, key: Math.random()};
   const t = S.feedTok.get(f.key);
@@ -837,6 +845,10 @@ function handlePending() {
   const me = G.me;
   return new Promise(res => {
     const p = me.pending.shift(); if (!p) return res();
+    if (p.kind === 'hand') {   // a card made by an effect (Encore): straight into the hand
+      if (G.hand.length < 10) { G.hand.push({card: p.card, a: 0, h: 0, key: Math.random()}); toast(`${p.card.name} added to your hand`); sfx('buy'); } else toast('Your hand is full');
+      renderAll(); return handlePending().then(res);
+    }
     sfx('discover');
     const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 65});
     el('div', 'dim', '', ov);
@@ -1320,7 +1332,7 @@ function showStats(range = 10) {
   const favs = how.querySelector('.favs');
   if (!ps.cards.length) el('span', 'none', '–', favs);
   for (const [name, k] of ps.cards) {
-    const c = CARD[name], bt = el('button', 'fav', `<span class="pic" style="background:${TC[c.tribe]}"><img src="${ART[c.art]}" alt=""></span><span class="cnt">×${k}</span>`, favs);
+    const c = CARD[name], bt = el('button', 'fav', `<span class="pic" style="${tribeBgCss(c.tribe, c.tribe2)}"><img src="${ART[c.art]}" alt=""></span><span class="cnt">×${k}</span>`, favs);
     bt.setAttribute('aria-label', `${name}, hired ${k} times`); bt.title = name; bt.onclick = () => showDetail(c, null);
   }
 }
@@ -1571,6 +1583,19 @@ const rtLevel = () => rtProgress().level;
 if (PROF.xp == null) { PROF.xp = (PROF.history || []).reduce((s, h) => s + (RT_XP_PLACE[(h.place || 8) - 1] || 40), 0); PROF.rtSeen = rtLevel(); saveProfile(); }
 /** Legendaries open from the track; profiles that reached 1,000 rating before the track keep them all. */
 const legendOpen = c => PROF.peak >= LEGEND_AT || PROF.rating >= LEGEND_AT || rtLevel() >= (RT_LEG_LV[c.name] || 99);
+/** Can this card go into the Feed pool? Legendaries and rewards-track cards open from the track. */
+const cardOpen = c => c.legendary ? legendOpen(c) : !c.track || rtLevel() >= c.track;
+/** New cards from a level go straight into the Feed pool when their tier still has a free slot. */
+function rtAutoAdd(r) {
+  const added = [];
+  for (const x of r.cards) {
+    const c = CARD[x.name]; if (!c || c.legendary || c.token) continue;
+    const d = deckSet(); if (d.has(c.name)) continue;
+    if (tribesOf(c).every(t => CARDS_ALL().filter(o => inTribe(o, t) && o.tier === c.tier && d.has(o.name)).length < PER_TIER)) { PROF.deck.push(c.name); added.push(c.name); }
+  }
+  if (added.length) saveProfile();
+  return added;
+}
 const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
 const tribeName = t => t === 'Neutral' ? 'Neighbours' : TP[t] || t;
 const rtTitle = r => r.set ? 'Legendaries for every tribe' : r.legend ? r.cards[0].name : r.cards.map(c => c.name).join(' & ');
@@ -1625,7 +1650,7 @@ const RT_SIL = '<svg class="rt-sil" viewBox="0 0 68 68" aria-hidden="true"><circ
 const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
 function rtTok(c, state, o = {}) {
   const real = rtReal(c), t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
-  t.style.background = c.tribe2 ? `linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[c.tribe2]} 50%)` : TC[c.tribe];
+  paintTribe(t, c.tribe, c.tribe2);
   t.innerHTML = `<div class="clip">${real ? `<img src="${artOf(c.name)}" alt="" draggable="false">` : RT_SIL + '<span class="rt-q">?</span>'}${c.legendary ? '<i class="foil"></i>' : ''}</div>`
     + (c.tier && !o.noStars ? `<div class="tier">${STAR(13).repeat(c.tier)}</div>` : '')
     + (state === 'done' && !o.noTick ? `<span class="rt-got">${RT_TICK}</span>` : '');
@@ -1731,7 +1756,9 @@ function rtAfterRun() {
   const lvl = rtLevel(), seen = PROF.rtSeen || 0;
   if (lvl <= seen) return;
   PROF.rtSeen = seen + 1; saveProfile();
+  const added = rtAutoAdd(RT_TRACK[seen]);
   rtLevelUp(seen + 1, rtAfterRun);
+  if (added.length) setTimeout(() => toast(`${added.join(' and ')} joined your Feed pool`, 2600), 1800);
 }
 
 window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack(), levelUp: l => rtLevelUp(l)}};

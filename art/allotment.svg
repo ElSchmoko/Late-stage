@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="0" y="150" width="200" height="56" rx="0" fill="#a0694a"/>
+<path d="M0 150 L200 150" fill="none"/>
+<ellipse cx="36" cy="120" rx="10" ry="26" fill="#2ecb6e" transform="rotate(-20 36 120)"/><path d="M29.4 122.4 L42.6 117.6" fill="none"/>
+<ellipse cx="52" cy="118" rx="10" ry="26" fill="#2ecb6e" transform="rotate(20 52 118)"/><path d="M45.4 115.6 L58.6 120.4" fill="none"/>
+<path d="M44 140 L40 196 L48 196 Z" fill="#ff8a3d"/>
+<circle cx="104" cy="140" r="30" fill="#9bd65a"/>
+<path d="M80 132 Q104 120 128 132 M84 150 Q104 160 124 150" fill="none"/>
+<path d="M94.1 141.35 Q97.25 136.85 100.4 141.35" fill="none"/>
+<path d="M107.6 141.35 Q110.75 136.85 113.9 141.35" fill="none"/>
+<ellipse cx="91.85" cy="146.3" rx="2.7" ry="1.575" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="116.15" cy="146.3" rx="2.7" ry="1.575" fill="#ff9a8a" stroke="none"/>
+<path d="M99.5 148.54999999999998 Q104 153.04999999999998 108.5 148.54999999999998" fill="none"/>
+<ellipse cx="160" cy="124" rx="8" ry="22" fill="#2ecb6e" transform="rotate(0 160 124)"/><path d="M154.4 124.0 L165.6 124.0" fill="none"/>
+<circle cx="160" cy="156" r="16" fill="#ff6b5e"/>
+<circle cx="154" cy="152" r="2.5" fill="#ffffff" stroke="none"/>
+<g transform="rotate(6 172.0 70)"><rect x="168.0" y="68" width="8" height="50" rx="2" fill="#c98a4a"/>
+<rect x="150" y="40" width="44" height="30" rx="4" fill="#ffffff"/>
+<path d="M158 52 L186 52" fill="none"/></g>
+<path d="M20 196 L180 196" fill="none" stroke-dasharray="6 10"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

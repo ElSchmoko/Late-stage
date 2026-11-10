@@ -18,7 +18,7 @@ SLUG = {'Dropshipper': 'dropshipper', 'Unpaid Intern': 'intern', 'Grindset Guru'
         'Sneaker Reseller': 'reseller', 'Side Hustle': 'gigworker', 'Thought Leader': 'thoughtleader', 'Crypto Bro': 'cryptobro',
         'Golden Parachute Exec': 'parachute', 'Venture Capitalist': 'vc', 'Corporate Raider': 'raider', 'Consultant': 'consultant',
         'Unicorn Startup': 'unicorn', 'Too Big to Fail': 'toobig', 'The Remote Worker': 'remote', 'The Reply-All Guy': 'boomer'}
-for mod in ['p_influencers', 'p_ferals', 'p_creatives', 'p_techies', 'p_punks', 'p_philosophers', 'p_neighbours', 'p_hustlers', 'p_heroes']:
+for mod in ['p_influencers', 'p_ferals', 'p_creatives', 'p_techies', 'p_punks', 'p_philosophers', 'p_neighbours', 'p_hustlers', 'p_heroes', 'p_track']:
     m = importlib.import_module(mod)
     for name, (slug, _) in m.ART.items():
         SLUG[name] = slug
@@ -27,7 +27,8 @@ BLOB = {pathlib.Path(v).stem: k for k, v in _b.items() if k != 'CITY'}
 
 
 def art(name):
-    return '/_blob/' + BLOB[SLUG[name]]
+    slug = SLUG[name]
+    return '/_blob/' + BLOB[slug] if slug in BLOB else f'file://{S}/art/{slug}.svg'   # newer art has no Design-canvas blob
 
 
 # ---- extra card info ----

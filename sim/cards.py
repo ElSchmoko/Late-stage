@@ -113,7 +113,7 @@ PUNKS = [
     Card('Zine Maker', P, 1, 2, 2, 'SO', 'When sold: give the minion to its right +3/+3.', 'Issue #1 of 1.', kind='stat', sellbait=True),
     Card('Sellout Frontman', P, 2, 3, 3, 'SO', 'When sold: give your other Punks +2/+2.', 'Signed to a major label. Still punk, though.', kind='stat', sellbait=True),
     Card('Heckler', P, 2, 3, 3, 'SA', 'Start of combat: deal 3 damage to the enemy minion with the highest Attack.', 'Boo. Encore. Boo.'),
-    Card('Crust Punk', P, 2, 3, 3, 'SA', 'Your Punks\' start-of-combat damage is increased by 2.', 'Hasn\'t washed the jacket since 1998.'),
+    Card('Crust Punk', P, 2, 3, 3, 'SA', 'Your Punks\' start-of-combat damage to enemy minions is increased by 2.', 'Hasn\'t washed the jacket since 1998.'),
     Card('Squat Collective', P, 3, 3, 4, 'SO', 'Your Punks\' "When sold" effects also trigger when they die.', 'Consensus reached in nine hours.'),
     Card('Feedback Loop', P, 3, 3, 4, 'SA', 'Start of combat: deal 1 damage to all enemy minions. If that kills any, give your Punks +3/+2 permanently.', 'Turned it up. Kept going.'),
     Card('Pirate Radio', P, 3, 2, 3, '-', 'First Impression: Discover a Punk.', 'Broadcasting from a van.', kind='fi', discover=P),
@@ -502,3 +502,27 @@ LEGENDS = [
 for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
     if _c.name == 'Zine Maker': _c.text = 'When sold: give the minion to its right +3/+3.'
     if _c.name == 'Speedrunner': _c.text = 'After this kills a minion, gain +1/+1 permanently.'
+
+
+# Rewards track (Nov 10): cards unlocked by levelling up the rewards track (docs/card-plan-v14.md). c.track = the level that
+# unlocks it; they stay out of the default Feed pool until the player unlocks them and adds them on the Collection screen.
+def _tr(lv, *a, **kw):
+    c = Card(*a, **kw); c.track = lv; return c
+TRACK = [
+    _tr(1, 'Performance Review', H, 2, 3, 2, 'EX', 'End of turn: take +1/+1 from the minion to its right and give your other Hustlers +1/+1.', 'Meets expectations. Barely. Always.'),
+    _tr(1, 'Loyalty Card', H, 3, 2, 5, 'PI', 'Every 4 gold you spend: give the minion to its left +3/+3.', 'Nine stamps. The tenth coffee is "out of stock".'),
+    _tr(2, 'Thirst Trap', I, 2, 2, 2, 'MC', 'Start of combat: give two other friendly minions "Legacy: get 1 Like."', 'Hydrating. For the content.'),
+    _tr(2, 'Bot Farm', I, 3, 2, 5, 'FO', 'End of turn: if you have space, summon two 1/1 Followers (3 times per game).', 'Ten thousand fans. One power strip.'),
+    _tr(3, 'Magpie', F, 2, 3, 2, 'SV', 'Your first Scroll each turn costs 1 less.', 'Shiny. Shiny. Mine.'),
+    _tr(3, 'Allotment', F, 3, 2, 5, 'OG', 'End of turn: give a random other Feral +1/+1 for each Feral you have (max +3).', 'Waiting list: eleven years.'),
+    _tr(4, 'Ghostwriter', C, 2, 2, 3, 'PF', 'After a friendly minion dies, give the Creative to its right +1/+1 permanently.', 'Wrote your memoir. Never met you.'),
+    _tr(4, 'Encore', C, 3, 4, 3, 'PE', 'When sold: get a copy of the last Creative you played (except Encore).', 'They never really leave.', kind='stat', sellbait=True),
+    _tr(5, 'Bluetooth Speaker', T, 2, 2, 2, 'GA', 'Collab. Clock In: deal 1 damage to all enemy minions. This damage is never Toxic.', 'Paired with the wrong phone. Again.', collab=True),
+    _tr(5, 'Clutch Player', T, 3, 4, 4, 'GM', 'Out of Office. While this is your last minion alive, it has Toxic and attacks twice.', '1v5. Still blames the lag.', shield=True),
+    _tr(6, 'Gig Poster', P, 2, 3, 2, 'SO', 'When sold: next turn, the first Punk you hire costs 1 less.', 'Stapled over last week\'s gig poster.', kind='stat', sellbait=True),
+    _tr(6, 'Banner Drop', P, 3, 3, 5, 'SA', 'Start of combat: deal 4 damage to each enemy Attention Seeker.', 'Hung it from the bridge. Spelled it wrong.'),
+    _tr(7, 'Breathwork Coach', PH, 2, 1, 4, 'ST', 'Attention Seeker. After a friendly Attention Seeker survives damage, give it +1 Attack permanently.', 'In for four. Invoice for eight.', taunt=True),
+    _tr(7, 'Debate Club', PH, 3, 2, 4, 'BI', 'End of turn: give the minions next to it +3/+3 for the next combat, or +4/+4 if they are from different tribes.', 'Both sides. Loudly.'),
+]
+for _c in TRACK: BY_TRIBE[_c.tribe].append(_c)
+ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS

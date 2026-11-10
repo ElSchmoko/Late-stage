@@ -9,7 +9,8 @@ import json, subprocess, sys, pathlib, re
 R = pathlib.Path(__file__).resolve().parent.parent
 OUT = R / 'game/changelog.js'
 VERSIONS = [  # (label, date, base rev, head rev; None = working copy). Group releases into larger updates.
-    ('Update 3', '2026-11-08', '0265f56', None),
+    ('Update 4', '2026-11-10', 'f44361b', None),   # rewards track: first 14 track cards, Crust Punk wording
+    ('Update 3', '2026-11-08', '0265f56', 'f44361b'),
     ('Update 2', '2026-11-07', 'b8618d3', '0265f56'),
     ('Update 1', '2026-11-04', '9137f32', 'b8618d3'),
 ]

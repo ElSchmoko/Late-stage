@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="62" y="30" width="76" height="150" rx="26" fill="#6b6182"/>
+<circle cx="100" cy="84" r="30" fill="#2b2140"/>
+<circle cx="100" cy="84" r="18" fill="#5ab8ff"/>
+<circle cx="100" cy="84" r="8" fill="#2b2140" stroke="none"/>
+<circle cx="94" cy="78" r="4" fill="#ffffff" stroke="none"/>
+<circle cx="100" cy="146" r="16" fill="#7fe0ff"/>
+<circle cx="100" cy="146" r="7" fill="none"/>
+<path d="M150 70 L166 62 M154 90 L176 90 M150 110 L166 118" fill="none"/>
+<path d="M50 70 L34 62 M46 90 L24 90 M50 110 L34 118" fill="none"/>
+<path d="M40 196 L160 196" fill="none"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

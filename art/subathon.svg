@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M150 36 Q132 50 142 70 Q160 82 176 66 Q158 66 150 36 Z" fill="#ffc928"/>
+<path d="M24 34 Q25.2 38.8 30 40 Q25.2 41.2 24 46 Q22.8 41.2 18 40 Q22.8 38.8 24 34 Z" fill="#ffffff"/>
+<path d="M46 60 Q46.8 63.2 50 64 Q46.8 64.8 46 68 Q45.2 64.8 42 64 Q45.2 63.2 46 60 Z" fill="#ffffff"/>
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#b18cff"/>
+<path d="M66 142 Q100 176 134 142 Q122 132 100 134 Q78 132 66 142 Z" fill="#ff8ab8"/>
+<path d="M92 156 L90 182 M108 156 L110 182" fill="none"/>
+<path d="M70 190 L130 190" fill="none"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#e8b48a"/>
+<circle cx="62" cy="92" r="9" fill="#e8b48a"/>
+<circle cx="138" cy="92" r="9" fill="#e8b48a"/>
+<circle cx="100" cy="86" r="38" fill="#e8b48a"/>
+<path d="M60 84 Q56 44 98 42 Q144 40 140 84 Q134 66 120 68 Q114 56 100 62 Q88 54 80 68 Q66 66 60 84 Z" fill="#4a3d6a"/><path d="M98 44 Q92 30 104 26 Q98 36 106 43" fill="none"/>
+<circle cx="85" cy="92" r="11.5" fill="#ffffff"/>
+<circle cx="115" cy="92" r="11.5" fill="#ffffff"/>
+<circle cx="86" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
+<circle cx="116" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
+<path d="M73.5 92 Q85 75.9 96.5 92 Z" fill="#e8b48a"/>
+<path d="M103.5 92 Q115 75.9 126.5 92 Z" fill="#e8b48a"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<path d="M90 113 Q95 109 100 113 Q105 117 110 113" fill="none"/>
+<path d="M76 103 Q85 107 94 103 M106 103 Q115 107 124 103" fill="none"/>
+<path d="M58 88 Q58 40 100 40 Q142 40 142 88" fill="none"/>
+<rect x="50" y="76" width="16" height="28" rx="7" fill="#ff8ab8"/>
+<rect x="134" y="76" width="16" height="28" rx="7" fill="#ff8ab8"/>
+<path d="M56 102 Q60 122 84 122" fill="none"/>
+<circle cx="86" cy="122" r="4" fill="#2b2140"/>
+<rect x="130" y="136" width="60" height="52" rx="6" fill="#ffffff"/>
+<rect x="130" y="136" width="60" height="14" rx="6" fill="#ff6b5e"/>
+<path d="M146 160 Q158 154 158 164 Q158 169 151 169 Q160 169 158 177 Q155 184 145 180 M168 162 L174 158 L174 182" fill="none"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

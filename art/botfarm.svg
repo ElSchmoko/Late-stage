@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="16" y="44" width="168" height="150" rx="10" fill="#9aa7b8"/>
+<path d="M16 118 L184 118" fill="none"/>
+<rect x="30" y="54" width="36" height="56" rx="6" fill="#2b2140"/>
+<rect x="34" y="60" width="28" height="40" rx="3" fill="#ff8ab8"/>
+<circle cx="42" cy="76" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="54" cy="76" r="3" fill="#2b2140" stroke="none"/>
+<path d="M41 88 L55 88" fill="none"/>
+<rect x="82" y="54" width="36" height="56" rx="6" fill="#2b2140"/>
+<rect x="86" y="60" width="28" height="40" rx="3" fill="#ff8ab8"/>
+<circle cx="94" cy="76" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="106" cy="76" r="3" fill="#2b2140" stroke="none"/>
+<path d="M93 88 L107 88" fill="none"/>
+<rect x="134" y="54" width="36" height="56" rx="6" fill="#2b2140"/>
+<rect x="138" y="60" width="28" height="40" rx="3" fill="#ff8ab8"/>
+<circle cx="146" cy="76" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="158" cy="76" r="3" fill="#2b2140" stroke="none"/>
+<path d="M145 88 L159 88" fill="none"/>
+<rect x="30" y="128" width="36" height="56" rx="6" fill="#2b2140"/>
+<rect x="34" y="134" width="28" height="40" rx="3" fill="#ff8ab8"/>
+<circle cx="42" cy="150" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="54" cy="150" r="3" fill="#2b2140" stroke="none"/>
+<path d="M41 162 L55 162" fill="none"/>
+<rect x="82" y="128" width="36" height="56" rx="6" fill="#2b2140"/>
+<rect x="86" y="134" width="28" height="40" rx="3" fill="#ff8ab8"/>
+<circle cx="94" cy="150" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="106" cy="150" r="3" fill="#2b2140" stroke="none"/>
+<path d="M93 162 L107 162" fill="none"/>
+<rect x="134" y="128" width="36" height="56" rx="6" fill="#2b2140"/>
+<rect x="138" y="134" width="28" height="40" rx="3" fill="#ff8ab8"/>
+<circle cx="146" cy="150" r="3" fill="#2b2140" stroke="none"/>
+<circle cx="158" cy="150" r="3" fill="#2b2140" stroke="none"/>
+<path d="M145 162 L159 162" fill="none"/>
+<path d="M176 42.1 Q165.2 34 167.0 28.6 Q169.7 23.2 176 28.6 Q182.3 23.2 185.0 28.6 Q186.8 34 176 42.1 Z" fill="#ff6b5e"/>
+<path d="M24 36.3 Q15.600000000000001 30 17.0 25.8 Q19.1 21.6 24 25.8 Q28.9 21.6 31.0 25.8 Q32.4 30 24 36.3 Z" fill="#ff6b5e"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

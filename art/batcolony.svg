@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="0" y="30" width="200" height="16" rx="4" fill="#8a5a3a"/>
+<g transform="translate(46 46) scale(0.9)"><path vector-effect="non-scaling-stroke" d="M0 0 L0 14" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M-30 30 Q-26 70 0 84 Q26 70 30 30 Q14 40 0 30 Q-14 40 -30 30 Z" fill="#4a3d6a"/>
+<circle vector-effect="non-scaling-stroke" cx="0" cy="92" r="18" fill="#4a3d6a"/>
+<path vector-effect="non-scaling-stroke" d="M-14 104 L-18 116 L-6 108 Z M14 104 L18 116 L6 108 Z" fill="#4a3d6a"/>
+<path vector-effect="non-scaling-stroke" d="M-8.8 88 Q-6.0 90.4 -3.1999999999999997 88" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M3.1999999999999997 88 Q6.0 90.4 8.8 88" fill="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="-10.8" cy="93.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="10.8" cy="93.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<path vector-effect="non-scaling-stroke" d="M-2.4000000000000004 96.4 Q0 98.4 2.4000000000000004 96.4" fill="none"/></g>
+<g transform="translate(100 46) scale(1.1)"><path vector-effect="non-scaling-stroke" d="M0 0 L0 14" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M-30 30 Q-26 70 0 84 Q26 70 30 30 Q14 40 0 30 Q-14 40 -30 30 Z" fill="#4a3d6a"/>
+<circle vector-effect="non-scaling-stroke" cx="0" cy="92" r="18" fill="#4a3d6a"/>
+<path vector-effect="non-scaling-stroke" d="M-14 104 L-18 116 L-6 108 Z M14 104 L18 116 L6 108 Z" fill="#4a3d6a"/>
+<path vector-effect="non-scaling-stroke" d="M-8.8 88 Q-6.0 90.4 -3.1999999999999997 88" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M3.1999999999999997 88 Q6.0 90.4 8.8 88" fill="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="-10.8" cy="93.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="10.8" cy="93.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<path vector-effect="non-scaling-stroke" d="M-2.4000000000000004 96.4 Q0 98.4 2.4000000000000004 96.4" fill="none"/></g>
+<g transform="translate(154 46) scale(0.9)"><path vector-effect="non-scaling-stroke" d="M0 0 L0 14" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M-30 30 Q-26 70 0 84 Q26 70 30 30 Q14 40 0 30 Q-14 40 -30 30 Z" fill="#4a3d6a"/>
+<circle vector-effect="non-scaling-stroke" cx="0" cy="92" r="18" fill="#4a3d6a"/>
+<path vector-effect="non-scaling-stroke" d="M-14 104 L-18 116 L-6 108 Z M14 104 L18 116 L6 108 Z" fill="#4a3d6a"/>
+<path vector-effect="non-scaling-stroke" d="M-8.8 88 Q-6.0 90.4 -3.1999999999999997 88" fill="none"/>
+<path vector-effect="non-scaling-stroke" d="M3.1999999999999997 88 Q6.0 90.4 8.8 88" fill="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="-10.8" cy="93.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<ellipse vector-effect="non-scaling-stroke" cx="10.8" cy="93.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<path vector-effect="non-scaling-stroke" d="M-2.4000000000000004 96.4 Q0 98.4 2.4000000000000004 96.4" fill="none"/></g>
+<path d="M150 160 L162 160 L150 172 L162 172" fill="none"/>
+<path d="M168 142 L177 142 L168 151 L177 151" fill="none"/>
+<path d="M20 164 Q21.2 168.8 26 170 Q21.2 171.2 20 176 Q18.8 171.2 14 170 Q18.8 168.8 20 164 Z" fill="#ffffff"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

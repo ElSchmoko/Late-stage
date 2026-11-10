@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="14" y="100" width="82" height="96" rx="6" fill="#3a3045"/>
+<rect x="104" y="100" width="82" height="96" rx="6" fill="#3a3045"/>
+<rect x="34" y="22" width="132" height="76" rx="6" fill="#3a3045"/>
+<circle cx="55" cy="150" r="30" fill="#6a5d7a"/>
+<circle cx="55" cy="150" r="12" fill="#2b2140"/>
+<circle cx="145" cy="150" r="30" fill="#6a5d7a"/>
+<circle cx="145" cy="150" r="12" fill="#2b2140"/>
+<circle cx="70" cy="60" r="22" fill="#6a5d7a"/>
+<circle cx="70" cy="60" r="8" fill="#2b2140"/>
+<circle cx="130" cy="60" r="22" fill="#6a5d7a"/>
+<circle cx="130" cy="60" r="8" fill="#2b2140"/>
+<circle cx="94.75" cy="60" r="4.0249999999999995" fill="#ffffff"/>
+<circle cx="105.25" cy="60" r="4.0249999999999995" fill="#ffffff"/>
+<circle cx="95.1" cy="60.525" r="1.3299999999999998" fill="#2b2140" stroke="none"/>
+<circle cx="105.6" cy="60.525" r="1.3299999999999998" fill="#2b2140" stroke="none"/>
+<path d="M91.25 53.7 L97.9 56.15" fill="none"/>
+<path d="M108.75 53.7 L102.1 56.15" fill="none"/>
+<ellipse cx="90.55" cy="64.9" rx="2.0999999999999996" ry="1.2249999999999999" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="109.45" cy="64.9" rx="2.0999999999999996" ry="1.2249999999999999" fill="#ff9a8a" stroke="none"/>
+<path d="M95.1 65.25 Q100 64.19999999999999 104.9 65.25 Q104.2 72.94999999999999 100 72.94999999999999 Q95.8 72.94999999999999 95.1 65.25 Z" fill="#2b2140"/><ellipse cx="100" cy="70.85" rx="2.0999999999999996" ry="1.2249999999999999" fill="#ff6b5e" stroke="none"/>
+<path d="M196 78 Q204 90 196 102" fill="none"/>
+<path d="M208 72 Q216 90 208 108" fill="none"/>
+<path d="M4 78 Q-4 90 4 102" fill="none"/>
+<path d="M-8 72 Q-16 90 -8 108" fill="none"/>
+<path d="M100 120 L90 140 L99 140 L94 158 L112 134 L103 134 L108 120 Z" fill="#ff8a3d"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

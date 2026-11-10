@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="18" y="34" width="164" height="24" rx="12" fill="#ffffff"/>
+<rect x="18" y="34" width="120" height="24" rx="12" fill="#ff8ab8"/>
+<path d="M138 36 L138 56" fill="none"/>
+<path d="M56 82 L144 82 L150 190 Q100 200 50 190 Z" fill="#e8f7ff"/>
+<rect x="48" y="70" width="104" height="16" rx="6" fill="#c9c2d6"/>
+<path d="M89.5 133.0 L91.4 137.5 L96.2 137.8 L92.5 141.0 L93.6 145.7 L89.5 143.2 L85.4 145.7 L86.5 141.0 L82.8 137.8 L87.6 137.5 Z" fill="#ffc928"/>
+<path d="M110.5 133.0 L112.4 137.5 L117.2 137.8 L113.5 141.0 L114.6 145.7 L110.5 143.2 L106.4 145.7 L107.5 141.0 L103.8 137.8 L108.6 137.5 Z" fill="#ffc928"/>
+<ellipse cx="81.1" cy="149.8" rx="4.199999999999999" ry="2.4499999999999997" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="118.9" cy="149.8" rx="4.199999999999999" ry="2.4499999999999997" fill="#ff9a8a" stroke="none"/>
+<path d="M90.2 151.89999999999998 L109.8 151.89999999999998 Q108.4 163.1 100 163.1 Q91.6 163.1 90.2 151.89999999999998 Z" fill="#ffffff"/>
+<circle cx="80" cy="176" r="10" fill="#ffc928"/><circle cx="80" cy="176" r="5.0" fill="none"/>
+<circle cx="122" cy="178" r="9" fill="#ffc928"/><circle cx="122" cy="178" r="4.5" fill="none"/>
+<circle cx="100" cy="66" r="9" fill="#ffc928"/><circle cx="100" cy="66" r="4.5" fill="none"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<g transform="translate(20 46) rotate(-6 80 60)"><rect x="0" y="0" width="160" height="120" rx="8" fill="#ffffff"/>
+<rect x="0" y="0" width="160" height="22" rx="8" fill="#5ab8ff"/>
+<path d="M0 22 L160 22" fill="none"/>
+<rect x="134" y="4" width="16" height="14" rx="3" fill="#ff6b5e"/>
+<path d="M138 7 L146 15 M146 7 L138 15" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+<path d="M42.0 44.0 L48.9 60.5 L66.7 62.0 L53.1 73.6 L57.3 91.0 L42.0 81.7 L26.7 91.0 L30.9 73.6 L17.3 62.0 L35.1 60.5 Z" fill="#ffc928"/>
+<path d="M33.2 71.2 Q36.0 67.2 38.8 71.2" fill="none"/>
+<path d="M45.2 71.2 Q48.0 67.2 50.8 71.2" fill="none"/>
+<ellipse cx="31.2" cy="75.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="52.8" cy="75.6" rx="2.4000000000000004" ry="1.4000000000000001" fill="#ff9a8a" stroke="none"/>
+<path d="M36.4 76.80000000000001 L47.6 76.80000000000001 Q46.8 83.2 42 83.2 Q37.2 83.2 36.4 76.80000000000001 Z" fill="#ffffff"/>
+<rect x="80" y="46" width="64" height="12" rx="4" fill="#ffc928"/>
+<rect x="80" y="66" width="50" height="8" rx="3" fill="#c9c2d6"/>
+<rect x="80" y="84" width="64" height="22" rx="8" fill="#2ecb6e"/></g>
+<path d="M150 196 L150 150 L162 160 L172 140 L178 144 L168 164 L184 166 Z" fill="#ffffff"/>
+<path d="M24 22 Q25.6 28.4 32 30 Q25.6 31.6 24 38 Q22.4 31.6 16 30 Q22.4 28.4 24 22 Z" fill="#ffc928"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

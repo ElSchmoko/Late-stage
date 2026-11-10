@@ -1,8 +1,21 @@
 # Card plan v14: rewards-track cards (draft 2)
 
-Status: design draft, not implemented or simulated. Draft 3 includes B's feedback from 10 Nov (two rounds). Stats are deliberately uneven: each card's shape (glass cannon, wall, small engine) follows its role, not a tier average.
+Status: design draft, not implemented or simulated. Draft 4 includes B's feedback from 10 Nov (three rounds); approved. Stats are deliberately uneven: each card's shape (glass cannon, wall, small engine) follows its role, not a tier average.
 
 Wording: **Promote** = going up a tier in the shop. **Level up** = the rewards track only.
+
+## Build status
+
+| Batch | Cards | Status |
+| --- | --- | --- |
+| 1 | Levels 1–7: the 14 cards for existing styles at tiers 2–3 | **In the game** (Update 4). Tuned in the simulator; see below |
+| 2 | Gig Economy (levels 8, 9, 11) | Next |
+| 3+ | The other spotlights, the tier 4–5 cards for the existing styles, Neighbours, new legendaries | Later |
+
+**Batch 1 balance check** (`node game/balance/sim.js cards 150 --card=…`, effect over a plain body; tier medians: tier 2 +0.70, tier 3 +0.91):
+- In band without changes: Thirst Trap +1.10, Magpie +0.75, Bluetooth Speaker +0.51, Breathwork Coach +0.49, Performance Review +0.45, Ghostwriter +0.34, Gig Poster +0.29, Loyalty Card +1.05, Encore +0.81.
+- Adjusted: Allotment max +4 → +3 (+1.42 → +1.23). Debate Club +2/+3 → +3/+4 (+0.41 → +0.61). Clutch Player 4/3 → 4/4 with Out of Office (−0.13 → +0.56). Banner Drop 2 → 4 damage, 3/5 (+0.21 → +0.37).
+- Bot Farm +0.19, now 2/5: the bots keep full boards, so it rarely gets to summon in the test. A player who leaves space gets more from it. Watch it in real games.
 
 ## Track structure (45 levels)
 
@@ -110,8 +123,8 @@ Players who already passed 1,000 rating keep their legendaries.
 
 | Tier | Style | Card | Stats | Text | Lv |
 | --- | --- | --- | --- | --- | --- |
-| 2 | Main Character | Thirst Trap | 2/2 | Start of combat: give two friendly minions "Legacy: get 1 Like." | 2 |
-| 3 | Followers | Bot Farm | 1/4 | End of turn: if you have space, summon two 1/1 Followers (3 times per game). | 2 |
+| 2 | Main Character | Thirst Trap | 2/2 | Start of combat: give two other friendly minions "Legacy: get 1 Like." | 2 |
+| 3 | Followers | Bot Farm | 2/5 | End of turn: if you have space, summon two 1/1 Followers (3 times per game). | 2 |
 | 4 | Main Character | Paid Verification | 4/4 | Side Gig (1): get 2 Likes. *Trust me. I paid.* | 16 |
 | 5 | Followers | Fan Convention | 4/7 | Legacy: summon a Follower for every 3 Followers you have summoned this game (max 4). | 16 |
 
@@ -131,7 +144,7 @@ Players who already passed 1,000 rating keep their legendaries.
 | Tier | Style | Card | Stats | Text | Lv |
 | --- | --- | --- | --- | --- | --- |
 | 2 | Scavengers | Magpie | 3/2 | Your first Scroll each turn costs 1 less. *Shiny. Shiny. Mine.* | 3 |
-| 3 | Overgrowth | Allotment | 2/5 | End of turn: give a random other Feral +1/+1 for each Feral you have (max +4). | 3 |
+| 3 | Overgrowth | Allotment | 2/5 | End of turn: give a random other Feral +1/+1 for each Feral you have (max +3). | 3 |
 | 4 | Scavengers | Fox Den | 4/5 | After a friendly Feral comes back (Rebrand), give it +3/+3 permanently. | 26 |
 | 5 | Overgrowth | Botanical Garden | 3/9 | End of turn: Ferals in the Feed get +1/+1 this game for each Feral on your board. | 26 |
 
@@ -179,36 +192,31 @@ Other directions, if this one doesn't land:
 | Tier | Style | Card | Stats | Text | Lv |
 | --- | --- | --- | --- | --- | --- |
 | 2 | Gadgets | Bluetooth Speaker | 2/2 | Collab. Clock In: deal 1 damage to all enemy minions. This damage is never Toxic. | 5 |
-| 3 | Gamers | Clutch Player | 4/3 | While this is your last minion alive, it has Toxic and attacks twice. | 5 |
+| 3 | Gamers | Clutch Player | 4/4 | Out of Office. While this is your last minion alive, it has Toxic and attacks twice. | 5 |
 | 4 | Gamers | LAN Party | 4/5 | After a friendly Techie kills a minion, it attacks again (once per combat each). | 27 |
 | 5 | Gadgets | Smart Doorbell | 4/7 | First Impression: make a friendly minion a Techie too. Legacy: give your Techies +1/+1 permanently. | 27 |
 
-## Punks: **Moshers** (new direction, draft 3)
+## Punks: **Moshers** (new direction)
 
-*Friendly fire. In the pit your own minions bruise each other, and surviving a bruise makes them stronger. Cleave stays rare (only Mosh Pit and the Cover Band legendary).*
+*Friendly fire. In the pit your own minions hit each other, and surviving a hit from a friend makes them stronger. Cleave stays rare (only Mosh Pit and the Cover Band legendary).*
 
-**Problem in draft 2:** Crust Punk (+2 to Punks' start-of-combat damage) and Mohawk Legend (Punks' start-of-combat effects trigger twice) also boosted the Moshers' hits on their own board, so Crowd Surfer or Festival Pit could wipe it.
-
-**Fix: one new keyword, Bruise.** *Bruise (N): deal N damage to a friendly minion. It can't drop below 1 Health.*
-- A bruise never kills, so damage boosts can't wreck your board. Crust Punk only adds to damage dealt to enemies (its text becomes "Your Punks' start-of-combat damage to enemy minions is increased by 2").
-- Mohawk Legend stays as it is: double start-of-combat effects means double bruises and double payoffs. That is a deliberate link between Sabotage and Moshers, and a combo to measure.
-- The keyword is universal, so other tribes can use it later (a Stoic that bruises itself, for example). Stoics' "after this survives damage" triggers on a bruise.
+**Start-of-combat boosts:** Crust Punk's text becomes "Your Punks' start-of-combat damage **to enemy minions** is increased by 2", so it never makes the Moshers' own hits bigger. No new keyword. Mohawk Legend still doubles Crowd Surfer and Festival Pit: two hits and two payoffs, so a riskier but stronger board. That's a deliberate link between Sabotage and Moshers, and it's on the watch list.
 
 | Tier | Card | Stats | Text | Flavour | Lv |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Pogo Dancer | 3/1 | Clock In: Bruise (1) the minions next to it. They gain +2 Attack permanently. | Jumps. That's the whole dance. | 28 |
-| 2 | Circle Pit | 2/4 | After a friendly minion is Bruised, give it +1/+1 permanently. | Clockwise. Always clockwise. | 28 |
+| 1 | Pogo Dancer | 3/1 | Clock In: deal 1 damage to the minions next to it. Each one that survives gains +2 Attack permanently. | Jumps. That's the whole dance. | 28 |
+| 2 | Circle Pit | 2/4 | After a friendly minion survives damage from another friendly minion, give it +1/+1 permanently. | Clockwise. Always clockwise. | 28 |
 | 3 | Bouncer | 2/6 | Attention Seeker. After this is attacked, deal damage equal to its Attack to the minions next to the attacker. | You're not on the list. | 30 |
-| 4 | Crowd Surfer | 4/4 | Start of combat: Bruise (2) your other Punks. They gain +3/+2 permanently. | Carried by everyone. Dropped by most. | 30 |
-| 5 | Wall of Death | 6/5 | After a friendly minion is Bruised, give your Punks +1/+1 permanently (5 times per combat). | Two sides. One bad idea. | 31 |
-| 6 | Festival Pit | 5/9 | Start of combat, and after a friendly Punk dies: Bruise (1) your other minions. They gain +2/+2 permanently. | Three days. One shower. | 31 |
+| 4 | Crowd Surfer | 4/4 | Start of combat: deal 2 damage to your other Punks. Each one that survives gains +3/+2 permanently. | Carried by everyone. Dropped by most. | 30 |
+| 5 | Wall of Death | 6/5 | After a friendly minion damages another friendly minion, give your Punks +1/+1 permanently (5 times per combat). | Two sides. One bad idea. | 31 |
+| 6 | Festival Pit | 5/9 | Start of combat, and after a friendly Punk dies: deal 1 damage to your other minions. Each one that survives gains +2/+2 permanently. | Three days. One shower. | 31 |
 
-**Bridges:** Stoics' survive-damage triggers, Out of Office (it soaks a bruise but still counts as Bruised), Silent Retreat and Enlightened Guru (smaller bruises), Posthumous Fame (Festival Pit pays off on deaths).
+**Bridges:** Stoics' "after this survives damage" triggers on friendly hits. Out of Office soaks a hit. Rebrand and Posthumous Fame like the deaths. Silent Retreat and Enlightened Guru make the hits smaller.
 
 | Tier | Style | Card | Stats | Text | Lv |
 | --- | --- | --- | --- | --- | --- |
 | 2 | Sellouts | Gig Poster | 3/2 | When sold: next turn, the first Punk you hire costs 1 less. | 6 |
-| 3 | Sabotage | Banner Drop | 3/4 | Start of combat: deal 2 damage to each enemy Attention Seeker. | 6 |
+| 3 | Sabotage | Banner Drop | 3/5 | Start of combat: deal 4 damage to each enemy Attention Seeker. | 6 |
 | 4 | Sellouts | Bootleg Merch | 4/5 | After you sell a Punk, get 1 gold back (twice per turn). | 32 |
 | 5 | Sabotage | Sound System | 3/8 | Start of combat: deal 1 damage to a random enemy minion for each Punk you have sold this game. | 32 |
 
@@ -228,7 +236,7 @@ Other directions, if this one doesn't land:
 | Tier | Style | Card | Stats | Text | Lv |
 | --- | --- | --- | --- | --- | --- |
 | 2 | Stoics | Breathwork Coach | 1/4 | Attention Seeker. After a friendly Attention Seeker survives damage, give it +1 Attack permanently. | 7 |
-| 3 | Big Ideas | Debate Club | 2/4 | End of turn: give the minions next to it +2/+2 for the next combat, or +3/+3 if they are from different tribes. | 7 |
+| 3 | Big Ideas | Debate Club | 2/4 | End of turn: give the minions next to it +3/+3 for the next combat, or +4/+4 if they are from different tribes. | 7 |
 | 4 | Stoics | Tenured Professor | 2/8 | Attention Seeker. This and the minions next to it take no damage from start-of-combat effects. | 38 |
 | 5 | Big Ideas | TED Talk | 5/6 | End of turn: give your minions +2/+2 for the next combat, plus +1/+1 for each Philosopher next to it. | 38 |
 
@@ -300,7 +308,7 @@ I went through every card that makes gold, refunds gold, lowers a cost or makes 
 | A minion dying in the shop phase (Cicada Swarm) | Cicada Swarm | New. Decide whether Legacy and Rebrand trigger. Suggestion: no. |
 | Re-trigger a neighbour's First Impression, Legacy or start of combat; copy effects; re-triggers never chain | Remix, Cover Band | No. Mashup Artist is the hardest. |
 | Cards into the hand; copies that sell for 0 | AI Art Generator, Encore, Recruitment Agency | Hand exists; generating cards into it is new |
-| Bruise (non-lethal friendly damage) and "after a friendly minion is Bruised"; Crust Punk limited to enemies | Moshers | New |
+| Friendly damage, "survives damage from a friendly minion"; Crust Punk limited to damage to enemies | Moshers | Damage exists; tracking who dealt it is new |
 | Damage that is never Toxic | Bluetooth Speaker | New flag |
 | Start-of-turn automatic payment | Auto-Renewal | New |
 | Legendary unlocks from track level instead of rating | `legendsOpen()`, `deckSet()` | Needs changing; keep it for profiles already past 1,000 |
@@ -317,3 +325,4 @@ I went through every card that makes gold, refunds gold, lowers a cost or makes 
 - **Bot Farm** (2 Followers, 3 times per game) together with Giveaway Host and Engagement Farmer.
 - **Data Centre** (now uncapped) and the gold engines (Pop-Up Ad, Data Broker, Cashback Card, Bootleg Merch): gold loops are hard for bots to value. Test by hand.
 - **Mashup Artist:** still the highest build-around ceiling.
+- **Mohawk Legend with Crowd Surfer or Festival Pit:** double friendly hits can kill your own board, and double payoffs can make it huge. Measure both.

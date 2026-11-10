@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<rect x="0" y="30" width="200" height="20" rx="3" fill="#c9c2d6"/>
+<path d="M0 40 L200 40" fill="none"/>
+<rect x="10" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<rect x="40" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<rect x="70" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<rect x="100" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<rect x="130" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<rect x="160" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<rect x="190" y="50" width="6" height="24" rx="0" fill="#c9c2d6"/>
+<path d="M24 74 L176 74 L170 172 Q100 160 30 172 Z" fill="#ffffff"/>
+<path d="M24 74 L30 172 M176 74 L170 172" fill="none"/>
+<path d="M46 104 L80 96 L66 136 L104 120 M118 96 Q150 90 152 114 Q150 140 118 134" fill="none" stroke="#ff8a3d" stroke-width="9"/>
+<path d="M46 104 L80 96 L66 136 L104 120 M118 96 Q150 90 152 114 Q150 140 118 134" fill="none"/>
+<g transform="rotate(30 169 193)"><rect x="160" y="176" width="18" height="34" rx="4" fill="#ff6b5e"/>
+<rect x="164" y="169" width="10" height="8" rx="2" fill="#c9c2d6"/>
+<rect x="167" y="165" width="4" height="4" rx="1" fill="#2b2140"/>
+<path d="M162 188 L176 188" fill="none"/></g>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>
