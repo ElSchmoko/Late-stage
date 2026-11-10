@@ -437,7 +437,7 @@ function newTurn() {
   drawFeed(G.saved); G.saved = false;
   L.planPairs();
   buildShop();
-  animateTurnStart(kept).then(() => { if (me.log.length) playLog(); });
+  animateTurnStart(kept).then(async () => { if (me.log.length) await playLog(); if (me.pending.length) await handlePending(); });
 }
 
 // ---------------------------------------------------------------- shop layout
@@ -687,7 +687,7 @@ function needsTarget(card) {
   const me = G.me;
   if (card.collab) return me.board.length ? me.board.filter(m => true) : null;
   if (!E.TARGETED_FI.has(card.name)) return null;
-  const cand = card.name === 'Art Student' ? me.board.filter(m => m.tribe === 'Creative') : me.board.slice();
+  const cand = card.name === 'Art Student' ? me.board.filter(m => m.tribe === 'Creative') : card.name === 'Smart Doorbell' ? me.board.filter(m => !m.follower && m.tribe !== 'Techie' && !m.tribe2) : me.board.slice();
   if (card.name === 'Venture Capitalist' && me.gold[0] <= 0) return null;
   return cand.length ? cand : null;
 }
@@ -716,7 +716,7 @@ async function playCard(hc, pos = null, target = null, more = null) {
   if (!G.hand.includes(hc)) { renderAll(); return; }
   G.hand.splice(G.hand.indexOf(hc), 1);
   const e = S.handEl.get(hc.key); if (e) { e._leaving = true; e.remove(); }
-  const m = me.play(card, me.gold, pos, target, card.collab ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell}, more); sfx('slap');
+  const m = me.play(card, me.gold, pos, target, card.collab ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell, zero: !!hc.zero}, more); sfx('slap');
   if (card.collab) { const c = S.tok.get(m.id); }
   G.firstTurn = G.firstTurn && me.turn <= 1;
   // sticker slap
@@ -846,13 +846,13 @@ function handlePending() {
   return new Promise(res => {
     const p = me.pending.shift(); if (!p) return res();
     if (p.kind === 'hand') {   // a card made by an effect (Encore): straight into the hand
-      if (G.hand.length < 10) { G.hand.push({card: p.card, a: 0, h: 0, key: Math.random()}); toast(`${p.card.name} added to your hand`); sfx('buy'); } else toast('Your hand is full');
+      if (G.hand.length < 10) { G.hand.push({card: p.card, a: 0, h: 0, zero: !!p.zero, key: Math.random()}); toast(`${p.card.name} added to your hand${p.zero ? ' (sells for 0)' : ''}`); sfx('buy'); } else toast('Your hand is full');
       renderAll(); return handlePending().then(res);
     }
     sfx('discover');
     const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 65});
     el('div', 'dim', '', ov);
-    const head = el('div', 'ab bd', p.why === 'triple' ? `Triple! Discover a ${'★'.repeat(p.tier)} minion` : p.why === 'hero' ? `${HERO[G.heroSlug].power}: Discover a minion` : `Discover a ${TP[p.why] ? TP[p.why].replace(/s$/, '') : 'minion'}`, ov);
+    const head = el('div', 'ab bd', p.why === 'gig' ? 'Ghost Kitchen: Discover a minion' : p.why === 'triple' ? `Triple! Discover a ${'★'.repeat(p.tier)} minion` : p.why === 'hero' ? `${HERO[G.heroSlug].power}: Discover a minion` : `Discover a ${TP[p.why] ? TP[p.why].replace(/s$/, '') : 'minion'}`, ov);
     css(head, {left: 0, right: 0, top: 14, textAlign: 'center'}); head.innerHTML = `<span style="display:inline-block;background:#ffc928;border:3px solid #2b2140;border-radius:999px;padding:6px 18px 2px;box-shadow:0 0 0 3px #fff;font-size:22px">${head.textContent}</span>`;
     // look at the board before choosing: the overlay hides, minions can be tapped to inspect, nothing else can be done
     const look = el('button', 'btn', ico('<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="#fff"></path><circle cx="12" cy="12" r="3" fill="#2b2140"></circle>', 20, 2.2) + 'Look at board', ov);
@@ -956,7 +956,13 @@ function showDetailFor(kind, e, look = false) {
   if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk * (h.golden ? 2 : 1) + h.a, hp: h.card.hp * (h.golden ? 2 : 1) + h.h, golden: h.golden}, look ? [] : [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7 && !(!h.golden && me.board.filter(m => m.name === h.card.name && !m.golden && !m.follower).length >= 2)}]); }
   const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
   const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
-  if (m.is_('Side Hustle')) acts.push({label: 'Side Gig', cost: 1, color: '#2fd0d0', disabled: !me.canGig(m), fn: () => chooseTarget(me.board.filter(o => (o.tribe === 'Hustler' || o.tribe2 === 'Hustler') && o !== m), `Side Gig: choose a Hustler for +${m.golden ? 6 : 3}/+${m.golden ? 6 : 3}`, async t => { me.sideGig(m, t); goldTick(-1); renderAll(); await playLog(); }, () => {})});
+  const gk = me.gigOf(m);
+  if (gk) {
+    const tg = me.gigTargets(m), left = me.gigsLeft(m), k = (1 + (m.bp || 0)) * m.g;
+    const hint = {'Side Hustle': `choose a Hustler for +${3 * m.g}/+${3 * m.g}`, 'Task Rabbit': 'choose a minion for Out of Office', 'Battle Pass': `choose a minion for +${k}/+${k}`}[gk] || '';
+    const run = async t => { const g0 = me.gold[0]; me.sideGig(m, t); RUN.act('gig', m.name); sfx('buy'); goldTick(me.gold[0] - g0); renderAll(); await playLog(); if (me.pending.length) await handlePending(); };
+    acts.push({label: me.gigLimit() > 1 ? `Side Gig (${Math.max(0, left)} left)` : 'Side Gig', cost: me.gigCost(m), color: '#2fd0d0', disabled: !me.canGig(m), fn: () => tg ? chooseTarget(tg, `Side Gig: ${hint}`, run, () => {}) : run(null)});
+  }
   if (me.likes > 0) acts.push({label: 'Give a Like', color: '#ff8ab8', fn: async () => { me.giveLike(m); sfx('like'); renderAll(); await playLog(); }});
   showDetail(card, m, look ? [] : acts);
 }

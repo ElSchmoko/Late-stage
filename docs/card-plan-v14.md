@@ -9,13 +9,21 @@ Wording: **Promote** = going up a tier in the shop. **Level up** = the rewards t
 | Batch | Cards | Status |
 | --- | --- | --- |
 | 1 | Levels 1–7: the 14 cards for existing styles at tiers 2–3 | **In the game** (Update 4). Tuned in the simulator; see below |
-| 2 | Gig Economy (levels 8, 9, 11) | Next |
-| 3+ | The other spotlights, the tier 4–5 cards for the existing styles, Neighbours, new legendaries | Later |
+| 2 | Everything else: the 7 new styles, the tier 4–5 cards for the existing styles, 2 Neighbours, 4 new legendaries (64 cards) | **In the game** (Update 5) |
 
 **Batch 1 balance check** (`node game/balance/sim.js cards 150 --card=…`, effect over a plain body; tier medians: tier 2 +0.70, tier 3 +0.91):
 - In band without changes: Thirst Trap +1.10, Magpie +0.75, Bluetooth Speaker +0.51, Breathwork Coach +0.49, Performance Review +0.45, Ghostwriter +0.34, Gig Poster +0.29, Loyalty Card +1.05, Encore +0.81.
 - Adjusted: Allotment max +4 → +3 (+1.42 → +1.23). Debate Club +2/+3 → +3/+4 (+0.41 → +0.61). Clutch Player 4/3 → 4/4 with Out of Office (−0.13 → +0.56). Banner Drop 2 → 4 damage, 3/5 (+0.21 → +0.37).
 - Bot Farm +0.19, now 2/5: the bots keep full boards, so it rarely gets to summon in the test. A player who leaves space gets more from it. Watch it in real games.
+
+**Batch 2 changes while building** (the tables below show the plan; the game has these values):
+- Stats: Reaction Streamer 2/3, Donation Goal 2/4, Raid Party 3/5, Subathon 3/7, Hype Train 6/6, Streamer House 6/9, Wedding Band 2/3, Sampler 2/4, Tribute Act 3/5, Circle Pit 3/4, Declutter Coach 3/5, Task Rabbit 3/5, Hibernating Bear 3/7, Tenured Professor 3/8, Silent Retreat 3/8, LAN Party 4/6, Five-Star Rating 2/4, Battle Pass 1/2.
+- Text: TED Talk gives +1/+1 (not +2/+2) plus +1/+1 per Philosopher next to it. Biopic max +4. Hype Train +2/+2. Declutter Coach +2/+2.
+- Timing: "after 2 turns on your board" means two turns after the one it was hired in. Cicada Swarm goes at the end of its third turn after that. Hibernating Bear doubles on turns 3, 6 and 9 after it arrived (Ancient Oak doesn't affect the doubling).
+- Rules: Side Gig works on any card now. Re-triggered effects never chain. Copies from AI Art Generator sell for 0. Out of Office still counts as "surviving" a friendly hit. Mashup Artist borrows names, so effects written per card name (most of them) work, and Side Gigs too.
+- Bots only play a style when the Feed pool has at least 4 of its cards, so new styles appear in lobbies once you put their cards in your pool.
+
+**Batch 2 style check** (1,200 bot lobbies with Feed pools that mix old and new cards, average place, lower is better): Hibernators 3.81, Overgrowth 3.78, Scavengers 3.83, Big Ideas 4.13, Moshers 4.28, Gadgets 4.32, Exploitation 4.35, Microtransactions 4.37, Passive Income 4.38, big-stats bot 4.43, Stoics 4.45, Gamers 4.46, Remix 4.49, Minimalists 4.56, Sabotage 4.61, Gig Economy 4.63, Posthumous Fame 4.64, Sellouts 4.67, Performers 4.81, Main Character 5.27, Livestreamers 5.30 (before a last small buff), Followers 5.32. The new styles sit inside the old spread. The whole Influencer tribe tests weak in these lobbies, which was already true before.
 
 ## Track structure (45 levels)
 

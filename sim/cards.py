@@ -526,3 +526,85 @@ TRACK = [
 ]
 for _c in TRACK: BY_TRIBE[_c.tribe].append(_c)
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
+# Rewards track batch 2 (Nov 10): the new playstyles, the tier 4-5 cards for the existing styles, Neighbours, new legendaries
+STYLES.update({'GE': (H, 'Gig Economy'), 'LS': (I, 'Livestreamers'), 'HB': (F, 'Hibernators'), 'RX': (C, 'Remix'),
+               'MT': (T, 'Microtransactions'), 'MO': (P, 'Moshers'), 'MN': (PH, 'Minimalists')})
+TRACK2 = [
+    # Hustlers: Gig Economy
+    _tr(8, 'Delivery Rider', H, 1, 3, 1, 'GE', 'Side Gig (1): gain +2/+1 permanently.', 'Fifteen minutes late. Five stars anyway.'),
+    _tr(8, 'Five-Star Rating', H, 2, 2, 4, 'GE', 'End of turn: if you used a Side Gig this turn, give the minions next to it +2/+2.', "Anything less and you're deactivated."),
+    _tr(9, 'Task Rabbit', H, 3, 3, 5, 'GE', 'Side Gig (2): give another minion Out of Office.', 'Assembles your furniture. Judges your flat.'),
+    _tr(9, 'Double Shift', H, 4, 5, 4, 'GE', 'Your Side Gigs can be used twice per turn.', 'Sleep is a subscription.'),
+    _tr(11, 'Ghost Kitchen', H, 5, 4, 8, 'GE', 'Side Gig (2): Discover a minion of your tier or lower.', 'Nine restaurants. One microwave.'),
+    _tr(11, 'Platform Monopoly', H, 6, 6, 9, 'GE', 'After you use a Side Gig, give your minions +2/+2 permanently.', 'Owns the road, the car and the driver.'),
+    # Influencers: Livestreamers
+    _tr(12, 'Reaction Streamer', I, 1, 2, 3, 'LS', 'Clock In: gain +1 Attack permanently.', 'Watches your video. Louder.'),
+    _tr(12, 'Donation Goal', I, 2, 2, 4, 'LS', 'Clock In: next turn, gain 1 extra gold (once per combat).', 'Only €4,990 to go.'),
+    _tr(13, 'Raid Party', I, 3, 3, 5, 'LS', 'Clock In: summon two 1/1 Followers (twice per combat).', 'Brought 400 viewers. Kept 3.'),
+    _tr(13, 'Subathon', I, 4, 3, 7, 'LS', 'Start of combat: your other minions trigger their Clock In effects.', 'Day 31. Still "one more sub".'),
+    _tr(14, 'Hype Train', I, 5, 6, 6, 'LS', 'After a friendly minion with Clock In attacks, give it +2/+2 permanently.', 'Choo choo. Monetised.'),
+    _tr(14, 'Streamer House', I, 6, 6, 9, 'LS', 'Clock In: give two other friendly minions +X/+X permanently, where X is the number of attacks your minions have made this combat.', 'Five streamers. One kitchen. No dishes.'),
+    _tr(15, 'Cashback Card', H, 4, 3, 6, 'PI', 'Every 4 gold you spend: get 1 gold back (twice per turn).', '2% back. 98% debt.'),
+    _tr(15, 'Recruitment Agency', H, 5, 5, 5, 'EX', 'After you sell a minion, get an Unpaid Intern (twice per turn).', 'Paid in experience.'),
+    _tr(16, 'Paid Verification', I, 4, 4, 4, 'MC', 'Side Gig (1): get 2 Likes.', 'Trust me. I paid.'),
+    _tr(16, 'Fan Convention', I, 5, 4, 7, 'FO', 'Legacy: summon a Follower for every 3 Followers you have summoned this game (max 4).', 'Queued six hours for a selfie.'),
+    # Ferals: Hibernators
+    _tr(18, 'Tulip Bulb', F, 1, 2, 2, 'HB', 'After 2 turns on your board, gain +3/+2.', 'Worth more than your flat in 1637.'),
+    _tr(18, 'Hedgehog', F, 2, 1, 4, 'HB', 'After 2 turns on your board, gain +2/+2 and Out of Office.', 'Under the patio since October.'),
+    _tr(19, 'Bat Colony', F, 3, 3, 3, 'HB', 'End of turn: give the Feral that has been on your board the longest +1/+1 for each turn it has been there (max +4).', 'Protected species. Lives in your loft.'),
+    _tr(19, 'Hibernating Bear', F, 4, 3, 7, 'HB', 'Every third end of turn on your board: double this minion\'s stats (3 times per game).', 'Do not disturb until spring.'),
+    _tr(20, 'Cicada Swarm', F, 5, 5, 5, 'HB', 'At the end of its third turn on your board: give your other Ferals +6/+6 permanently, then it dies.', 'Back every 17 years. Louder each time.'),
+    _tr(20, 'Seed Vault', F, 6, 4, 10, 'HB', 'End of turn: give your other Ferals +1/+1 for each turn they have been on your board (max +4 each).', 'A backup of everything. Just in case.'),
+    # Techies: Microtransactions
+    _tr(22, 'Pop-Up Ad', T, 1, 1, 3, 'MT', 'Every second turn, gain 1 extra gold.', 'Close it. No, the other X.'),
+    _tr(22, 'Battle Pass', T, 2, 1, 2, 'MT', 'Side Gig (1): give a minion +1/+1 permanently. Each use raises the bonus by +1/+1 this game.', 'Tier 100 is a hat.'),
+    _tr(23, 'Data Broker', T, 3, 3, 3, 'MT', 'After you use a Side Gig, gain 1 extra gold next turn (twice per turn).', 'Knows your shoe size. Sells it.'),
+    _tr(23, 'Auto-Renewal', T, 4, 3, 6, 'MT', 'Start of turn: pay 1 gold to give your Techies +2/+2 permanently. Sell it to cancel.', 'Cancel any time. Between 3:00 and 3:05.'),
+    _tr(24, 'App Store', T, 5, 4, 8, 'MT', 'Your Side Gigs cost 1 less (minimum 1). After you use one, gain +2/+2 permanently.', 'Takes 30%. Of everything.'),
+    _tr(24, 'Data Centre', T, 6, 7, 7, 'MT', 'Start of combat: give your minions +1/+1 for this combat for each gold you have spent on Side Gigs this game.', 'Drinks a lake a day.'),
+    _tr(26, 'Fox Den', F, 4, 4, 5, 'SV', 'After a friendly Feral comes back (Rebrand), give it +3/+3 permanently.', 'Two exits. Both yours.'),
+    _tr(26, 'Botanical Garden', F, 5, 3, 9, 'OG', 'End of turn: Ferals in the Feed get +1/+1 this game for each Feral on your board.', 'Free entry. Gift shop not free.'),
+    _tr(27, 'LAN Party', T, 4, 4, 6, 'GM', 'After a friendly Techie kills a minion, it attacks again (once per combat each).', 'Bring your own chair. And router.'),
+    _tr(27, 'Smart Doorbell', T, 5, 4, 7, 'GA', 'First Impression: make another friendly minion a Techie too. Legacy: give your Techies +1/+1 permanently.', 'Saw everything. Remembers more.'),
+    # Punks: Moshers
+    _tr(28, 'Pogo Dancer', P, 1, 3, 1, 'MO', 'Clock In: deal 1 damage to the minions next to it. Each one that survives gains +2 Attack permanently.', "Jumps. That's the whole dance."),
+    _tr(28, 'Circle Pit', P, 2, 3, 4, 'MO', 'After a friendly minion survives damage from another friendly minion, give it +1/+1 permanently.', 'Clockwise. Always clockwise.'),
+    _tr(30, 'Bouncer', P, 3, 2, 6, 'MO', 'Attention Seeker. After this is attacked, deal damage equal to its Attack to the minions next to the attacker.', "You're not on the list.", taunt=True),
+    _tr(30, 'Crowd Surfer', P, 4, 4, 4, 'MO', 'Start of combat: deal 2 damage to your other Punks. Each one that survives gains +3/+2 permanently.', 'Carried by everyone. Dropped by most.'),
+    _tr(31, 'Wall of Death', P, 5, 6, 5, 'MO', 'After a friendly minion damages another friendly minion, give your Punks +1/+1 permanently (5 times per combat).', 'Two sides. One bad idea.'),
+    _tr(31, 'Festival Pit', P, 6, 5, 9, 'MO', 'Start of combat, and after a friendly Punk dies: deal 1 damage to your other minions. Each one that survives gains +2/+2 permanently.', 'Three days. One shower.'),
+    _tr(32, 'Bootleg Merch', P, 4, 4, 5, 'SO', 'After you sell a Punk, get 1 gold back (twice per turn).', 'Official. Ish.'),
+    _tr(32, 'Sound System', P, 5, 3, 8, 'SA', 'Start of combat: deal 1 damage to a random enemy minion for each Punk you have sold this game.', 'Two hundred watts of "turn it down".'),
+    # Philosophers: Minimalists
+    _tr(34, 'Van Lifer', PH, 1, 2, 2, 'MN', 'End of turn: if you have 4 or fewer minions, gain +1/+1.', 'Home is where you park it.'),
+    _tr(34, 'Digital Detox', PH, 2, 1, 5, 'MN', 'Start of combat: gain +1/+1 for each empty space on your board.', 'Posting about it from a cabin.'),
+    _tr(35, 'Declutter Coach', PH, 3, 3, 5, 'MN', 'After you sell a minion, give a random other minion +2/+2 permanently.', 'Does it spark joy? Sell it.'),
+    _tr(35, 'Silent Retreat', PH, 4, 3, 8, 'MN', 'Attention Seeker. If you have 4 or fewer minions, your minions take 1 less damage.', '€2,000 to not talk.', taunt=True),
+    _tr(36, 'Capsule Wardrobe', PH, 5, 5, 6, 'MN', 'End of turn: give your minions +1/+1 for each empty space on your board.', 'Twelve items. All beige.'),
+    _tr(36, 'The Void', PH, 6, 4, 12, 'MN', 'Start of combat: give your minions +4/+4 for each empty space on your board. If you have 3 or fewer minions, they also get Out of Office.', 'Stared back. Liked what it saw.'),
+    _tr(38, 'Tenured Professor', PH, 4, 3, 8, 'ST', 'Attention Seeker. This and the minions next to it take no damage from start-of-combat effects.', 'Has not changed a slide since 1994.', taunt=True),
+    _tr(38, 'TED Talk', PH, 5, 5, 6, 'BI', 'End of turn: give your minions +1/+1 for the next combat, plus +1/+1 for each Philosopher next to it.', 'Eighteen minutes. One idea. Seven sponsors.'),
+    # Creatives: Remix
+    _tr(40, 'Wedding Band', C, 1, 2, 3, 'RX', 'First Impression: trigger the First Impression of the minion to its left.', 'Only plays other people\'s hits.'),
+    _tr(40, 'Sampler', C, 2, 2, 4, 'RX', 'Legacy: trigger the Legacy of the minion to its right.', 'Cleared the sample. Eventually.'),
+    _tr(42, 'Tribute Act', C, 3, 3, 5, 'RX', 'Start of combat: trigger the start-of-combat effect of the minion to its right.', 'Sounds just like them. A tenth of the price.'),
+    _tr(42, 'Plagiarist', C, 4, 4, 5, 'RX', 'Clock In: gain the Attack of the minion it attacks permanently.', "It's called homage."),
+    _tr(43, 'AI Art Generator', C, 5, 4, 6, 'RX', 'End of turn: get a plain copy of the minion to its left. It sells for 0 gold.', 'Trained on your work. Without asking.'),
+    _tr(43, 'Mashup Artist', C, 6, 6, 8, 'RX', 'Has the effects of the minions next to it (except other Mashup Artists).', 'Two songs you love, ruined at once.'),
+    _tr(44, 'Biopic', C, 4, 3, 6, 'PF', 'Legacy: give your Creatives +1/+1 permanently for each friendly minion that died this combat (max +4).', 'Based on a true story. Loosely.'),
+    _tr(44, 'Crossover Hit', C, 5, 5, 6, 'PE', 'Your minions of other tribes also count as Creatives.', 'Number one in nine genres.'),
+]
+NEIGHBOURS += [
+    _tr(39, 'Parcel Locker', N, 3, 1, 6, text='Start of combat: give the minion to its left Out of Office if it has none.', flavour='Your parcel is in locker 14. Locker 14 is jammed.'),
+    _tr(39, 'Neighbourhood Watch', N, 5, 3, 7, text='After an enemy minion attacks a minion next to it, deal 3 damage to that enemy minion.', flavour='Noted your car. And your bin. And you.'),
+]
+for _c in TRACK2: BY_TRIBE[_c.tribe].append(_c)
+def _legt(lv, *a, **kw):
+    c = _leg(*a, **kw); c.track = lv; return c
+LEGENDS += [
+    _legt(25, 'Sponsored Streamer', I, 5, 5, 6, 'Clock In: next turn, gain 1 extra gold (twice per combat). Side Gig (2): give your Influencers and Techies +2/+2 permanently.', 'Use code LATESTAGE.', tribe2=T),
+    _legt(29, 'Pension Fund', H, 5, 3, 7, 'End of turn: gain +2/+2 permanently. When sold: give your other Hustlers and Ferals the stats it has gained.', 'Matures in 40 years. Or never.', tribe2=F),
+    _legt(37, 'Startup Monk', T, 6, 5, 8, 'End of turn: remove your lowest-Attack other minion and give its stats to your other minions.', 'Meditates. Then lays off half the team.', tribe2=PH),
+    _legt(45, 'Cover Band', C, 5, 5, 6, 'Cleave. Start of combat: trigger the start-of-combat effects of the minions next to it.', 'Only the hits. Louder.', tribe2=P),
+]
+ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS

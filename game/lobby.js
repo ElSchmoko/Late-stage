@@ -11,7 +11,9 @@ class Lobby {
     this.rng = E.RNG(seed);
     this.tribes = opts.tribes || this.rng.shuffle(E.TRIBES.slice()).slice(0, 5);
     this.pool = E.buildPool(this.tribes, opts.deck || null);
-    const styles = Object.keys(E.styles()).filter(s => this.tribes.includes(E.styles()[s][0]));
+    // bots only play styles the Feed pool can support (the rewards-track styles need their cards unlocked and in the pool)
+    const have = {}; for (const c of this.pool[6][0]) have[c.style] = (have[c.style] || 0) + 1;
+    const styles = Object.keys(E.styles()).filter(s => this.tribes.includes(E.styles()[s][0]) && (have[s] || 0) >= 4);
     const options = styles.concat(['BASE']);
     const chosen = this.rng.shuffle(options.slice()).slice(0, opts.human ? 7 : 8);
     const heroes = this.rng.shuffle(BOT_HEROES.filter(h => h !== opts.heroSlug));

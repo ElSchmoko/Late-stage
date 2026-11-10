@@ -8,7 +8,8 @@ fonts = f"""<style>
 @font-face{{font-family:'Nunito';font-weight:800;src:url('file://{F}/nunito-latin-800-normal.woff2')}}
 @font-face{{font-family:'Nunito';font-weight:900;src:url('file://{F}/nunito-latin-900-normal.woff2')}}
 </style>"""
-cards = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
+from cards import LEGENDS
+cards = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS + LEGENDS
 body = ''.join(f'<div class="w" data-n="{html.escape(c.name)}">{card_html(c)}</div>' for c in cards)
 p = S / 'tools/_fit.html'
 p.write_text(f'<html><head>{fonts}<style>{CARD_CSS}body{{font-family:Nunito}}.w{{display:inline-block;margin:30px}}</style></head><body>{body}</body></html>')
