@@ -1338,14 +1338,14 @@ function showStats(range = 10) {
     <div class="tile"><b>${n}</b><i>runs</i></div><div class="tile"><b>${ap}</b><i>average place</i></div>
     <div class="tile"><b>${pct(rec.filter(r => r.place <= 4).length)}</b><i>top 4</i></div><div class="tile"><b>${pct(rec.filter(r => r.place === 1).length)}</b><i>wins</i></div>`, stage);
   css(tiles, {left: 30, top: 66, width: 300});
-  const chart = el('div', 'ab panel statchart', `<p class="bd">${range ? `Last ${n} runs` : `All ${n} runs · average place`}</p>${placeChart(rec)}`, stage);
+  const chart = el('div', 'ab panel statchart', `<p class="bd">${!n ? "No runs yet" : range ? `Last ${n} runs` : `All ${n} runs · average place`}</p>${placeChart(rec)}`, stage);
   css(chart, {left: 346, top: 66, width: 468, height: 122});
   const ps = playStyle(rec), f = x => x == null ? '–' : x.toFixed(1);
-  const how = el('div', 'ab panel stathow', `<p class="bd">How you play</p>
-    <div class="lvl">${[3, 4, 5, 6].map((tt, i) => `<div><span class="stars">${STAR(11).repeat(tt)}</span><b>${ps.lv[i] == null ? '–' : 'turn ' + f(ps.lv[i])}</b></div>`).join('')}</div>
-    <div class="nums"><div><b>${f(ps.hires)}</b><i>hires / turn</i></div><div><b>${f(ps.rolls)}</b><i>Scrolls / turn</i></div><div><b>${f(ps.sells)}</b><i>sells / turn</i></div>
-    <div><b>${ps.tribe ? `<i class="dot" style="background:${TC[ps.tribe]}"></i>${TP[ps.tribe] || ps.tribe}` : '–'}</b><i>favourite tribe</i></div></div>
-    <div class="favs"><i>Most hired</i></div>`, stage);
+  const g = x => x == null ? '–' : (+x.toFixed(1)).toString();
+  const how = el('div', 'ab panel stathow', `<div class="hhead"><p class="bd">How you play</p>${ps.tribe ? `<span class="ftribe"><i>Favourite</i><span class="dot" style="background:${TC[ps.tribe]}"></span>${TP[ps.tribe] || ps.tribe}</span>` : ''}</div>
+    <div class="hrow"><i>Promoted</i><div class="cells">${[3, 4, 5, 6].map((tt, i) => `<div class="cell lv"><span class="tierpill sm">${STAR(10)}${tt}</span><b>${ps.lv[i] == null ? '–' : '<small>turn</small> ' + g(ps.lv[i])}</b></div>`).join('')}</div></div>
+    <div class="hrow"><i>Each turn</i><div class="cells">${[[ps.hires, 'hires'], [ps.rolls, 'Scrolls'], [ps.sells, 'sells']].map(([v, l]) => `<div class="cell"><b>${g(v)}</b><small>${l}</small></div>`).join('')}</div></div>
+    <div class="hrow favs"><i>Most hired</i></div>`, stage);
   css(how, {left: 346, top: 198, width: 468, height: 178});
   const favs = how.querySelector('.favs');
   if (!ps.cards.length) el('span', 'none', '–', favs);
@@ -1666,20 +1666,28 @@ const RT_GROUND = {Hustler: '#bfe9cd', Influencer: '#ffd3e4', Feral: '#e6efa6', 
 
 const RT_SIL = '<svg class="rt-sil" viewBox="0 0 68 68" aria-hidden="true"><circle cx="34" cy="27" r="13"/><path d="M7 72c2-17 13-26 27-26s25 9 27 26z"/></svg>';
 const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
+/** A reward on the track. Locked rewards stay a mystery: only the tribe colour (or the legendary frame) shows;
+ *  unlocked cards and the next level's cards show the real card. */
 function rtTok(c, state, o = {}) {
-  const real = rtReal(c), t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
+  const show = rtReal(c) && (state === 'done' || state === 'next'), t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
   paintTribe(t, c.tribe, c.tribe2);
-  t.innerHTML = `<div class="clip">${real ? `<img src="${artOf(c.name)}" alt="" draggable="false">` : RT_SIL + '<span class="rt-q">?</span>'}${c.legendary ? '<i class="foil"></i>' : ''}</div>`
-    + (c.tier && !o.noStars ? `<div class="tier">${STAR(13).repeat(c.tier)}</div>` : '')
+  t.innerHTML = `<div class="clip">${show ? `<img src="${artOf(c.name)}" alt="" draggable="false">` : RT_SIL + '<span class="rt-q">?</span>'}${c.legendary ? '<i class="foil"></i>' : ''}</div>`
+    + (show && c.tier && !o.noStars ? `<div class="tier">${STAR(13).repeat(c.tier)}</div>` : '')
     + (state === 'done' && !o.noTick ? `<span class="rt-got">${RT_TICK}</span>` : '');
-  t.setAttribute('role', 'button'); t.setAttribute('aria-label', c.name);
-  t.onclick = e => { e.stopPropagation(); if (real) showDetail(CARD[c.name], null); else { sfx('pop'); toast(`${c.name}: coming in a future update`); } };
+  t.setAttribute('role', 'button'); t.setAttribute('aria-label', show ? c.name : 'Mystery card');
+  t.onclick = e => { e.stopPropagation(); if (show) showDetail(CARD[c.name], null); else { sfx('pop'); toast(o.lv ? `A surprise, unlocked at level ${o.lv}` : 'A surprise'); } };
   return t;
+}
+/** Small label under a milestone: just the tribe, or the legendary. */
+function rtTag(r) {
+  const c = r.cards[0], col = r.legend ? '#ffc928' : TC[r.tribe];
+  const dot = r.legend && c.tribe2 ? `background:linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[c.tribe2]} 50%)` : r.set ? 'background:conic-gradient(#14a052,#ff8ab8,#d4e24a,#b18cff,#5ab8ff,#ff8a3d,#4fd1c5,#14a052)' : `background:${col}`;
+  return `<span class="rt-tag${r.legend ? ' leg' : ''}"><i style="${dot}"></i>${r.legend ? 'Legendary' : tribeName(r.tribe)}</span>`;
 }
 function rtToks(r, st, parent) {
   const box = el('div', 'rt-toks' + (r.set ? ' fan' : ''), '', parent);
-  if (r.set) r.cards.forEach((c, i) => { const t = rtTok(c, st, {noStars: true, noTick: true}); t.style.zIndex = 10 - Math.abs(i - 3); t.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 3}px)`; box.appendChild(t); });
-  else r.cards.forEach(c => box.appendChild(rtTok(c, st)));
+  if (r.set) r.cards.forEach((c, i) => { const t = rtTok(c, st, {noStars: true, noTick: true, lv: r.lv}); t.style.zIndex = 10 - Math.abs(i - 3); t.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 3}px)`; box.appendChild(t); });
+  else r.cards.forEach(c => box.appendChild(rtTok(c, st, {lv: r.lv})));
   return box;
 }
 const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
@@ -1690,13 +1698,13 @@ function showTrack() {
   const P = rtProgress(), done = P.level >= RT_LEVELS, nxt = RT_TRACK[Math.min(P.level, RT_LEVELS - 1)];
   PROF.rtSeen = Math.max(PROF.rtSeen || 0, P.level); saveProfile();
   const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
-  side.innerHTML = `<div class="rt-lvl"><span class="bd">${P.level}</span></div><p class="bd rt-lvlt">Level ${P.level}<small>of ${RT_LEVELS}</small></p>
-    ${rtXpBar(P, 186)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} … 8th +${RT_XP_PLACE[7]} XP</p>
-    <p class="rt-cap">${done ? 'All levels done' : `Next: Level ${nxt.lv}`}</p><div class="rt-nextrow"></div><p class="rt-nextl">${rtTitle(nxt)}<br><span>${rtSub(nxt)}</span></p>`;
+  side.innerHTML = `<div class="rt-head"><div class="rt-lvl"><span class="bd">${P.level}</span></div><p class="bd rt-lvlt">Level ${P.level}<small>of ${RT_LEVELS}</small></p></div>
+    ${rtXpBar(P, 182)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} … 8th +${RT_XP_PLACE[7]} XP</p>
+    <div class="rt-nexthead"><p class="rt-cap">${done ? 'All done' : `Next · Lv ${nxt.lv}`}</p>${rtTag(nxt)}</div><div class="rt-nextrow"></div><p class="rt-nextl">${rtTitle(nxt)}</p>`;
   rtToks(nxt, done ? 'done' : 'next', side.querySelector('.rt-nextrow'));
   const p = el('div', 'panel rt-roadp', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
   const body = el('div', 'rt-scroll', '', p);
-  const ROW = 150, TOP = 132, XL = 214, XR = 326, Wd = 540, Hd = TOP + (RT_LEVELS - 1) * ROW + 90;
+  const ROW = 164, TOP = 136, XL = 226, XR = 314, Wd = 540, Hd = TOP + (RT_LEVELS - 1) * ROW + 90;
   const pos = r => r.lv ? [r.lv % 2 ? XL : XR, TOP + (r.lv - 1) * ROW] : [XL, 58];   // level 0 = the start, just above level 1
   const inner = el('div', 'rt-inner', '', body); css(inner, {width: Wd, height: Hd});
   const seg = (a, b) => { const [x1, y1] = pos(a), [x2, y2] = pos(b); return `M${x1} ${y1}C${x1} ${y1 + ROW * .62} ${x2} ${y2 - ROW * .62} ${x2} ${y2}`; };
@@ -1708,7 +1716,7 @@ function showTrack() {
   for (const r of RT_TRACK) {   // scenery goes in first, under the road
     const [x, y] = pos(r), left = r.lv % 2, key = r.legend ? 'Legend' : r.tribe, set = RT_PROPS[key], st = rtState(r, P.level);
     const sc = el('div', `rt-scene ${st}`, '', inner);
-    css(sc, left ? {left: x + 48, top: y - 74} : {left: x - 48 - 200, top: y - 74});
+    css(sc, left ? {left: x + 62, top: y - 66} : {left: x - 62 - 200, top: y - 66});
     const [a, b, c] = [0, 1, 2].map(k => set[(r.lv + k) % 3]), side = left ? 'left' : 'right';
     sc.innerHTML = `<i class="rt-ground" style="background:${RT_GROUND[key]}"></i><span class="pr big" style="${side}:30px">${a}</span><span class="pr mid" style="${side}:96px">${b}</span><span class="pr small" style="${side}:148px">${c}</span>`;
   }
@@ -1720,9 +1728,9 @@ function showTrack() {
     const n = el('div', `rt-node ${st}${r.legend ? ' leg' : ''}${r.set ? ' set' : ''}`, `<span class="bd">${r.lv}</span>`, inner);
     css(n, {left: x, top: y}); if (st === 'done' && !r.legend) n.style.background = TC[r.tribe];
     if (st === 'done') el('i', 'rt-ok', RT_TICK, n);
-    const g = el('div', `rt-grp ${left ? 'l' : 'r'} ${st}`, '', inner); css(g, left ? {right: Wd - x + 46, top: y - 50} : {left: x + 46, top: y - 50});
+    const g = el('div', `rt-grp ${left ? 'l' : 'r'} ${st}`, '', inner); css(g, left ? {right: Wd - x + 54, top: y - 52} : {left: x + 54, top: y - 52});
     rtToks(r, st, g);
-    el('p', 'rt-glab', `<b>${rtTitle(r)}</b><span>${rtSub(r)}</span>`, g);
+    g.insertAdjacentHTML('beforeend', rtTag(r));
   }
   // your hero rides the road like a board-game peg
   const pe = inner.querySelector('.rpart'), [ex, ey] = pos(RT_TRACK[RT_LEVELS - 1]);

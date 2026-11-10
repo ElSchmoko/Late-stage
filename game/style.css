@@ -388,3 +388,50 @@ button{font:inherit;color:inherit}
 .rt-tok{cursor:pointer}
 .logcard .legat.lv{position:absolute;left:0;right:0;bottom:44px;text-align:center;z-index:6;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:13px;color:var(--ink)}
 .rt-xpchip{position:relative;display:inline-flex;align-items:center;gap:4px;margin-left:10px;padding:3px 10px 1px;border:2.5px solid var(--ink);border-radius:999px;background:#ffc928;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px}
+/* rewards track: v3 spacing (side panel, milestone tags) */
+.rt-side{padding:14px 18px}
+.rt-head{display:flex;align-items:center;gap:12px;height:56px}
+.rt-head .rt-lvl{position:relative;left:auto;top:auto;width:52px;height:52px;flex-shrink:0}
+.rt-head .rt-lvl span{font-size:28px}
+.rt-head .rt-lvlt{margin:0;height:auto;font-size:24px;line-height:1}.rt-head .rt-lvlt small{margin-top:3px}
+.rt-side .rt-xp{margin-top:12px}
+.rt-per{margin:6px 0 0}
+.rt-nexthead{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:14px;padding-top:12px;border-top:2.5px dashed #e2dbea}
+.rt-side .rt-nexthead .rt-cap{margin:0}
+.rt-side .rt-nextrow{justify-content:center;margin:16px 0 0;height:72px;gap:20px}
+.rt-side .rt-nextl{margin:12px 0 0;text-align:center;font-size:14px;line-height:1.1}
+.rt-side .rt-nextrow:has(.gold) + .rt-nextl{margin-top:16px}
+.rt-tag{display:inline-flex;align-items:center;gap:5px;align-self:center;white-space:nowrap;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:3px 10px 1px 5px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:12.5px;line-height:1.2}
+.rt-tag i{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);flex-shrink:0}
+.rt-tag.leg{background:#fff6c2}
+.rt-grp{align-items:center !important;gap:12px}
+.rt-grp.locked .rt-tag{color:#8f86a6;border-color:#a59cb8}
+.rt-nexthead{margin-top:10px;padding-top:10px}
+.rt-side .rt-nexthead .rt-cap{white-space:nowrap}
+.rt-side .rt-nextrow{margin-top:12px}
+.rt-side .rt-nextl{margin-top:8px;font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rt-side .rt-nextrow:has(.gold) + .rt-nextl{margin-top:12px}
+.rt-nexthead{margin-top:8px;padding-top:8px}
+.rt-side .rt-nextrow{margin-top:10px}
+.rt-side .rt-nextl{margin-top:20px}
+/* stats page: How you play v2 (aligned rows) */
+.stathow{display:flex;flex-direction:column;gap:9px}
+.stathow .hhead{display:flex;align-items:center;justify-content:space-between;height:24px}
+.stathow .hhead p{margin:0;font-size:17px}
+.stathow .ftribe{display:inline-flex;align-items:center;gap:5px;border:2.5px solid var(--ink);border-radius:999px;padding:2px 10px 0 4px;font:800 13px/1.3 'Baloo 2',sans-serif;background:#fff}
+.stathow .ftribe>i{font-size:11px;color:#8f86a6;margin:0 2px 0 4px}
+.stathow .hrow{display:flex;align-items:center;gap:10px;margin:0}
+.stathow .hrow>i{width:66px;flex-shrink:0;line-height:1.1}
+.stathow .cells{flex:1;display:flex;gap:8px;min-width:0}
+.stathow .cell{flex:1;height:34px;border:2.5px solid var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;gap:5px;background:#fff;min-width:0;padding:2px 6px 0}
+.stathow .cell b{font-family:'Baloo 2',sans-serif;font-size:17px;line-height:1;white-space:nowrap}
+.stathow .cell small{font:800 11.5px/1 'Baloo 2',sans-serif;color:#5a5270}
+.stathow .cell.lv{justify-content:flex-start;gap:6px;padding-left:5px}
+.stathow .cell.lv .tierpill{flex-shrink:0;margin-top:-2px}
+.stathow .cell.lv b{font-size:15px}
+.stathow .hrow.favs{margin-top:2px}
+.stathow{gap:8px}
+.stathow .cells{gap:7px}
+.stathow .cell.lv{justify-content:center;gap:4px;padding:2px 3px 0}
+.stathow .cell.lv b{font-size:14.5px}.stathow .cell.lv small{font-size:10.5px}
+.stathow .hrow.favs{margin-top:0}
