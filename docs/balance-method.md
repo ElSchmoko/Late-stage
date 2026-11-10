@@ -176,3 +176,69 @@ A stronger bot for the balance runs, built on the expert bot without any trainin
 With slower levelling, early-game styles gain. Builds whose payoff is at tier 5–6 lose: Sellouts, Big Ideas, Stoics, Main Character. The big-stats reference bot has no tribe, so the plans don't help it, and it is no longer a fair reference in `--pro` runs.
 
 Usage: `node game/balance/sim.js styles 3200 0 --pro`, and `node game/balance/h2h.js 150 1 exp [parts off] [PRO=values]`.
+
+### 15b · Pro bot v2 (Nov 10)
+
+**New situational rules** (`levelPlan`; each can be switched off for testing with `PRO.off`):
+- **Lives left:** how many more lost fights the bot can take at this stage.
+- **Next-fight odds:** simulated against the next opponent's last board.
+- **Missing payoff:** the style's payoff isn't on the board yet, so the bot levels to find it and digs (more Scrolls) once it's in reach.
+- **Cheap levels:** levels that are nearly free get taken.
+- **Full board:** a full board already at its tier wants to level.
+- **Pairs:** with a pair on the board, the bot rolls for the triple before levelling.
+- **Endgame:** with 3 or fewer players left, strength now comes first.
+- **Hero fit:** the Minimalist board cap tested slightly worse, so it's off.
+
+Each rule tested alone was neutral against v1. The gold check used to block every early level, so they rarely fired: an above-curve level needed the level cost plus 3 gold. Rule-driven levels now need only the level cost.
+
+**Settings per bot.** `p.prm` overrides `PRO` for one player, so a head-to-head can tune the test seats only. Earlier PRO overrides changed both sides of pro-vs-pro tests.
+
+**Levelling turns, tuned per tier** (150-lobby seat-swapped tests):
+
+| Tier | Turn |
+| --- | --- |
+| 3 | 5 |
+| 4 | 7 |
+| 5 | 9 |
+| 6 | 11 |
+
+This has the same average place as reaching tier 3 on turn 6, but wins 13% instead of 10%.
+
+**Tested and neutral:**
+- Card-tier weight in buying: 0, 0.5 (kept) and 1.5.
+- Swap threshold: 0.5, 1.5 (kept) and 3.
+
+**Head to head** (150 lobbies, played twice with the seats swapped):
+
+| Opponent | Pro bot | Opponent |
+| --- | --- | --- |
+| Expert bot | 4.15 | 4.85 |
+| Standard bot | 3.80 | 5.20 |
+
+The pro bot takes about 6 ms per turn.
+
+**Balance runs on `--pro`:**
+- The big-stats bot stays the expert bot, as a fixed yardstick.
+- Results count by each bot's starting style, even if it changes plan mid-game.
+
+**Styles with pro bots** (1,600 lobbies):
+
+| Style | Expert bots | Pro bots | Wins (pro) |
+| --- | --- | --- | --- |
+| Overgrowth | 4.12 | **3.86** | 24% |
+| Scavengers | 4.20 | 4.04 | 21% |
+| Sellouts | 4.45 | 4.22 | |
+| Sabotage | 4.42 | 4.24 | |
+| Gamers | 4.52 | 4.26 | |
+| Gadgets | 4.67 | 4.38 | |
+| Pure Feeling | 4.67 | 4.42 | |
+| Performers | 4.64 | 4.51 | |
+| Passive Income | 4.41 | 4.55 | |
+| Big Ideas | 4.34 | 4.56 | |
+| Exploitation | 4.52 | 4.60 | |
+| Followers | 4.68 | 4.66 | |
+| Stoics | 4.28 | 4.73 | |
+| Main Character | 4.85 | 4.73 | |
+| Big stats (expert bot) | 4.68 | 5.38 | |
+
+The spread is 0.87. Under strong play, Ferals lead, and Stoics, Main Character and Followers trail.

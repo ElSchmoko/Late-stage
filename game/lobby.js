@@ -28,7 +28,7 @@ class Lobby {
       const rating = botRating(), skill = opts.skill != null ? opts.skill : rating == null ? 0 : E.skillOf(rating);
       const hero = opts.botHeroes ? opts.botHeroes[i] : heroes[i], hd = (root.LS_HEROES || []).find(h => h.slug === hero);
       // bots start with their hero's Boundaries, like the player does (the hero balance sims assume this)
-      const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero, boundaries: hd ? hd.boundaries : undefined, name: s, rating, skill, expert: opts.expert, pro: opts.pro});
+      const p = new E.Player(s, E.RNG(this.rng.int(1, 1e9)), this.pool, {hero, boundaries: hd ? hd.boundaries : undefined, name: s, rating, skill, expert: opts.expert || (opts.pro && s === 'BASE'), pro: opts.pro && s !== 'BASE'});   // the big-stats bot stays the expert bot: a fixed yardstick
       this.players.push(p);
     });
     this.turn = 0; this.deadOrder = []; this.ghosts = []; this.lastPairs = [];
@@ -37,7 +37,7 @@ class Lobby {
   botTurns() {
     for (const p of this.alive()) if (!p.human) {
       if (p.skill >= 0.5 || p.pro) p.scout = this.alive().filter(q => q !== p && q.lastSeen).map(q => ({board: q.lastSeen, hero: q.hero, power: q.lastSeen.reduce((s, m) => s + m.atk + m.hp, 0), next: this.nextOpponentFor(p) === q}));
-      p.takeTurn();
+      p.aliveCount = this.alive().length; p.takeTurn();
     }
   }
   pair() {

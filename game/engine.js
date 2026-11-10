@@ -95,7 +95,7 @@ class Player {
     this.sold_hustle = false; this.punks_sold = 0; this.kills_last = 0; this.techie_kills = 0; this.spent_this_turn = 0;
     this.human = !!opts.human; this.hero = opts.hero || null; this.name = opts.name || style;
     this.hand = []; this.feed = []; this.saved = false; this.gold = [0]; this.log = []; this.pending = []; this.lostLast = false;
-    this.pro = !!opts.pro; this.skill = this.pro ? 1 : opts.skill ?? 0; this.expert = opts.expert ?? (this.pro || this.skill >= 0.8); this.persona = this.pro && rng ? PERSONAS[Math.floor(rng() * PERSONAS.length)] : PERSONAS[3]; this.kn = knobs(this.skill); this.scrollUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
+    this.pro = !!opts.pro; this.v2 = this.pro && opts.v2 !== false; this.skill = this.pro ? 1 : opts.skill ?? 0; this.expert = opts.expert ?? (this.pro || this.skill >= 0.8); this.persona = this.pro && rng ? PERSONAS[Math.floor(rng() * PERSONAS.length)] : PERSONAS[3]; this.kn = knobs(this.skill); this.scrollUses = {}; this.scout = []; this.simSeed = 1; this.rating = opts.rating ?? null; this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollsTotal = 0; this.coachId = null; this.savedFeed = null; this.rereleaseCost = 2; this.merchUsed = {}; this.resellUsed = new Set();
     this.likes = 0; this.likeBonus = 0; this.likesSpent = 0; this.feedBuff = {}; this.creativeAtk = 0; this.creativesThisTurn = 0; this.gigUsed = new Set(); this.feedRef = null; this.getFeed = null;
   }
   has(n) { return this.board.some(m => m.is_(n)); }
@@ -124,7 +124,7 @@ class Player {
     if (m.name === 'Lawyer Next Door' && ['FO', 'PF'].includes(this.style) && this.count('Lawyer Next Door') <= 1) v += 4;
     if (!m.golden && this.board.some(o => o !== m && o.name === m.name && !o.golden)) v += 1.5 * this.skill;
     if (this.expert && c) v += 0.8 * this.synergy(c, m) * this.commit();
-    if (this.pro && c) v += PRO.plan * planWeight(this.style, c.name) * this.commit();
+    if (this.pro && c) v += (this.prm || PRO).plan * planWeight(this.style, c.name) * this.commit();
     if (this.expert && c && this.tier >= 5 && c.style === this.style && c.tier === 6 && !this.board.some(o => o !== m && o.name === c.name)) v += 8;
     return v + 1.5 * m.extras.length;
   }
@@ -159,7 +159,8 @@ class Player {
   cardScore(card) {
     const m = new M(card); UID--;
     if (this.tribe === null) return m.stats() / 2 + card.tier * .5;
-    let s = this.value(m) + card.tier * .5;
+    const pr = this.pro ? (this.prm || PRO) : null;
+    let s = this.value(m) + card.tier * (pr ? pr.tierW : .5) + (pr ? (pr.statW - 0.5) * (card.atk + card.hp) / 2 : 0);
     if (card.tribe === this.tribe) {
       const decay = Math.max(.25, 1 - .25 * Math.max(0, this.tier - card.tier - 1));
       if (card.kind === 'fi' || card.collab) s += 1.5 * (1 + card.tier) * decay;
@@ -168,7 +169,7 @@ class Player {
     if (card.name === 'Helpful Neighbour') s += 2;
     if (card.name === 'Jingle Writer' && this.tribe === P && this.punks_sold >= 2) s += 3 + 3 * this.count('Reunion Tour');
     if (card.collab && this.board.length) s += 1;
-    if (!card.collab) s += (1.5 + (this.pro ? PRO.twin : 0)) * this.board.filter(x => x.name === card.name && !x.golden).length;
+    if (!card.collab) s += (1.5 + (this.pro ? (this.prm || PRO).twin : 0)) * this.board.filter(x => x.name === card.name && !x.golden).length;
     return s;
   }
   summonFollower(board) {
@@ -498,7 +499,7 @@ class Player {
       const spare = minBy(this.board.filter(o => !o.is_('Sneaker Reseller') && !o.is_('Private Equity') && !o.golden), o => this.value(o) - (o.name === 'Unpaid Intern' ? 3 : 0));
       if (spare) this.sell(spare, gold);
     }
-    const target = this.pro ? Math.max(1, Math.min(6, (CURVE[this.turn + PRO.curve] || 6))) : CURVE[this.turn] || 6;
+    const target = this.pro ? 1 + [(this.prm || PRO).l2, (this.prm || PRO).l3, (this.prm || PRO).l4, (this.prm || PRO).l5, (this.prm || PRO).l6].filter(t => this.turn >= t).length : CURVE[this.turn] || 6;
     let proRefs = [], proFeed = null;
     if (this.pro) {
       this.planPivot();
@@ -513,17 +514,19 @@ class Player {
       if (w < 0.3 && this.health + this.boundaries < 16) { eager = false; hold = this.tier >= target - 1; }
     }
     if (this.pro && !PRO.off.tempo) {   // tempo: level ahead of the curve when ahead and healthy; hold when behind and hurting
-      const tp = this.tempo(), safe = this.health + this.boundaries >= PRO.safeHp;
-      eager = tp >= PRO.ahead && safe && this.turn >= 3;
-      hold = tp <= -PRO.behind && !safe && this.tier >= target - 1;
+      const tp = this.tempo(), safe = this.health + this.boundaries >= (this.prm || PRO).safeHp;
+      eager = tp >= (this.prm || PRO).ahead && safe && this.turn >= 3;
+      hold = tp <= -(this.prm || PRO).behind && !safe && this.tier >= target - 1;
+      if (this.v2) { const d = this.levelPlan(target); eager = d.eager; hold = hold || d.hold; }
     }
     if (this.tier < 6 && !hold && (this.tier < target || (eager && this.tier <= target))) {
-      const cost = this.levelCost(); if (gold[0] >= cost + (this.tier >= target ? 3 : 0)) { gold[0] -= cost; this.gainSpend(cost); this.tier += 1; this.turns_at_tier = 0; }
+      const cost = this.levelCost(); if (gold[0] >= cost + (this.tier >= target && !(this.v2 && eager) ? 3 : 0)) { gold[0] -= cost; this.gainSpend(cost); this.tier += 1; this.turns_at_tier = 0; }
     }
     let feed = this.savedFeed || this.feedEntries(this.drawFeed()); this.savedFeed = null;
     this.getFeed = () => feed;
     let scrolls = 0, digs = 0, swaps = 0, guard = 0, digCap = 0;
-    const maxScrolls = 4 + (this.health < 12 ? Math.round(3 * sk) : 0) + (this.pro ? PRO.rolls : 0);
+    const maxScrolls = 4 + (this.health < 12 ? Math.round(3 * sk) : 0) + (this.pro ? (this.prm || PRO).rolls : 0)
+      + (this.v2 && !PRO.off.pair && this.hasPair() ? (this.prm || PRO).pairRolls : 0) + (this.v2 && !PRO.off.payoff && this.payoffMissing() && this.tier >= this.payoffTier() ? (this.prm || PRO).digRolls : 0);
     const hp = this.hero;
     if (hp === 'h_overthinker' && this.canPower() && this.board.length < 7 && gold[0] >= 2 + (this.turn > 2 ? 3 : 0)) this.usePower(null, feed);
     if (hp === 'boomer' && this.canPower() && gold[0] >= 4) this.usePower(this.board.length ? this.carry() : null, feed);
@@ -558,9 +561,10 @@ class Player {
       if (sc === 0 && scrolls === 0 && best && this.tribe && best.card.tribe !== this.tribe) { this.payScroll(); scrolls++; feed = this.feedEntries(this.drawFeed()); continue; }
       if (best) {
         const twin = !best.card.collab && this.board.filter(x => x.name === best.card.name && !x.golden && !x.follower).length >= 2;
-        const bs = this.cardScore(best.card), free = twin || this.board.length < 7 || (best.card.collab && this.board.length);
+        const cap = this.v2 && !PRO.off.hero && this.hero === 'h_minimalist' ? MINI_MAX : 7;
+        const bs = this.cardScore(best.card), free = twin || this.board.length < cap || (best.card.collab && this.board.length);
         const playEngines = this.expert && best.card.tribe === C ? ['World Tour', 'Festival Headliner', 'Busker', 'Indie Band', 'Record Label', 'Merch Stand'].reduce((k, n) => k + this.count(n), 0) : 0;
-        if (free || (swaps < (playEngines ? 5 : 3) && (this.pro && !playEngines && !PRO.off.look ? this.proSwapLook(best, worst) : bs > this.value(worst) + 1.5 - 1.5 * Math.min(3, playEngines)))) {
+        if (free || (swaps < (playEngines ? 5 : 3) && (this.pro && !playEngines && !PRO.off.look ? this.proSwapLook(best, worst) : bs > this.value(worst) + (this.pro ? (this.prm || PRO).swapTh : 1.5) - 1.5 * Math.min(3, playEngines)))) {
           if (!free) { this.sell(worst, gold); swaps++; }
           gold[0] -= this.minionCost(best); this.gainSpend(this.minionCost(best)); feed.splice(feed.indexOf(best), 1);
           if (twin) { this.tripleOnBuy(best.card, [{a: best.a, h: best.h}], gold); continue; }
@@ -964,8 +968,12 @@ const damageCap = turn => turn <= 3 ? 5 : turn <= 7 ? 10 : 15;
 // One brain for every bot in the game. It judges boards in simulated fights against the boards it has seen, looks a turn or
 // two ahead so it values engines (spirals), plans its levelling, and places minions for attack order. Difficulty only
 // limits its search and adds mistakes. PRO holds the weights that self-play tuning adjusts.
-const PRO = {growth: 0.5, tierVal: 0.12, levelHealth: 12, err: 0.35, off: {},
-  plan: 2.0, look: 0.35, ahead: 99, behind: 0.2, safeHp: 16, horizon: 3, stick: 2, curve: -2, twin: 0, rolls: 0};
+// off.hero: the Minimalist board cap tested slightly worse, so it is off by default
+const PRO = {growth: 0.5, tierVal: 0.12, levelHealth: 12, err: 0.35, off: {hero: true},
+  plan: 2.0, look: 0.35, ahead: 99, behind: 0.2, safeHp: 16, horizon: 3, stick: 2, curve: -2, twin: 0, rolls: 0,
+  // v2 (situational levelling and buying): thresholds
+  l2: 2, l3: 5, l4: 7, l5: 9, l6: 11, tierW: 0.5, swapTh: 1.5, statW: 0.5,   // turn on which the pro bot aims to reach each tier
+  winHi: 0.72, winLo: 0.35, livesGamble: 3, livesSafe: 2, cheap: 2, payoffTurn: 7, pairRolls: 2, digRolls: 2};
 // What a strong player builds toward in each style: [core and enablers, payoffs]. Payoffs count double.
 const PLANS = {
   PI: [['Thought Leader', 'Consultant', 'Side Hustle', 'Grindset Guru', 'Venture Capitalist', 'Dropshipper', 'Tech Founder'], ['Unicorn Startup', 'Thought Leader']],
@@ -993,17 +1001,44 @@ const PERSONAS = [   // levelling bias (win-prob units per tier), extra Scrolls,
   {name: 'fast', level: 0.06, rolls: -1, flex: false}, {name: 'tempo', level: -0.05, rolls: 2, flex: false},
   {name: 'flex', level: 0, rolls: 0, flex: true}, {name: 'steady', level: 0, rolls: 0, flex: false}, {name: 'greedy', level: 0.03, rolls: 1, flex: true}];
 Object.assign(Player.prototype, {
+  /** How many more lost fights this player can take, at this stage of the game. */
+  lives() { return (this.health + this.boundaries) / Math.max(3, 0.6 * damageCap(this.turn + 1)); },
+  /** Chance to win the next fight (simulated against the next opponent's last board), or null if unknown. */
+  nextWin() {
+    const nx = (this.scout || []).filter(o => o.next && o.board.length); if (!nx.length || !this.board.length) return null;
+    const sh = this.shadow(); sh.endOfTurn(); return this.simScore(sh.board, nx, 2);
+  },
+  /** The style's payoff cards, and whether one is on the board. */
+  payoffMissing() { const p = PLANS[this.style]; return !!p && !this.board.some(m => m.c && p[1].includes(m.c.name)); },
+  payoffTier() { const p = PLANS[this.style]; if (!p) return 7; const ts = p[1].map(n => BY_NAME[n] && BY_NAME[n].tier).filter(Boolean); return ts.length ? Math.min(...ts) : 7; },
+  /** A pair (two copies, not golden) at a tier the Feed still offers: worth rolling for the third. */
+  hasPair() { const c = {}; for (const m of this.board) if (!m.golden && !m.follower && m.c && m.tier <= this.tier) c[m.name] = (c[m.name] || 0) + 1; return Object.values(c).some(k => k >= 2); },
+  /** v2 levelling: the curve, adjusted by health, next-fight odds, missing payoffs, cheap levels, a full board, pairs and the lobby. */
+  levelPlan(target) {
+    const off = PRO.off, lives = this.lives(), cost = this.levelCost(), alive = this.aliveCount || 8;
+    const full = this.board.filter(m => !m.follower).length >= 7, avgTier = this.board.length ? this.board.reduce((a, m) => a + (m.tier || 1), 0) / this.board.length : 0;
+    const win = off.next ? null : this.nextWin();
+    let eager = false, hold = false;
+    if (!off.payoff && this.payoffMissing() && this.turn >= (this.prm || PRO).payoffTurn && this.tier < this.payoffTier() && lives >= (this.prm || PRO).livesGamble) eager = true;   // go find the payoff
+    if (!off.cheap && cost <= (this.prm || PRO).cheap && lives >= (this.prm || PRO).livesSafe) eager = true;                                                    // a level this cheap is nearly free
+    if (!off.full && full && avgTier >= this.tier - 0.3 && lives >= (this.prm || PRO).livesSafe) eager = true;                                    // nothing left to upgrade at this tier
+    if (!off.next && win != null && win >= (this.prm || PRO).winHi && lives >= (this.prm || PRO).livesGamble) eager = true;                                     // safe this turn: invest
+    if (!off.next && win != null && win < (this.prm || PRO).winLo && lives < (this.prm || PRO).livesSafe && this.tier >= target - 1) { eager = false; hold = true; }   // must win now
+    if (!off.pair && this.hasPair() && this.tier >= target && cost > (this.prm || PRO).cheap) eager = false;                                       // roll for the triple first
+    if (!off.lobby && alive <= 3 && cost > (this.prm || PRO).cheap && win != null && win < 0.5) { eager = false; hold = this.tier >= target - 1; }  // endgame: strength now
+    return {eager, hold};
+  },
   /** Stats a board gains over the next few turns from its own engines (end of turn, Likes), played forward on a copy. */
   growth(board) {
     const sh = this.shadow(board), now = sh.board.reduce((a, m) => a + m.atk + m.hp, 0);
-    for (let t = 0; t < PRO.horizon; t++) { for (const m of sh.board) { m.ta = m.th = 0; } sh.endOfTurn(); sh.likes += 0; sh.spendLikes(); }
+    for (let t = 0; t < (this.prm || PRO).horizon; t++) { for (const m of sh.board) { m.ta = m.th = 0; } sh.endOfTurn(); sh.likes += 0; sh.spendLikes(); }
     return sh.board.reduce((a, m) => a + m.atk + m.hp, 0) - now;
   },
   /** Extra value of a Feed card from what it makes the board grow into (spirals), on top of its card score. */
   lookBonus(e) {
     if (e.card.collab || this.board.length >= 7) return 0;
     const m = new M(e.card); UID--; m.atk += e.a; m.hp += e.h;
-    return PRO.look * Math.max(-10, this.growth(this.board.concat([m])) - this.baseGrowth) / 2;
+    return (this.prm || PRO).look * Math.max(-10, this.growth(this.board.concat([m])) - this.baseGrowth) / 2;
   },
   /** Tempo: own board against the lobby's typical board (from scouting). >0 ahead, <0 behind. */
   tempo() {
@@ -1016,7 +1051,7 @@ Object.assign(Player.prototype, {
     if (this.turn < 4 || this.turn > 10) return;
     const score = st => this.board.reduce((a, m) => a + (m.c ? planWeight(st, m.c.name) : 0), 0);
     const cur = score(this.style), best = maxBy(Object.keys(PLANS), score);
-    if (best !== this.style && score(best) >= cur + PRO.stick) { this.style = best; this.style_code = best; this.tribe = STYLES[best][0]; }
+    if (best !== this.style && score(best) >= cur + (this.prm || PRO).stick) { this.style = best; this.tribe = STYLES[best][0]; }   // style_code keeps the starting style (balance results count by it)
   },
   /** A throwaway copy of this player for trying moves; nothing done to it touches the real player. */
   shadow(board = this.board) {
@@ -1053,7 +1088,7 @@ Object.assign(Player.prototype, {
     sh.endOfTurn(); let v = this.wp(sh.board, refs);
     if (this.kn.horizon) {
       for (const m of sh.board) { m.ta = m.th = 0; m.turns_on_board += 1; }
-      sh.endOfTurn(); v = (1 - PRO.growth) * v + PRO.growth * this.wp(sh.board, refs, this.lobbyGrowth || 1.25);
+      sh.endOfTurn(); v = (1 - (this.prm || PRO).growth) * v + (this.prm || PRO).growth * this.wp(sh.board, refs, this.lobbyGrowth || 1.25);
     }
     return v;
   },
@@ -1080,8 +1115,8 @@ Object.assign(Player.prototype, {
       }
       sh.arrange(); return this.judge(sh, refs);
     };
-    const left = Math.max(0.15, Math.min(1, (16 - this.turn) / 10)), hurt = this.health + this.boundaries < PRO.levelHealth ? 0.4 : 1;
-    const tv = (PRO.tierVal + this.persona.level) * left * hurt * (this.tier <= 3 ? 1.2 : 1);
+    const left = Math.max(0.15, Math.min(1, (16 - this.turn) / 10)), hurt = this.health + this.boundaries < (this.prm || PRO).levelHealth ? 0.4 : 1;
+    const tv = ((this.prm || PRO).tierVal + this.persona.level) * left * hurt * (this.tier <= 3 ? 1.2 : 1);
     return plan(true) + tv > plan(false);
   },
   /** Among the best few affordable cards, take the one whose board judges best (sometimes, at low skill, a worse one). */
@@ -1096,8 +1131,8 @@ Object.assign(Player.prototype, {
   proSwapLook(entry, worst) {
     const g0 = this.growth(this.board), lose = g0 - this.growth(this.board.filter(o => o !== worst));
     this.baseGrowth = this.growth(this.board.filter(o => o !== worst));
-    const gain = PRO.look * (this.growth(this.board.filter(o => o !== worst).concat([Object.assign(new M(entry.card), {})])) - this.baseGrowth) / 2; UID--;
-    return this.cardScore(entry.card) + (entry.a + entry.h) / 4 + gain > this.value(worst) + PRO.look * lose / 2 + 1.5;
+    const gain = (this.prm || PRO).look * (this.growth(this.board.filter(o => o !== worst).concat([Object.assign(new M(entry.card), {})])) - this.baseGrowth) / 2; UID--;
+    return this.cardScore(entry.card) + (entry.a + entry.h) / 4 + gain > this.value(worst) + (this.prm || PRO).look * lose / 2 + (this.prm || PRO).swapTh;
   },
   /** Full board: is selling the weakest minion for this card an upgrade? */
   proSwap(entry, worst, refs) {
