@@ -435,3 +435,51 @@ button{font:inherit;color:inherit}
 .stathow .cell.lv{justify-content:center;gap:4px;padding:2px 3px 0}
 .stathow .cell.lv b{font-size:14.5px}.stathow .cell.lv small{font-size:10.5px}
 .stathow .hrow.favs{margin-top:0}
+/* the Night Line (rating track): a night train through the city */
+.rm-switch .logtab{font-size:14px;padding:4px 12px 1px;box-shadow:0 0 0 3px #fff}
+.rm-panel{background:#141030}
+.rm-scroll{position:absolute;inset:0;border-radius:21px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none}
+.rm-scroll::-webkit-scrollbar{display:none}
+.rm-inner{position:relative;overflow:hidden}
+.rm-inner>svg,.rm-inner>i,.rm-sky{position:absolute;left:0;top:0;pointer-events:none}
+.rm-sky{width:100%;height:100%;background:linear-gradient(#120e2b 0%,#1d1640 45%,#352a5c 78%,#4a3b6e 100%)}
+.rm-moon{position:absolute;left:520px;top:26px;width:34px;height:34px;border-radius:50%;background:#fff6d6;box-shadow:0 0 0 8px rgba(255,246,214,.08),0 0 40px 14px rgba(255,236,190,.22)}
+.rm-stars{position:absolute;left:0;top:0}
+.rm-far{opacity:.95}
+.rm-fog{display:block;height:100%;width:calc(100% + 600px);left:-300px !important;background-repeat:repeat-x}
+.rm-fog.f1{top:60px !important;background-image:radial-gradient(ellipse 260px 60px at 50% 70%,rgba(190,180,235,.16),transparent 70%);background-size:520px 220px;animation:rmfog 60s linear infinite}
+.rm-fog.f2{top:96px !important;background-image:radial-gradient(ellipse 220px 46px at 50% 60%,rgba(205,198,240,.2),transparent 72%);background-size:440px 200px;animation:rmfog 44s linear infinite reverse}
+.rm-fog.f3{top:150px !important;background-image:radial-gradient(ellipse 300px 50px at 50% 80%,rgba(220,214,250,.18),transparent 70%);background-size:600px 160px;animation:rmfog 52s linear infinite}
+@keyframes rmfog{from{transform:translateX(0)}to{transform:translateX(-520px)}}
+.rm-tv{animation:rmtv 2.6s steps(1) infinite}
+@keyframes rmtv{0%{opacity:.2}9%{opacity:.85}17%{opacity:.35}26%{opacity:1}38%{opacity:.5}47%{opacity:.15}58%{opacity:.9}66%{opacity:.4}79%{opacity:.75}90%{opacity:.25}}
+.rm-walk{animation:rmwalk 9s ease-in-out infinite}
+@keyframes rmwalk{0%,12%{transform:translateX(-14px)}45%,58%{transform:translateX(12px)}92%,100%{transform:translateX(-14px)}}
+.rm-blink{animation:rmblink 2.4s steps(1) infinite}@keyframes rmblink{0%{opacity:1}50%{opacity:.15}}
+.rm-stn{position:absolute;top:142px;width:150px;margin-left:-75px;height:80px;pointer-events:none}
+.rm-stn svg{position:absolute;left:0;top:0}
+.rm-stn .rm-glow{position:absolute;left:15px;top:20px;width:120px;height:90px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,226,150,.55),transparent);filter:blur(2px)}
+.rm-stn.locked .rm-glow{display:none}
+.rm-sign{position:absolute;left:50%;top:-18px;transform:translateX(-50%);display:inline-flex;align-items:center;gap:3px;white-space:nowrap;background:#fff;border:2.5px solid #171230;border-radius:999px;padding:2px 10px 0 7px;font-size:13px;box-shadow:0 0 0 2.5px rgba(255,255,255,.25)}
+.rm-sign svg{position:relative;width:12px;height:12px}
+.rm-stn.locked .rm-sign{background:#4a4270;color:#c9c2e6}
+.rm-stn.next .rm-sign{background:#ffc928}
+.rm-grp{transform:translateX(-50%);align-items:center !important;z-index:4}
+.rm-grp .rt-toks{gap:12px;padding-top:4px}
+.rm-grp .rt-tok{box-shadow:0 0 0 3px #fff,0 0 22px 6px rgba(255,220,140,.25),2px 4px 0 3px #171230}
+.rm-grp.locked .rt-tok{box-shadow:0 0 0 3px #8f86b6,2px 4px 0 3px #171230;filter:saturate(.4) brightness(.75);opacity:1}
+.rm-train{position:absolute;width:0;height:0;z-index:3}
+.rm-trainsvg{position:absolute;left:-232px;top:0;display:block}
+.rm-train .av{position:absolute;left:-58px;top:-26px;width:34px;height:34px;border-radius:50%;overflow:hidden;border:3px solid #171230;box-shadow:0 0 0 2.5px #fff}
+.rm-train .av img{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:42px;height:42px}
+.rm-now{position:absolute;left:-116px;top:-22px;background:#171230;color:#fff;border:2px solid #fff;border-radius:999px;font-size:12px;padding:2px 9px 0;white-space:nowrap}
+.rm-beam{position:absolute;left:-6px;top:-24px;width:330px;height:116px;clip-path:polygon(0 47%,100% 0,100% 100%,0 57%);background:linear-gradient(90deg,rgba(255,240,196,.75),rgba(255,236,190,.3) 45%,transparent 92%);filter:blur(5px);mix-blend-mode:screen;pointer-events:none}
+.rm-beamfog{position:absolute;left:40px;top:-6px;width:240px;height:80px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,240,206,.28),transparent);mix-blend-mode:screen;pointer-events:none}
+.rm-badge{background:#352a5c !important}.rm-badge span{color:#ffc928}
+.rm-xp i{background:#ffc928}
+@media (prefers-reduced-motion:reduce){.rm-fog,.rm-tv,.rm-walk,.rm-blink{animation:none}}
+.rm-fog.f1{background-image:radial-gradient(ellipse 260px 60px at 50% 70%,rgba(190,180,235,.24),transparent 70%)}
+.rm-fog.f2{background-image:radial-gradient(ellipse 220px 46px at 50% 60%,rgba(205,198,240,.3),transparent 72%)}
+.rm-fog.f3{top:170px !important;background-image:radial-gradient(ellipse 300px 44px at 50% 50%,rgba(220,214,250,.26),transparent 70%);background-size:600px 120px}
+.rt-side .rt-nextrow:has(.gold){height:84px}.rt-side .rt-nextrow:has(.gold) + .rt-nextl{margin-top:14px}
+.rm-haze{display:block;width:100%;height:100%;background:linear-gradient(transparent 38%,rgba(178,168,226,.16) 58%,rgba(200,192,240,.24) 70%,transparent 74%,transparent 86%,rgba(255,200,140,.10) 100%)}

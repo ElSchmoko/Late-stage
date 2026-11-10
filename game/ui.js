@@ -285,7 +285,7 @@ function collectionTabs(on) {
 const TRIBE_ORDER = ['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'];
 const CARDS_ALL = () => window.LS_CARDS.filter(c => !c.token && c.name !== 'Follower');
 // ---- the Feed pool ("deck"): 3 cards per tier per tribe, 1 legendary per tribe; legendaries unlock on the rewards track (or at 1000 rating before it existed)
-const LEGEND_AT = 1000, PER_TIER = 3;
+const PER_TIER = 3;
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
 function deckSet() {
   if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
@@ -323,7 +323,7 @@ function showCards(tribe = 'Hustler') {
       const on = neutral || d.has(c.name), locked = !cardOpen(c);
       const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
       if (on && !neutral) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', `Rewards Lv ${c.track || RT_LEG_LV[c.name] || ''}`, w); }
+      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', c.legendary ? `Rating ${(RM_AT[c.name] || 0).toLocaleString('en')}` : `Rewards Lv ${RT_CARD_LV[c.name] || c.track || ''}`, w); }
       w.onclick = () => showDetail(c, null, neutral || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
         const r = deckToggle(c);
         if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
@@ -1547,48 +1547,63 @@ function showUnlocks(list) {
 }
 
 // ---------------------------------------------------------------- rewards track: runs give XP, XP levels up the track, levels unlock cards
-// The order of the 45 levels is explained in docs/card-plan-v14.md. Cards that are not in the game yet show as "?" placeholders.
+// Two tracks: Levels (XP from every run, regular cards) and the Night Line (your best rating this season, legendaries).
+// The order is explained in docs/card-plan-v14.md. Cards that are not in the game yet show as "?" placeholders.
 const RT_XP_PLACE = [110, 95, 85, 75, 60, 50, 45, 40];          // XP for finishing 1st..8th
 const rtCost = lv => 200 + 20 * (lv - 1);                        // XP needed for level lv: 200 … 1,080 (about 410 runs in all)
 const RT_TRACK = (() => {
   const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher', N = 'Neutral';
   const two = (tribe, a, ta, b, tb) => ({tribe, cards: [{name: a, tribe, tier: ta}, {name: b, tribe, tier: tb}]});
-  const leg = (name, tribe, tribe2, tier) => ({tribe, legend: true, cards: [{name, tribe, tribe2, tier, legendary: true}]});
-  const set = [['The Billionaire', H, 5], ['Cancelled Celebrity', I, 4], ['Apex Scavenger', F, 5], ['Pop Diva', C, 5], ['The Algorithm', T, 5], ['Mohawk Legend', P, 5], ['Renaissance Thinker', PH, 4]];
   const L = [
     two(H, 'Performance Review', 2, 'Loyalty Card', 3), two(I, 'Thirst Trap', 2, 'Bot Farm', 3), two(F, 'Magpie', 2, 'Allotment', 3),
     two(C, 'Ghostwriter', 2, 'Encore', 3), two(T, 'Bluetooth Speaker', 2, 'Clutch Player', 3), two(P, 'Gig Poster', 2, 'Banner Drop', 3),
     two(PH, 'Breathwork Coach', 2, 'Debate Club', 3),
     two(H, 'Delivery Rider', 1, 'Five-Star Rating', 2), two(H, 'Task Rabbit', 3, 'Double Shift', 4),
-    {set: true, legend: true, cards: set.map(([name, tribe, tier]) => ({name, tribe, tier, legendary: true}))},
     two(H, 'Ghost Kitchen', 5, 'Platform Monopoly', 6),
     two(I, 'Reaction Streamer', 1, 'Donation Goal', 2), two(I, 'Raid Party', 3, 'Subathon', 4), two(I, 'Hype Train', 5, 'Streamer House', 6),
     two(H, 'Cashback Card', 4, 'Recruitment Agency', 5), two(I, 'Paid Verification', 4, 'Fan Convention', 5),
-    leg('Tech Founder', H, T, 4),
     two(F, 'Tulip Bulb', 1, 'Hedgehog', 2), two(F, 'Bat Colony', 3, 'Hibernating Bear', 4), two(F, 'Cicada Swarm', 5, 'Seed Vault', 6),
-    leg('Wise Old Owl', F, PH, 5),
     two(T, 'Pop-Up Ad', 1, 'Battle Pass', 2), two(T, 'Data Broker', 3, 'Auto-Renewal', 4), two(T, 'App Store', 5, 'Data Centre', 6),
-    leg('Sponsored Streamer', I, T, 5),
     two(F, 'Fox Den', 4, 'Botanical Garden', 5), two(T, 'LAN Party', 4, 'Smart Doorbell', 5),
     two(P, 'Pogo Dancer', 1, 'Circle Pit', 2),
-    leg('Pension Fund', H, F, 5),
     two(P, 'Bouncer', 3, 'Crowd Surfer', 4), two(P, 'Wall of Death', 5, 'Festival Pit', 6),
     two(P, 'Bootleg Merch', 4, 'Sound System', 5),
-    leg('Punk Philosopher', P, PH, 5),
     two(PH, 'Van Lifer', 1, 'Digital Detox', 2), two(PH, 'Declutter Coach', 3, 'Silent Retreat', 4), two(PH, 'Capsule Wardrobe', 5, 'The Void', 6),
-    leg('Startup Monk', T, PH, 6),
     two(PH, 'Tenured Professor', 4, 'TED Talk', 5), two(N, 'Parcel Locker', 3, 'Neighbourhood Watch', 5),
     two(C, 'Wedding Band', 1, 'Sampler', 2),
-    leg('Content Creator', I, C, 4),
     two(C, 'Tribute Act', 3, 'Plagiarist', 4), two(C, 'AI Art Generator', 5, 'Mashup Artist', 6),
     two(C, 'Biopic', 4, 'Crossover Hit', 5),
-    leg('Cover Band', C, P, 5),
   ];
   return L.map((r, i) => Object.assign(r, {lv: i + 1, cost: rtCost(i + 1)}));
 })();
 const RT_LEVELS = RT_TRACK.length;
-const RT_LEG_LV = {};   // legendary card -> track level that unlocks it
-for (const r of RT_TRACK) if (r.legend) for (const c of r.cards) RT_LEG_LV[c.name] = r.lv;
+const RT_CARD_LV = {};   // card -> track level that unlocks it
+for (const r of RT_TRACK) for (const c of r.cards) RT_CARD_LV[c.name] = r.lv;
+// ---- the Night Line: legendaries unlock at rating stations (best rating this season counts, so a bad run never takes one away).
+// Two-tribe legendaries come one per station; single-tribe legendaries come in pairs from two tribes.
+const RM_TRACK = (() => {
+  const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher';
+  const L = (name, tribe, tier, tribe2) => ({name, tribe, tribe2, tier, legendary: true});
+  const S = [
+    [1000, L('The Billionaire', H, 5), L('Cancelled Celebrity', I, 4)],
+    [1250, L('Tech Founder', H, 4, T)],
+    [1500, L('Apex Scavenger', F, 5), L('Pop Diva', C, 5)],
+    [1750, L('Content Creator', I, 4, C)],
+    [2000, L('The Algorithm', T, 5), L('Mohawk Legend', P, 5)],
+    [2250, L('Wise Old Owl', F, 5, PH)],
+    [2500, L('Renaissance Thinker', PH, 4)],
+    [2750, L('Punk Philosopher', P, 5, PH)],
+    [3000, L('Sponsored Streamer', I, 5, T)],
+    [3300, L('Pension Fund', H, 5, F)],
+    [3600, L('Cover Band', C, 5, P)],
+    [4000, L('Startup Monk', T, 6, PH)],
+  ];
+  return S.map(([at, ...cards], i) => ({lv: i + 1, at, legend: true, tribe: cards[0].tribe, cards}));
+})();
+const RM_AT = {};
+for (const r of RM_TRACK) for (const c of r.cards) RM_AT[c.name] = r.at;
+const rmBest = () => Math.max(PROF.peak || 0, PROF.rating || 0);
+const rmLevel = () => RM_TRACK.filter(r => rmBest() >= r.at).length;
 /** Level and progress for a total XP amount. */
 function rtProgressOf(total) {
   let level = 0, xp = total;
@@ -1599,10 +1614,10 @@ const rtProgress = () => rtProgressOf(PROF.xp || 0);
 const rtLevel = () => rtProgress().level;
 // Profiles from before the track get the XP their past runs would have earned, without replaying every level-up.
 if (PROF.xp == null) { PROF.xp = (PROF.history || []).reduce((s, h) => s + (RT_XP_PLACE[(h.place || 8) - 1] || 40), 0); PROF.rtSeen = rtLevel(); saveProfile(); }
-/** Legendaries open from the track; profiles that reached 1,000 rating before the track keep them all. */
-const legendOpen = c => PROF.peak >= LEGEND_AT || PROF.rating >= LEGEND_AT || rtLevel() >= (RT_LEG_LV[c.name] || 99);
-/** Can this card go into the Feed pool? Legendaries and rewards-track cards open from the track. */
-const cardOpen = c => c.legendary ? legendOpen(c) : !c.track || rtLevel() >= c.track;
+/** Legendaries open at their Night Line station. */
+const legendOpen = c => rmBest() >= (RM_AT[c.name] ?? Infinity);
+/** Can this card go into the Feed pool? Legendaries open on the Night Line, rewards-track cards on the Levels track. */
+const cardOpen = c => c.legendary ? legendOpen(c) : !c.track || rtLevel() >= (RT_CARD_LV[c.name] || c.track);
 /** New cards from a level go straight into the Feed pool when their tier still has a free slot. */
 function rtAutoAdd(r) {
   const added = [];
@@ -1616,8 +1631,8 @@ function rtAutoAdd(r) {
 }
 const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
 const tribeName = t => t === 'Neutral' ? 'Neighbours' : TP[t] || t;
-const rtTitle = r => r.set ? 'Legendaries for every tribe' : r.legend ? r.cards[0].name : r.cards.map(c => c.name).join(' & ');
-const rtSub = r => r.set ? 'Legendary' : r.legend ? `Legendary · ${r.cards[0].tribe} + ${r.cards[0].tribe2}` : tribeName(r.tribe);
+const rtTitle = r => r.set ? 'Legendaries for every tribe' : r.cards.map(c => c.name).join(' & ');
+const rtSub = r => r.set ? 'Legendary' : r.legend ? `Legendary · ${r.cards.map(c => [c.tribe, c.tribe2].filter(Boolean).map(tribeName).join(' + ')).join(' & ')}` : tribeName(r.tribe);
 const rtReal = c => CARD[c.name] && !CARD[c.name].token;   // the card exists in the game already
 
 // ---- scenery: three small props per stop, themed after the tribe it unlocks
@@ -1681,7 +1696,8 @@ function rtTok(c, state, o = {}) {
 /** Small label under a milestone: just the tribe, or the legendary. */
 function rtTag(r) {
   const c = r.cards[0], col = r.legend ? '#ffc928' : TC[r.tribe];
-  const dot = r.legend && c.tribe2 ? `background:linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[c.tribe2]} 50%)` : r.set ? 'background:conic-gradient(#14a052,#ff8ab8,#d4e24a,#b18cff,#5ab8ff,#ff8a3d,#4fd1c5,#14a052)' : `background:${col}`;
+  const t2 = c.tribe2 || (r.cards[1] && r.cards[1].tribe);
+  const dot = r.legend && t2 ? `background:linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[t2]} 50%)` : r.set ? 'background:conic-gradient(#14a052,#ff8ab8,#d4e24a,#b18cff,#5ab8ff,#ff8a3d,#4fd1c5,#14a052)' : `background:${col}`;
   return `<span class="rt-tag${r.legend ? ' leg' : ''}"><i style="${dot}"></i>${r.legend ? 'Legendary' : tribeName(r.tribe)}</span>`;
 }
 function rtToks(r, st, parent) {
@@ -1692,9 +1708,10 @@ function rtToks(r, st, parent) {
 }
 const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
 
-function showTrack() {
+function showTrack(kind = PROF.rtTab || 'xp') {
+  if (kind === 'rating') return showNightLine();
   clear(); G.screen = 'rewards'; bg(true); AU.music('hold');
-  collectionTabs('rewards');
+  collectionTabs('rewards'); trackSwitch('xp');
   const P = rtProgress(), done = P.level >= RT_LEVELS, nxt = RT_TRACK[Math.min(P.level, RT_LEVELS - 1)];
   PROF.rtSeen = Math.max(PROF.rtSeen || 0, P.level); saveProfile();
   const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
@@ -1743,6 +1760,186 @@ function showTrack() {
   body.scrollTop = Math.max(0, (P.level ? pos(RT_TRACK[P.level - 1])[1] : 0) - 74);
 }
 
+// ---------------------------------------------------------------- the Night Line: a night train through the city, one station per rating reward
+// Side view, scrolls sideways. Layers back to front: sky, far skyline, fog, houses, fog, viaduct with café arches, stations, train + headlight, cards.
+const RM_X0 = 190, RM_X1 = 400, RM_SP = 270, RM_H = 306, RM_DECK = 214;
+const rmX = r => r.lv ? RM_X1 + (r.lv - 1) * RM_SP : RM_X0;
+const RM_W = RM_X1 + (RM_TRACK.length - 1) * RM_SP + 420;
+/** Where the front of the train is for a rating: between the start and the first station, then station to station. */
+function rmTrainX(rating) {
+  if (rating < RM_TRACK[0].at) return RM_X0 + (RM_X1 - RM_X0) * Math.max(0, rating) / RM_TRACK[0].at;
+  for (let i = 1; i < RM_TRACK.length; i++) { const a = RM_TRACK[i - 1], b = RM_TRACK[i]; if (rating < b.at) return rmX(a) + (rmX(b) - rmX(a)) * (rating - a.at) / (b.at - a.at); }
+  return rmX(RM_TRACK[RM_TRACK.length - 1]);
+}
+function rmProgress() {
+  const best = rmBest(), lv = rmLevel(), prev = lv ? RM_TRACK[lv - 1].at : 0, next = RM_TRACK[lv];
+  return {best, lv, prev, next, frac: next ? Math.max(0, (best - prev) / (next.at - prev)) : 1};
+}
+const rmBar = (P, w) => `<div class="rt-xp rm-xp" style="width:${w}px"><i style="width:${Math.round(100 * Math.min(1, P.frac))}%"></i><b>${P.next ? `${P.best.toLocaleString('en')} / ${P.next.at.toLocaleString('en')}` : 'Last stop reached'}</b></div>`;
+
+/** The city, drawn once per visit. A seeded random keeps it the same every time. */
+function rmCity() {
+  let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }, pick = a => a[Math.floor(rnd() * a.length)];
+  const INK = '#171230', BASE = RM_H;
+  let clip = 0;
+  // a window: dark, lamp-lit, office-lit, a TV flickering, or someone walking past
+  const win = (x, y, w, h, office) => {
+    const k = rnd();
+    if (k < .05) return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#3a5fc4"/><rect class="rm-tv" style="animation-delay:-${(rnd() * 4).toFixed(2)}s" x="${x}" y="${y}" width="${w}" height="${h}" fill="#b9d4ff"/>`;
+    if (k < .085) { const id = 'rmc' + (clip++);
+      return `<clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ffcf73"/>
+        <g clip-path="url(#${id})"><g class="rm-walk" style="animation-delay:-${(rnd() * 9).toFixed(2)}s;animation-duration:${(7 + rnd() * 5).toFixed(1)}s"><circle cx="${x + w / 2}" cy="${y + h * .42}" r="${w * .2}" fill="#5a3a2a"/><path d="M${x + w * .16} ${y + h + 1}q${w * .34} -${h * .55} ${w * .68} 0z" fill="#5a3a2a"/></g></g>`; }
+    const lit = office ? k < .42 : k < .3;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${lit ? (office ? pick(['#d6ecff', '#bfe0ff', '#eef6ff']) : pick(['#ffcf73', '#ffbe5c', '#ffd98f'])) : pick(['#2a2350', '#30285a', '#262046'])}"${lit && !office ? ' class="rm-lamp"' : ''}/>`;
+  };
+  // 19th-century block: floors with cornices, tall windows, a mansard roof with dormers
+  const altbau = (x, w, h) => {
+    const top = BASE - h, col = pick(['#5b4a7a', '#4e4470', '#64506e', '#4b5274', '#6a5468']), fl = 4, fh = 26, cols = Math.floor((w - 14) / 22);
+    let s = `<path d="M${x} ${BASE}V${top + 22}h${w}V${BASE}z" fill="${col}" stroke="${INK}" stroke-width="2.5"/>`;
+    s += `<path d="M${x + 4} ${top + 22}L${x + 12} ${top}h${w - 24}l8 22z" fill="#3a2f55" stroke="${INK}" stroke-width="2.5"/>`;
+    for (let d = 0; d < Math.max(1, cols - 1); d += 2) s += `<path d="M${x + 18 + d * 22} ${top + 20}v-9h12v9" fill="#3a2f55" stroke="${INK}" stroke-width="2"/>` + win(x + 20 + d * 22, top + 13, 8, 7);
+    for (let f = 0; f < fl; f++) {
+      const y = top + 28 + f * fh;
+      s += `<path d="M${x - 2} ${y - 3}h${w + 4}" stroke="${INK}" stroke-width="2"/>`;
+      for (let c = 0; c < cols; c++) s += win(x + 10 + c * 22 + (w - 14 - cols * 22) / 2, y + 3, 11, 17);
+    }
+    return s;
+  };
+  // glass tower: a grid of small office windows, whole lit floors here and there
+  const tower = (x, w, h) => {
+    const top = BASE - h; let s = `<rect x="${x}" y="${top}" width="${w}" height="${h}" fill="#2f3b63" stroke="${INK}" stroke-width="2.5"/><rect x="${x + w * .35}" y="${top - 12}" width="${w * .3}" height="12" fill="#2f3b63" stroke="${INK}" stroke-width="2"/>`;
+    s += `<rect x="${x + 3}" y="${top + 3}" width="${w * .28}" height="${h - 6}" fill="#fff" opacity=".05"/>`;
+    for (let y = top + 8; y < RM_DECK - 4; y += 11) {
+      const floorLit = rnd() < .22;
+      for (let xx = x + 6; xx < x + w - 10; xx += 11) s += floorLit ? `<rect x="${xx}" y="${y}" width="8" height="6" fill="${pick(['#e6f4ff', '#cde8ff'])}"/>` : win(xx, y, 8, 6, true);
+    }
+    return s;
+  };
+  // far skyline: soft silhouettes, a TV tower and a dome
+  let far = '';
+  for (let x = -20; x < RM_W; ) {
+    const w = 40 + rnd() * 60, h = 70 + rnd() * 110, y = 250 - h;
+    far += `<rect x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${w.toFixed(0)}" height="${h + 60}" fill="#2a2452"/>`;
+    for (let k = 0; k < 4; k++) if (rnd() < .6) far += `<rect x="${(x + 6 + rnd() * (w - 14)).toFixed(0)}" y="${(y + 8 + rnd() * (h - 20)).toFixed(0)}" width="4" height="4" fill="#5f5596"/>`;
+    x += w + rnd() * 16;
+  }
+  const tvTower = x => `<path d="M${x - 3} 250V58h6V250z" fill="#2a2452"/><circle cx="${x}" cy="74" r="13" fill="#2a2452"/><path d="M${x - 1} 58V22h2V58z" fill="#2a2452"/><circle class="rm-blink" cx="${x}" cy="21" r="2.5" fill="#ff6b5e"/>`;
+  const dome = x => `<path d="M${x - 46} 250V150h92V250z" fill="#2a2452"/><path d="M${x - 34} 150a34 36 0 0 1 68 0z" fill="#2a2452"/><path d="M${x - 2} 114v-12h4v12z" fill="#2a2452"/><path d="M${x - 6} 104h12" stroke="#2a2452" stroke-width="3"/>`;
+  far += tvTower(700) + dome(1500) + tvTower(2620) + dome(3240);
+  // houses, side by side
+  let mid = '';
+  for (let x = -30; x < RM_W; ) {
+    const t = rnd(), isTower = t < .26, w = isTower ? 64 + rnd() * 30 : 96 + rnd() * 40, h = isTower ? 210 + rnd() * 50 : 150 + rnd() * 34;
+    mid += isTower ? tower(x, w, h) : altbau(x, w, h);
+    x += w + 4 + rnd() * 10;
+  }
+  // the viaduct: brick deck on arches; some arches are cafés with warm light, little tables and someone at the counter
+  const deck = RM_DECK + 2;
+  let via = `<rect x="-10" y="${deck}" width="${RM_W + 20}" height="16" fill="#7a4250" stroke="${INK}" stroke-width="3"/><path d="M-10 ${deck + 8}H${RM_W + 10}" stroke="#5e2f3c" stroke-width="2"/>`;
+  via += `<path d="M-10 ${deck - 1}H${RM_W + 10}" stroke="#c9c2d6" stroke-width="3"/>`;
+  via = `<defs><linearGradient id="rmcafe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe3a0"/><stop offset="1" stop-color="#ffa944"/></linearGradient>
+    <radialGradient id="rmspill"><stop offset="0" stop-color="#ffc56a" stop-opacity=".55"/><stop offset="1" stop-color="#ffc56a" stop-opacity="0"/></radialGradient></defs>` + via;
+  via += `<rect x="-10" y="${BASE - 8}" width="${RM_W + 20}" height="12" fill="#1c1636"/><path d="M-10 ${BASE - 8}H${RM_W + 10}" stroke="${INK}" stroke-width="2.5"/>`;
+  for (let x = 0, i = 0; x < RM_W; x += 66, i++) {
+    const cafe = i % 3 === 1, ax = x + 16, aw = 50, ay = deck + 16, foot = BASE - 8, spring = ay + 28;
+    via += `<rect x="${x}" y="${ay}" width="16" height="${foot - ay}" fill="#7a4250" stroke="${INK}" stroke-width="2.5"/><path d="M${x + 3} ${ay + 20}h10M${x + 3} ${ay + 40}h10M${x + 3} ${ay + 60}h10" stroke="#5e2f3c" stroke-width="2"/>`;
+    via += `<path d="M${ax} ${ay}h${aw}v${foot - ay}h-${aw}z" fill="#6a3946"/>`;
+    const open = `M${ax + 3} ${foot}V${spring}a${aw / 2 - 3} ${aw / 2 - 5} 0 0 1 ${aw - 6} 0V${foot}z`;
+    if (cafe) {
+      via += `<ellipse cx="${ax + aw / 2}" cy="${foot + 2}" rx="56" ry="12" fill="url(#rmspill)"/>`;
+      via += `<path d="${open}" fill="url(#rmcafe)" stroke="${INK}" stroke-width="2.5"/>`;
+      via += `<path d="M${ax + 8} ${foot - 14}h${aw - 16}" stroke="#a8652a" stroke-width="3"/>`;   // counter
+      via += `<circle cx="${ax + 17}" cy="${foot - 23}" r="4.5" fill="#6a4232"/><path d="M${ax + 11} ${foot - 14}q6 -9 12 0z" fill="#6a4232"/><circle cx="${ax + 33}" cy="${foot - 22}" r="4" fill="#6a4232"/><path d="M${ax + 28} ${foot - 14}q5 -8 10 0z" fill="#6a4232"/>`;
+      via += `<path d="M${ax + aw / 2} ${spring - 18}v8" stroke="${INK}" stroke-width="1.5"/><circle cx="${ax + aw / 2}" cy="${spring - 8}" r="3" fill="#fff6c2"/>`;
+      via += `<path d="${open}" fill="none" stroke="${INK}" stroke-width="2.5"/><path d="M${ax + 3} ${spring}h${aw - 6}M${ax + aw / 2} ${spring}V${foot - 14}" stroke="${INK}" stroke-width="2"/>`;
+      via += `<rect x="${ax + 7}" y="${ay + 4}" width="${aw - 14}" height="9" rx="3" fill="#ff6b5e" stroke="${INK}" stroke-width="2"/>`;
+      // a table and two chairs out front
+      const tx = ax + aw + 8;
+      via += `<path d="M${tx - 7} ${foot - 9}h14M${tx} ${foot - 9}v9M${tx - 13} ${foot}v-8h4M${tx + 13} ${foot}v-8h-4" stroke="${INK}" stroke-width="2.2" fill="none"/>`;
+    } else via += `<path d="${open}" fill="#211a3c" stroke="${INK}" stroke-width="2.5"/>`;
+  }
+  // a little park with a monument where the line ends: trees, a lamp, a column with a golden figure
+  const px = RM_W - 210;
+  let park = `<path d="M${px - 30} ${deck - 2}q130 -14 260 0v${BASE - deck + 2}h-260z" fill="#24406a"/>`;
+  park += `<rect x="${px + 70}" y="${deck - 120}" width="14" height="118" fill="#cdbfa3" stroke="${INK}" stroke-width="2.5"/><rect x="${px + 60}" y="${deck - 12}" width="34" height="12" fill="#b8aa8e" stroke="${INK}" stroke-width="2.5"/><rect x="${px + 64}" y="${deck - 126}" width="26" height="8" fill="#b8aa8e" stroke="${INK}" stroke-width="2.5"/>`;
+  park += `<path d="M${px + 77} ${deck - 128}l-6 -14 6 -12 6 12z" fill="#ffc928" stroke="${INK}" stroke-width="2"/><path d="M${px + 71} ${deck - 142}l-14 -6 12 10M${px + 83} ${deck - 142}l14 -6 -12 10" fill="#ffc928" stroke="${INK}" stroke-width="2"/><circle cx="${px + 77}" cy="${deck - 158}" r="4" fill="#ffc928" stroke="${INK}" stroke-width="2"/>`;
+  for (const [tx, r] of [[px + 10, 26], [px + 140, 30], [px + 186, 22]]) park += `<path d="M${tx} ${deck}v-30" stroke="${INK}" stroke-width="4"/><circle cx="${tx}" cy="${deck - 36 - r * .4}" r="${r}" fill="#2e5a4a" stroke="${INK}" stroke-width="2.5"/>`;
+  park += `<path d="M${px + 112} ${deck}v-44" stroke="${INK}" stroke-width="3"/><circle cx="${px + 112}" cy="${deck - 46}" r="5" fill="#fff1b8" stroke="${INK}" stroke-width="2"/>`;
+  return {far, mid, via, park, deck};
+}
+
+const RM_TRAIN = `<svg class="rm-trainsvg" width="236" height="52" viewBox="0 0 236 52" aria-hidden="true"><g stroke="#171230" stroke-width="3" stroke-linejoin="round">
+  ${[0, 78].map(x => `<rect x="${x + 2}" y="8" width="72" height="36" rx="8" fill="#ffc928"/><rect x="${x + 2}" y="31" width="72" height="7" fill="#e0a800"/>${[10, 30, 50].map(w => `<rect x="${x + w}" y="14" width="14" height="13" rx="3" fill="#ffd98f"/>`).join('')}<circle cx="${x + 15}" cy="46" r="5" fill="#3a3045"/><circle cx="${x + 61}" cy="46" r="5" fill="#3a3045"/>`).join('')}
+  <path d="M156 8h46c14 0 24 14 30 28v4c0 3-2 4-5 4h-71z" fill="#ff6b5e"/><rect x="156" y="31" width="76" height="7" fill="#d8433a"/>
+  <rect x="166" y="14" width="14" height="13" rx="3" fill="#ffd98f"/><path d="M198 13h6c6 0 12 6 15 14h-21z" fill="#bfe0ff"/>
+  <circle cx="171" cy="46" r="5" fill="#3a3045"/><circle cx="217" cy="46" r="5" fill="#3a3045"/><circle cx="229" cy="34" r="3.5" fill="#fff6c2"/>
+  <path d="M74 26h4M152 26h4" stroke-width="4"/>
+  ${[17, 37, 57, 95, 115, 135].map(x => `<path class="rm-pax" d="M${x - 3} 27q3 -7 6 0zM${x} 18.5a2.6 2.6 0 1 0 .1 0" fill="#5a3a2a" stroke="none"/>`).join('')}
+</g></svg>`;
+
+/** A station: canopy, lamp and a hanging sign with the rating. */
+const rmStation = (r, st) => `<div class="rm-stn ${st}" style="left:${rmX(r)}px"><i class="rm-glow"></i>
+  <svg width="150" height="78" viewBox="0 0 150 78" aria-hidden="true"><g stroke="#171230" stroke-width="3" stroke-linejoin="round">
+  <path d="M6 18L20 4h110l14 14z" fill="${st === 'locked' ? '#4a4270' : '#ffc928'}"/><rect x="4" y="18" width="142" height="6" fill="${st === 'locked' ? '#3a3260' : '#e0a800'}"/>
+  <path d="M18 24v54M132 24v54" stroke-width="4"/><path d="M75 24v6"/><path d="M71 30h8l-2 6h-4z" fill="${st === 'locked' ? '#6a628c' : '#fff6c2'}"/></g></svg>
+  <span class="rm-sign bd">${STAR(11)}${r.at.toLocaleString('en')}</span></div>`;
+
+function showNightLine() {
+  clear(); G.screen = 'nightline'; bg(true); AU.music('hold');
+  collectionTabs('rewards'); trackSwitch('rating');
+  const P = rmProgress(), done = !P.next, nxt = P.next || RM_TRACK[RM_TRACK.length - 1];
+  const side = el('div', 'panel rt-side rm-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
+  const b = bracketOf(PROF.rating);
+  side.innerHTML = `<div class="rt-head"><div class="rt-lvl rm-badge"><span class="bd">${P.lv}</span></div><p class="bd rt-lvlt">Station ${P.lv}<small>of ${RM_TRACK.length}</small></p></div>
+    ${rmBar(P, 182)}<p class="rt-per">Your best rating this season counts</p>
+    <div class="rt-nexthead"><p class="rt-cap">${done ? 'All aboard' : `Next · ${nxt.at.toLocaleString('en')}`}</p>${rtTag(nxt)}</div><div class="rt-nextrow"></div><p class="rt-nextl">${rtTitle(nxt)}</p>`;
+  rtToks(nxt, done ? 'done' : 'next', side.querySelector('.rt-nextrow'));
+  const p = el('div', 'panel rt-roadp rm-panel', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
+  const body = el('div', 'rm-scroll', '', p);
+  const inner = el('div', 'rm-inner', '', body); css(inner, {width: RM_W, height: RM_H});
+  const C = rmCity(), tx = rmTrainX(P.best);
+  inner.innerHTML = `<div class="rm-sky"><i class="rm-moon"></i><svg class="rm-stars" width="${RM_W}" height="140" aria-hidden="true">${Array.from({length: 70}, (_, i) => `<circle cx="${(i * 197) % RM_W}" cy="${(i * 53) % 120 + 6}" r="${i % 5 ? 1.1 : 1.8}" fill="#fff" opacity="${.3 + (i % 4) * .15}"/>`).join('')}</svg></div>
+    <svg class="rm-far" width="${RM_W}" height="${RM_H}" aria-hidden="true">${C.far}</svg>
+    <i class="rm-fog f1"></i>
+    <svg class="rm-mid" width="${RM_W}" height="${RM_H}" aria-hidden="true">${C.mid}</svg>
+    <i class="rm-fog f2"></i>
+    <svg class="rm-via" width="${RM_W}" height="${RM_H}" aria-hidden="true">${C.park}${C.via}
+      <path d="M0 ${C.deck - 1}H${tx - 4}" stroke="#ffc928" stroke-width="4"/></svg>
+    <i class="rm-fog f3"></i><i class="rm-haze"></i>`;
+  for (const r of RM_TRACK) inner.insertAdjacentHTML('beforeend', rmStation(r, rtState(r, P.lv)));
+  // the train, its headlight cutting through the fog, and your hero in the cab
+  const hero = HERO[G.heroSlug] || HERO[PROF.unlocked[0]] || HEROES[0];
+  const train = el('div', 'rm-train', `<i class="rm-beam"></i><i class="rm-beamfog"></i>${RM_TRAIN}<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>`, inner);
+  css(train, {left: tx, top: C.deck - 51});
+  anim(train.querySelector('.rm-trainsvg'), [{translate: '0 0'}, {translate: '0 -1px'}, {translate: '0 0'}], {duration: 380, iterations: Infinity, raw: true});
+  // the rewards float above each station
+  for (const r of RM_TRACK) {
+    const st = rtState(r, P.lv), g = el('div', `rt-grp rm-grp ${st}`, '', inner); css(g, {left: rmX(r), top: 28});
+    rtToks(r, st, g);
+  }
+  // far skyline drifts slower than the street
+  const far = inner.querySelector('.rm-far'), f1 = inner.querySelector('.f1');
+  body.onscroll = () => { const s = body.scrollLeft; far.style.transform = `translateX(${s * .45}px)`; f1.style.translate = `${s * .2}px 0`; };
+  body.scrollLeft = Math.max(0, tx - 230); body.onscroll();
+}
+/** Levels / Night Line switch above the Rewards screen. */
+function trackSwitch(on) {
+  const sw = el('div', 'ab logtabs rm-switch', '', stage); css(sw, {left: 432, top: 15});
+  for (const [k, lab] of [['xp', 'Levels'], ['rating', 'Night Line']]) {
+    const b = el('button', 'logtab' + (k === on ? ' on' : ''), lab, sw);
+    b.onclick = () => { if (k !== on) { sfx('pop'); PROF.rtTab = k; saveProfile(); k === 'xp' ? showTrack('xp') : showNightLine(); } };
+  }
+}
+/** After a run: a pop-up for each Night Line station passed but not shown yet. */
+function rmAfterRun() {
+  if (G.screen !== 'end') return;
+  const seen = PROF.legSeen || [], r = RM_TRACK.find(x => rmBest() >= x.at && x.cards.some(c => !seen.includes(c.name)));
+  if (!r) return;
+  PROF.legSeen = seen.concat(r.cards.map(c => c.name)); const first = !PROF.flags.legendTut; PROF.flags.legendTut = true; saveProfile();
+  rtRewardPop(r, {head: `Station ${r.at.toLocaleString('en')}`, sub: first ? 'New legendary! Add it to your Feed pool in Collection › Cards (one per tribe)' : r.cards.length > 1 ? 'Two new legendaries' : 'A new legendary',
+    bar: rmBar(rmProgress(), 280), track: showNightLine, onDone: rmAfterRun});
+}
+
 // ---------------------------------------------------------------- reward moment, after the end screen: one pop-up per new level
 function rtCardHTML(c) {
   if (rtReal(c)) return cardHTML(CARD[c.name]);
@@ -1753,10 +1950,13 @@ function rtCardHTML(c) {
     <p class="txt" style="font-size:14px;color:#8f86a6">Coming in a future update.</p><div class="sa">?</div><div class="sh">?</div></div>`;
 }
 function rtLevelUp(lv, onDone) {
-  const r = RT_TRACK[lv - 1], P = rtProgress();
+  const r = RT_TRACK[lv - 1];
+  rtRewardPop(r, {head: `Level up! Level ${lv}`, sub: rtSub(r), bar: rtXpBar(rtProgress(), 280), track: () => showTrack('xp'), onDone});
+}
+function rtRewardPop(r, o) {
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.84)';
-  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level up! Level ${lv}</span>`, ov); css(head, {left: 0, right: 0, top: 12, textAlign: 'center'});
-  const sub = el('p', 'ab bd', r.set ? 'A legendary card for every tribe' : rtSub(r), ov); css(sub, {left: 0, right: 0, top: 62, margin: 0, textAlign: 'center', color: '#fff', fontSize: '19px'});
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">${o.head}</span>`, ov); css(head, {left: 0, right: 0, top: 12, textAlign: 'center'});
+  const sub = el('p', 'ab bd', o.sub, ov); css(sub, {left: 0, right: 0, top: 62, margin: 0, textAlign: 'center', color: '#fff', fontSize: '19px'});
   if (r.set) {
     const fan = el('div', 'ab legfan', '', ov); css(fan, {left: 0, right: 0, top: 96, height: 180});
     r.cards.forEach((c, i) => { const w = el('div', 'logcard', rtCardHTML(c), fan); w.style.marginLeft = i ? '-58px' : '0'; w.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 4}px)`; anim(w, [{opacity: 0, transform: 'translateY(60px) scale(.6)'}, {opacity: 1}], {duration: 380, delay: 90 * i, fill: 'backwards', raw: true}); });
@@ -1768,25 +1968,25 @@ function rtLevelUp(lv, onDone) {
     w.style.transform = `rotate(var(--rot)) scale(.58)`;
     setTimeout(() => { w.classList.add('on'); sfx('pop'); }, 900 + i * 260);
   });
-  const bar = el('div', 'ab rt-gain', `${rtXpBar(P, 280)}`, ov); css(bar, {left: 0, right: 0, top: 308});
+  const bar = el('div', 'ab rt-gain', o.bar, ov); css(bar, {left: 0, right: 0, top: 308});
   const ok = el('button', 'btn', 'Nice!', ov); css(ok, {left: 300, top: 342, width: 120, height: 40, background: '#2ecb6e', fontSize: '20px'});
   const tr = el('button', 'btn', 'See the track', ov); css(tr, {left: 436, top: 344, width: 150, height: 36, fontSize: '15px'});
   setTimeout(() => confetti(422, 120, 40), 900); sfx('unlock');
-  ok.onclick = () => { ov.remove(); onDone && onDone(); };
-  tr.onclick = () => { ov.remove(); showTrack(); };
+  ok.onclick = () => { ov.remove(); o.onDone && o.onDone(); };
+  tr.onclick = () => { ov.remove(); o.track(); };
 }
 /** After a run: XP for the placing, then a pop-up for each level not shown yet. */
 function rtAwardRun(place) { const g = RT_XP_PLACE[place - 1] || RT_XP_PLACE[7]; PROF.xp = (PROF.xp || 0) + g; return g; }
 function rtAfterRun() {
   if (G.screen !== 'end') return;
   const lvl = rtLevel(), seen = PROF.rtSeen || 0;
-  if (lvl <= seen) return;
+  if (lvl <= seen) { rmAfterRun(); return; }
   PROF.rtSeen = seen + 1; saveProfile();
   const added = rtAutoAdd(RT_TRACK[seen]);
   rtLevelUp(seen + 1, rtAfterRun);
   if (added.length) setTimeout(() => toast(`${added.join(' and ')} joined your Feed pool`, 2600), 1800);
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack(), levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();

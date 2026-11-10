@@ -334,3 +334,25 @@ I went through every card that makes gold, refunds gold, lowers a cost or makes 
 - **Data Centre** (now uncapped) and the gold engines (Pop-Up Ad, Data Broker, Cashback Card, Bootleg Merch): gold loops are hard for bots to value. Test by hand.
 - **Mashup Artist:** still the highest build-around ceiling.
 - **Mohawk Legend with Crowd Surfer or Festival Pit:** double friendly hits can kill your own board, and double payoffs can make it huge. Measure both.
+
+## Track split (Nov 10): Levels + Night Line
+
+- **Levels** (XP): the 45-level track minus its 9 legendary stops = 36 levels, same order, same XP cost formula. The UI now takes each card's unlock level from `RT_TRACK` (`RT_CARD_LV`), so `c.track` in sim/cards.py is only a fallback.
+- **Night Line** (rating): legendaries unlock at rating stations. Best rating this season counts (`max(peak, rating)`), so a bad run never takes a legendary away. Two-tribe legendaries come one per station; single-tribe ones in pairs from two tribes.
+
+| Rating | Legendaries |
+|---|---|
+| 1,000 | The Billionaire + Cancelled Celebrity |
+| 1,250 | Tech Founder |
+| 1,500 | Apex Scavenger + Pop Diva |
+| 1,750 | Content Creator |
+| 2,000 | The Algorithm + Mohawk Legend |
+| 2,250 | Wise Old Owl |
+| 2,500 | Renaissance Thinker (alone: 7 single-tribe legendaries, so one has no partner) |
+| 2,750 | Punk Philosopher |
+| 3,000 | Sponsored Streamer |
+| 3,300 | Pension Fund |
+| 3,600 | Cover Band |
+| 4,000 | Startup Monk |
+
+Art: night train on a brick viaduct through a European capital — Altbau blocks with mansard roofs, glass office towers, café arches under the viaduct, TV tower and dome in the far skyline, a park with a column monument at the end of the line. Windows flicker (TVs), people walk past lit windows, fog drifts in three layers and the train's headlight cuts through it.
