@@ -255,7 +255,7 @@ function toggleFatFinger() { PROF.fatFinger = !PROF.fatFinger; saveProfile(); sf
 function showTitle() {
   clear(); G.screen = 'title'; bg(true); AU.music('hold');
   soundButton(790, 12, false); changelogButton(740, 12); statsButton(690, 12);
-  if (!(PROF.flags || {})[TOUR_FLAG]) setTimeout(() => G.screen === 'title' && showTour(), 700); else setTimeout(legendPopup, 500);
+  setTimeout(legendPopup, 500);
   SEASON_NEW = false;
   const t = el('div', 'ab', `<h1 class="bd" style="margin:8px 0 0;font-size:112px;line-height:.9;letter-spacing:-.02em;color:#fff;-webkit-text-stroke:5px #2b2140;paint-order:stroke fill;text-shadow:0 9px 0 #2b2140">Late <span style="color:#ff6b5e">Stage</span></h1>`, stage);
   css(t, {left: 0, right: 0, top: 74, textAlign: 'center'});
@@ -370,28 +370,6 @@ function legendPopup() {
   const later = el('button', 'btn', 'Later', ov); css(later, {left: 460, top: 322, width: 120, height: 42, fontSize: '17px'});
   go.onclick = () => { ov.remove(); showCards(fresh[0].tribe); }; later.onclick = () => ov.remove();
   sfx('triple');
-}
-// ---------------------------------------------------------------- what's new: a short walk through the two track screens (once per player)
-const TOUR_FLAG = 'tourTracks2';
-/** A small explainer bubble under a collection tab, with a pulsing ring on the tab. */
-function coach(tabIdx, html, label, onNext) {
-  const tab = stage.querySelectorAll('.colltabs .logtab')[tabIdx]; if (!tab) return;
-  const r = tab.getBoundingClientRect(), sr = stage.getBoundingClientRect(), k = sr.width / W;
-  const x = (r.left - sr.left) / k, y = (r.top - sr.top) / k, w = r.width / k, h = r.height / k;
-  const ring = el('div', 'ab coach-ring', '', stage); css(ring, {left: x - 6, top: y - 6, width: w + 12, height: h + 12});
-  const b = el('div', 'ab coach', `<i class="coach-tip" style="left:${Math.max(20, Math.min(236, x + w / 2 - Math.max(18, x - 10)))}px"></i>${html}<button class="btn coach-ok">${label}</button>`, stage);
-  css(b, {left: Math.max(18, x - 10), top: y + h + 14, width: 270});
-  anim(b, [{transform: 'translateY(-8px)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 260, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
-  b.querySelector('.coach-ok').onclick = () => { sfx('pop'); ring.remove(); b.remove(); onNext(); };
-}
-function showTour() {
-  PROF.flags = PROF.flags || {};
-  const reset = PROF.games > 0 ? '<p class="coach-new">New season: rating and cards start over. Your heroes stay.</p>' : '';
-  showTrack('xp');
-  coach(0, `${reset}<p><b>Levels.</b> Every run gives XP. Each level unlocks new cards.</p>`, 'Next', () => {
-    showNightLine();
-    coach(1, '<p><b>Rating.</b> Legendaries unlock every 500 rating. Your best this season counts.</p>', 'Got it', () => { PROF.flags[TOUR_FLAG] = true; saveProfile(); });
-  });
 }
 function showCollection() {
   clear(); G.screen = 'collection'; bg(true); AU.music('hold');
@@ -1584,7 +1562,7 @@ function showUnlocks(list) {
 // Two tracks: Levels (XP from every run, regular cards) and the Night Line (your best rating this season, legendaries).
 // The order is explained in docs/card-plan-v14.md. Cards that are not in the game yet show as "?" placeholders.
 const RT_XP_PLACE = [110, 95, 85, 75, 60, 50, 45, 40];          // XP for finishing 1st..8th
-const rtCost = lv => 200 + 20 * (lv - 1);                        // XP needed for level lv: 200 … 1,080 (about 410 runs in all)
+const rtCost = lv => 500 + 50 * (lv - 1);                        // XP needed for level lv: 500 … 2,250 (49,500 XP, about 700 runs in all)
 const RT_TRACK = (() => {
   const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher', N = 'Neutral';
   const two = (tribe, a, ta, b, tb) => ({tribe, cards: [{name: a, tribe, tier: ta}, {name: b, tribe, tier: tb}]});
@@ -1646,6 +1624,7 @@ function rtProgressOf(total) {
 }
 const rtProgress = () => rtProgressOf(PROF.xp || 0);
 const rtLevel = () => rtProgress().level;
+if ((PROF.rtSeen || 0) > rtLevel()) { PROF.rtSeen = rtLevel(); saveProfile(); }   // after a cost change, re-reached levels pop up again
 // Profiles from before the track get the XP their past runs would have earned, without replaying every level-up.
 if (PROF.xp == null) { PROF.xp = (PROF.history || []).reduce((s, h) => s + (RT_XP_PLACE[(h.place || 8) - 1] || 40), 0); PROF.rtSeen = rtLevel(); saveProfile(); }
 /** Legendaries open at their Night Line station. */
@@ -2011,6 +1990,6 @@ function rtAfterRun() {
   if (added.length) setTimeout(() => toast(`${added.join(' and ')} joined your Feed pool`, 2600), 1800);
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), tour: () => showTour(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();
