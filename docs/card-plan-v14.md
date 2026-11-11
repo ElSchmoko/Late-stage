@@ -39,7 +39,7 @@ Wording: **Promote** = going up a tier in the shop. **Level up** = the rewards t
 | | Value |
 | --- | --- |
 | XP per run | 1st 110 · 2nd 95 · 3rd 85 · 4th 75 · 5th 60 · 6th 50 · 7th 45 · 8th 40 |
-| XP for a level | 200 + 20 per level: Lv 1 = 200, Lv 10 = 380, Lv 20 = 580, Lv 45 = 1,080 |
+| XP for a level | 500 + 50 per level: Lv 1 = 500, Lv 10 = 950, Lv 20 = 1,450, Lv 36 = 2,250 (49,500 XP in all) |
 | Total | 28,800 XP ≈ 410 runs at an average of 70 XP. The first level takes about 3 runs; the last ones about 15 runs each. |
 
 ### The track
