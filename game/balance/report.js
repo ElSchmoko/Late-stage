@@ -22,9 +22,9 @@ const T = {   // targets
 const ACCEPT = {
   'Timing|Loot Box': 'Discover offers cards up to your tier, so it is meant to get better later.',
   'Timing|Art Student': 'Its First Impression needs another Creative on the board, so it is a little better a turn or two later.',
-  'Cohesion|Robot Vacuum': 'Collabs are meant to spread the Techie tag to other tribes\' minions.',
-  'Cohesion|Noise-Cancelling Headphones': 'Collabs are meant to spread the Techie tag to other tribes\' minions.',
-  'Cohesion|Smart Plug': 'Collabs are meant to spread the Techie tag to other tribes\' minions.',
+  'Cohesion|Robot Vacuum': 'Connects attach to Techies.',
+  'Cohesion|Noise-Cancelling Headphones': 'Connects attach to Techies.',
+  'Cohesion|Smart Plug': 'Connects attach to Techies.',
 };
 const NEUTRAL_LOW = 0.6;   // Neighbours are generic by design: they may sit lower, but not this far below the tier median
 const ms = Object.fromEntries(LS_CARDS.filter(c => !c.token).map(c => [c.name, modelOf(c)]));

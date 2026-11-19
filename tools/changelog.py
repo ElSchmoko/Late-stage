@@ -8,8 +8,11 @@ Only card changes are listed (tier, stats, card text, new and retired cards), wi
 import json, subprocess, sys, pathlib, re
 R = pathlib.Path(__file__).resolve().parent.parent
 OUT = R / 'game/changelog.js'
+sys.path.insert(0, str(R / 'sim'))
+from cards import RENAMED   # v15: cards that moved tribe got new names; the log shows them as changed cards
 VERSIONS = [  # (label, date, base rev, head rev; None = working copy). Group releases into larger updates.
-    ('Update 5', '2026-11-10', '34d6ceb', None),   # rewards track: the other 64 cards, 7 new playstyles
+    ('Update 6', '2026-11-19', '238be25', None),   # playstyle swap (Followers <-> Attention Seekers), Connect, card updates
+    ('Update 5', '2026-11-10', '34d6ceb', '238be25'),   # rewards track: the other 64 cards, 7 new playstyles
     ('Update 4', '2026-11-10', 'f44361b', '34d6ceb'),   # rewards track: first 14 track cards, Crust Punk wording
     ('Update 3', '2026-11-08', '0265f56', 'f44361b'),
     ('Update 2', '2026-11-07', 'b8618d3', '0265f56'),
@@ -21,14 +24,17 @@ def cards_at(rev):
     m = re.search(r'window\.LS_CARDS=(\[.*?\]);\n', src, re.S)
     return {c['name']: c for c in json.loads(m.group(1)) if not c.get('token') and c['name'] != 'Follower'}
 def slim(c): return {k: c.get(k) for k in ('tier', 'atk', 'hp', 'html', 'fit', 'tribe', 'art')}
+REN = {}   # old name -> new name, for the diff being built
 def diff(a, b):
     out = []
+    back = {v: k for k, v in REN.items() if k in a and k not in b}
     for n, c in b.items():
-        o = a.get(n)
+        o = a.get(n) or a.get(back.get(n))
         if o is None: out.append({'name': n, 'new': slim(c)})
+        elif n in back: out.append({'name': n, 'was': back[n], 'old': slim(o), 'new': slim(c)})
         elif any(o.get(k) != c.get(k) for k in KEYS): out.append({'name': n, 'old': slim(o), 'new': slim(c)})
     for n, o in a.items():
-        if n not in b: out.append({'name': n, 'old': slim(o)})
+        if n not in b and REN.get(n) not in b: out.append({'name': n, 'old': slim(o)})
     order = {t: i for i, t in enumerate(['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'])}
     out.sort(key=lambda e: (order.get((e.get('new') or e['old'])['tribe'], 9), (e.get('new') or e['old'])['tier'], e['name']))
     return out
@@ -49,7 +55,12 @@ def load():
 if __name__ == '__main__':
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'rebuild'
     if cmd == 'rebuild':
-        write([{'v': v, 'date': d, 'cards': diff(cards_at(a), cards_at(b))} for v, d, a, b in VERSIONS], [a for _, _, a, _ in VERSIONS])
+        log = []
+        for v, d, a, b in VERSIONS:
+            REN.clear()
+            if v == 'Update 6': REN.update(RENAMED)
+            log.append({'v': v, 'date': d, 'cards': diff(cards_at(a), cards_at(b))})
+        write(log, [a for _, _, a, _ in VERSIONS])
     elif cmd == 'add':
         import datetime
         label, base = sys.argv[2], sys.argv[3]

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M58 90 Q48 40 100 40 Q152 40 142 90 L150 150 Q126 156 118 136 L82 136 Q74 156 50 150 Z" fill="#d8d2e2"/>
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#f4efe4"/>
+<path d="M60 150 Q100 156 128 140 L150 172 Q110 168 70 196 Z" fill="#4a3d6a"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#e8b48a"/>
+<circle cx="62" cy="92" r="9" fill="#e8b48a"/>
+<circle cx="138" cy="92" r="9" fill="#e8b48a"/>
+<circle cx="100" cy="86" r="38" fill="#e8b48a"/>
+<path d="M62 86 Q54 40 104 42 Q148 46 138 86 Q134 64 114 58 Q92 74 64 76 Z" fill="#d8d2e2"/>
+<path d="M64 96 Q62 156 100 178 Q138 156 136 96 Q130 116 116 112 Q100 118 84 112 Q70 116 64 96 Z" fill="#d8d2e2"/>
+<path d="M78 92 Q85 98 92 92" fill="none"/>
+<path d="M108 92 Q115 98 122 92" fill="none"/>
+<path d="M76 75 Q85 68 94 75" fill="none"/>
+<path d="M106 75 Q115 68 124 75" fill="none"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<path d="M91 115 Q102 117 110 109" fill="none"/>
+<path d="M70 58 L66 28 L84 42 L100 22 L116 42 L134 28 L130 58 Z" fill="#ffc928"/>
+<circle cx="100" cy="46" r="3" fill="#ff6b5e" stroke="none"/>
+<rect x="160" y="70" width="8" height="136" rx="3" fill="#ffc928"/>
+<circle cx="164" cy="60" r="14" fill="#ffffff"/>
+<circle cx="164" cy="58" r="8" fill="#ffc928"/>
+<rect x="160" y="66" width="8" height="5" rx="1" fill="#c9c2d6"/>
+<circle cx="164" cy="146" r="10" fill="#e8b48a"/>
+<g transform="rotate(-14 32.0 147.0)"><rect x="14" y="136" width="36" height="22" rx="3" fill="#fff6dc"/>
+<circle cx="14" cy="147.0" r="13.0" fill="#f0e2b8"/>
+<circle cx="50" cy="147.0" r="13.0" fill="#f0e2b8"/>
+<path d="M22 145 L42 145 M22 153 L36 153" fill="none"/></g>
+<path d="M30 52 Q31.6 58.4 38 60 Q31.6 61.6 30 68 Q28.4 61.6 22 60 Q28.4 58.4 30 52 Z" fill="#ffc928"/>
+<path d="M184 102 Q185.2 106.8 190 108 Q185.2 109.2 184 114 Q182.8 109.2 178 108 Q182.8 106.8 184 102 Z" fill="#ffffff"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

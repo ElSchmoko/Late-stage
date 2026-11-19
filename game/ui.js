@@ -22,6 +22,17 @@ function loadProfile() {
 }
 function saveProfile() { try { localStorage.setItem(PKEY, JSON.stringify(PROF)); } catch (e) {} }
 const PROF = loadProfile();
+// Renamed cards (v15, Nov 19): keep them in the Feed pool and in the run stats under their new names.
+const RENAMED = {'Reply Guy': 'Sophist', 'Giveaway Host': 'Epicurean', 'Comment Section': 'Peripatetic', 'Unboxing Streamer': 'Pythagorean', 'Viral Video': 'Hemlock Martyr',
+  'Engagement Farmer': 'The Academy', 'Brand Ambassador': 'Existentialist', 'Blue Checkmark': 'Philosopher King', 'Bot Farm': 'Mystery Cult', 'Fan Convention': 'Utopian Commune',
+  'Stoicism Podcaster': 'Troll', 'Cold-Plunge Stoic': 'Rage Baiter', 'Marathon Monk': 'Prank Vlogger', 'Book-Club Stoic': 'Reality Star', 'Desert Hermit': 'Apology Video',
+  'The Cynic': 'Shock Jock', 'Enlightened Guru': 'Crisis PR Firm', 'Breathwork Coach': 'Drama Channel', 'Tenured Professor': 'Comments Off'};
+if (!PROF.renamed15) {
+  const rn = n => RENAMED[n] || n;
+  if (PROF.deck) PROF.deck = [...new Set(PROF.deck.map(rn))];
+  for (const r of PROF.history || []) if (r && r.c) { const c = {}; for (const k in r.c) c[rn(k)] = (c[rn(k)] || 0) + r.c[k]; r.c = c; }
+  PROF.renamed15 = true; saveProfile();
+}
 // Season reset (Nov 10): rating, rewards-track progress and unlocked cards start over for every profile; heroes stay unlocked.
 // Bump SEASON to run it again. Restoring an older save code runs it on the next load as well.
 const SEASON = 1;
@@ -326,10 +337,11 @@ function showCards(tribe = 'Hustler') {
     const all = CARDS_ALL().filter(c => inTribe(c, tribe));
     const addCard = (c, row) => {
       const fixed = neutral && !c.legendary, on = (fixed && !locked0(c)) || d.has(c.name), locked = !cardOpen(c);
-      const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : ''), cardHTML(c), row);
+      const at = c.legendary ? `Rating ${(RM_AT[c.name] || 0).toLocaleString('en')}` : `Rewards Lv ${RT_CARD_LV[c.name] || c.track || ''}`;
+      const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked mystery' : ''), locked ? mysteryCardHTML(c, at) : cardHTML(c), row);   // locked cards stay a surprise
       if (on && !fixed) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', c.legendary ? `Rating ${(RM_AT[c.name] || 0).toLocaleString('en')}` : `Rewards Lv ${RT_CARD_LV[c.name] || c.track || ''}`, w); }
-      w.onclick = () => showDetail(c, null, fixed || locked ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
+      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', at, w); w.setAttribute('aria-label', 'Mystery card'); w.onclick = () => { sfx('pop'); toast(`A surprise, unlocked at ${at}`); }; return; }
+      w.onclick = () => showDetail(c, null, fixed ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
         const r = deckToggle(c);
         if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
         sfx('error'); show(tribe, true);
@@ -434,8 +446,8 @@ function showHeroSelect() {
     };
   });
   const box = el('div', 'ab', `<p class="bd" style="margin:0 0 5px;font-size:10px;letter-spacing:.12em;color:#5a5270;line-height:1.2">TRIBES IN THIS LOBBY</p>` +
-    tribes.map(t => `<div class="bd" style="display:flex;align-items:center;gap:5px;font-size:12px;line-height:1.6"><i style="width:10px;height:10px;border-radius:3px;border:2px solid #2b2140;background:${TC[t]};display:block"></i>${TP[t]}</div>`).join(''), stage);
-  css(box, {left: 722, top: 58, width: 106, background: '#fff', border: '2.5px solid #2b2140', borderRadius: '16px', padding: '8px 9px 9px', boxShadow: '0 0 0 3px #fff'});
+    tribes.map(t => `<div class="bd" style="display:flex;align-items:center;gap:5px;font-size:12px;line-height:1.6"><i style="flex:none;width:10px;height:10px;border-radius:3px;border:2px solid #2b2140;background:${TC[t]};display:block"></i>${TP[t]}</div>`).join(''), stage);
+  css(box, {left: 716, top: 58, width: 116, background: '#fff', border: '2.5px solid #2b2140', borderRadius: '16px', padding: '8px 9px 9px', boxShadow: '0 0 0 3px #fff'});
   start.onclick = () => { if (chosen) startRun(chosen); };
 }
 
@@ -556,7 +568,7 @@ function renderChrome() {
   S.shield.setAttribute('aria-label', lc === null ? `Tier ${me.tier}, max` : `Tier ${me.tier}. Promote for ${lc} gold`);
   // gold
   S.gold.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#2b2140" stroke-width="2"><circle cx="12" cy="12" r="10" fill="#ffc928"></circle><circle cx="12" cy="12" r="5" stroke="#d99a12" stroke-width="2.4"></circle></svg><span style="padding-top:3px">${me.gold[0]}</span>`;
-  S.bonus.style.display = me.bonus_next ? 'block' : 'none'; S.bonus.textContent = `+${me.bonus_next} next turn`;
+  S.bonus.style.display = me.bonus_next ? 'block' : 'none'; S.bonus.textContent = `${me.bonus_next > 0 ? '+' : '−'}${Math.abs(me.bonus_next)} next turn`;
   const scc = me.scrollCost(); S.scroll.classList.toggle('off', me.gold[0] < scc);
   const sccEl = S.scroll.querySelector('.coin'); sccEl.textContent = scc === 0 ? 'FREE' : scc; sccEl.style.width = scc === 0 ? '40px' : '24px'; sccEl.style.fontSize = scc === 0 ? '10px' : '13px'; sccEl.style.left = scc === 0 ? '38px' : '46px';
   S.save.innerHTML = `<svg width="58" height="74" viewBox="0 0 58 74" aria-hidden="true"><g stroke-linejoin="round"><path d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" transform="translate(0 5)" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" fill="#fff" stroke="#fff" stroke-width="9"></path><path d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" transform="translate(0 5)" fill="#2b2140" stroke="#2b2140" stroke-width="3"></path><path class="face" d="M10 6H48Q52 6 52 10V64L29 51L6 64V10Q6 6 10 6Z" fill="${G.saved ? '#ffc928' : '#ff8ab8'}" stroke="#2b2140" stroke-width="3"></path></g></svg><span class="ab" style="left:0;right:0;top:23px;text-align:center;font-size:14px;pointer-events:none">${G.saved ? 'Saved' : 'Save'}</span>`;
@@ -636,7 +648,7 @@ async function playLog() {
       if (++i % 2 === 0) await sleep(70);
     } else if (e.type === 'gold' || e.type === 'gold_next') {
       const r = t ? center(rectOf(t)) : [420, 200];
-      floatText(r[0], r[1] - 30, e.type === 'gold' ? `+${e.n} gold` : `+${e.n} gold next turn`, 'gold');
+      floatText(r[0], r[1] - 30, e.type === 'gold' ? `+${e.n} gold` : `${e.n >= 0 ? '+' : '−'}${Math.abs(e.n)} gold next turn`, e.n >= 0 ? 'gold' : 'red');
       if (e.type === 'gold') coinFly(r, center(rectOf(S.gold)), e.n); sfx('coin');
     } else if (e.type === 'triple') {
       if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#ffc928', 110); confetti(c[0], c[1], 24); anim(t, [{transform: 'scale(.4) rotate(-180deg)'}, {transform: 'scale(1.3) rotate(10deg)', offset: .6}, {transform: 'scale(1)'}], {duration: 700, easing: 'ease-out'}); }
@@ -678,7 +690,7 @@ function makeTriple(card, newPiece) {
   const fromHand = G.hand.filter(h => h.card.name === card.name && !h.golden).slice(0, need - fromBoard);
   for (const h of fromHand) { G.hand.splice(G.hand.indexOf(h), 1); const e = S.handEl.get(h.key); if (e) { e._leaving = true; e.remove(); } }
   const spec = me.takeTriple(card, [...(newPiece ? [newPiece] : []), ...fromHand.map(h => ({a: h.a, h: h.h}))], fromBoard);
-  G.hand.push({card, a: spec.a, h: spec.h, golden: true, extras: spec.extras, shield: spec.shield, sell: spec.sell, key: Math.random()});
+  G.hand.push({card, a: spec.a, h: spec.h, golden: true, extras: spec.extras, shield: spec.shield, sell: spec.sell, kw: spec.kw, tribe2: spec.tribe2, key: Math.random()});
   me.tripleReward(me.gold); toast('Triple! Golden card in your hand', 1500); sfx('triple');
 }
 const handCopies = card => G.hand.filter(h => h.card.name === card.name && !h.golden).length;
@@ -709,7 +721,7 @@ async function buy(f, toBoardAt = null) {
 }
 function needsTarget(card) {
   const me = G.me;
-  if (card.collab) return me.board.length ? me.board.filter(m => true) : null;
+  if (card.collab) { const c = me.connectTargets(card); return c.length ? c : null; }
   if (!E.TARGETED_FI.has(card.name)) return null;
   const cand = card.name === 'Art Student' ? me.board.filter(m => m.tribe === 'Creative') : card.name === 'Smart Doorbell' ? me.board.filter(m => !m.follower && m.tribe !== 'Techie' && !m.tribe2) : me.board.slice();
   if (card.name === 'Venture Capitalist' && me.gold[0] <= 0) return null;
@@ -720,16 +732,16 @@ async function playCard(hc, pos = null, target = null, more = null) {
   const me = G.me, card = hc.card;
   if (!G.hand.includes(hc)) { renderAll(); return; }   // already played (a second tap or drag on the same card): never remove another one
   const merges = !hc.golden && me.board.filter(m => m.name === card.name && !m.golden && !m.follower).length >= 2;
-  if (!card.collab && me.board.length >= 7 && !merges) { toast('Your board is full (7)'); renderAll(); return; }
+  if (!me.canConnect(card) && me.board.length >= 7 && !merges) { toast('Your board is full (7)'); renderAll(); return; }
   if (target === null) {
     const cands = needsTarget(card);
-    if (cands) { await chooseTarget(cands, card.collab ? `Choose a minion for ${card.name} to stick to` : `Choose a minion for ${card.name}`, async t => playCard(hc, pos, t), () => renderAll()); return; }
+    if (cands) { await chooseTarget(cands, card.collab ? `Choose a minion for ${card.name} to connect to` : `Choose a minion for ${card.name}`, async t => playCard(hc, pos, t), () => renderAll()); return; }
   }
-  // Smart Home Hub: the Collab also sticks to more minions; the player picks each one
+  // Smart Home Hub: the Connect also attaches to more minions; the player picks each one
   if (card.collab && target && more === null) {
     const extra = me.hubExtra(), picked = [];
     for (let i = 0; i < extra; i++) {
-      const cands = me.board.filter(m => m !== target && !picked.includes(m) && !m.follower);
+      const cands = me.connectTargets(card).filter(m => m !== target && !picked.includes(m));
       if (!cands.length) break;
       let got = null;
       await chooseTarget(cands, `Smart Home Hub: choose another minion for ${card.name} (${i + 2} of ${extra + 1})`, async t => { got = t; }, () => {});
@@ -740,7 +752,7 @@ async function playCard(hc, pos = null, target = null, more = null) {
   if (!G.hand.includes(hc)) { renderAll(); return; }
   G.hand.splice(G.hand.indexOf(hc), 1);
   const e = S.handEl.get(hc.key); if (e) { e._leaving = true; e.remove(); }
-  const m = me.play(card, me.gold, pos, target, card.collab ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell, zero: !!hc.zero}, more); sfx('slap');
+  const m = me.play(card, me.gold, pos, target, me.canConnect(card) ? null : {a: hc.a, h: hc.h, golden: !!hc.golden, extras: hc.extras, shield: hc.shield, sell: hc.sell, zero: !!hc.zero, kw: hc.kw, tribe2: hc.tribe2}, more); sfx('slap');
   if (card.collab) { const c = S.tok.get(m.id); }
   G.firstTurn = G.firstTurn && me.turn <= 1;
   // sticker slap
@@ -907,10 +919,10 @@ function showDetail(card, inst, actions = [], onClose = null) {
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 95});
   el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
   const c = el('div', 'ab', cardHTML(card, inst ? {atk: inst.atk + (inst.ta || 0), hp: inst.hp + (inst.th || 0), golden: inst.golden} : {}), ov); css(c, {left: 70, top: 22});
-  const kws = ['Attention Seeker', 'Out of Office', 'Toxic', 'First Impression', 'Legacy', 'Rebrand', 'Collab', 'Discover', 'Clock In', 'Grievance', 'Side Gig', 'Like', 'Acquire', 'Cleave'].filter(k => card.text.includes(k));
-  const KD = {'Attention Seeker': 'Enemies must attack it first.', 'Out of Office': 'Ignores the first damage it would take.', 'Toxic': 'Destroys any minion it damages.', 'First Impression': 'Happens when you play it from your hand.', 'Legacy': 'Happens when it dies.', 'Rebrand': 'Comes back once with 1 Health after it dies.', 'Collab': 'Sticks to a minion: adds its stats and effect, and makes it a Techie too.', 'Discover': 'Pick 1 of 3 cards to add to your hand.',
+  const kws = ['Attention Seeker', 'Out of Office', 'Toxic', 'First Impression', 'Legacy', 'Rebrand', 'Connect', 'Discover', 'Clock In', 'Grievance', 'Side Gig', 'Like', 'Acquire', 'Cleave'].filter(k => card.text.includes(k));
+  const KD = {'Attention Seeker': 'Enemies must attack it first.', 'Out of Office': 'Ignores the first damage it would take.', 'Toxic': 'Destroys any minion it damages.', 'First Impression': 'Happens when you play it from your hand.', 'Legacy': 'Happens when it dies.', 'Rebrand': 'Comes back once with 1 Health after it dies.', 'Connect': 'Attaches to one of your Techies: adds its stats and effect. With no Techie to attach to, it is played as a minion.', 'Discover': 'Pick 1 of 3 cards to add to your hand.',
     'Clock In': 'Happens every time it attacks.', 'Grievance': 'Happens every time that many friendly minions have died this combat.', 'Side Gig': 'Pay the gold in the shop to use it, once per turn.', 'Like': 'Give a Like to a minion for +1/+1. Tap the heart next to your hero.', 'Acquire': 'Take a minion out of the Feed.', 'Cleave': 'Also damages the minions next to its target.'};
-  const ex = inst && inst.extras && inst.extras.length ? `<p class="kwl">Collabs: ${inst.extras.join(', ')}</p>` : '';
+  const ex = inst && inst.extras && inst.extras.length ? `<p class="kwl">Connected: ${inst.extras.join(', ')}</p>` : '';
   const tmp = inst && (inst.ta || inst.th) ? `<p class="kwl">Includes +${inst.ta}/+${inst.th} for the next combat only.</p>` : '';
   const gold = inst && inst.golden;
   const t = el('div', 'detail-txt', `${gold ? '<p class="kwl" style="color:#ffc928">Tripled: every effect is doubled.</p>' : ''}<p class="rules">${gold ? card.gold_html || card.full_html : card.full_html}</p>${kws.map(k => `<p class="kwl"><b class="kw">${k}:</b> ${KD[k]}</p>`).join('')}${ex}${tmp}<p class="fl">${card.flavour || ''}</p><div class="acts"></div>`, ov);
@@ -973,11 +985,11 @@ function bindToken(e, kind, obj) {
     e.addEventListener('pointermove', move); e.addEventListener('pointerup', up); e.addEventListener('pointercancel', up);
   });
 }
-const FOLLOWER = () => CARD['Follower'] || {name: 'Follower', tribe: 'Influencer', tier: 1, atk: 1, hp: 1, art: 'follower', fit: 13, html: 'A loyal fan.', full_html: 'A loyal fan.', text: '', flavour: ''};
+const FOLLOWER = () => CARD['Follower'] || {name: 'Follower', tribe: 'Philosopher', tier: 1, atk: 1, hp: 1, art: 'follower', fit: 13, html: 'A loyal disciple.', full_html: 'A loyal disciple.', text: '', flavour: ''};
 function showDetailFor(kind, e, look = false) {
   const me = G.me;
   if (kind === 'feed') { const f = e._f; return showDetail(f.card, {atk: f.card.atk + f.a, hp: f.card.hp + f.h}, look ? [] : [{label: 'Hire', cost: costOf(f), fn: () => buy(f), disabled: me.gold[0] < costOf(f) || (G.hand.length >= 10 && !tripleReady(f.card))}]); }
-  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk * (h.golden ? 2 : 1) + h.a, hp: h.card.hp * (h.golden ? 2 : 1) + h.h, golden: h.golden}, look ? [] : [{label: 'Play', fn: () => playCard(h, null), disabled: !h.card.collab && me.board.length >= 7 && !(!h.golden && me.board.filter(m => m.name === h.card.name && !m.golden && !m.follower).length >= 2)}]); }
+  if (kind === 'hand') { const h = e._h; return showDetail(h.card, {atk: h.card.atk * (h.golden ? 2 : 1) + h.a, hp: h.card.hp * (h.golden ? 2 : 1) + h.h, golden: h.golden}, look ? [] : [{label: 'Play', fn: () => playCard(h, null), disabled: !me.canConnect(h.card) && me.board.length >= 7 && !(!h.golden && me.board.filter(m => m.name === h.card.name && !m.golden && !m.follower).length >= 2)}]); }
   const m = e._m, card = m.follower ? FOLLOWER() : CARD[m.name] || FOLLOWER();
   const acts = [{label: 'Sell', cost: '+' + me.sellValue(m), color: '#ffc928', fn: () => sell(m)}];
   const gk = me.gigOf(m);
@@ -1015,13 +1027,13 @@ async function onDrop(kind, e, x, y, dist = 999) {
   const overHand = y >= LY.handTop && far;
   const gap = lastGap; lastGap = null;
   if (kind === 'feed') {
-    if (overBoard && (G.me.board.length < 7 || tripleReady(e._f.card) || (e._f.card.collab && G.me.board.length))) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
+    if (overBoard && (G.me.board.length < 7 || tripleReady(e._f.card) || G.me.canConnect(e._f.card))) { if (canBuy(e._f)) return buy(e._f, gap !== null ? gap : boardIndexAt(x)); }
     else if (overHand) return buy(e._f);
     renderAll(); return;
   }
   if (kind === 'hand') {
     if (overBoard) return playCard(e._h, gap !== null ? gap : boardIndexAt(x));
-    if (overFeed && e._h.card.collab && G.hand.includes(e._h)) {   // a Collab in the hand can be sold like a minion
+    if (overFeed && e._h.card.collab && G.hand.includes(e._h)) {   // a Connect card in the hand can be sold like a minion
       G.hand.splice(G.hand.indexOf(e._h), 1); G.me.gold[0] += 1; sfx('coin'); goldTick(1); G.saved = false;
     }
     renderAll(); return;
@@ -1048,7 +1060,7 @@ async function animateTurnStart(kept) {
   anim(S.gold, [{transform: 'scale(.6)'}, {transform: 'scale(1.2)'}, {transform: 'scale(1)'}], {duration: 420, easing: 'ease-out'});
   const c = center(rectOf(S.gold));
   for (let i = 0; i < Math.min(8, G.me.gold[0]); i++) { const co = el('span', 'coin', '', stage); css(co, {width: 18, height: 18, left: c[0] - 9, top: -20, zIndex: 88}); anim(co, [{transform: 'translateY(0)'}, {transform: `translateY(${c[1] + 20}px)`}], {duration: 380, delay: i * 45, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards'}).then(() => co.remove()); }
-  if (g.bonus) floatText(c[0], c[1] + 30, `+${g.bonus} bonus`, 'gold');
+  if (g.bonus) floatText(c[0], c[1] + 30, `${g.bonus > 0 ? '+' : '−'}${Math.abs(g.bonus)} bonus`, g.bonus > 0 ? 'gold' : 'red');
   if (g.carry) floatText(c[0], c[1] + 46, `+${g.carry} carried over`, 'gold');
   toast(`Turn ${G.me.turn}`, 1100);
   await sleep(450);
@@ -1440,7 +1452,7 @@ function showChangelog() {
     if (!v) { body.innerHTML = '<p class="kwl" style="color:#5a5270">No card changes yet.</p>'; return; }
     for (const ch of v.cards) {
       const row = el('div', 'logrow', '', body);
-      if (ch.old && ch.new) { row.appendChild(logCard(ch.name, ch.old)); el('div', 'logarrow', '&#10140;', row); row.appendChild(logCard(ch.name, ch.new, ch.old)); }
+      if (ch.old && ch.new) { row.appendChild(logCard(ch.was || ch.name, ch.old)); el('div', 'logarrow', '&#10140;', row); const nw = row.appendChild(logCard(ch.name, ch.new, ch.old)); if (ch.was) nw.querySelector('.nm').classList.add('chg'); }
       else { const tag = el('div', 'logtag ' + (ch.new ? 'new' : 'gone'), ch.new ? 'NEW' : 'RETIRED', row); row.appendChild(logCard(ch.name, ch.new || ch.old)); if (!ch.new) row.lastChild.classList.add('gone'); }
     }
   };
@@ -1562,18 +1574,18 @@ function showUnlocks(list) {
 // Two tracks: Levels (XP from every run, regular cards) and the Night Line (your best rating this season, legendaries).
 // The order is explained in docs/card-plan-v14.md. Cards that are not in the game yet show as "?" placeholders.
 const RT_XP_PLACE = [110, 95, 85, 75, 60, 50, 45, 40];          // XP for finishing 1st..8th
-const rtCost = lv => 500 + 50 * (lv - 1);                        // XP needed for level lv: 500 … 2,250 (49,500 XP, about 700 runs in all)
+const rtCost = lv => 300 + 50 * (lv - 1);                        // XP needed for level lv: 300 … 2,050 (42,300 XP, about 600 runs in all)
 const RT_TRACK = (() => {
   const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher', N = 'Neutral';
   const two = (tribe, a, ta, b, tb) => ({tribe, cards: [{name: a, tribe, tier: ta}, {name: b, tribe, tier: tb}]});
   const L = [
-    two(H, 'Performance Review', 2, 'Loyalty Card', 3), two(I, 'Thirst Trap', 2, 'Bot Farm', 3), two(F, 'Magpie', 2, 'Allotment', 3),
+    two(H, 'Performance Review', 2, 'Loyalty Card', 3), two(I, 'Thirst Trap', 2, 'Drama Channel', 2), two(F, 'Magpie', 2, 'Allotment', 3),
     two(C, 'Ghostwriter', 2, 'Encore', 3), two(T, 'Bluetooth Speaker', 2, 'Clutch Player', 3), two(P, 'Gig Poster', 2, 'Banner Drop', 3),
-    two(PH, 'Breathwork Coach', 2, 'Debate Club', 3),
+    two(PH, 'Mystery Cult', 3, 'Debate Club', 3),
     two(H, 'Delivery Rider', 1, 'Five-Star Rating', 2), two(H, 'Task Rabbit', 3, 'Double Shift', 4),
     two(H, 'Ghost Kitchen', 5, 'Platform Monopoly', 6),
     two(I, 'Reaction Streamer', 1, 'Donation Goal', 2), two(I, 'Raid Party', 3, 'Subathon', 4), two(I, 'Hype Train', 5, 'Streamer House', 6),
-    two(H, 'Cashback Card', 4, 'Recruitment Agency', 5), two(I, 'Paid Verification', 4, 'Fan Convention', 5),
+    two(H, 'Cashback Card', 4, 'Recruitment Agency', 5), two(I, 'Paid Verification', 4, 'Comments Off', 4),
     two(F, 'Tulip Bulb', 1, 'Hedgehog', 2), two(F, 'Bat Colony', 3, 'Hibernating Bear', 4), two(F, 'Cicada Swarm', 5, 'Seed Vault', 6),
     two(T, 'Pop-Up Ad', 1, 'Battle Pass', 2), two(T, 'Data Broker', 3, 'Auto-Renewal', 4), two(T, 'App Store', 5, 'Data Centre', 6),
     two(F, 'Fox Den', 4, 'Botanical Garden', 5), two(T, 'LAN Party', 4, 'Smart Doorbell', 5),
@@ -1581,7 +1593,7 @@ const RT_TRACK = (() => {
     two(P, 'Bouncer', 3, 'Crowd Surfer', 4), two(P, 'Wall of Death', 5, 'Festival Pit', 6),
     two(P, 'Bootleg Merch', 4, 'Sound System', 5),
     two(PH, 'Van Lifer', 1, 'Digital Detox', 2), two(PH, 'Declutter Coach', 3, 'Silent Retreat', 4), two(PH, 'Capsule Wardrobe', 5, 'The Void', 6),
-    two(PH, 'Tenured Professor', 4, 'TED Talk', 5), two(N, 'Parcel Locker', 3, 'Neighbourhood Watch', 5),
+    two(PH, 'Utopian Commune', 5, 'TED Talk', 5), two(N, 'Parcel Locker', 3, 'Neighbourhood Watch', 5),
     two(C, 'Wedding Band', 1, 'Sampler', 2),
     two(C, 'Tribute Act', 3, 'Plagiarist', 4), two(C, 'AI Art Generator', 5, 'Mashup Artist', 6),
     two(C, 'Biopic', 4, 'Crossover Hit', 5),
@@ -1944,6 +1956,15 @@ function rmAfterRun() {
 }
 
 // ---------------------------------------------------------------- reward moment, after the end screen: one pop-up per new level
+/** A locked card in Collection: tribe and tier show, the rest stays a surprise. */
+function mysteryCardHTML(c, at) {
+  const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();
+  const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${TC[tr]} 50%,${TC[c.tribe2]} 50%)` : `background-color:${TC[tr]}`;
+  const tag = c.tribe2 ? `<span class="trb" style="background:${TC[tr]}">${lab}</span><span class="trb" style="background:${TC[c.tribe2]}">${c.tribe2.toUpperCase()}</span>` : `<span class="trb" style="background:${TC[tr]}">${lab}</span>`;
+  return `<div class="card rt-card${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}">${RT_SIL}<span class="rt-q">?</span></div>${c.legendary ? '<i class="foil"></i>' : ''}
+    <p class="nm" style="font-size:21px">???</p><div class="meta${c.tribe2 ? ' duo' : ''}">${tag}${fmtStars(c.tier, c.tribe2 ? 11 : c.tier <= 4 ? 16 : 13)}</div>
+    <p class="txt" style="font-size:14px;color:#8f86a6">A surprise.</p><div class="sa">?</div><div class="sh">?</div></div>`;
+}
 function rtCardHTML(c) {
   if (rtReal(c)) return cardHTML(CARD[c.name]);
   const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();

@@ -10,12 +10,13 @@ const LEVEL_COST = {2: 5, 3: 7, 4: 8, 5: 9, 6: 10};
 const CURVE = {1: 1, 2: 2, 3: 2, 4: 3, 5: 3, 6: 4, 7: 4, 8: 5, 9: 5, 10: 6};
 const COPIES = {1: 16, 2: 15, 3: 13, 4: 11, 5: 9, 6: 7};
 const P_ = {vv: 4, mc: 4};
-const RIGHT_GIVERS = new Set(['Shower Thinker', 'Zine Maker', 'Marathon Monk']);
+const RIGHT_GIVERS = new Set(['Shower Thinker', 'Zine Maker', 'Prank Vlogger']);
 const LEFT_GIVERS = new Set(['Pub Philosopher']);
-const NB_GIVERS = new Set(['Rooftop Beehive', 'Thought Experiment', 'Bestselling Author', 'Tree Hugger', 'Wild Boar', 'Desert Hermit',
+const NB_GIVERS = new Set(['Rooftop Beehive', 'Thought Experiment', 'Bestselling Author', 'Tree Hugger', 'Wild Boar', 'Apology Video',
   'Squat Collective', 'Package Hoarder', 'Open Mic Poet', 'Thought Leader', 'Caretaker', 'Nihilist', 'World Record', 'E-Sports Coach']);
 const NEUTRAL_GOOD = {'Caretaker': 2, 'The Landlord': 2, 'Block Party Host': 4, 'Package Hoarder': 1, 'Wi-Fi Leech': 1, 'Leaf Blower Guy': 1};
 const SELL_STYLES = ['EX', 'SO'];
+const KEEP_KW = ['taunt', 'shield', 'toxic', 'rebrand', 'twice'];
 const TARGETED_FI = new Set(['Art Student', 'Venture Capitalist', 'Smart Doorbell']);
 
 let CARDS = [], BY_NAME = {}, BY_TRIBE = {}, STYLES = {}, TOKENS = {};
@@ -50,7 +51,7 @@ let UID = 1;
 class M {
   constructor(card, follower = false) {
     this.c = card; this.follower = follower;
-    if (follower) { this.name = 'Follower'; this.tribe = I; this.style = 'FO'; this.tier = 1; this.atk = 1; this.hp = 1;
+    if (follower) { this.name = 'Follower'; this.tribe = PH; this.style = 'FO'; this.tier = 1; this.atk = 1; this.hp = 1;
       this.taunt = this.shield = this.toxic = this.rebrand = this.twice = false; }
     else { Object.assign(this, {name: card.name, tribe: card.tribe, style: card.style, tier: card.tier, atk: card.atk, hp: card.hp,
       taunt: card.taunt, shield: card.shield, toxic: card.toxic, rebrand: card.rebrand, twice: card.twice}); }
@@ -85,7 +86,7 @@ const skillOf = r => Math.max(0, Math.min(1, r / 5000));
 
 // ---------- pool ----------
 // The Feed pool: each tribe has up to 3 cards per tier, chosen on the Collection screen (deck = Set of names; null = default).
-const DEFAULT_OFF = new Set(['Unboxing Streamer', 'Loot Box']);
+const DEFAULT_OFF = new Set(['Pythagorean', 'Loot Box', 'Keynote Speaker']);
 const inDeck = (c, deck) => deck ? deck.has(c.name) : !c.legendary && !c.track && !DEFAULT_OFF.has(c.name);
 function buildPool(tribes, deck = null) {
   const all = [...new Set(tribes.flatMap(t => BY_TRIBE[t]).filter(c => inDeck(c, deck)).concat(BY_TRIBE[N].filter(c => inDeck(c, deck))))];
@@ -218,7 +219,7 @@ class Player {
   }
   playQueue() {
     const q = this.queue || []; this.queue = [];
-    for (const x of q) if (this.board.length < 7 || (x.card.collab && this.board.length)) { const m = this.play(x.card, this.gold, null, null, x.zero ? {zero: true} : null); if (m && x.zero) m.zero = true; }
+    for (const x of q) if (this.board.length < 7 || this.canConnect(x.card)) { const m = this.play(x.card, this.gold, null, null, x.zero ? {zero: true} : null); if (m && x.zero) m.zero = true; }
   }
   commit() { let c = this.turn <= 3 ? .4 : this.turn <= 5 ? .7 : 1; if (this.health < 15) c *= .6; return c; }
   cardScore(card) {
@@ -228,13 +229,13 @@ class Player {
     let s = this.value(m) + card.tier * (pr ? pr.tierW : .5) + (pr ? (pr.statW - 0.5) * (card.atk + card.hp) / 2 : 0);
     if (card.tribe === this.tribe) {
       const decay = Math.max(.25, 1 - .25 * Math.max(0, this.tier - card.tier - 1));
-      if (card.kind === 'fi' || card.collab) s += 1.5 * (1 + card.tier) * decay;
+      if (card.kind === 'fi' || this.canConnect(card)) s += 1.5 * (1 + card.tier) * decay;
       if (card.discover) s += 2 * decay;
     }
     if (card.name === 'Helpful Neighbour') s += 2;
     if (card.name === 'Jingle Writer' && this.tribe === P && this.punks_sold >= 2) s += 3 + 3 * this.count('Reunion Tour');
-    if (card.collab && this.board.length) s += 1;
-    if (!card.collab) s += (1.5 + (this.pro ? (this.prm || PRO).twin : 0)) * this.board.filter(x => x.name === card.name && !x.golden).length;
+    if (this.canConnect(card)) s += 1;
+    if (!this.canConnect(card)) s += (1.5 + (this.pro ? (this.prm || PRO).twin : 0)) * this.board.filter(x => x.name === card.name && !x.golden).length;
     return s;
   }
   summonFollower(board) {
@@ -242,7 +243,7 @@ class Player {
     if (board.length >= 7) return null;
     const f = new M(null, true);
     f.atk += this.fbonus; f.hp += this.fbonus;
-    const ef = 6 * wsum(board, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
+    const ef = 5 * wsum(board, 'The Academy'); f.atk += ef; f.hp += ef;
     board.push(f); this.note('summon', {id: f.id}); this.fsum = (this.fsum || 0) + 1;
     return f;
   }
@@ -255,29 +256,31 @@ class Player {
       for (const m of this.board.slice()) if (m.is_('Cashback Card')) { const u = this.cashUses = this.cashUses || {}; if ((u[m.id] || 0) < 2) { u[m.id] = (u[m.id] || 0) + 1; this.gold[0] += m.g; this.note('refund', {id: m.id, n: m.g}); } }
     for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
       for (const m of this.board.slice()) if (m.is_('Loyalty Card')) { const o = leftOf(this.board, m); if (o) this.buff(o, 3 * m.g, 3 * m.g, m); }
-    for (const tf of this.board.filter(m => m.is_('Tech Founder'))) for (let k = 0; k < Math.floor(this.spent / 3) - Math.floor(before / 3); k++) for (const o of this.board) if (isTribe(o, H) || isTribe(o, T)) this.buff(o, tf.g, tf.g, tf);
-    for (const c of cons) for (let k = 0; k < Math.floor(this.spent / 3) - Math.floor(before / 3); k++) for (const o of this.board) if (o !== c && o.tribe === H) this.buff(o, c.g, c.g, c);   // Consultant's own trigger
+    for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
+      for (const tf of this.board.filter(m => m.is_('Tech Founder'))) { this.addFeedBuff(H, 2 * tf.g, 2 * tf.g); this.addFeedBuff(T, 2 * tf.g, 2 * tf.g); }
+    for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++) for (const c of cons) this.buff(c, 4, 4, c);   // Consultant's own trigger (golden: every 2 gold)
   }
   carry() { const c = this.board.filter(m => !m.follower); return maxBy(c.length ? c : this.board, m => [m.stats(), this.value(m)]); }
-  discoverOptions(tribe, tier) {
-    const inPool = new Set(this.pool[6][0]), cards = tribe ? BY_TRIBE[tribe].filter(c => c.tier <= this.tier && inPool.has(c)) : this.pool[6][0].filter(c => c.tier === tier);
+  discoverOptions(tribe, tier, not = null) {
+    const inPool = new Set(this.pool[6][0]), cards = (tribe ? BY_TRIBE[tribe].filter(c => c.tier <= this.tier && inPool.has(c)) : this.pool[6][0].filter(c => c.tier === tier)).filter(c => c.name !== not);
     const w = tribe ? cards.map(c => COPIES[c.tier]) : null;
     return this.rng.choices(cards, w, 3);
   }
-  discover(tribe, gold) {
-    const opts = this.discoverOptions(tribe);
+  discover(tribe, gold, not = null) {
+    const opts = this.discoverOptions(tribe, null, not);
     if (this.human) { this.pending.push({kind: 'discover', options: opts, why: tribe}); return; }
     const best = maxBy(opts, c => this.cardScore(c));
-    if (this.board.length < 7 || (best.collab && this.board.length)) this.play(best, gold);
+    if (this.board.length < 7 || this.canConnect(best)) this.play(best, gold);
   }
   firstImpression(m, gold, target) {
     const reps = (1 + this.wcount('DJ Upstairs')) * m.g;
     for (let r = 0; r < reps; r++) {
       const n = m.name, others = this.board.filter(o => o !== m);
       if (n === 'Dropshipper') { this.bonus_next += 1; this.note('gold_next', {id: m.id, n: 1}); }
-      else if (n === 'Unboxing Streamer') { this.summonFollower(); this.summonFollower(); this.addLikes(2, m); }
+      else if (n === 'Pythagorean') { this.summonFollower(); this.summonFollower(); this.addLikes(2, m); }
       else if (n === 'Personal Brand') { this.addLikes(2, m); this.likeBonus += 1; this.note('likebonus', {id: m.id}); }
-      else if (n === 'Engagement Bot') this.addLikes(m.g, m);
+      else if (n === 'Engagement Bot') this.addLikes(2 * m.g, m);
+      else if (n === 'Crypto Bro') { const k = this.rng.int(-1, 3); this.bonus_next += k; this.note('gold_next', {id: m.id, n: k}); }
       else if (n === 'Ring Light Studio') this.addLikes(2 * m.g, m);
       else if (n === 'Helpful Neighbour') { const by = {}; for (const o of others) if (!o.follower && o.tribe !== N) (by[o.tribe] = by[o.tribe] || []).push(o); for (const t in by) this.buff(this.rng.choice(by[t]), 2 * m.g, 2 * m.g, m); }
       else if (n === 'Venture Capitalist') {
@@ -292,7 +295,7 @@ class Player {
         const t = target && cands.includes(target) ? target : cands.length ? maxBy(cands, o => this.value(o)) : null;
         if (t) { t.tribe2 = T; this.note('collab', {id: t.id, name: n}); }
       } else if (n === 'Wedding Band') { const l = leftOf(this.board, m); if (l && !this.retrig) { this.retrig = true; this.firstImpression(l, gold, null); this.retrig = false; } }
-      else if (m.c && m.c.discover) this.discover(m.c.discover, gold);
+      else if (m.c && m.c.discover) this.discover(m.c.discover, gold, m.name);
     }
   }
   afterCollab() {
@@ -322,17 +325,21 @@ class Player {
     tgt.extras.push(card.name); this.buffed.add(tgt.id); this.note('collab', {id: tgt.id, name: card.name});
     this.afterCollab();
   }
-  /** Extra minions a Collab sticks to (Smart Home Hub: +1 each, golden +2). */
+  /** Minions a Connect card can attach to: your Techies (Robot Vacuum: any minion). Empty: it is played as a minion. */
+  connectTargets(card) { return card && card.collab ? this.board.filter(x => !x.follower && (card.name === 'Robot Vacuum' || isTribe(x, T))) : []; }
+  canConnect(card) { return !!(card && card.collab) && this.connectTargets(card).length > 0; }
+  /** Extra minions a Connect attaches to (Smart Home Hub: +1 each, golden +2). */
   hubExtra() { return this.board.reduce((k, m) => k + m.w('Smart Home Hub'), 0); }
   play(card, gold, pos = null, target = null, bonus = null, more = null) {
-    if (card.collab && this.board.length) {
-      let tgt = target && this.board.includes(target) ? target : null;
-      if (!tgt) { const own = this.tribe === card.tribe ? this.board.filter(x => !x.follower && isTribe(x, card.tribe)) : []; tgt = own.length ? maxBy(own, x => x.stats()) : this.carry(); }
+    if (this.canConnect(card)) {
+      const cands = this.connectTargets(card);
+      let tgt = target && cands.includes(target) ? target : null;
+      if (!tgt) tgt = maxBy(cands, x => [x.stats(), this.value(x)]);
       const extra = this.hubExtra(), done = [tgt];
       this.stick(card, tgt); auras(this.board);
       for (let i = 0; i < extra; i++) {   // the player picks these (more); bots and unpicked slots take the best other minion
-        const pick = more && more[i] && this.board.includes(more[i]) && !done.includes(more[i]) ? more[i] : null;
-        const rest = this.board.filter(x => !done.includes(x) && !x.follower);
+        const pick = more && more[i] && cands.includes(more[i]) && !done.includes(more[i]) ? more[i] : null;
+        const rest = cands.filter(x => !done.includes(x));
         const t = pick || (rest.length ? maxBy(rest, x => [isTribe(x, T) ? 1 : 0, x.is_('Smart Home Hub') ? 0 : 1, x.stats()]) : null);
         if (!t) break; done.push(t); this.stick(card, t);
       }
@@ -341,7 +348,9 @@ class Player {
     }
     const m = new M(card);
     if (bonus) { m.atk += bonus.a || 0; m.hp += bonus.h || 0; }
-    if (bonus && bonus.golden) { m.golden = true; m.atk += card.atk; m.hp += card.hp; if (bonus.extras) m.extras.push(...bonus.extras); m.shield = m.shield || !!bonus.shield; m.sell_bonus += bonus.sell || 0; }
+    if (bonus && bonus.golden) { m.golden = true; m.atk += card.atk; m.hp += card.hp; if (bonus.extras) m.extras.push(...bonus.extras); m.shield = m.shield || !!bonus.shield; m.sell_bonus += bonus.sell || 0;
+      if (bonus.kw) for (const k of KEEP_KW) if (bonus.kw[k]) m[k] = true;   // keywords a copy gained (Attention Seeker, Rebrand, Toxic ...)
+      if (bonus.tribe2 && !m.tribe2) m.tribe2 = bonus.tribe2; }
     if (card.tribe === C && this.creativeAtk) m.atk += this.creativeAtk;
     if (bonus && bonus.zero) m.zero = true;
     if (pos === null || pos > this.board.length) this.board.push(m); else this.board.splice(pos, 0, m);
@@ -357,9 +366,11 @@ class Player {
    *  Returns the golden card's spec {a, h, extras, shield, sell}; play(card, gold, pos, target, {...spec, golden: true}) plays it. */
   takeTriple(card, pieces, fromBoard) {
     const same = this.board.filter(x => x.name === card.name && !x.golden && !x.follower).slice(0, fromBoard);
-    const spec = {a: 0, h: 0, extras: [], shield: false, sell: 0};
+    const spec = {a: 0, h: 0, extras: [], shield: false, sell: 0, kw: {}, tribe2: null};
     for (const x of same) {
       spec.a += x.atk - card.atk; spec.h += x.hp - card.hp; spec.extras.push(...x.extras); spec.shield = spec.shield || (x.shield && !card.shield); spec.sell += x.sell_bonus;
+      for (const k of KEEP_KW) if (x[k] && !card[k]) spec.kw[k] = true;
+      if (x.tribe2 && !card.tribe2) spec.tribe2 = x.tribe2;
       this.board.splice(this.board.indexOf(x), 1);
     }
     for (const pc of pieces) { spec.a += pc.a || 0; spec.h += pc.h || 0; }
@@ -368,7 +379,7 @@ class Player {
   /** Bots: buying the third copy makes the golden card and plays it at once (bots have no hand), First Impression doubled. */
   tripleOnBuy(card, pieces, gold) {
     const onBoard = this.board.filter(x => x.name === card.name && !x.golden && !x.follower).length;
-    if (card.collab || onBoard + pieces.length < 3) return null;
+    if (this.canConnect(card) || onBoard + pieces.length < 3) return null;
     const spec = this.takeTriple(card, pieces, 3 - pieces.length);
     const m = this.play(card, gold, null, null, Object.assign({golden: true}, spec));
     this.note('triple', {id: m.id});
@@ -380,7 +391,7 @@ class Player {
     const opts = this.discoverOptions(null, t);
     if (this.human) { this.pending.push({kind: 'discover', options: opts, why: 'triple', tier: t}); return; }
     const best = maxBy(opts, c => this.cardScore(c));
-    if (this.board.length < 7 || (best.collab && this.board.length)) this.play(best, gold);
+    if (this.board.length < 7 || this.canConnect(best)) this.play(best, gold);
   }
   checkTriple(card, gold) {
     const same = this.board.filter(x => x.name === card.name && !x.golden && !x.follower);
@@ -388,6 +399,7 @@ class Player {
     const keep = same[0];
     for (const x of same.slice(1, 3)) {
       keep.atk += x.atk - card.atk; keep.hp += x.hp - card.hp; keep.shield = keep.shield || x.shield;
+      for (const k of KEEP_KW) if (x[k]) keep[k] = true; if (x.tribe2 && !keep.tribe2) keep.tribe2 = x.tribe2;
       keep.extras.push(...x.extras); keep.sell_bonus += x.sell_bonus; this.board.splice(this.board.indexOf(x), 1);
     }
     keep.atk += card.atk; keep.hp += card.hp; keep.golden = true; keep.tier = card.tier;
@@ -396,7 +408,7 @@ class Player {
   }
   sellValue(m) {
     if (m.zero) return 0;
-    let g = m.name === 'Unpaid Intern' ? 2 * m.g : m.name === 'Crypto Bro' ? (m.turns_on_board > 6 ? 0 : Math.min(1 + m.turns_on_board, 7) * m.g) : 1;
+    let g = m.name === 'Unpaid Intern' ? 2 * m.g : 1;
     return g + m.sell_bonus;
   }
   sell(m, gold) {
@@ -415,8 +427,8 @@ class Player {
     else if (n === 'Pension Fund' && m.pens) { for (const o of this.board) if (isTribe(o, H) || isTribe(o, F)) this.buff(o, m.pens, m.pens, m); }
     else if (n === 'Gig Poster') { this.punkDiscountNext = (this.punkDiscountNext || 0) + g; this.note('discount', {n: g}); }
     else if (n === 'Encore' && this.lastCreative) for (let i = 0; i < g; i++) this.gainCard(this.lastCreative);
-    else if (n === 'Zine Maker' && right) this.buff(right, 3 * g, 3 * g);
-    else if (n === 'Sellout Frontman') { for (const o of this.board) if (o.tribe === P) this.buff(o, 3 * g, 3 * g); this.addFeedBuff(P, g, g); }
+    else if (n === 'Zine Maker' && right) this.buff(right, 2 * g, 2 * g);
+    else if (n === 'Sellout Frontman') { for (const o of this.board) if (o.tribe === P) this.buff(o, 2 * g, 2 * g); this.addFeedBuff(P, 2 * g, 2 * g); }
     else if (n === 'Jingle Writer') { const k = Math.min(16, 2 * this.punks_sold) * g; if (k) for (const o of this.board) if (o.tribe === P) this.buff(o, k, k); }
   }
   afterSell(sold) {
@@ -442,6 +454,9 @@ class Player {
   endOfTurn() {
     auras(this.board);
     let b = this.board; this.in_eot = true; this.oak = 1 + this.wcount('Ancient Oak');
+    const eotReps = 1 + this.wcount('New Neighbours');   // New Neighbours: end-of-turn effects trigger twice
+    for (let eot = 0; eot < eotReps; eot++) {
+    b = this.board; this.in_eot = true;
     for (const m of doubled(b.slice())) {
       b = this.board; if (!b.includes(m)) continue;
       for (const n of [m.name].concat(m.mash || [])) {
@@ -484,15 +499,14 @@ class Player {
         const feed = this.getFeed ? this.getFeed() : this.feedRef;
         if (feed && feed.length) { const f = maxBy(feed, x => x.card.atk + x.a); feed.splice(feed.indexOf(f), 1); m.atk += (f.card.atk + f.a) >> 1; m.hp += (f.card.hp + f.h) >> 1; this.buffed.add(m.id); this.note('acquire', {id: m.id, name: f.card.name, a: (f.card.atk + f.a) >> 1, h: (f.card.hp + f.h) >> 1}); }
       }
-      else if (n === 'Giveaway Host') { this.fbonus += 1; for (const o of b) if (o.follower) this.buff(o, 1, 1, m); }
+      else if (n === 'Epicurean') { this.fbonus += 1; for (const o of b) if (o.follower) this.buff(o, 1, 1, m); }
       else if (n === 'Caretaker') { for (const o of neighbours(b, m)) { o.taunt = true; this.buff(o, 1, 2, m); } }
       else if (n === 'The Landlord') {
         for (const o of b.filter(x => x !== m)) { o.atk = Math.max(0, o.atk - 1); o.hp -= 1; m.atk += 2; m.hp += 2; this.note('drain', {id: o.id, src: m.id});
           if (o.hp <= 0) { b.splice(b.indexOf(o), 1); this.bonus_next += 2; this.note('shopdeath', {id: o.id}); this.onShopDeath(o); } }
-      } else if (n === 'Block Party Host') { for (const o of b) { const k = 2 * neighbours(b, o).length; if (k) this.buff(o, k, k, m); } }
-      else if (n === 'Unicorn Startup') { const g = this.spent_this_turn >> 1; if (g) for (const o of b) if (o !== m && o.tribe === H) this.buff(o, g, g, m); }
+      } else if (n === 'Unicorn Startup') { const g = 2 * Math.floor(this.spent_this_turn / 4); if (g) for (const o of b) if (o !== m && o.tribe === H) this.buff(o, g, g, m); }
       else if (n === 'Windowsill Succulent') { if (b.some(o => o !== m && o.tribe === F)) this.buff(m, 1, 1, m); }
-      else if (n === 'The Billionaire') { const k = Math.min(10, this.gold[0]); if (k) for (const o of b) if (o !== m && isTribe(o, H)) this.buff(o, k, k, m); }
+      else if (n === 'The Billionaire') { const k = 3 * Math.max(0, this.gold[0]); if (k) this.buff(m, k, k, m); }
       else if (n === 'Apex Scavenger') { const feed = this.getFeed ? this.getFeed() : this.feedRef; if (feed && feed.length) { const k = Math.floor(Math.max(...feed.map(x => x.card.atk + (x.a || 0))) / 2); if (k) for (const o of b) if (o !== m && isTribe(o, F)) this.buff(o, k, k, m); } }
       else if (n === 'The Algorithm') { for (const o of b) if (o.extras.length) this.buff(o, o.extras.length, o.extras.length, m); }
       else if (n === 'Housing Co-op') { const ts = new Set(); for (const o of b) if (!o.follower) for (const t of [o.tribe, o.tribe2]) if (t) ts.add(t); for (const o of b) if (o !== m) this.buff(o, 2 * ts.size, 2 * ts.size, m); }
@@ -512,21 +526,23 @@ class Player {
       if (m.n('Quantum Computer') && m.extras.length) { const k = 2 * m.n('Quantum Computer') * m.extras.length; this.buff(m, k, k, m); }
       if (m.n('Smart Fridge')) { const k = m.n('Smart Fridge'); for (const o of b) if (isTribe(o, T)) this.buff(o, k, k, m); }
     }
-    for (const m of this.board.slice()) if (m.is_('Bot Farm') && (m.farm || 0) < BOT_FARM_MAX && this.board.length < 7) { m.farm = (m.farm || 0) + 1; for (let i = 0; i < 2 * m.g; i++) this.summonFollower(); }
+    for (const m of this.board.slice()) if (m.is_('Mystery Cult') && (m.farm || 0) < BOT_FARM_MAX && this.board.length < 7) { m.farm = (m.farm || 0) + 1; for (let i = 0; i < 2 * m.g; i++) this.summonFollower(); }
     b = this.board;
     this.in_eot = false;
     for (const m of b) if (m.name === 'Bestselling Author') for (const o of neighbours(b, m)) if (isTribe(o, PH)) this.tbuff(o, m.g, m.g, m);
-    for (const m of b) if (m.is_('Grand Unified Theory')) { const tc = tribeCount(b), k = (tc >= 4 ? 3 : 2) + (m.golden ? 1 : 0); for (const o of b) { o.ta += tc * m.g; o.th += tc * m.g; o.ta *= k; o.th *= k; this.buffed.add(o.id); } }
+    for (const m of b) if (m.is_('Grand Unified Theory')) { const tc = tribeCount(b), k = m.golden ? 3 : 2; for (const o of b) { o.ta += tc * m.g; o.th += tc * m.g; o.ta *= k; o.th *= k; this.buffed.add(o.id); } }
     for (const m of b) if (m.name === 'Bestselling Author') for (const o of b) if (o.ta || o.th) { o.atk += o.ta; o.hp += o.th; this.note('buff', {id: o.id, a: o.ta, h: o.th, src: m.id}); if (!m.golden) o.ta = o.th = 0; }
+    }
     for (const m of b) m.fb = this.fbonus;
   }
   onShopDeath(v) {
     const reps = 1 + this.wcount('Lawyer Next Door'), g = v.g;
     for (let r = 0; r < reps; r++) {
-      if (v.name === 'Reply Guy') for (let i = 0; i < g; i++) this.summonFollower();
-      else if (v.name === 'Comment Section') for (let i = 0; i < 2 * g; i++) this.summonFollower();
+      if (v.name === 'Sophist') for (let i = 0; i < g; i++) this.summonFollower();
+      else if (v.name === 'Peripatetic') for (let i = 0; i < 2 * g; i++) this.summonFollower();
       else if (v.name === 'Compost Heap') this.addFeedBuff(F, g, g);
       else if (v.name === 'Golden Parachute Exec') this.bonus_next += 2 * g;
+      else if (v.name === 'Block Party Host') { const b = this.board; for (const o of b) { const k = 2 * neighbours(b, o).length * g; if (k) this.buff(o, k, k); } }
     }
   }
   drawFeed() { const [cards, w] = this.pool[this.tier]; return this.rng.choices(cards, w, FEED_SIZE[this.tier]); }
@@ -601,7 +617,7 @@ class Player {
     if (orLower) { const cs = this.pool[tier][0].filter(c => !c.token); opts = this.rng.choices(cs, cs.map(c => COPIES[c.tier]), 3); }
     if (this.human) { this.pending.push({kind: 'discover', options: opts, why: 'hero', tier}); return; }
     const best = maxBy(opts, c => this.cardScore(c));
-    if (this.board.length < 7 || (best.collab && this.board.length)) this.play(best, this.gold);
+    if (this.board.length < 7 || this.canConnect(best)) this.play(best, this.gold);
   }
   /** After combat: Life Coach keeps the buff if the minion survived. */
   afterCombat(survivedIds) {
@@ -615,7 +631,7 @@ class Player {
     this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollUses = {}; this.ghSold = 0; this.punkDiscount = this.punkDiscountNext || 0; this.punkDiscountNext = 0;
     for (const m of this.board) { m.turns_on_board += 1; m.ta = m.th = 0; }
     const carry = this.hero === 'h_procrastinator' ? Math.min(3, this.gold[0]) : 0;
-    this.gold = [Math.min(2 + this.turn, 10) + this.bonus_next + carry]; this.gold_from = {base: Math.min(2 + this.turn, 10), bonus: this.bonus_next, carry};
+    this.gold = [Math.max(0, Math.min(2 + this.turn, 10) + this.bonus_next + carry)]; this.gold_from = {base: Math.min(2 + this.turn, 10), bonus: this.bonus_next, carry};
     this.bonus_next = 0; this.spent_start = this.spent;
     const pop = this.board.reduce((k, m) => k + (m.is_('Pop-Up Ad') ? m.g : 0), 0);
     if (pop && this.turn % 2 === 0) { this.gold[0] += pop; this.gold_from.ads = pop; }
@@ -627,7 +643,6 @@ class Player {
     this.beginTurn(); const gold = this.gold, r = this.rng, sk = this.skill;
     if (this.onBegin) this.onBegin(this);   // test hook (balance suite)
     this.playQueue();
-    for (const m of this.board.slice()) if (m.name === 'Crypto Bro' && m.turns_on_board >= 6) this.sell(m, gold);
     if ((SELL_STYLES.includes(this.style) || [H, P].includes(this.tribe)) && !(this.expert && this.has('Squat Collective')))
       for (const m of this.board.slice()) if (m.c && m.c.sellbait && m.turns_on_board >= 1 && this.board.length > 4) this.sell(m, gold);
     for (const m of this.board.slice()) if (m.name === 'Encore' && this.lastCreative && m.turns_on_board >= 1 && this.board.length >= 5) this.sell(m, gold);
@@ -696,9 +711,9 @@ class Player {
       }
       if (sc === 0 && scrolls === 0 && best && this.tribe && best.card.tribe !== this.tribe) { this.payScroll(); scrolls++; feed = this.feedEntries(this.drawFeed()); continue; }
       if (best) {
-        const twin = !best.card.collab && this.board.filter(x => x.name === best.card.name && !x.golden && !x.follower).length >= 2;
+        const twin = !this.canConnect(best.card) && this.board.filter(x => x.name === best.card.name && !x.golden && !x.follower).length >= 2;
         const cap = this.v2 && !PRO.off.hero && this.hero === 'h_minimalist' ? MINI_MAX : 7;
-        const bs = this.cardScore(best.card), free = twin || this.board.length < cap || (best.card.collab && this.board.length);
+        const bs = this.cardScore(best.card), free = twin || this.board.length < cap || this.canConnect(best.card);
         const playEngines = this.expert && best.card.tribe === C ? ['World Tour', 'Festival Headliner', 'Busker', 'Indie Band', 'Record Label', 'Merch Stand'].reduce((k, n) => k + this.count(n), 0) : 0;
         if (free || (swaps < (playEngines ? 5 : 3) && (this.pro && !playEngines && !PRO.off.look ? this.proSwapLook(best, worst) : bs > this.value(worst) + (this.pro ? (this.prm || PRO).swapTh : 1.5) - 1.5 * Math.min(3, playEngines)))) {
           if (!free) { this.sell(worst, gold); swaps++; }
@@ -779,8 +794,8 @@ class Player {
       if (m.is_('Bestselling Author')) s += 2 * g * nb.filter(isPH).length;
       if (m.is_('Shower Thinker') && R) s += 6 * g + (R === cy ? 3 : 0);
       if (m.is_('Pub Philosopher') && L) s += 6 * g + (L === cy ? 3 : 0);
-      if (m.is_('Marathon Monk') && isPH(R)) s += 3 * g;
-      if (m.is_('E-Sports Coach')) s += 3 * g * nb.length;
+      if (m.is_('Prank Vlogger') && R && isTribe(R, I)) s += 3 * g;
+      if (m.is_('E-Sports Coach')) s += 4 * g;
       if (m.is_('Wi-Fi Leech')) s += 2 * g * nb.length;
       if (m.is_('Open Mic Poet')) s += 2 * g * nb.length;
       if (m.is_('Package Hoarder') || m.is_('Caretaker')) for (const o of nb) if (!o.taunt) s += Math.min(o.hp, 30) / 6 - (o === this.carry() ? 2 : 0);
@@ -826,7 +841,7 @@ class Player {
   simWith(entry, opps) {
     const m = new M(entry.card); UID--; m.atk += entry.a; m.hp += entry.h;
     let b = this.board.slice();
-    if (entry.card.collab) { if (!b.length) return 0; const c = this.carry(); const cp = Object.assign(Object.create(M.prototype), c, {extras: c.extras.concat(entry.card.name), atk: c.atk + entry.card.atk, hp: c.hp + entry.card.hp}); b[b.indexOf(c)] = cp; }
+    if (this.canConnect(entry.card)) { const c = maxBy(this.connectTargets(entry.card), x => x.stats()); const cp = Object.assign(Object.create(M.prototype), c, {extras: c.extras.concat(entry.card.name), atk: c.atk + entry.card.atk, hp: c.hp + entry.card.hp}); b[b.indexOf(c)] = cp; }
     else if (b.length >= 7) { const w = minBy(b, x => this.value(x)); b.splice(b.indexOf(w), 1, m); } else b.push(m);
     return this.simScore(b, opps);
   }
@@ -852,7 +867,7 @@ class Player {
 // The plays a strong player makes, used by the top rating brackets and by the balance suite to see top boards:
 // synergy-aware buying, sell plays, positioning around neighbour effects, spending into spend engines, digging for pieces.
 const TAG_RE = [[/Like/, 'likes'], [/Follower/, 'followers'], [/When sold|you sell|Punks you have sold/, 'selling'], [/Legacy/, 'legacy'],
-  [/next combat|next-combat/, 'tempbuff'], [/Attention Seeker/, 'taunt'], [/Collab/, 'collab'], [/Scroll/, 'scroll'], [/Rebrand|comes back/, 'rebrand'],
+  [/next combat|next-combat/, 'tempbuff'], [/Attention Seeker/, 'taunt'], [/Connect/, 'collab'], [/Scroll/, 'scroll'], [/Rebrand|comes back/, 'rebrand'],
   [/End of turn|end-of-turn/, 'eot'], [/gold you spend|you spent/, 'spend'], [/Toxic|kills a minion/, 'kill'], [/play a Creative|Creatives you|Creative you/, 'cplay'],
   [/minion dies|Grievance/, 'death'], [/in the Feed/, 'feed'], [/Clock In/, 'clock'], [/damage to|start-of-combat damage/, 'damage']];
 const TAGS = new Map();
@@ -875,16 +890,21 @@ function snap(side) {
   return side.b.map(m => ({id: m.id, name: m.name, atk: m.atk, hp: m.hp, shield: m.shield, taunt: m.taunt, toxic: m.toxic, golden: m.golden,
     tier: m.tier, follower: m.follower, tribe: m.tribe, extras: m.extras.slice(), rebrand: m.rebrand}));
 }
-function perm(m, a, h) { m.atk += a; m.hp += h; if (m.orig) { m.orig.atk += a; m.orig.hp += h; } }
+/** Grand Unified Theory: buffs a side's minions get during combat count double (golden: triple). */
+const gutMul = m => m.side && m.side.b ? 1 + wsum(m.side.b.filter(o => o.hp > 0), 'Grand Unified Theory') : 1;
+/** A buff for this combat. */
+function gain(m, a, h) { const k = gutMul(m); if (a > 0) a *= k; if (h > 0) h *= k; m.atk += a; m.hp += h; }
+/** A permanent buff (also kept on the shop board). */
+function perm(m, a, h) { const k = gutMul(m); if (a > 0) a *= k; if (h > 0) h *= k; m.atk += a; m.hp += h; if (m.orig) { m.orig.atk += a; m.orig.hp += h; } }
 function hit(t, n, src) {
   if (n <= 0 || t.hp <= 0) return 0;
   if (t.side) {
     const b = t.side.b;
-    if (SOC_PHASE && (t.is_('Tenured Professor') || neighbours(b, t).some(o => o.is_('Tenured Professor')))) return 0;   // no start-of-combat damage
+    if (SOC_PHASE && (t.is_('Comments Off') || neighbours(b, t).some(o => o.is_('Comments Off')))) return 0;   // no start-of-combat damage
     const sr = wsum(b, 'Silent Retreat'); if (sr && b.length <= 4) { n -= sr; if (n <= 0) return 0; }
   }
   if (t.shield) { t.shield = false; t.popped = true; t.oooLost = true; return 0; }
-  if (t.cap && t.capLeft > 0) { if (n > t.cap) n = t.cap; t.capLeft--; }   // Enlightened Guru: the first hit(s) each combat
+  if (t.cap && t.capLeft > 0) { if (n > t.cap) n = t.cap; t.capLeft--; }   // Crisis PR Firm: the first hit(s) each combat
   if (src && src.toxic) { t.hp = Math.min(t.hp - n, 0); src.toxic = false; t.toxicked = true; } else t.hp -= n;
   t.hits = (t.hits || 0) + 1;
   return n;
@@ -906,8 +926,8 @@ function combatFollower(side, idx) {
   const f = new M(null, true); const fb = Math.max(0, ...b.map(x => x.fb || 0));
   f.side = side; f.cross = b.some(x => x.cross); if (side.p && !side.p.ghost) side.p.fsum = (side.p.fsum || 0) + 1;
   f.atk += fb; f.hp += fb; f.fb = fb;
-  const ba = side.baff || 0; f.atk += ba; f.hp += ba;   // Brand Ambassador's bonus for this combat
-  const ef = 6 * wsum(b, 'Engagement Farmer'); f.atk += ef; f.hp += ef;
+  f.atk += side.baffA || 0; f.hp += side.baffH || 0;   // Existentialist's bonus for this combat
+  const ef = 5 * wsum(b, 'The Academy'); f.atk += ef; f.hp += ef;
   f.hits = 0; f.surv_used = f.kill_used = false; f.speed_used = 0;
   b.splice(Math.min(idx, b.length), 0, f); return f;
 }
@@ -929,44 +949,44 @@ class Fight {
     const ev = (src, kind, tgts) => this.frame({type: 'soc', side: k, src: src.id, kind, tgts: (tgts || []).map(x => x.id)});
     const hero = me.p && me.p.hero;
     if (hero === 'remote' && b.length) { b[0].shield = true; this.frame({type: 'hero', side: k, hero, tgts: [b[0].id]}); }
-    if (hero === 'h_minimalist' && b.length <= MINI_MAX) { const e2 = MINI_BUFF; for (const o of b) { o.atk += e2; o.hp += e2; } this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
+    if (hero === 'h_minimalist' && b.length <= MINI_MAX) { const e2 = MINI_BUFF; for (const o of b) gain(o, e2, e2); this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
     const reach = (m, r) => { const i = b.indexOf(m); return b.filter((o, j) => o !== m && Math.abs(j - i) <= r); };
-    // Brand Ambassador: the bonus holds for this whole combat, so Followers summoned later get it too (see combatFollower)
-    for (const m of b.slice()) if (m.name === 'Brand Ambassador') { const kk = m.g * b.filter(o => isTribe(o, I)).length, fs = b.filter(o => o.follower); me.baff = (me.baff || 0) + kk; for (const f of fs) { f.atk += kk; f.hp += kk; } ev(m, 'give', fs); }
-    for (const m of b) if (m.name === 'Pop Diva' && me.p && !me.p.ghost) { const k = m.g * (me.p.creativesTotal || 0); const cs = b.filter(o => isTribe(o, C)); for (const o of cs) { o.atk += k; o.hp += k; } if (k) ev(m, 'give', cs); }
+    // Existentialist: the bonus holds for this whole combat, so Followers summoned later get it too (see combatFollower)
+    for (const m of b.slice()) if (m.name === 'Existentialist') { const kk = m.g * b.filter(o => isTribe(o, PH)).length, fs = b.filter(o => o.follower); me.baffA = (me.baffA || 0) + 2 * kk; me.baffH = (me.baffH || 0) + kk; for (const f of fs) gain(f, 2 * kk, kk); ev(m, 'give', fs); }
+    for (const m of b) if (m.name === 'Pop Diva' && me.p && !me.p.ghost) { const k = m.g * (me.p.creativesTotal || 0); const cs = b.filter(o => isTribe(o, C)); for (const o of cs) gain(o, k, k); if (k) ev(m, 'give', cs); }
     for (const m of b) if (m.name === 'Thirst Trap') { const os = this.rng.shuffle(b.filter(o => o !== m)).slice(0, 2); for (const o of os) o.likeLegacy = (o.likeLegacy || 0) + m.g; if (os.length) ev(m, 'give', os); }
-    const bc = b.filter(m => m.is_('Blue Checkmark'));
-    for (const m of b.slice()) if (m.name === 'Package Hoarder') { const nb = reach(m, m.g); for (const o of nb) { o.taunt = true; o.atk += 2 * m.g; o.hp += 2 * m.g; } if (nb.length) ev(m, 'give', nb); }
-    const gurus = b.filter(m => m.is_('Enlightened Guru'));
-    if (gurus.length) { const left = gurus.some(m => m.golden) ? 4 : 2; for (const o of b) if (o.taunt && !o.is_('Enlightened Guru')) { o.cap = 3; o.capLeft = left; } }
+    const bc = b.filter(m => m.is_('Philosopher King'));
+    for (const m of b.slice()) if (m.name === 'Package Hoarder') { const nb = reach(m, m.g); for (const o of nb) { o.taunt = true; gain(o, 2 * m.g, 2 * m.g); } if (nb.length) ev(m, 'give', nb); }
+    const gurus = b.filter(m => m.is_('Crisis PR Firm'));
+    if (gurus.length) { const left = gurus.some(m => m.golden) ? 4 : 2; for (const o of b) if (o.taunt && !o.is_('Crisis PR Firm')) { o.cap = 3; o.capLeft = left; } }
     const legend = b.reduce((k, o) => k + o.w('Mohawk Legend'), 0);
     const soc = m => {
       const g = m.g;
       if (m.n('Robot Vacuum') && e.length) for (let i = 0; i < m.n('Robot Vacuum'); i++) { const live = e.filter(x => x.hp > 0); if (live.length) { const t = minBy(live, x => x.hp); hit(t, 2); ev(m, 'shot', [t]); } }
       for (const n of [m.name].concat(m.mash || [])) {
-      if (n === 'Corporate Raider' && e.length) { for (let i = 0; i < g; i++) { const live = e.filter(x => x.hp > 0); if (!live.length) break; const t = minBy(live, x => x.hp); hit(t, 6); if (t.hp <= 0 && me.p && !me.p.ghost) me.p.bonus_next += 1; ev(m, 'shot', [t]); } }
-      else if (n === 'Paparazzi') { const ts = b.filter(o => isTribe(o, I)).sort((x, y) => y.atk - x.atk).slice(0, 2 * g); for (const t of ts) { t.shield = true; t.atk += 2; t.hp += 2; } if (ts.length) ev(m, 'give', ts); }
+      if (n === 'Corporate Raider' && e.length) { for (let i = 0; i < g; i++) { const live = e.filter(x => x.hp > 0); if (!live.length) break; const t = minBy(live, x => x.hp); hit(t, 4); if (t.hp <= 0 && me.p && !me.p.ghost) me.p.bonus_next += 1; ev(m, 'shot', [t]); } }
+      else if (n === 'Paparazzi') { const ts = b.filter(o => isTribe(o, I)).sort((x, y) => y.atk - x.atk).slice(0, 2 * g); for (const t of ts) { t.shield = true; gain(t, 2, 2); } if (ts.length) ev(m, 'give', ts); }
       else if (n === 'Quiet-Hours Enforcer' && e.length) { e[0].atk = Math.max(0, e[0].atk - 3 * g); ev(m, 'shot', [e[0]]); }
-      else if (n === 'Wi-Fi Leech') { const k2 = neighbours(b, m).length * g; m.atk += k2; m.hp += k2; ev(m, 'self'); }
+      else if (n === 'Wi-Fi Leech') { const k2 = neighbours(b, m).length * g; gain(m, k2, k2); ev(m, 'self'); }
       else if (n === 'Leaf Blower Guy') { for (let r = 0; r < 2 * g; r++) for (const x of e) hit(x, 1); ev(m, 'sweep', e); }
-      else if (n === 'Tree Hugger') { const nb = neighbours(b, m).filter(o => isTribe(o, F)); for (const o of nb) { o.atk += 2 * g; o.hp += 2 * g; } if (nb.length) ev(m, 'give', nb); }
-      else if (n === 'Book-Club Stoic') { const os = b.filter(o => o !== m && o.taunt); for (const o of os) { o.atk += 2 * g; o.hp += 2 * g; } if (os.length) ev(m, 'give', os); }
+      else if (n === 'Tree Hugger') { const nb = neighbours(b, m).filter(o => isTribe(o, F)); for (const o of nb) gain(o, 2 * g, 2 * g); if (nb.length) ev(m, 'give', nb); }
+      else if (n === 'Reality Star') { const os = b.filter(o => o !== m && o.taunt); for (const o of os) gain(o, 2 * g, 2 * g); if (os.length) ev(m, 'give', os); }
       else if (n === 'Wild Boar') { const nb = reach(m, g).filter(o => isTribe(o, F)); for (const o of nb) o.rebrand = true; if (nb.length) ev(m, 'give', nb); }
-      else if (n === 'E-Sports Coach') { const nb = reach(m, g); for (const o of nb) o.toxic = true; if (nb.length) ev(m, 'give', nb); }
+      else if (n === 'E-Sports Coach') { const nb = this.rng.shuffle(b.filter(o => o !== m && o.hp > 0 && !o.toxic)).slice(0, 2 * g); for (const o of nb) o.toxic = true; if (nb.length) ev(m, 'give', nb); }
       else if (n === 'World Record') { const os = b.filter(o => o !== m && isTribe(o, T)).slice(0, g); for (const o of os) o.toxic = true; if (os.length) ev(m, 'give', os); }
-      else if (n === 'Graffiti Kid' && e.length) { hit(e[0], punks * g + amp); ev(m, 'shot', [e[0]]); }
+      else if (n === 'Graffiti Kid' && e.length) { hit(e[0], 2 * punks * g + amp); ev(m, 'shot', [e[0]]); }
       else if (n === 'Heckler' && e.length) { const t = maxBy(e, x => x.atk); hit(t, 4 * g + amp); ev(m, 'shot', [t]); }
       else if (n === 'Banner Drop') { const ts = e.filter(x => x.taunt && x.hp > 0); for (const x of ts) hit(x, 4 * g + amp); if (ts.length) ev(m, 'shot', ts); }
-      else if (n === 'Feedback Loop') { for (const x of e) hit(x, g + amp); const killed = e.some(x => x.hp <= 0); if (killed) for (const o of b) if (o.tribe === P) { o.atk += 2 * g; o.hp += 2 * g; } ev(m, 'sweep', e); }
+      else if (n === 'Feedback Loop') { for (const x of e) hit(x, g + amp); const killed = e.some(x => x.hp <= 0); if (killed) for (const o of b) if (o.tribe === P) gain(o, 2 * g, 2 * g); ev(m, 'sweep', e); }
       else if (n === 'Stage Diver' && e.length) { const t = e[0]; hit(t, m.atk + amp); perm(m, 4 * g, 0); ev(m, 'shot', [t]); }
       else if (n === 'General Strike') { const alive = e.filter(x => x.hp > 0); for (const x of e) hit(x, punks * g + amp); const k2 = 2 * alive.filter(x => x.hp <= 0).length * g; if (k2) for (const o of b) if (o.tribe === P) perm(o, k2, k2); ev(m, 'sweep', e); }
       else if (n === 'Subathon') { const os = b.filter(o => o !== m && o.hp > 0 && hasClockIn(o)); for (let r = 0; r < g; r++) for (const o of os) this.clockIn(me, o, them); if (os.length) ev(m, 'give', os); }
-      else if (n === 'Data Centre' && me.p && !me.p.ghost) { const k2 = (me.p.gigGold || 0) * g; if (k2) { for (const o of b) { o.atk += k2; o.hp += k2; } ev(m, 'give', b); } }
+      else if (n === 'Data Centre' && me.p && !me.p.ghost) { const k2 = (me.p.gigGold || 0) * g; if (k2) { for (const o of b) gain(o, k2, k2); ev(m, 'give', b); } }
       else if (n === 'Crowd Surfer') { const ps = b.filter(o => o !== m && isTribe(o, P) && o.hp > 0); for (const o of ps) if (this.fhit(me, o, 2)) perm(o, 3 * g, 2 * g); if (ps.length) ev(m, 'give', ps); }
       else if (n === 'Festival Pit') { this.festival(me, m); ev(m, 'give', b.filter(o => o !== m)); }
       else if (n === 'Sound System' && me.p && !me.p.ghost) { const k2 = (me.p.punks_sold || 0) * g; for (let i = 0; i < k2; i++) { const live = e.filter(x => x.hp > 0); if (!live.length) break; hit(this.rng.choice(live), 1 + amp); } if (k2) ev(m, 'sweep', e); }
-      else if (n === 'Digital Detox') { const k2 = (7 - b.length) * g; if (k2 > 0) { m.atk += k2; m.hp += k2; ev(m, 'self'); } }
-      else if (n === 'The Void') { const k2 = 4 * (7 - b.length) * g, few = b.length <= 3; for (const o of b) { if (k2 > 0) { o.atk += k2; o.hp += k2; } if (few) o.shield = true; } ev(m, 'give', b); }
+      else if (n === 'Digital Detox') { const k2 = (7 - b.length) * g; if (k2 > 0) { gain(m, k2, k2); ev(m, 'self'); } }
+      else if (n === 'The Void') { const k2 = 4 * (7 - b.length) * g, few = b.length <= 3; for (const o of b) { if (k2 > 0) gain(o, k2, k2); if (few) o.shield = true; } ev(m, 'give', b); }
       else if (n === 'Parcel Locker') { const ts = (g > 1 ? neighbours(b, m) : [leftOf(b, m)]).filter(o => o && !o.shield); for (const o of ts) o.shield = true; if (ts.length) ev(m, 'give', ts); }
       }
     };
@@ -980,7 +1000,7 @@ class Fight {
         this.retrig = false;
       }
     }
-    me.vv = P_.vv * wsum(b, 'Viral Video');
+    me.vv = P_.vv * wsum(b, 'Hemlock Martyr');
   }
   /** Friendly fire (Moshers): returns true if the minion survives. Damage dealt triggers Circle Pit and Wall of Death. */
   fhit(side, t, n) {
@@ -997,13 +1017,13 @@ class Fight {
     for (const m of b) if (m.oooLost) { m.oooLost = false; const k = 2 * m.n('Noise-Cancelling Headphones'); if (k) { for (const o of b) if (isTribe(o, T) && o.hp > 0) perm(o, k, 0); this.frame({type: 'trigger', src: m.id}); } }
     for (const m of b.slice()) {
       const h = m.hits || 0; if (!h) continue; m.hits = 0;
-      if (m.is_('The Cynic')) { const k = h * m.w('The Cynic'); for (const o of b) if (o !== m && isTribe(o, PH)) perm(o, k, k); }
-      if (m.taunt && m.hp > 0) { const k = wsum(b, 'Breathwork Coach'); if (k) { perm(m, k * h, 0); this.frame({type: 'trigger', src: m.id}); } }
-      if (m.hp > 0 && !m.surv_used && ['Stoicism Podcaster', 'Cold-Plunge Stoic', 'Marathon Monk', 'Desert Hermit'].includes(m.name)) {
+      if (m.is_('Shock Jock')) { const k = h * m.w('Shock Jock'); for (const o of b) if (o !== m && isTribe(o, I)) perm(o, k, k); }
+      if (m.taunt && m.hp > 0) { const k = wsum(b, 'Drama Channel'); if (k) { perm(m, k * h, 0); this.frame({type: 'trigger', src: m.id}); } }
+      if (m.hp > 0 && !m.surv_used && ['Troll', 'Rage Baiter', 'Prank Vlogger', 'Apology Video'].includes(m.name)) {
         m.surv_used = true; const n = m.name, g = m.g;
-        if (n === 'Stoicism Podcaster') perm(m, 0, g); else if (n === 'Cold-Plunge Stoic') perm(m, g, g);
-        else if (n === 'Marathon Monk') { const o = rightOf(b, m); if (o && isTribe(o, PH)) perm(o, 2 * g, 2 * g); }
-        else for (const o of b) if (o !== m && o.tribe === PH) perm(o, 2 * g, 2 * g);
+        if (n === 'Troll') perm(m, 0, g); else if (n === 'Rage Baiter') perm(m, 2 * g, 2 * g);
+        else if (n === 'Prank Vlogger') { const o = rightOf(b, m); if (o && isTribe(o, I)) perm(o, 2 * g, 2 * g); }
+        else for (const o of b) if (o !== m && isTribe(o, I)) perm(o, 2 * g, 2 * g);
         this.frame({type: 'trigger', src: m.id});
       }
     }
@@ -1028,7 +1048,7 @@ class Fight {
     if (!side.b.includes(killer)) return;
     if (killer === this.curAtt && isTribe(killer, T)) { const k = wsum(side.b, 'LAN Party'); if (k && (killer.lan || 0) < k) { killer.lan = (killer.lan || 0) + 1; killer.extraSwings = (killer.extraSwings || 0) + 1; } }
     if (killer.is_('Speedrunner')) perm(killer, killer.g, killer.g);
-    if (killer.is_('Mosh Pit')) { const k = killer.w('Mosh Pit'); for (const o of side.b) if (isTribe(o, P) && o.hp > 0) perm(o, k, k); }
+    if (killer.is_('Mosh Pit')) { const k = killer.w('Mosh Pit'); for (const o of side.b) if (isTribe(o, P) && o.hp > 0) perm(o, k, 0); }
     if (isTribe(killer, T) && side.p) side.p.techie_kills += 1;
     if (isTribe(killer, T)) for (const v of side.b) if (v.is_('World Record')) { for (const o of side.b) if (isTribe(o, T) && o.hp > 0) perm(o, v.g, v.g); this.frame({type: 'trigger', src: v.id}); }
   }
@@ -1036,25 +1056,26 @@ class Fight {
     const b = side.b, n = m.name, g = m.g;
     if (n === 'Anarchist Barista' && side.p && !side.p.ghost) side.p.bonus_next += g;
     else if (n === 'Gig Poster' && side.p && !side.p.ghost) side.p.punkDiscountNext = (side.p.punkDiscountNext || 0) + g;
-    else if (n === 'Zine Maker' && idx < b.length) { b[idx].atk += 3 * g; b[idx].hp += 3 * g; }
-    else if (n === 'Sellout Frontman') { for (const o of b) if (o.tribe === P) { o.atk += 3 * g; o.hp += 3 * g; } if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(P, g, g); }
-    else if (n === 'Jingle Writer') { const k = side.p ? Math.min(16, 2 * (side.p.punks_sold || 0)) * g : 0; for (const o of b) if (o.tribe === P) { o.atk += k; o.hp += k; } }
+    else if (n === 'Zine Maker' && idx < b.length) gain(b[idx], 2 * g, 2 * g);
+    else if (n === 'Sellout Frontman') { for (const o of b) if (o.tribe === P) gain(o, 2 * g, 2 * g); if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(P, 2 * g, 2 * g); }
+    else if (n === 'Jingle Writer') { const k = side.p ? Math.min(16, 2 * (side.p.punks_sold || 0)) * g : 0; for (const o of b) if (o.tribe === P) gain(o, k, k); }
   }
   /** One Legacy effect (n) of minion m, which died at idx; Sampler uses this to trigger the Legacy of the minion to its right. */
   legacy(side, m, n, idx, nbs) {
     const b = side.b, g = m.g; let legacy = false;
-    if (n === 'Reply Guy') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
-    else if (n === 'Comment Section') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
-    else if (n === 'Brand Ambassador') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
+    if (n === 'Sophist') { for (let i = 0; i < g; i++) combatFollower(side, idx); legacy = true; }
+    else if (n === 'Peripatetic') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
+    else if (n === 'Existentialist') { for (let i = 0; i < 2 * g; i++) combatFollower(side, idx); legacy = true; }
     else if (n === 'Punk Philosopher') { for (const o of b) if (isTribe(o, P) || isTribe(o, PH)) perm(o, 3 * g, 3 * g); legacy = true; }
     else if (n === 'Compost Heap') { if (side.p && !side.p.ghost && side.p.addFeedBuff) side.p.addFeedBuff(F, g, g); legacy = true; }
-    else if (n === 'Open Mic Poet') { const k = 2; for (const o of nbs) { o.atk += k * g; o.hp += k * g; } legacy = true; }
+    else if (n === 'Open Mic Poet') { const k = 2; for (const o of nbs) gain(o, k * g, k * g); legacy = true; }
     else if (n === 'Golden Parachute Exec' && side.p && !side.p.ghost) { side.p.bonus_next += 2 * g; legacy = true; }
-    else if (n === 'Struggling Artist') { for (const o of b) { o.atk += g; o.hp += g; } legacy = true; }
-    else if (n === 'Nihilist') { for (const o of b) o.atk += g; legacy = true; }
+    else if (n === 'Struggling Artist') { for (const o of b) gain(o, g, g); legacy = true; }
+    else if (n === 'Block Party Host') { for (const o of b) { const k = 2 * neighbours(b, o).length * g; if (k) perm(o, k, k); } legacy = true; }
+    else if (n === 'Nihilist') { for (const o of b) gain(o, g, 0); legacy = true; }
     else if (n === 'Dead Rock Star') { for (const o of b) if (isTribe(o, C)) perm(o, 4 * g, 4 * g); legacy = true; }
-    else if (n === 'Rage Quitter') { const kk = m.killer; if (kk && kk.hp > 0) { hit(kk, 5 * g); legacy = true; } }
-    else if (n === 'Fan Convention') { const k = Math.min(4, Math.floor(((side.p && side.p.fsum) || 0) / 3)) * g; for (let i = 0; i < k; i++) combatFollower(side, idx); legacy = k > 0; }
+    else if (n === 'Rage Quitter') { const kk = m.killer; if (kk && kk.hp > 0) { hit(kk, 4 * g); legacy = true; } }
+    else if (n === 'Utopian Commune') { const k = Math.min(4, Math.floor(((side.p && side.p.fsum) || 0) / 3)) * g; for (let i = 0; i < k; i++) combatFollower(side, idx); legacy = k > 0; }
     else if (n === 'Smart Doorbell') { for (const o of b) if (isTribe(o, T)) perm(o, g, g); legacy = true; }
     else if (n === 'Biopic') { const k = Math.min(4, side.deaths || 0) * g; for (const o of b) if (isTribe(o, C)) perm(o, k, k); legacy = true; }
     else if (n === 'Sampler' && !this.retrig) {
@@ -1070,7 +1091,7 @@ class Fight {
       changed = false;
       for (const m of b.slice()) {
         if (m.hp > 0) continue;
-        if (m.name === 'Too Big to Fail' && !m.tbf_used) { m.tbf_used = true; m.hp = 1; for (const o of b) if (o !== m && o.tribe === H) perm(o, 4 * m.g, 4 * m.g); this.frame({type: 'trigger', src: m.id}); changed = true; continue; }
+        if (m.name === 'Too Big to Fail' && !m.tbf_used) { m.tbf_used = true; m.hp = 1; for (const o of b) if (o !== m && o.tribe === H) perm(o, 3 * m.g, 3 * m.g); this.frame({type: 'trigger', src: m.id}); changed = true; continue; }
         const idx = b.indexOf(m), nbs = neighbours(b, m);
         b.splice(idx, 1); if (idx < ptr) ptr -= 1;
         side.deaths = (side.deaths || 0) + 1;
@@ -1092,16 +1113,16 @@ class Fight {
             for (let r = 0; r < v.n('Memorial Mural') * (v.golden ? 2 : 1); r++) {
               const real = side.p && !side.p.ghost && side.p.board;
               if (real) { side.p.creativeAtk = (side.p.creativeAtk || 0) + 1; for (const o of side.p.board) if (isTribe(o, C)) o.atk += 1; }   // the real board: dead ones too
-              for (const o of b) if (isTribe(o, C)) o.atk += 1;   // this fight's copies
+              for (const o of b) if (isTribe(o, C)) gain(o, 1, 0);   // this fight's copies
             }
             this.frame({type: 'trigger', src: v.id});
           }
           if (v.is_('Museum Retrospective') && side.deaths % 2 === 0) { const g = v.golden ? 6 : 3; for (const o of b) if (o !== v && isTribe(o, C)) perm(o, g, g); this.frame({type: 'trigger', src: v.id}); }
         }
-        if (m.follower) for (const v of b) if (v.is_('Blue Checkmark')) { for (const o of b) if (isTribe(o, I)) perm(o, 2 * v.g, 2 * v.g); this.frame({type: 'trigger', src: v.id}); }
+        if (m.follower) for (const v of b) if (v.is_('Philosopher King')) { for (const o of b) if (isTribe(o, PH)) perm(o, 3 * v.g, 3 * v.g); this.frame({type: 'trigger', src: v.id}); }
         if (side.vv > 0) { side.vv--; if (combatFollower(side, idx)) this.frame({type: 'summon', side: k}); }
         const hero = side.p && side.p.hero;
-        if (hero === 'h_complainer' && side.deaths % COMPLAIN_EVERY === 0 && b.length) { for (const o of b) { o.atk += 1; o.hp += 1; } this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
+        if (hero === 'h_complainer' && side.deaths % COMPLAIN_EVERY === 0 && b.length) { for (const o of b) gain(o, 1, 1); this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
         let back = m.rebrand;
         if (!back && hero === 'h_ex' && !side.exUsed) { side.exUsed = true; back = true; this.frame({type: 'hero', side: k, hero, tgts: []}); }
         if (back) {
@@ -1111,7 +1132,7 @@ class Fight {
           if (r.name === 'Cancelled Celebrity') for (let i = 0; i < 3 * r.g; i++) combatFollower(side, b.indexOf(r) + 1);
           // Scavengers: "when it comes back" / "after a friendly Feral comes back"
           if (isTribe(r, F)) { const kf = wsum(b, 'Fox Den'); if (kf) perm(r, 3 * kf, 3 * kf); }
-          if (r.is_('Trash Panda')) { const os = b.filter(o => o !== r && isTribe(o, F)); for (const o of os) { o.atk += r.g; o.hp += r.g; } if (os.length) this.frame({type: 'trigger', src: r.id}); }
+          if (r.is_('Trash Panda')) { const os = b.filter(o => o !== r && isTribe(o, F)); for (const o of os) gain(o, r.g, r.g); if (os.length) this.frame({type: 'trigger', src: r.id}); }
         }
         changed = true; break;
       }
@@ -1195,7 +1216,7 @@ const PRO = {growth: 0.5, tierVal: 0.12, levelHealth: 12, err: 0.35, off: {hero:
 const PLANS = {
   PI: [['Thought Leader', 'Consultant', 'Side Hustle', 'Grindset Guru', 'Venture Capitalist', 'Dropshipper', 'Tech Founder'], ['Unicorn Startup', 'Thought Leader']],
   EX: [['Sneaker Reseller', 'Middle Manager', 'Unpaid Intern', 'Golden Parachute Exec', 'Corporate Raider', 'Crypto Bro'], ['Private Equity', 'Too Big to Fail', 'The Billionaire']],
-  FO: [['Giveaway Host', 'Comment Section', 'Reply Guy', 'Viral Video', 'Unboxing Streamer', 'Lawyer Next Door', 'Cancelled Celebrity'], ['Engagement Farmer', 'Brand Ambassador', 'Blue Checkmark']],
+  FO: [['Epicurean', 'Peripatetic', 'Sophist', 'Hemlock Martyr', 'Pythagorean', 'Lawyer Next Door', 'Punk Philosopher', 'Wise Old Owl'], ['The Academy', 'Existentialist', 'Philosopher King']],
   MC: [['Personal Brand', 'Stan Account', 'Hype Man', 'Engagement Bot', 'Paparazzi', 'Content Creator'], ['Main Character', 'Ring Light Studio']],
   OG: [['Rooftop Beehive', 'Plant Parent', 'Guerrilla Gardener', 'Compost Heap', 'Tree Hugger', 'Windowsill Succulent', 'Wise Old Owl'], ['World Tree', 'Ancient Oak', 'Apex Scavenger']],
   SV: [['City Pigeon', 'Seagull', 'Trash Panda', 'Urban Fox', 'Wild Boar'], ['Nature Is Healing', 'Rat King']],
@@ -1206,7 +1227,7 @@ const PLANS = {
   SA: [['Feedback Loop', 'Crust Punk', 'Heckler', 'Graffiti Kid', 'Mosh Pit'], ['General Strike', 'Stage Diver', 'Mohawk Legend']],
   SO: [['Jingle Writer', 'Squat Collective', 'Sellout Frontman', 'Zine Maker', 'Anarchist Barista', 'Punk Philosopher'], ['Greatest Hits', 'Reunion Tour']],
   BI: [['Thought Experiment', 'Utilitarian', 'Pub Philosopher', 'Shower Thinker', 'Renaissance Thinker', 'Wise Old Owl'], ['Grand Unified Theory', 'Bestselling Author']],
-  ST: [['Desert Hermit', 'Book-Club Stoic', 'Marathon Monk', 'Cold-Plunge Stoic', 'Stoicism Podcaster', 'Package Hoarder', 'Caretaker', 'Punk Philosopher'], ['Enlightened Guru', 'The Cynic']],
+  ST: [['Apology Video', 'Reality Star', 'Prank Vlogger', 'Rage Baiter', 'Troll', 'Package Hoarder', 'Caretaker', 'Cancelled Celebrity', 'Content Creator'], ['Crisis PR Firm', 'Shock Jock', 'Main Character']],
 };
 const planWeight = (style, name) => { const p = PLANS[style]; return !p ? 0 : p[1].includes(name) ? 2 : p[0].includes(name) ? 1 : 0; };
 const cloneM = m => { const c = Object.assign(Object.create(Object.getPrototypeOf(m)), m); c.extras = m.extras.slice(); return c; };
@@ -1253,7 +1274,7 @@ Object.assign(Player.prototype, {
   },
   /** Extra value of a Feed card from what it makes the board grow into (spirals), on top of its card score. */
   lookBonus(e) {
-    if (e.card.collab || this.board.length >= 7) return 0;
+    if (this.canConnect(e.card) || this.board.length >= 7) return 0;
     const m = new M(e.card); UID--; m.atk += e.a; m.hp += e.h;
     return (this.prm || PRO).look * Math.max(-10, this.growth(this.board.concat([m])) - this.baseGrowth) / 2;
   },

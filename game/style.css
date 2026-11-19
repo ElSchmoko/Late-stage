@@ -140,7 +140,7 @@ button{font:inherit;color:inherit}
 .tribebtn i{width:12px;height:12px;border-radius:4px;border:2px solid var(--ink);display:block}
 .tribepop{position:absolute;z-index:40;background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:6px 10px 6px 7px;box-shadow:0 0 0 3px #fff,3px 5px 0 3px var(--ink);transform-origin:left center}
 .tribepop div{display:flex;align-items:center;gap:6px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:12px;line-height:1.6}
-.tribepop i{width:11px;height:11px;border-radius:3px;border:2px solid var(--ink);display:block}
+.tribepop i{flex:none;width:11px;height:11px;border-radius:3px;border:2px solid var(--ink);display:block}
 .likes{position:absolute;display:flex;align-items:center;gap:2px;padding:2px 9px 0 4px;height:38px;border:2.5px solid var(--ink);border-radius:999px;background:#fff;box-shadow:0 0 0 3px #fff,0 4px 0 3px var(--ink);cursor:pointer;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;line-height:1}
 .detail-txt{position:absolute;color:#fff;text-shadow:0 2px 0 rgba(43,33,64,.6)}
 .detail-txt .rules{margin:0;font-size:16px;font-weight:700;line-height:1.5}
@@ -236,7 +236,7 @@ button{font:inherit;color:inherit}
 .logcard.gone{filter:grayscale(.85);opacity:.75}
 .logcard .sa.up,.logcard .sh.up{box-shadow:0 0 0 4px #fff,0 0 0 10px #2ecb6e}
 .logcard .sa.down,.logcard .sh.down{box-shadow:0 0 0 4px #fff,0 0 0 10px #ff6b5e}
-.logcard .txt.chg,.logcard .stars.chg{background:#fff1b8;border-radius:8px;box-shadow:0 0 0 4px #fff1b8}
+.logcard .txt.chg,.logcard .stars.chg,.logcard .nm.chg{background:#fff1b8;border-radius:8px;box-shadow:0 0 0 4px #fff1b8}
 .logarrow{font-size:26px;font-weight:900;color:var(--ink);width:24px;text-align:center}
 .logtag{position:absolute;left:-2px;top:-8px;z-index:2;border:2.5px solid var(--ink);border-radius:999px;padding:1px 8px 0;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:11px;letter-spacing:.08em}
 .logtag.new{background:#2ecb6e;color:#fff}.logtag.gone{background:#c9c2d6}
@@ -289,7 +289,7 @@ button{font:inherit;color:inherit}
 .statchart,.stathow{padding:10px 16px}
 .statchart>p,.stathow>p{margin:0;font-size:17px}.stathow>p span{font-family:inherit;font-size:12px;color:#5a5270;margin-left:6px}
 .statchart .bars{display:flex;align-items:flex-end;gap:6px;height:84px;margin-top:6px}
-.statchart .bars span{flex:1;max-width:22px;border:2.5px solid var(--ink);border-radius:7px 7px 3px 3px;position:relative}
+.statchart .bars span{flex:1;max-width:64px;border:2.5px solid var(--ink);border-radius:7px 7px 3px 3px;position:relative}
 .statchart .bars em{position:absolute;left:0;right:0;top:-17px;text-align:center;font-style:normal;font-weight:800;font-size:11px}
 .stathow .lvl{display:flex;gap:10px;margin:8px 0 10px}
 .stathow .lvl div{flex:1;border:2.5px solid var(--ink);border-radius:14px;padding:4px 6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -488,3 +488,5 @@ button{font:inherit;color:inherit}
 .rm-haze{background:linear-gradient(transparent 48%,rgba(178,168,226,.14) 66%,rgba(205,198,240,.26) 84%,rgba(205,198,240,.1) 92%,transparent 93%)}
 .avbadge{position:absolute;left:50%;top:-10px;transform:translateX(-50%);background:#ffc928;border:2.5px solid var(--ink);border-radius:999px;padding:2px 10px 0;font-size:12px;box-shadow:0 0 0 2.5px #fff;z-index:2}
 .avbtn{display:flex;align-items:center;justify-content:center;gap:6px}
+
+.logcard.locked.mystery{cursor:pointer}.logcard.mystery .card{filter:saturate(.55)}

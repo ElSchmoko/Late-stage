@@ -4,7 +4,7 @@ from lsdata import *
 STYLE_BLURB = {
     'PI': 'Hire Hustlers and spend gold. Every coin you spend turns into stats.',
     'EX': 'Sell, squeeze and cash out. Your board feeds on itself.',
-    'FO': 'Flood the board with 1/1 Followers, then make them huge.',
+    'FO': 'Schools of thought: flood the board with 1/1 Followers, then make them huge.',
     'MC': 'Pour every buff into your single highest-Attack star.',
     'OG': 'Slow growers that get bigger at every end of turn.',
     'SV': 'Animals that rummage through the bins and keep coming back.',
@@ -15,7 +15,7 @@ STYLE_BLURB = {
     'SA': 'Start-of-combat damage that wrecks the enemy before the first hit.',
     'SO': 'Sell Punks for value. Their When sold effects keep paying out.',
     'BI': 'Big next-combat buffs that the right cards make permanent.',
-    'ST': 'Attention Seekers that grow every time they survive a hit.',
+    'ST': 'Influencers who seek attention and grow every time they survive a hit.',
 }
 NB_BLURB = 'Neighbours turn up in every lobby, whichever tribes are in it. They are glue: buffs for whoever sits next to them, two rule-doublers, and The Landlord.'
 FLEX = 'Flex cards (no tag) fit either style.'

@@ -241,3 +241,37 @@ GOLD.update({  # rewards track, batch 2
     'Startup Monk': 'End of turn, twice: remove your lowest-Attack other minion and give its stats to your other minions.',
     'Cover Band': 'Cleave. Start of combat: trigger the start-of-combat effects of the minions next to it twice.',
 })
+# v15 (Nov 19): Collab is Connect; moved cards keep their golden text under the new name (tribes swapped)
+GOLD = {k: v.replace('Collabs stick to', 'Connects attach to').replace('Collab', 'Connect').replace('the minion it sticks to', 'the minion it connects to') for k, v in GOLD.items()}
+import sys as _sys, pathlib as _pl
+_sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'sim'))
+from cards import RENAMED as _RN
+for _old, _new in _RN.items():
+    if _old in GOLD:
+        GOLD[_new] = GOLD[_old].replace('Philosopher', '\0').replace('Influencer', 'Philosopher').replace('\0', 'Influencer')
+GOLD.update({
+    'The Academy': 'After you summon a Follower, give it +10/+10.',
+    'Existentialist': 'Start of combat: for this combat, your Followers have +4/+2 for each Philosopher you have, including Followers summoned later. Legacy: summon four Followers.',
+    'Philosopher King': 'After a friendly Follower dies, give your Philosophers +6/+6 permanently.',
+    'Rage Baiter': 'Attention Seeker. After this survives damage, gain +4/+4 permanently (once per combat).',
+    'Crisis PR Firm': 'Attention Seeker. The first four times each of your other Attention Seekers takes damage each combat, it takes at most 3.',
+    'Reality Star': 'Attention Seeker. Out of Office. Start of combat: give your other Attention Seekers +4/+4.',
+    'Engagement Bot': 'First Impression: get 4 Likes.',
+    'Crypto Bro': 'First Impression, twice: next turn, gain between -1 and +3 extra gold.',
+    'Corporate Raider': 'Start of combat, twice: deal 4 damage to the enemy minion with the lowest Health. For each that dies, gain 1 extra gold next turn.',
+    'Consultant': 'Every 4 gold you spend: gain +4/+4. Your "every 4 gold you spend" effects trigger every 2 gold instead.',
+    'Unicorn Startup': 'End of turn: give your other Hustlers +4/+4 for every 4 gold you spent this turn.',
+    'Too Big to Fail': 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +6/+6 permanently.',
+    'The Billionaire': 'End of turn: gain +6/+6 for each gold you have left.',
+    'Tech Founder': 'Every 4 gold you spend: Hustlers and Techies in the Feed get +4/+4 this game.',
+    'Rage Quitter': 'Legacy: deal 8 damage to the minion that killed it.',
+    'E-Sports Coach': 'Start of combat: give four random other friendly minions Toxic.',
+    'Graffiti Kid': 'Start of combat: deal 4 damage to the left-most enemy minion for each Punk you have.',
+    'Zine Maker': 'When sold: give the minion to its right +4/+4.',
+    'Mosh Pit': 'Cleave: its attacks also hit the minions next to its target. After this kills a minion, give your Punks +2 Attack permanently.',
+    'Sellout Frontman': 'When sold: give your other Punks +4/+4. Punks in the Feed get +4/+4 this game.',
+    'Grand Unified Theory': 'End of turn: give your minions +2/+2 for the next combat for each tribe you have, then triple all next-combat buffs. Buffs your minions get during combat are tripled.',
+    'Block Party Host': 'Legacy: give each of your minions +4/+4 permanently for each minion next to it.',
+    'New Neighbours': 'Your end-of-turn effects trigger three times.',
+})
+GOLD['Robot Vacuum'] = 'Connect to any minion (it becomes a Techie). Start of combat: deal 2 damage to the enemy minion with the lowest Health.'

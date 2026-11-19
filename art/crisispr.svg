@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<path d="M56 92 Q50 42 100 42 Q150 42 144 92 L148 124 Q130 130 120 120 L80 120 Q70 130 52 124 Z" fill="#4a3d6a"/>
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#3a3045"/>
+<path d="M84 140 L100 166 L116 140 Z" fill="#ffffff"/>
+<path d="M97 146 L103 146 L106 174 L100 182 L94 174 Z" fill="#4fd1c5"/>
+<path d="M78 140 L96 178 M122 140 L104 178" fill="none"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#f7d9a4"/>
+<circle cx="62" cy="92" r="9" fill="#f7d9a4"/>
+<circle cx="138" cy="92" r="9" fill="#f7d9a4"/>
+<circle cx="100" cy="86" r="38" fill="#f7d9a4"/>
+<path d="M60 88 Q56 44 100 44 Q144 44 140 88 L136 72 Q100 62 64 72 Z" fill="#4a3d6a"/>
+<circle cx="85" cy="92" r="11.5" fill="#ffffff"/>
+<circle cx="115" cy="92" r="11.5" fill="#ffffff"/>
+<circle cx="86" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
+<circle cx="116" cy="93.5" r="3.8" fill="#2b2140" stroke="none"/>
+<path d="M76 76 L94 76" fill="none"/>
+<path d="M106 76 L124 76" fill="none"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<path d="M90 111 Q100 121 110 111" fill="none"/>
+<path d="M142 64 Q150 76 146 82 Q138 80 142 64 Z" fill="#8fd4ff"/>
+<path d="M58 88 Q58 40 100 40 Q142 40 142 88" fill="none"/>
+<rect x="50" y="76" width="16" height="28" rx="7" fill="#6b6182"/>
+<rect x="134" y="76" width="16" height="28" rx="7" fill="#6b6182"/>
+<path d="M56 102 Q60 122 84 122" fill="none"/>
+<circle cx="86" cy="122" r="4" fill="#2b2140"/>
+<rect x="144" y="120" width="28" height="52" rx="8" fill="#ff6b5e"/>
+<rect x="150" y="110" width="16" height="12" rx="3" fill="#6b6182"/>
+<path d="M158 110 Q170 96 184 98" fill="none" stroke-width="5"/>
+<path d="M184 98 L190 92 L194 104 Z" fill="#6b6182"/>
+<circle cx="152" cy="168" r="10" fill="#f7d9a4"/>
+<path d="M20 168 Q14 148 26 134 Q28 146 36 144 Q34 126 46 116 Q48 138 56 146 Q62 160 52 172 Z" fill="#ff8a3d"/>
+<path d="M30 168 Q28 156 36 148 Q38 158 44 160 Q46 168 42 172 Z" fill="#ffc928"/>
+<circle cx="70" cy="132" r="7" fill="#ffffff"/>
+<circle cx="60" cy="120" r="9" fill="#ffffff"/>
+<circle cx="48" cy="108" r="6" fill="#ffffff"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

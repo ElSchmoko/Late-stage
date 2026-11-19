@@ -27,8 +27,8 @@ function setup(seed, cardTribe, own, forceStyle) {
 function run(seed, cardTribe, own, card, turn, forceStyle) {
   const {L, p} = setup(seed, cardTribe, own, forceStyle);
   // the card arrives at the start of the bot's turn, played with the bot's real gold (Venture Capitalist invests it)
-  let at = turn;   // a Collab needs a minion to stick to: if the board is empty it arrives a turn later
-  if (card) p.onBegin = q => { if (q.turn !== at) return; if (card.collab && !q.board.length) { at++; return; }
+  let at = turn;   // a Connect needs a Techie to attach to: if the board is empty it arrives a turn later
+  if (card) p.onBegin = q => { if (q.turn !== at) return; if (card.collab && !q.canConnect(card) && at < turn + 3) { at++; return; }
     if (!card.collab && q.board.length >= 7) q.board.splice(q.board.indexOf(q.board.reduce((a, m) => (q.value(m) < q.value(a) ? m : a))), 1);
     if (!card.collab || q.board.length) q.play(card, q.gold); };
   let reached = 0;

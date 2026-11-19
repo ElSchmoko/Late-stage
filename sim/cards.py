@@ -609,3 +609,88 @@ LEGENDS += [
     _leg('Housing Co-op', N, 5, 4, 7, 'End of turn: give your other minions +2/+2 for each tribe you have (Neighbours count).', 'Waitlist: eleven years. Worth it.'),
 ]
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
+
+
+# ======================================================================== v15 (Nov 19): playstyle swap and card updates
+# The Attention Seeker playstyle (ST) moves from the Philosophers to the Influencers, and the Follower playstyle (FO) moves
+# from the Influencers to the Philosophers: schools of thought gather followers, influencers seek attention. Every card that
+# moves gets a new name and new art. Collab is renamed Connect and only attaches to Techies (unless the card says otherwise).
+STYLES['FO'] = (PH, 'Followers'); STYLES['ST'] = (I, 'Attention Seekers')
+# old name: (new name, new tribe, tier, atk, hp, text, flavour, track level or None)
+SWAP = {
+    'Reply Guy': ('Sophist', PH, 1, 2, 2, 'Legacy: summon a 1/1 Follower.', 'Argues either side. Invoices both.', None),
+    'Giveaway Host': ('Epicurean', PH, 2, 1, 3, 'End of turn: your Followers get +1/+1 this game.', 'Simple pleasures. Very long guest list.', None),
+    'Comment Section': ('Peripatetic', PH, 2, 2, 3, 'Legacy: summon two 1/1 Followers.', 'Lectures on the move. The class jogs behind.', None),
+    'Unboxing Streamer': ('Pythagorean', PH, 3, 3, 3, 'First Impression: summon two Followers and get 2 Likes.', 'All is number. Beans are forbidden.', None),
+    'Viral Video': ('Hemlock Martyr', PH, 3, 3, 3, 'After a friendly minion dies, summon a Follower (4 times per combat).', 'Died for the argument. Won it anyway.', None),
+    'Engagement Farmer': ('The Academy', PH, 3, 4, 5, 'After you summon a Follower, give it +5/+5.', 'Let no one ignorant of geometry enter.', None),
+    'Brand Ambassador': ('Existentialist', PH, 5, 5, 6, 'Start of combat: for this combat, your Followers have +2/+1 for each Philosopher you have, including Followers summoned later. Legacy: summon two Followers.', 'Hell is other people. Table for twelve.', None),
+    'Blue Checkmark': ('Philosopher King', PH, 6, 6, 8, 'After a friendly Follower dies, give your Philosophers +3/+3 permanently.', 'Rules by reason. Mostly his own.', None),
+    'Bot Farm': ('Mystery Cult', PH, 3, 2, 5, 'End of turn: if you have space, summon two 1/1 Followers (3 times per game).', 'Membership is secret. The recruitment drive is not.', 7),
+    'Fan Convention': ('Utopian Commune', PH, 5, 4, 7, 'Legacy: summon a Follower for every 3 Followers you have summoned this game (max 4).', 'Everything is shared. Especially the chores.', 38),
+    'Stoicism Podcaster': ('Troll', I, 1, 1, 3, 'Attention Seeker. After this survives damage, gain +1 Health permanently (once per combat).', 'Feeds on replies. Never logs off.', None),
+    'Cold-Plunge Stoic': ('Rage Baiter', I, 2, 2, 2, 'Attention Seeker. After this survives damage, gain +2/+2 permanently (once per combat).', 'Wrong on purpose. Paid per comment.', None),
+    'Marathon Monk': ('Prank Vlogger', I, 2, 1, 5, 'Attention Seeker. After this survives damage, give the Influencer to its right +2/+2 permanently (once per combat).', "It's just a prank. The lawsuit isn't.", None),
+    'Book-Club Stoic': ('Reality Star', I, 3, 4, 5, 'Attention Seeker. Out of Office. Start of combat: give your other Attention Seekers +2/+2.', 'Famous for being famous. Season nine.', None),
+    'Desert Hermit': ('Apology Video', I, 4, 3, 7, 'Attention Seeker. After this survives damage, give your other Influencers +2/+2 permanently (once per combat).', 'Grey hoodie. Long pause. Merch link below.', None),
+    'The Cynic': ('Shock Jock', I, 5, 4, 9, 'Attention Seeker. After this takes damage, give your other Influencers +1/+1 permanently.', 'Says the quiet part. Loudly. Daily.', None),
+    'Enlightened Guru': ('Crisis PR Firm', I, 6, 3, 9, 'Attention Seeker. The first two times each of your other Attention Seekers takes damage each combat, it takes at most 3.', 'We hear you. We have learned. We are moving on.', None),
+    'Breathwork Coach': ('Drama Channel', I, 2, 1, 4, 'Attention Seeker. After a friendly Attention Seeker survives damage, give it +1 Attack permanently.', 'Covers every feud. Starts most of them.', 2),
+    'Tenured Professor': ('Comments Off', I, 4, 3, 8, 'Attention Seeker. This and the minions next to it take no damage from start-of-combat effects.', "Can't be ratioed if nobody can reply.", 16),
+}
+RENAMED = {old: v[0] for old, v in SWAP.items()}
+for _t in (I, PH):
+    for _c in list(BY_TRIBE[_t]):
+        if _c.name not in SWAP: continue
+        _n, _tr2, _ti, _a, _h, _x, _fl, _lv = SWAP[_c.name]
+        BY_TRIBE[_t].remove(_c); BY_TRIBE[_tr2].append(_c)
+        _c.name, _c.tribe, _c.tier, _c.atk, _c.hp, _c.text, _c.flavour = _n, _tr2, _ti, _a, _h, _x, _fl
+        if _lv: _c.track = _lv
+TOKENS[0].tribe, TOKENS[0].text, TOKENS[0].flavour = PH, 'A loyal disciple.', 'Agrees with everything. Takes notes.'
+# old name -> (tier, atk, hp, text or None)  (names here are the current names)
+_V15 = {
+    # Hustlers
+    'Crypto Bro': (3, 4, 5, 'First Impression: next turn, gain between -1 and +3 extra gold.'),
+    'Corporate Raider': (3, 5, 5, 'Start of combat: deal 4 damage to the enemy minion with the lowest Health. If it dies, gain 1 extra gold next turn.'),
+    'Golden Parachute Exec': (4, 4, 3, None),
+    'Consultant': (6, 6, 7, 'Every 4 gold you spend: gain +4/+4. Your "every 4 gold you spend" effects trigger every 3 gold instead.'),
+    'Unicorn Startup': (6, 7, 9, 'End of turn: give your other Hustlers +2/+2 for every 4 gold you spent this turn.'),
+    'Too Big to Fail': (5, 8, 8, 'Attention Seeker. The first time it would die each combat, it survives with 1 Health and your other Hustlers get +3/+3 permanently.'),
+    # Influencers
+    'Engagement Bot': (1, 1, 1, 'First Impression: get 2 Likes.'),
+    'Personal Brand': (4, 4, 6, None),
+    # Techies (Collab is now Connect)
+    'Speedrunner': (2, 1, 2, None),
+    'Smart Plug': (1, 1, 2, 'Connect. End of turn: the minion it connects to gains +1 Health.'),
+    'Robot Vacuum': (2, 2, 2, 'Connect to any minion (it becomes a Techie). Start of combat: deal 2 damage to the enemy minion with the lowest Health.'),
+    'Firmware Update': (2, 2, 3, 'After you Connect, give your Techies +1/+1.'),
+    'Rage Quitter': (1, 2, 1, 'Legacy: deal 4 damage to the minion that killed it.'),
+    'Smart Fridge': (3, 2, 2, 'Connect. End of turn: give your Techies +1/+1.'),
+    'E-Sports Coach': (3, 4, 5, 'Start of combat: give two random other friendly minions Toxic.'),
+    'Noise-Cancelling Headphones': (4, 2, 4, 'Connect. Out of Office. When the minion it connects to loses Out of Office, give your Techies +2 Attack permanently.'),
+    'Smart Home Hub': (6, 4, 7, 'Your Connects attach to two minions instead of one.'),
+    'Quantum Computer': (6, 6, 6, 'Connect. Out of Office. Rebrand. End of turn: the minion it connects to gains +2/+2 for each Connect on it.'),
+    'World Record': (5, 6, 7, None),
+    'Bluetooth Speaker': (2, 2, 2, 'Connect. Clock In: deal 1 damage to all enemy minions. This damage is never Toxic.'),
+    # Punks
+    'Graffiti Kid': (1, 2, 2, 'Start of combat: deal 2 damage to the left-most enemy minion for each Punk you have.'),
+    'Zine Maker': (1, 2, 1, 'When sold: give the minion to its right +2/+2.'),
+    'Crust Punk': (3, 3, 3, None),
+    'Squat Collective': (2, 3, 3, None),
+    'Mosh Pit': (4, 6, 8, 'Cleave: its attacks also hit the minions next to its target. After this kills a minion, give your Punks +1 Attack permanently.'),
+    'Sellout Frontman': (2, 3, 3, 'When sold: give your other Punks +2/+2. Punks in the Feed get +2/+2 this game.'),
+    # Philosophers
+    'Grand Unified Theory': (6, 5, 9, 'End of turn: give your minions +1/+1 for the next combat for each tribe you have, then double all next-combat buffs. Buffs your minions get during combat are doubled.'),
+}
+for _c in [c for t in TRIBES for c in BY_TRIBE[t]]:
+    if _c.name in _V15:
+        _c.tier, _c.atk, _c.hp, _x = _V15[_c.name]
+        if _x: _c.text = _x
+        if _c.name == 'Crypto Bro': _c.kind, _c.sellbait = 'fi', False
+_L15 = {'The Billionaire': 'End of turn: gain +3/+3 for each gold you have left.',
+        'Tech Founder': 'Every 4 gold you spend: Hustlers and Techies in the Feed get +2/+2 this game.',
+        'The Algorithm': 'End of turn: give each of your minions +1/+1 for each Connect on it.'}
+for _c in LEGENDS:
+    if _c.name in _L15: _c.text = _L15[_c.name]
+NEIGHBOURS.append(Card('New Neighbours', N, 6, 5, 7, '-', 'Your end-of-turn effects trigger twice.', 'Moved in on Tuesday. Already run the group chat.'))
+ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS

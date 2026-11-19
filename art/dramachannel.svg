@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 200">
+<defs>
+<g id="a" stroke-linejoin="round" stroke-linecap="round">
+<circle cx="100" cy="72" r="52" fill="#2b2140"/>
+<path d="M34 206 Q38 152 72 140 L128 140 Q162 152 166 206 Z" fill="#b18cff"/>
+<path d="M84 140 Q100 154 116 140" fill="none"/>
+<path d="M88 116 L112 116 L112 140 Q100 148 88 140 Z" fill="#7a4a2e"/>
+<circle cx="62" cy="92" r="9" fill="#7a4a2e"/>
+<circle cx="138" cy="92" r="9" fill="#7a4a2e"/>
+<circle cx="100" cy="86" r="38" fill="#7a4a2e"/>
+<path d="M66 78 Q70 56 100 56 Q130 56 134 78" fill="none"/>
+<path d="M85.0 82.0 L87.6 88.4 L94.5 88.9 L89.3 93.4 L90.9 100.1 L85.0 96.5 L79.1 100.1 L80.7 93.4 L75.5 88.9 L82.4 88.4 Z" fill="#ffc928"/>
+<path d="M115.0 82.0 L117.6 88.4 L124.5 88.9 L119.3 93.4 L120.9 100.1 L115.0 96.5 L109.1 100.1 L110.7 93.4 L105.5 88.9 L112.4 88.4 Z" fill="#ffc928"/>
+<path d="M76 75 Q85 68 94 75" fill="none"/>
+<path d="M106 75 Q115 68 124 75" fill="none"/>
+<ellipse cx="73" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<ellipse cx="127" cy="106" rx="6" ry="3.5" fill="#ff9a8a" stroke="none"/>
+<circle cx="100" cy="115" r="4.5" fill="#2b2140"/>
+<circle cx="62" cy="106" r="4" fill="#ffc928"/>
+<path d="M140 128 L180 128 L174 196 L146 196 Z" fill="#ffffff"/>
+<path d="M148 128 L152 196 M160 128 L160 196 M172 128 L168 196" fill="none" stroke="#ff6b5e" stroke-width="5"/>
+<circle cx="146" cy="124" r="8" fill="#fff6c2"/>
+<circle cx="158" cy="118" r="8" fill="#fff6c2"/>
+<circle cx="170" cy="122" r="8" fill="#fff6c2"/>
+<circle cx="180" cy="126" r="8" fill="#fff6c2"/>
+<circle cx="152" cy="112" r="8" fill="#fff6c2"/>
+<circle cx="166" cy="110" r="8" fill="#fff6c2"/>
+<circle cx="146" cy="176" r="10" fill="#7a4a2e"/>
+<path d="M18 120 L50 120 L46 146 L22 146 Z" fill="#ffffff"/>
+<path d="M50 126 Q60 126 58 134 Q56 140 48 140" fill="none"/>
+<ellipse cx="34" cy="121" rx="16" ry="3" fill="#c98a4a"/>
+<path d="M18 120 Q8 132 16 146 Q22 156 14 166" fill="none" stroke="#c98a4a" stroke-width="4"/>
+<ellipse cx="20" cy="172" rx="14" ry="4" fill="#c98a4a"/>
+</g>
+</defs>
+<use href="#a" xlink:href="#a" stroke="#ffffff" stroke-width="16"/>
+<use href="#a" xlink:href="#a" stroke="#2b2140" stroke-width="5"/>
+</svg>

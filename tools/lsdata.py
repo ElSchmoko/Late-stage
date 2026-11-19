@@ -18,7 +18,7 @@ SLUG = {'Dropshipper': 'dropshipper', 'Unpaid Intern': 'intern', 'Grindset Guru'
         'Sneaker Reseller': 'reseller', 'Side Hustle': 'gigworker', 'Thought Leader': 'thoughtleader', 'Crypto Bro': 'cryptobro',
         'Golden Parachute Exec': 'parachute', 'Venture Capitalist': 'vc', 'Corporate Raider': 'raider', 'Consultant': 'consultant',
         'Unicorn Startup': 'unicorn', 'Too Big to Fail': 'toobig', 'The Remote Worker': 'remote', 'The Reply-All Guy': 'boomer'}
-for mod in ['p_influencers', 'p_ferals', 'p_creatives', 'p_techies', 'p_punks', 'p_philosophers', 'p_neighbours', 'p_hustlers', 'p_heroes', 'p_track']:
+for mod in ['p_influencers', 'p_ferals', 'p_creatives', 'p_techies', 'p_punks', 'p_philosophers', 'p_neighbours', 'p_hustlers', 'p_heroes', 'p_track', 'p_v15']:
     m = importlib.import_module(mod)
     for name, (slug, _) in m.ART.items():
         SLUG[name] = slug
@@ -82,7 +82,7 @@ KW_ICON = {
     'Rebrand': '<path d="M19 9.5A7.5 7.5 0 0 0 5.6 7.6"></path><path d="M5 3.5v4.5h4.5"></path><path d="M5 14.5a7.5 7.5 0 0 0 13.4 1.9"></path><path d="M19 20.5V16h-4.5"></path><path d="M12 9l1 2 2 1-2 1-1 2-1-2-2-1 2-1z" fill="#ffc928" stroke-width="1.6"></path>',
     'Toxic': '<path d="M3.5 4.5h17v11H11l-5 4v-4H3.5z" fill="#8ee05a"></path><path d="M12 7.5v4"></path><path d="M12 13.8v0.2"></path>',
     'First Impression': '<rect x="2.5" y="5" width="19" height="14" rx="2.5" fill="#ffffff"></rect><path d="M5 5h14a2.5 2.5 0 0 1 2.5 2.5v3h-19v-3A2.5 2.5 0 0 1 5 5z" fill="#ff6b5e"></path><path d="M7.5 15h9"></path>',
-    'Collab': '<rect x="2" y="8" width="12" height="8" rx="4" fill="#8fd4ff"></rect><rect x="10" y="8" width="12" height="8" rx="4"></rect>',
+    'Connect': '<rect x="2" y="8" width="12" height="8" rx="4" fill="#8fd4ff"></rect><rect x="10" y="8" width="12" height="8" rx="4"></rect>',
     'Discover': '<circle cx="10" cy="10" r="6.5" fill="#ffffff"></circle><path d="M15 15l5.5 5.5"></path><path d="M10 7.2l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9z" fill="#ffc928" stroke-width="1.4"></path>',
 }
 TRIG_ICON = {
@@ -102,7 +102,7 @@ def fmt(text):
     # keyword lead-ins
     for k in KEYWORDS:
         t = re.sub(rf'(^|(?<=\. )){re.escape(k)}([.:])\s*', lambda m, k=k: kw_chip(k, label=k + m.group(2)) + ' ', t)
-    for k in ('Out of Office', 'Toxic', 'Collab', 'Rebrand', 'Attention Seeker', 'Legacy', 'First Impression'):
+    for k in ('Out of Office', 'Toxic', 'Connect', 'Rebrand', 'Attention Seeker', 'Legacy', 'First Impression'):
         t = re.sub(rf'(?<![>\w]){re.escape(k)}s?(?=[ .,"]|$)', lambda m, k=k: kw_chip(k, label=m.group(0)), t)
     t = re.sub(r'Discover (a|an) ', lambda m: kw_chip('Discover') + f' {m.group(1)} ', t)
     for trig in ('Start of combat:', 'End of turn:', 'When sold:', 'Every second end of turn:', 'Once per turn,', 'Twice per combat,', 'Once per combat,', 'Clock In:', 'Cleave:', 'First Impression and end of turn:'):
@@ -282,3 +282,35 @@ SLUG.update({'The Billionaire': 'billionaire', 'Cancelled Celebrity': 'cancelled
     'Mohawk Legend': 'mohawklegend', 'Renaissance Thinker': 'renaissance', 'Tech Founder': 'techfounder', 'Content Creator': 'contentcreator', 'Wise Old Owl': 'wiseowl',
     'Punk Philosopher': 'punkphilosopher'})
 SHORT.pop('Zine Maker', None); SHORT.pop('Speedrunner', None)
+
+
+# v15 (Nov 19): playstyle swap (Followers to Philosophers, Attention Seekers to Influencers), Collab renamed Connect
+NEIGHBOUR_TEXT.update({
+    'Block Party Host': 'Legacy: give each of your minions +2/+2 permanently for each minion next to it.',
+    'New Neighbours': 'Your end-of-turn effects trigger twice.',
+})
+FLAVOUR['New Neighbours'] = 'Moved in on Tuesday. Already run the group chat.'
+for _k in ('Crypto Bro', 'Robot Vacuum', 'Quantum Computer', 'Noise-Cancelling Headphones', 'Graffiti Kid', 'Unicorn Startup', 'Too Big to Fail',
+           'Consultant', 'Grand Unified Theory', 'Mosh Pit'):
+    SHORT.pop(_k, None)
+SHORT.update({
+    'Existentialist': 'Start of combat: your Followers get +2/+1 per Philosopher for this combat. Legacy: summon two Followers.',
+    'Troll': 'Attention Seeker. Once per combat, after it survives damage: gain +1 Health permanently.',
+    'Rage Baiter': 'Attention Seeker. Once per combat, after it survives damage: gain +2/+2 permanently.',
+    'Prank Vlogger': 'Attention Seeker. Once per combat, after it survives damage: the Influencer on its right gets +2/+2 permanently.',
+    'Apology Video': 'Attention Seeker. Once per combat, after it survives damage: other Influencers get +2/+2 permanently.',
+    'Shock Jock': 'Attention Seeker. After this takes damage, your other Influencers get +1/+1 permanently.',
+    'Crisis PR Firm': 'Attention Seeker. Each other Attention Seeker takes at most 3 damage from its first two hits each combat.',
+    'Comments Off': 'Attention Seeker. This and the minions next to it take no start-of-combat damage.',
+    'Robot Vacuum': 'Connect to any minion (it becomes a Techie). Start of combat: deal 2 damage to the lowest-Health enemy.',
+    'Quantum Computer': 'Connect. Out of Office. Rebrand. End of turn: its host gets +2/+2 per Connect on it.',
+    'Noise-Cancelling Headphones': 'Connect. Out of Office. When its host loses Out of Office, Techies get +2 Attack permanently.',
+    'Graffiti Kid': 'Start of combat: deal 2 damage per Punk to the left-most enemy.',
+    'Unicorn Startup': 'End of turn: other Hustlers get +2/+2 per 4 gold you spent this turn.',
+    'Too Big to Fail': 'Attention Seeker. Survives its first death each combat at 1 Health. Other Hustlers get +3/+3 permanently.',
+    'Consultant': 'Every 4 gold you spend: gain +4/+4. "Every 4 gold" effects trigger every 3 gold.',
+    'Grand Unified Theory': 'End of turn: minions get +1/+1 next combat per tribe, then double next-combat buffs. Buffs in combat are doubled.',
+    'Mosh Pit': 'Cleave. After this kills a minion, your Punks get +1 Attack permanently.',
+    'Tech Founder': 'Every 4 gold you spend: Hustlers and Techies in the Feed get +2/+2 this game.',
+})
+SHORT['Corporate Raider'] = 'Start of combat: deal 4 damage to the lowest-Health enemy. If it dies, +1 gold next turn.'

@@ -6,10 +6,10 @@ const TRIGGERS = [
   [/^First Impression/i, 'FI'], [/^Every second end of turn|^End of turn/i, 'EOT'], [/^Start of combat/i, 'SOC'], [/^Legacy/i, 'LEG'],
   [/^When sold/i, 'SOLD'], [/^Clock In/i, 'CLOCK'], [/^Grievance/i, 'GRIEV'], [/^Side Gig/i, 'GIG'], [/^After you play a Creative|^After you play a minion/i, 'PLAY'],
   [/^After you hire/i, 'HIRE'], [/^After you Scroll/i, 'SCROLL'], [/^Once per turn, after you sell|^After you sell/i, 'SELL'], [/^After this survives damage|^After this takes damage/i, 'HURT'],
-  [/^After this kills/i, 'KILL'], [/^When it comes back|^After a friendly \w+ comes back/i, 'BACK'], [/^After a friendly minion dies/i, 'DIES'], [/^After you summon/i, 'SUMMON'], [/^After you Collab/i, 'COLLAB'],
+  [/^After this kills/i, 'KILL'], [/^When it comes back|^After a friendly \w+ comes back/i, 'BACK'], [/^After a friendly minion dies/i, 'DIES'], [/^After you summon/i, 'SUMMON'], [/^After you Connect/i, 'COLLAB'],
   [/^Every \d+ gold/i, 'SPEND'], [/^Sells for/i, 'SELLVAL'], [/^The first time it would die/i, 'DEATHSAVE'], [/^Your /i, 'AURA'], [/^Cleave/i, 'CLEAVE'],
-  [/^Attacks twice/i, 'KW'], [/^(Attention Seeker|Out of Office|Rebrand|Toxic|Collab)\b/i, 'KW']];
-const MECH = [[/Like/, 'likes'], [/Follower/, 'followers'], [/in the Feed|Feed/, 'feed'], [/sold|sell/i, 'selling'], [/gold/, 'gold'], [/Collab/, 'collab'],
+  [/^Attacks twice/i, 'KW'], [/^(Attention Seeker|Out of Office|Rebrand|Toxic|Connect)\b/i, 'KW']];
+const MECH = [[/Like/, 'likes'], [/Follower/, 'followers'], [/in the Feed|Feed/, 'feed'], [/sold|sell/i, 'selling'], [/gold/, 'gold'], [/Connect/, 'collab'],
   [/next combat/, 'tempbuff'], [/Attention Seeker/, 'taunt'], [/Legac/, 'legacy'], [/Discover/, 'discover'], [/damage/, 'damage'], [/Toxic/, 'toxic'],
   [/Out of Office/, 'shield'], [/dies|die\b|died/, 'death'], [/Creative/, 'creative-play'], [/kills/, 'kill'], [/spend|spent/, 'spend'], [/Scroll/, 'scroll'], [/comes back|Rebrand/, 'rebrand']];
 
@@ -55,7 +55,7 @@ function parseSentence(s) {
 }
 function modelOf(c) {
   const kws = ['taunt', 'shield', 'toxic', 'rebrand', 'twice', 'collab'].filter(k => c[k]);
-  const sentences = c.text.split(/(?<=\.)\s+/).filter(s => s && !/^(Attention Seeker|Out of Office|Rebrand|Toxic|Collab|Cleave[^:]*|Attacks twice)\.$/.test(s.trim()));
+  const sentences = c.text.split(/(?<=\.)\s+/).filter(s => s && !/^(Attention Seeker|Out of Office|Rebrand|Toxic|Connect|Cleave[^:]*|Attacks twice)\.$/.test(s.trim()));
   const parts = sentences.map(parseSentence).filter(p => p.trigger !== 'KW' || p.effects.length);
   return {name: c.name, tribe: c.tribe, tier: c.tier, style: c.style, atk: c.atk, hp: c.hp, kws, parts,
     triggers: [...new Set(parts.map(p => p.trigger))], mech: [...new Set(parts.flatMap(p => p.mech))]};
