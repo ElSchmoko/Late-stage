@@ -26,12 +26,13 @@ const PROF = loadProfile();
 const RENAMED = {'Reply Guy': 'Sophist', 'Giveaway Host': 'Epicurean', 'Comment Section': 'Peripatetic', 'Unboxing Streamer': 'Pythagorean', 'Viral Video': 'Hemlock Martyr',
   'Engagement Farmer': 'The Academy', 'Brand Ambassador': 'Existentialist', 'Blue Checkmark': 'Philosopher King', 'Bot Farm': 'Mystery Cult', 'Fan Convention': 'Utopian Commune',
   'Stoicism Podcaster': 'Troll', 'Cold-Plunge Stoic': 'Rage Baiter', 'Marathon Monk': 'Prank Vlogger', 'Book-Club Stoic': 'Reality Star', 'Desert Hermit': 'Apology Video',
-  'The Cynic': 'Shock Jock', 'Enlightened Guru': 'Crisis PR Firm', 'Breathwork Coach': 'Drama Channel', 'Tenured Professor': 'Comments Off'};
-if (!PROF.renamed15) {
+  'The Cynic': 'Shock Jock', 'Enlightened Guru': 'Crisis PR Firm', 'Breathwork Coach': 'Drama Channel', 'Tenured Professor': 'Comments Off', 'Cancelled Celebrity': 'The Heretic'};
+if (!PROF.renamed16) {   // v16 adds Cancelled Celebrity -> The Heretic; running the map twice is harmless
   const rn = n => RENAMED[n] || n;
+  if (PROF.legSeen) PROF.legSeen = PROF.legSeen.map(rn);
   if (PROF.deck) PROF.deck = [...new Set(PROF.deck.map(rn))];
   for (const r of PROF.history || []) if (r && r.c) { const c = {}; for (const k in r.c) c[rn(k)] = (c[rn(k)] || 0) + r.c[k]; r.c = c; }
-  PROF.renamed15 = true; saveProfile();
+  PROF.renamed15 = PROF.renamed16 = true; saveProfile();
 }
 // Season reset (Nov 10): rating, rewards-track progress and unlocked cards start over for every profile; heroes stay unlocked.
 // Bump SEASON to run it again. Restoring an older save code runs it on the next load as well.
@@ -1619,10 +1620,10 @@ const RM_TRACK = (() => {
   const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher';
   const L = (name, tribe, tier, tribe2) => ({name, tribe, tribe2, tier, legendary: true});
   const S = [
-    [1000, L('The Billionaire', H, 5), L('Cancelled Celebrity', I, 4)],
+    [1000, L('The Billionaire', H, 5), L('The Heretic', PH, 4)],
     [1500, L('Tech Founder', H, 4, T)],
     [2000, L('Apex Scavenger', F, 5), L('Pop Diva', C, 5)],
-    [2500, L('Content Creator', I, 4, C)],
+    [2500, L('Content Creator', I, 4, C), L('Controversy Magnet', I, 4)],
     [3000, L('The Algorithm', T, 5), L('Mohawk Legend', P, 5)],
     [3500, L('Wise Old Owl', F, 5, PH)],
     [4000, L('Renaissance Thinker', PH, 4), L('Housing Co-op', 'Neutral', 5)],

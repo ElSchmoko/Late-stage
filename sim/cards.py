@@ -694,3 +694,14 @@ for _c in LEGENDS:
     if _c.name in _L15: _c.text = _L15[_c.name]
 NEIGHBOURS.append(Card('New Neighbours', N, 6, 5, 7, '-', 'Your end-of-turn effects trigger twice.', 'Moved in on Tuesday. Already run the group chat.'))
 ALL[:] = [c for t in TRIBES for c in BY_TRIBE[t]] + NEIGHBOURS
+
+# v16 (Nov 20): the playstyle swap reaches the legendaries. Cancelled Celebrity (Followers) becomes the Philosopher
+# legendary The Heretic; the Influencers get an Attention Seeker legendary instead, Controversy Magnet.
+for _c in LEGENDS:
+    if _c.name == 'Cancelled Celebrity':
+        _c.name, _c.tribe, _c.flavour = 'The Heretic', PH, 'Burned once. Came back with a following.'
+RENAMED['Cancelled Celebrity'] = 'The Heretic'
+LEGENDS.append(_leg('Controversy Magnet', I, 4, 4, 7, 'Attention Seeker. After this takes damage, give your other Attention Seekers +1/+1 permanently.',
+                    'Any press is good press. Especially the bad.', taunt=True))
+for _c in TECHIES:
+    if _c.name == 'Robot Vacuum': _c.text = 'Connect to any minion. Start of combat: deal 2 damage to the enemy minion with the lowest Health.'

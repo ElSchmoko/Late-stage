@@ -321,7 +321,7 @@ class Player {
   }
   stick(card, tgt) {
     tgt.atk += card.atk; tgt.hp += card.hp; tgt.shield = tgt.shield || card.shield; tgt.rebrand = tgt.rebrand || card.rebrand; tgt.toxic = tgt.toxic || card.toxic;
-    if (card.tribe === T && tgt.tribe !== T) tgt.tribe2 = T;
+    if (card.tribe === T && tgt.tribe !== T && card.name !== 'Robot Vacuum') tgt.tribe2 = T;   // Robot Vacuum attaches to any minion without making it a Techie
     tgt.extras.push(card.name); this.buffed.add(tgt.id); this.note('collab', {id: tgt.id, name: card.name});
     this.afterCollab();
   }
@@ -1031,6 +1031,7 @@ class Fight {
     for (const m of b) if (m.oooLost) { m.oooLost = false; const k = 2 * m.n('Noise-Cancelling Headphones'); if (k) { for (const o of b) if (isTribe(o, T) && o.hp > 0) perm(o, k, 0); this.frame({type: 'trigger', src: m.id}); } }
     for (const m of b.slice()) {
       const h = m.hits || 0; if (!h) continue; m.hits = 0;
+      if (m.is_('Controversy Magnet')) { const k = h * m.w('Controversy Magnet'); for (const o of b) if (o !== m && o.taunt && o.hp > 0) perm(o, k, k); }
       if (m.is_('Shock Jock')) { const k = h * m.w('Shock Jock'); for (const o of b) if (o !== m && isTribe(o, I)) perm(o, k, k); }
       if (m.taunt && m.hp > 0) { const k = wsum(b, 'Drama Channel'); if (k) { perm(m, k * h, 0); this.frame({type: 'trigger', src: m.id}); } }
       if (m.hp > 0 && !m.surv_used && ['Troll', 'Rage Baiter', 'Prank Vlogger', 'Apology Video'].includes(m.name)) {
@@ -1143,7 +1144,7 @@ class Fight {
           const r = Object.assign(Object.create(Object.getPrototypeOf(m)), m);
           r.hp = 1; r.rebrand = false; r.extras = m.extras.slice(); r.hits = 0; r.id = UID++; r.orig = m.orig;
           b.splice(Math.min(idx, b.length), 0, r); this.frame({type: 'rebrand', side: k, id: r.id});
-          if (r.name === 'Cancelled Celebrity') for (let i = 0; i < 3 * r.g; i++) combatFollower(side, b.indexOf(r) + 1);
+          if (r.name === 'The Heretic') for (let i = 0; i < 3 * r.g; i++) combatFollower(side, b.indexOf(r) + 1);
           // Scavengers: "when it comes back" / "after a friendly Feral comes back"
           if (isTribe(r, F)) { const kf = wsum(b, 'Fox Den'); if (kf) perm(r, 3 * kf, 3 * kf); }
           if (r.is_('Trash Panda')) { const os = b.filter(o => o !== r && isTribe(o, F)); for (const o of os) gain(o, r.g, r.g); if (os.length) this.frame({type: 'trigger', src: r.id}); }
@@ -1230,7 +1231,7 @@ const PRO = {growth: 0.5, tierVal: 0.12, levelHealth: 12, err: 0.35, off: {hero:
 const PLANS = {
   PI: [['Thought Leader', 'Consultant', 'Side Hustle', 'Grindset Guru', 'Venture Capitalist', 'Dropshipper', 'Tech Founder'], ['Unicorn Startup', 'Thought Leader']],
   EX: [['Sneaker Reseller', 'Middle Manager', 'Unpaid Intern', 'Golden Parachute Exec', 'Corporate Raider', 'Crypto Bro'], ['Private Equity', 'Too Big to Fail', 'The Billionaire']],
-  FO: [['Epicurean', 'Peripatetic', 'Sophist', 'Hemlock Martyr', 'Pythagorean', 'Lawyer Next Door', 'Punk Philosopher', 'Wise Old Owl'], ['The Academy', 'Existentialist', 'Philosopher King']],
+  FO: [['Epicurean', 'Peripatetic', 'Sophist', 'Hemlock Martyr', 'Pythagorean', 'Lawyer Next Door', 'Punk Philosopher', 'Wise Old Owl', 'The Heretic'], ['The Academy', 'Existentialist', 'Philosopher King']],
   MC: [['Personal Brand', 'Stan Account', 'Hype Man', 'Engagement Bot', 'Paparazzi', 'Content Creator'], ['Main Character', 'Ring Light Studio']],
   OG: [['Rooftop Beehive', 'Plant Parent', 'Guerrilla Gardener', 'Compost Heap', 'Tree Hugger', 'Windowsill Succulent', 'Wise Old Owl'], ['World Tree', 'Ancient Oak', 'Apex Scavenger']],
   SV: [['City Pigeon', 'Seagull', 'Trash Panda', 'Urban Fox', 'Wild Boar'], ['Nature Is Healing', 'Rat King']],
@@ -1241,7 +1242,7 @@ const PLANS = {
   SA: [['Feedback Loop', 'Crust Punk', 'Heckler', 'Graffiti Kid', 'Mosh Pit'], ['General Strike', 'Stage Diver', 'Mohawk Legend']],
   SO: [['Jingle Writer', 'Squat Collective', 'Sellout Frontman', 'Zine Maker', 'Anarchist Barista', 'Punk Philosopher'], ['Greatest Hits', 'Reunion Tour']],
   BI: [['Thought Experiment', 'Utilitarian', 'Pub Philosopher', 'Shower Thinker', 'Renaissance Thinker', 'Wise Old Owl'], ['Grand Unified Theory', 'Bestselling Author']],
-  ST: [['Apology Video', 'Reality Star', 'Prank Vlogger', 'Rage Baiter', 'Troll', 'Package Hoarder', 'Caretaker', 'Cancelled Celebrity', 'Content Creator'], ['Crisis PR Firm', 'Shock Jock', 'Main Character']],
+  ST: [['Apology Video', 'Reality Star', 'Prank Vlogger', 'Rage Baiter', 'Troll', 'Package Hoarder', 'Caretaker', 'Content Creator'], ['Crisis PR Firm', 'Shock Jock', 'Main Character', 'Controversy Magnet']],
 };
 const planWeight = (style, name) => { const p = PLANS[style]; return !p ? 0 : p[1].includes(name) ? 2 : p[0].includes(name) ? 1 : 0; };
 const cloneM = m => { const c = Object.assign(Object.create(Object.getPrototypeOf(m)), m); c.extras = m.extras.slice(); return c; };

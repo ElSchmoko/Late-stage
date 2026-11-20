@@ -253,10 +253,11 @@ button{font:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){.foil{animation:none;background-position:50% 0}}
 /* collection: Feed pool */
 .logbody.deck{flex-direction:column;flex-wrap:nowrap;gap:10px}
-.tierrow{display:flex;align-items:center;gap:14px;padding:6px 6px 14px;border-radius:16px;transition:background .2s}
+.tierrow{display:flex;align-items:center;gap:14px;padding:6px 6px 14px;border-radius:16px;transition:background .2s;flex-shrink:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
+.tierrow::-webkit-scrollbar{display:none}
 .tierrow.flash,.legrow.flash{animation:flash .5s 2}
 @keyframes flash{50%{background:#ffd9d4}}
-.tierlab{width:58px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px}
+.tierlab{width:58px;flex-shrink:0;position:sticky;left:-6px;z-index:5;align-self:stretch;justify-content:center;background:#fff;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .tierlab .stars{display:flex;flex-wrap:wrap;justify-content:center;width:44px}
 .slots{display:flex;gap:4px}.slots i,.slotsdemo i{width:12px;height:12px;border-radius:50%;border:2.5px solid var(--ink);background:#fff;display:inline-block}
 .slots i.on,.slotsdemo i.on{background:#2ecb6e}

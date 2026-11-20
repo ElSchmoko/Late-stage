@@ -278,7 +278,7 @@ SHORT.update({
     'The Cynic': 'Attention Seeker. After this takes damage, your other Philosophers get +1/+1 permanently.',
 })
 SHORT['Pro Gamer'] = 'Attacks twice. After this attacks, gain +3/+2 permanently.'
-SLUG.update({'The Billionaire': 'billionaire', 'Cancelled Celebrity': 'cancelled', 'Apex Scavenger': 'apexcrow', 'Pop Diva': 'popdiva', 'The Algorithm': 'algorithm',
+SLUG.update({'The Billionaire': 'billionaire', 'Controversy Magnet': 'cancelled', 'Apex Scavenger': 'apexcrow', 'Pop Diva': 'popdiva', 'The Algorithm': 'algorithm',
     'Mohawk Legend': 'mohawklegend', 'Renaissance Thinker': 'renaissance', 'Tech Founder': 'techfounder', 'Content Creator': 'contentcreator', 'Wise Old Owl': 'wiseowl',
     'Punk Philosopher': 'punkphilosopher'})
 SHORT.pop('Zine Maker', None); SHORT.pop('Speedrunner', None)
@@ -314,3 +314,5 @@ SHORT.update({
     'Tech Founder': 'Every 4 gold you spend: Hustlers and Techies in the Feed get +2/+2 this game.',
 })
 SHORT['Corporate Raider'] = 'Start of combat: deal 4 damage to the lowest-Health enemy. If it dies, +1 gold next turn.'
+SHORT['Robot Vacuum'] = 'Connect to any minion. Start of combat: deal 2 damage to the lowest-Health enemy.'
+SHORT['Controversy Magnet'] = 'Attention Seeker. After this takes damage, other Attention Seekers get +1/+1 permanently.'

@@ -23,7 +23,7 @@ Track stops stay one tribe each: Drama Channel joins Thirst Trap (Lv 2), Mystery
 Comments Off joins Paid Verification, Utopian Commune joins TED Talk.
 
 ## Rules
-- **Connect** (was Collab) attaches only to your Techies; Robot Vacuum attaches to any minion and makes it a Techie.
+- **Connect** (was Collab) attaches only to your Techies; Robot Vacuum attaches to any minion (it does not make it a Techie).
   With no valid minion on the board, a Connect card is played as a normal minion.
 - **Golden cards** keep the keywords and extra tribe their copies gained (Attention Seeker, Out of Office, Toxic, Rebrand, Techie ...).
 - **Discover** (First Impression) never offers the card that discovers.
@@ -54,3 +54,11 @@ Sells and triples are counted from this update on (`PROF.stats.sells`, `PROF.sta
 The Heroes collection page scrolls now (three rows).
 
 Golden Consultant: every 4 gold you spend, gain +8/+8; its passive is the same as the normal card's (every 3 gold).
+
+## Legendaries (Nov 20)
+Cancelled Celebrity (Rebrand, comes back with three Followers) is now the Philosopher legendary **The Heretic** (new art,
+same Night Line station at 1,000). The Influencers get an Attention Seeker legendary instead: **Controversy Magnet**
+(tier 4, 4/7, Attention Seeker; after it takes damage, your other Attention Seekers get +1/+1 permanently), at the 2,500
+station next to Content Creator, using the old Cancelled Celebrity art.
+
+Collection › Cards: each tier is one row that scrolls sideways; the tier label stays put.

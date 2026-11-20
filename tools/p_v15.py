@@ -230,3 +230,13 @@ def _():
     o += [*box(20, 150, 72, 50), path('M30 180 L58 180', 'none'), *box(108, 160, 80, 40, '#d9a868'), *box(128, 126, 48, 36),
           path('M156 126 L150 104 Q150 96 158 98 L164 112', SKINS[0]), sparkle(30, 40, 7, Y), sparkle(178, 50, 6, W)]
     return o
+
+
+@reg('heretic', 'The Heretic')
+def _():
+    o = [tiny(28, 178, .36, 0, 'short', 'brown', TOGA, eyes='stars'), tiny(176, 176, .36, 4, 'bun', 'black', TOGA, eyes='stars')]
+    o += person(1, 'long', 'black', 'robe', '#5a4a8a', ORA, eyes='calm', mouth='smirk', brows='one', extra=['longbeard'],
+                back=[*[path(f'M{x} 150 Q{x - 10} 120 {x} 96 Q{x + 6} 112 {x + 10} 100 Q{x + 18} 126 {x + 8} 150 Z', ORA) for x in (14, 172)],
+                      *[path(f'M{x + 2} 150 Q{x - 2} 132 {x + 4} 120 Q{x + 8} 132 {x + 6} 150 Z', Y) for x in (14, 172)]],
+                prop=[scroll(132, 116, 40, 24, -14), hand(140, 150, SKINS[1]), sparkle(30, 60, 8, Y), sparkle(174, 56, 6, W)])
+    return o
