@@ -86,4 +86,58 @@ def _():
                         *speech(130, 52, 64, 30, 1, W, 'left'), heart(180, 66, .5, RED)])
 
 
+
+@reg('h_daytrader', 'The Day Trader')
+def _():
+    chart = [rect(10, 34, 64, 52, INK, 8), path('M18 76 L30 62 L40 70 L52 50 L66 44', 'none', f' stroke="{G}" stroke-width="4"'),
+             path('M58 42 L68 42 L68 52', 'none', f' stroke="{G}" stroke-width="4"'), path('M18 56 L30 64', 'none', f' stroke="{RED}" stroke-width="4"')]
+    return person(1, 'slick', 'brown', 'suit', '#3a5a8a', RED, eyes='wide', mouth='grin', brows='up', extra=['sweat'],
+                  back=chart,
+                  prop=[phone(142, 112, 32, 54, INK, '#d6f5df', -10, [path('M150 150 L158 138 L164 144 L172 128', 'none', f' stroke="{G}" stroke-width="3"')]),
+                        hand(150, 164, SKINS[1]), coin(176, 70, 9), coin(186, 92, 7)])
+
+
+@reg('h_overachiever', 'The Overachiever')
+def _():
+    return person(2, 'ponytail', 'black', 'cardigan', '#ffb547', W, eyes='happy', mouth='grin', extra=['freckles'],
+                  front=[circ(84, 160, 10, Y), path('M80 168 L76 186 L84 180 L90 188 L88 168', RED)],
+                  prop=[g([rect(0, 0, 44, 56, W, 4), path('M8 12 L30 12 M8 22 L34 22 M8 32 L26 32'), path('M18 44 Q22 36 28 44 Q32 50 36 40', 'none', f' stroke="{RED}" stroke-width="3"')], 'translate(138 108) rotate(8)'),
+                        star(168, 112, 13, Y), hand(146, 170, SKINS[2]), star(26, 70, 9, Y), star(42, 50, 6, Y), sparkle(180, 70, 7, W)])
+
+
+@reg('h_collector', 'The Collector')
+def _():
+    shelf = [rect(4, 100, 52, 6, BROWN, 2), rect(10, 70, 16, 30, '#ffd84a', 3), circ(18, 64, 8, '#ffd84a'), rect(32, 78, 18, 22, PINK, 3)]
+    return person(3, 'buzz', 'dark', 'tee', DGREY, eyes='stars', mouth='open', hat='capback', hatc=PUR, extra=['earring'],
+                  back=shelf,
+                  prop=[g([rect(0, 0, 50, 34, W, 4), path('M0 22 Q25 14 50 22', 'none'), path('M6 30 Q26 6 46 22 L46 30 Z', '#ffd84a')], 'translate(138 130) rotate(-8)'),
+                        hand(144, 170, SKINS[3]), sparkle(172, 104, 8, Y), sparkle(150, 96, 5, W)])
+
+
+@reg('h_networker', 'The Networker')
+def _():
+    return person(0, 'swoop', 'blonde', 'suit', '#5a6fb8', W, eyes='open', mouth='grin', extra=['earring'],
+                  front=[rect(84, 152, 30, 20, W, 3), path('M90 159 L108 159 M90 165 L102 165')],
+                  prop=[g([rect(0, 0, 40, 24, W, 3), path('M7 8 L26 8 M7 16 L20 16'), circ(32, 12, 4, '#5a6fb8')], 'translate(140 110) rotate(-12)'),
+                        g([rect(0, 0, 40, 24, Y, 3), path('M7 8 L26 8 M7 16 L20 16'), circ(32, 12, 4, RED)], 'translate(148 132) rotate(6)'),
+                        hand(150, 160, SKINS[0]), circ(30, 56, 9, SKY), circ(22, 88, 7, PINK), circ(48, 76, 7, LIME), path('M30 56 L22 88 M30 56 L48 76 M22 88 L48 76', 'none')])
+
+
+@reg('h_prepper', 'The Prepper')
+def _():
+    cans = [rect(4 + 18 * i, 160 - 20 * j, 16, 20, c, 3) for i, j, c in [(0, 0, RED), (1, 0, G), (2, 0, Y), (0, 1, SKY), (1, 1, RED)]]
+    return person(4, 'buzz', 'black', 'vest', '#8a9a5a', '#6b7a44', eyes='open', mouth='flat', brows='angry', hat='bandana', hatc='#6b7a44', extra=['beard'],
+                  back=cans,
+                  prop=[rect(140, 112, 44, 56, '#c98a4a', 6), path('M140 130 L184 130'), rect(154, 104, 16, 10, '#a86b45', 3),
+                        circ(162, 148, 9, '#ffd84a'), path('M157 148 L167 148 M162 143 L162 153'), hand(144, 168, SKINS[4])])
+
+
+@reg('h_trendchaser', 'The Trend Chaser')
+def _():
+    return person(3, 'pigtails', 'teal', 'puffer', '#ff9ec7', W, eyes='hearts', mouth='open', extra=['nosering'],
+                  prop=[rect(136, 120, 48, 52, W, 6), path('M136 132 L184 132'), path('M148 120 Q150 104 160 104 Q170 104 172 120', 'none'), heart(160, 152, .7, RED),
+                        hand(140, 170, SKINS[3]), phone(10, 70, 30, 50, INK, SKY, -12, [path('M18 92 L30 88 M18 100 L28 98', 'none')]),
+                        sparkle(44, 56, 7, Y), sparkle(186, 96, 6, W), path('M46 130 L56 122 M44 142 L58 142')])
+
+
 TRIBE = 'Hero'

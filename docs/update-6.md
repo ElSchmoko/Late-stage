@@ -36,3 +36,21 @@ Comments Off joins Paid Verification, Utopian Commune joins TED Talk.
 
 ## Rewards track
 XP per level: 300 + 50 per level (was 500 + 50).
+
+## New heroes (Nov 20)
+Six unlockable heroes (art in `tools/p_heroes.py`, data in `tools/heroes.py`, rules in `game/engine.js`).
+Boundaries were tuned with `node game/herosim.js 900`: all six land between 4.21 and 4.79 average place (old heroes 4.19–4.73).
+
+| Hero | Power | Effect | Boundaries | Unlock |
+| --- | --- | --- | --- | --- |
+| The Day Trader | Buy the Dip (passive) | Unspent gold (up to 4) is invested; next turn it comes back as 0 to double | 2 | Sell 60 minions |
+| The Overachiever | Gold Star (2 gold) | A minion gets +X/+X permanently, X = your tier | 4 | Win a run |
+| The Collector | Limited Edition (passive) | Copies of your minions show up in the Feed 4× as often; golden minions get +4/+4 | 10 | Make 10 triples |
+| The Networker | Circle Back (1 gold) | A random minion of each tribe you have gets +1/+1 | 8 | Have 5 tribes on your board |
+| The Prepper | Bunker Mentality (passive) | Start of combat: your minions get +1 Health per 5 Health you have lost | 9 | Win a combat at 3 Health or less |
+| The Trend Chaser | FOMO (passive) | The Feed shows one more minion (7 at tier 6) | 10 | Hire 250 minions |
+
+Sells and triples are counted from this update on (`PROF.stats.sells`, `PROF.stats.triples`).
+The Heroes collection page scrolls now (three rows).
+
+Golden Consultant: every 4 gold you spend, gain +8/+8; its passive is the same as the normal card's (every 3 gold).

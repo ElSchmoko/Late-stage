@@ -49,7 +49,9 @@ const bracketOf = r => BRACKETS.reduce((b, x) => (r >= x[0] ? x : b), BRACKETS[0
 const UNLOCK = {   // hero -> [goal, progress(profile)]
   h_bargainhunter: [60, P => P.stats.hires], h_doomscroller: [100, P => P.stats.scrolls], h_serial: [1, P => +!!P.flags.tier6],
   h_overthinker: [1, P => +!!P.flags.fourTribes], h_lifecoach: [1, P => +!!P.flags.streak3], h_minimalist: [1, P => +!!P.flags.small],
-  h_complainer: [1, P => +!!P.flags.comeback], h_ex: [80, P => P.stats.deaths]};
+  h_complainer: [1, P => +!!P.flags.comeback], h_ex: [80, P => P.stats.deaths],
+  h_daytrader: [60, P => P.stats.sells || 0], h_overachiever: [1, P => Math.min(1, P.wins || 0)], h_collector: [10, P => P.stats.triples || 0],
+  h_networker: [1, P => +!!P.flags.fiveTribes], h_prepper: [1, P => +!!P.flags.bunker], h_trendchaser: [250, P => P.stats.hires]};
 const isUnlocked = slug => PROF.unlocked.includes(slug);
 /** The hero that stands for you outside a run (the rewards tracks): picked in Collection › Heroes, else the last one played. */
 const avatarHero = () => HERO[PROF.avatar] && isUnlocked(PROF.avatar) ? HERO[PROF.avatar] : HERO[G.heroSlug] || HERO[PROF.unlocked[0]] || HEROES[0];
@@ -389,15 +391,17 @@ function showCollection() {
   collectionTabs('heroes');
   const rc = rankChip(PROF.rating, 13); stage.appendChild(rc); css(rc, {right: 130, top: 14});
   const order = HEROES.map(h => h.slug).sort((a, b) => isUnlocked(b) - isUnlocked(a));
+  const wrap = el('div', 'ab heroscroll', '', stage); css(wrap, {left: 0, top: 56, width: W, height: H - 56});   // three rows: scrolls
+  el('div', 'ab', '', wrap).style.cssText = `position:absolute;left:0;top:0;width:1px;height:${10 + Math.ceil(order.length / 6) * 160 + 8}px`;
   order.forEach((slug, i) => {
     const h = HERO[slug], lock = !isUnlocked(slug), [c, g] = progressOf(slug);
-    const x = 34 + (i % 6) * 130, y = 66 + Math.floor(i / 6) * 160;
+    const x = 34 + (i % 6) * 130, y = 10 + Math.floor(i / 6) * 160;
     const b = el('button', 'coll', `<div style="position:absolute;inset:0;background:#fff;border:3px solid #2b2140;border-radius:20px;box-shadow:0 0 0 3px #fff,3px 5px 0 3px #2b2140"></div>
       <div style="position:absolute;left:8px;right:8px;top:8px;height:74px;border:2.5px solid #2b2140;border-radius:46px 46px 10px 10px;background:${lock ? '#c9c2d6' : h.col};overflow:visible"><img src="${ART[slug]}" alt="" style="position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);width:92px;height:92px;${lock ? 'filter:grayscale(1) brightness(.7)' : ''}"></div>
       <p class="bd" style="position:absolute;left:4px;right:4px;top:88px;margin:0;text-align:center;font-size:13.5px;line-height:1.05">${h.name.replace('The ', '')}</p>
       ${lock ? `<div class="prog" style="position:absolute;left:12px;right:12px;top:120px"><i style="width:${Math.round(100 * c / g)}%;${c ? '' : 'border:0'}"></i></div><p class="bd" style="position:absolute;left:0;right:0;top:134px;margin:0;text-align:center;font-size:10.5px;color:#5a5270">${g > 1 ? `${c} / ${g}` : 'LOCKED'}</p>
         <span style="position:absolute;right:6px;top:4px">${ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 22)}</span>`
-        : `<p style="position:absolute;left:4px;right:4px;top:108px;margin:0;text-align:center;font-size:11px;font-weight:800;color:#5a5270;line-height:1.15">${h.power}</p>`}`, stage);
+        : `<p style="position:absolute;left:4px;right:4px;top:108px;margin:0;text-align:center;font-size:11px;font-weight:800;color:#5a5270;line-height:1.15">${h.power}</p>`}`, wrap);
     css(b, {left: x, top: y, width: 118, height: 150}); b.setAttribute('aria-label', h.name + (lock ? ' (locked)' : '') + (slug === avatarHero().slug ? ', your avatar' : ''));
     if (!lock && slug === avatarHero().slug && PROF.avatar) el('span', 'avbadge bd', 'You', b);
     anim(b, [{transform: 'translateY(30px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 360, delay: 30 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
@@ -502,7 +506,10 @@ function applyLayout(on) {
 }
 const HALF = () => LY.tok / 2;
 function rowX(i, n, gap) { return LY.x0 + (LY.w - (n * LY.tok + (n - 1) * gap)) / 2 + i * (LY.tok + gap); }
-function feedX(i, n) { return rowX(i, n, LY.fgap); }
+function feedX(i, n) {   // the Trend Chaser's Feed can hold 7: squeeze the gaps, keep clear of the price coin
+  if (n <= 6) return rowX(i, n, LY.fgap);
+  const gap = Math.min(LY.fgap, (LY.w - 34 - n * LY.tok) / (n - 1)); return rowX(i, n, gap) + 17;
+}
 function boardX(i, n) { return rowX(i, n, LY.bgap); }
 function handPos(i, n) { const h = LY.hand, sp = Math.min(h.max, h.avail ? (h.avail - h.w) / Math.max(1, n - 1) : h.spread / Math.max(1, n)); const x0 = h.cx - ((n - 1) * sp) / 2 - h.w / 2; return {x: x0 + i * sp, y: LY.handY + Math.abs(i - (n - 1) / 2) * LY.arc, r: (i - (n - 1) / 2) * 3}; }
 let S = {};   // shop dom refs
@@ -652,7 +659,7 @@ async function playLog() {
       if (e.type === 'gold') coinFly(r, center(rectOf(S.gold)), e.n); sfx('coin');
     } else if (e.type === 'triple') {
       if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#ffc928', 110); confetti(c[0], c[1], 24); anim(t, [{transform: 'scale(.4) rotate(-180deg)'}, {transform: 'scale(1.3) rotate(10deg)', offset: .6}, {transform: 'scale(1)'}], {duration: 700, easing: 'ease-out'}); }
-      toast('Triple! Golden minion', 1400); sfx('triple');
+      toast('Triple! Golden minion', 1400); sfx('triple'); PROF.stats.triples = (PROF.stats.triples || 0) + 1;
     } else if (e.type === 'collab') {
       if (t) { const c = center(rectOf(t)); ring(c[0], c[1], '#8fd4ff', 80); floatText(c[0], c[1] - 34, e.name, ''); } sfx('sparkle');
     } else if (e.type === 'acquire') {
@@ -691,7 +698,7 @@ function makeTriple(card, newPiece) {
   for (const h of fromHand) { G.hand.splice(G.hand.indexOf(h), 1); const e = S.handEl.get(h.key); if (e) { e._leaving = true; e.remove(); } }
   const spec = me.takeTriple(card, [...(newPiece ? [newPiece] : []), ...fromHand.map(h => ({a: h.a, h: h.h}))], fromBoard);
   G.hand.push({card, a: spec.a, h: spec.h, golden: true, extras: spec.extras, shield: spec.shield, sell: spec.sell, kw: spec.kw, tribe2: spec.tribe2, key: Math.random()});
-  me.tripleReward(me.gold); toast('Triple! Golden card in your hand', 1500); sfx('triple');
+  me.tripleReward(me.gold); toast('Triple! Golden card in your hand', 1500); sfx('triple'); PROF.stats.triples = (PROF.stats.triples || 0) + 1;
 }
 const handCopies = card => G.hand.filter(h => h.card.name === card.name && !h.golden).length;
 function canBuy(f) { if (tripleReady(f.card)) { if (G.me.gold[0] < costOf(f)) { shake(S.gold); toast('Not enough gold'); return false; }
@@ -763,7 +770,7 @@ async function sell(m) {
   if (G.busy) return;
   const me = G.me, t = S.tok.get(m.id), g = me.sellValue(m);
   const c = t ? center(rectOf(t)) : [420, 210];
-  RUN.act('sell', m.name); me.sell(m, me.gold); sfx('sell');
+  RUN.act('sell', m.name); me.sell(m, me.gold); sfx('sell'); PROF.stats.sells = (PROF.stats.sells || 0) + 1;
   if (t) { t._leaving = true; t.style.transition = 'none';
     anim(t, [{transform: 'scale(1) rotate(0)'}, {transform: 'scale(1.2) rotate(-12deg)', offset: .3}, {transform: 'scale(0) rotate(200deg)', opacity: 0}], {duration: 380, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove()); }
   coinFly(c, center(rectOf(S.gold)), g); setTimeout(() => goldTick(g), 450);
@@ -823,7 +830,7 @@ async function levelUp() {
   const c = center(rectOf(S.shield)); ring(c[0], c[1] - 20, '#ffc928', 120); confetti(c[0], c[1] - 20, 14);
   const stars = S.shield.querySelectorAll('svg')[me.tier];
   if (stars) anim(stars, [{transform: 'scale(3) rotate(-90deg)', opacity: 0}, {transform: 'scale(1) rotate(0)', opacity: 1}], {duration: 450, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
-  toast(`Tier ${me.tier}! The Feed now shows ${E.FEED_SIZE[me.tier]} minions`, 1500);
+  toast(`Tier ${me.tier}! The Feed now shows ${me.feedSize()} minions`, 1500);
   await playLog();
 }
 async function useLikes() {
@@ -1062,6 +1069,7 @@ async function animateTurnStart(kept) {
   for (let i = 0; i < Math.min(8, G.me.gold[0]); i++) { const co = el('span', 'coin', '', stage); css(co, {width: 18, height: 18, left: c[0] - 9, top: -20, zIndex: 88}); anim(co, [{transform: 'translateY(0)'}, {transform: `translateY(${c[1] + 20}px)`}], {duration: 380, delay: i * 45, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards'}).then(() => co.remove()); }
   if (g.bonus) floatText(c[0], c[1] + 30, `${g.bonus > 0 ? '+' : '−'}${Math.abs(g.bonus)} bonus`, g.bonus > 0 ? 'gold' : 'red');
   if (g.carry) floatText(c[0], c[1] + 46, `+${g.carry} carried over`, 'gold');
+  if (g.inv) floatText(c[0], c[1] + 46, `Invested ${g.inv}, got ${g.trade} back`, g.trade >= g.inv ? 'gold' : 'red');
   toast(`Turn ${G.me.turn}`, 1100);
   await sleep(450);
   G.busy = false;
@@ -1271,7 +1279,9 @@ function trackCombat(rec) {
     const tribes = new Set(me.board.filter(m => !m.follower && m.tribe !== 'Neutral').map(m => m.tribe));
     if (tribes.size >= 4) PROF.flags.fourTribes = true;
     if (me.board.length <= 3 && G.lobby.turn >= 6) PROF.flags.small = true;
+    if (me.health > 0 && me.health <= 3) PROF.flags.bunker = true;
   }
+  if (new Set(me.board.filter(m => !m.follower && m.tribe !== 'Neutral').map(m => m.tribe)).size >= 5) PROF.flags.fiveTribes = true;
   G.minHealth = Math.min(G.minHealth ?? 99, me.health);
   checkUnlocks();
 }

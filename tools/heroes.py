@@ -15,6 +15,12 @@ HEROES = [
     ('h_lifecoach', 'The Life Coach', 'Accountability Partner', '1', 'Give a minion +2/+2 for the next combat. If it survives, it keeps the buff.', 'Growing one carry', 6, 'Win 3 combats in a row', '#ff8ab8'),
     ('h_minimalist', 'The Minimalist', 'Sparks Joy', 'Passive', 'Start of combat: if you have 4 or fewer minions, give them +2/+2.', 'Small elite boards', 3, 'Win a combat with 3 or fewer minions after turn 5', '#e6dccb'),
     ('h_complainer', 'The Complainer', 'Speak to the Manager', 'Passive', 'Grievance (2): give your minions +1/+1 for this combat.', 'Wide boards that trade', 6, 'Finish top 4 after dropping to 10 Health or less', '#b5e05a'),
+    ('h_daytrader', 'The Day Trader', 'Buy the Dip', 'Passive', 'Unspent gold (up to 4) is invested at the end of your turn. Next turn, get back anywhere from nothing to double.', 'Gambling with spare gold', 2, 'Sell 60 minions', '#86e3a8'),
+    ('h_overachiever', 'The Overachiever', 'Gold Star', '2', 'Give a minion +X/+X permanently, where X is your tier.', 'Growing one carry fast', 4, 'Win a run', '#ffb547'),
+    ('h_collector', 'The Collector', 'Limited Edition', 'Passive', 'Copies of your minions show up in the Feed 4 times as often. Your golden minions get +4/+4.', 'Hunting triples', 10, 'Make 10 triples', '#d6b8ff'),
+    ('h_networker', 'The Networker', 'Circle Back', '1', 'Give a random minion of each tribe you have +1/+1.', 'Boards with many tribes', 8, 'Have 5 tribes on your board', '#a6b8ff'),
+    ('h_prepper', 'The Prepper', 'Bunker Mentality', 'Passive', 'Start of combat: give your minions +1 Health for every 5 Health you have lost.', 'Comebacks', 9, 'Win a combat at 3 Health or less', '#cdbb8a'),
+    ('h_trendchaser', 'The Trend Chaser', 'FOMO', 'Passive', 'The Feed shows one more minion.', 'Finding the right card', 10, 'Hire 250 minions', '#ff9ec7'),
     ('h_ex', 'The Ex', 'Back Again', 'Passive', 'The first friendly minion that dies each combat comes back with 1 Health.', 'Legacy and death synergies', 8, 'Have 80 of your minions die in combat', '#ff6b5e'),
 ]
 HERO_BY = {h[0]: h for h in HEROES}

@@ -275,3 +275,4 @@ GOLD.update({
     'New Neighbours': 'Your end-of-turn effects trigger three times.',
 })
 GOLD['Robot Vacuum'] = 'Connect to any minion (it becomes a Techie). Start of combat: deal 2 damage to the enemy minion with the lowest Health.'
+GOLD['Consultant'] = 'Every 4 gold you spend: gain +8/+8. Your "every 4 gold you spend" effects trigger every 3 gold instead.'

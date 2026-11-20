@@ -249,7 +249,7 @@ class Player {
   }
   gainSpend(amount) {
     const before = this.spent; this.spent += amount;
-    const cons = this.board.filter(m => m.is_('Consultant')), step = cons.some(m => m.golden) ? 2 : cons.length ? 3 : 4;
+    const cons = this.board.filter(m => m.is_('Consultant')), step = cons.length ? 3 : 4;
     for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
       for (const m of doubled(this.board.slice())) if (m.is_('Thought Leader')) for (const o of this.board) if (o !== m && o.tribe === H) this.buff(o, 1, 1, m);
     for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
@@ -258,7 +258,7 @@ class Player {
       for (const m of this.board.slice()) if (m.is_('Loyalty Card')) { const o = leftOf(this.board, m); if (o) this.buff(o, 3 * m.g, 3 * m.g, m); }
     for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++)
       for (const tf of this.board.filter(m => m.is_('Tech Founder'))) { this.addFeedBuff(H, 2 * tf.g, 2 * tf.g); this.addFeedBuff(T, 2 * tf.g, 2 * tf.g); }
-    for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++) for (const c of cons) this.buff(c, 4, 4, c);   // Consultant's own trigger (golden: every 2 gold)
+    for (let k = 0; k < Math.floor(this.spent / step) - Math.floor(before / step); k++) for (const c of cons) this.buff(c, 4 * c.g, 4 * c.g, c);   // Consultant's own trigger (golden: +8/+8)
   }
   carry() { const c = this.board.filter(m => !m.follower); return maxBy(c.length ? c : this.board, m => [m.stats(), this.value(m)]); }
   discoverOptions(tribe, tier, not = null) {
@@ -348,7 +348,7 @@ class Player {
     }
     const m = new M(card);
     if (bonus) { m.atk += bonus.a || 0; m.hp += bonus.h || 0; }
-    if (bonus && bonus.golden) { m.golden = true; m.atk += card.atk; m.hp += card.hp; if (bonus.extras) m.extras.push(...bonus.extras); m.shield = m.shield || !!bonus.shield; m.sell_bonus += bonus.sell || 0;
+    if (bonus && bonus.golden) { m.golden = true; m.atk += card.atk + this.collectorBonus(); m.hp += card.hp + this.collectorBonus(); if (bonus.extras) m.extras.push(...bonus.extras); m.shield = m.shield || !!bonus.shield; m.sell_bonus += bonus.sell || 0;
       if (bonus.kw) for (const k of KEEP_KW) if (bonus.kw[k]) m[k] = true;   // keywords a copy gained (Attention Seeker, Rebrand, Toxic ...)
       if (bonus.tribe2 && !m.tribe2) m.tribe2 = bonus.tribe2; }
     if (card.tribe === C && this.creativeAtk) m.atk += this.creativeAtk;
@@ -402,10 +402,11 @@ class Player {
       for (const k of KEEP_KW) if (x[k]) keep[k] = true; if (x.tribe2 && !keep.tribe2) keep.tribe2 = x.tribe2;
       keep.extras.push(...x.extras); keep.sell_bonus += x.sell_bonus; this.board.splice(this.board.indexOf(x), 1);
     }
-    keep.atk += card.atk; keep.hp += card.hp; keep.golden = true; keep.tier = card.tier;
+    keep.atk += card.atk + this.collectorBonus(); keep.hp += card.hp + this.collectorBonus(); keep.golden = true; keep.tier = card.tier;
     this.note('triple', {id: keep.id});
     this.tripleReward(gold);
   }
+  collectorBonus() { return this.hero === 'h_collector' ? COLLECT : 0; }
   sellValue(m) {
     if (m.zero) return 0;
     let g = m.name === 'Unpaid Intern' ? 2 * m.g : 1;
@@ -545,7 +546,12 @@ class Player {
       else if (v.name === 'Block Party Host') { const b = this.board; for (const o of b) { const k = 2 * neighbours(b, o).length * g; if (k) this.buff(o, k, k); } }
     }
   }
-  drawFeed() { const [cards, w] = this.pool[this.tier]; return this.rng.choices(cards, w, FEED_SIZE[this.tier]); }
+  feedSize() { return FEED_SIZE[this.tier] + (this.hero === 'h_trendchaser' ? 1 : 0); }
+  drawFeed() {
+    let [cards, w] = this.pool[this.tier];
+    if (this.hero === 'h_collector') { const have = new Set(this.board.map(m => m.name)); w = w.map((x, i) => have.has(cards[i].name) ? x * COLLECT_W : x); }   // Limited Edition
+    return this.rng.choices(cards, w, this.feedSize());
+  }
   feedEntries(cards) { return cards.map(c => { const fb = this.feedBonus(c); return {card: c, a: fb.a, h: fb.h}; }); }
   levelCost() { return this.tier >= 6 ? null : Math.max(0, LEVEL_COST[this.tier + 1] - this.turns_at_tier); }
   minionCost(entry) {
@@ -610,6 +616,8 @@ class Player {
       this.checkTriple(card, this.gold);
     } else if (h === 'h_overthinker') this.heroDiscover(this.tier, true);
     else if (h === 'h_lifecoach' && target && this.board.includes(target)) { this.tbuff(target, 2, 2); this.coachId = target.id; }
+    else if (h === 'h_overachiever' && target && this.board.includes(target)) this.buff(target, this.tier, this.tier);   // Gold Star: +X/+X, X = your tier
+    else if (h === 'h_networker') { const by = {}; for (const o of this.board) for (const t of [o.tribe, o.tribe2]) if (t && t !== N) (by[t] = by[t] || []).push(o); for (const t in by) this.buff(this.rng.choice(by[t]), 1, 1); }   // Circle Back
     return true;
   }
   heroDiscover(tier, orLower) {
@@ -631,7 +639,8 @@ class Player {
     this.powerUsed = false; this.scrollsThisTurn = 0; this.scrollUses = {}; this.ghSold = 0; this.punkDiscount = this.punkDiscountNext || 0; this.punkDiscountNext = 0;
     for (const m of this.board) { m.turns_on_board += 1; m.ta = m.th = 0; }
     const carry = this.hero === 'h_procrastinator' ? Math.min(3, this.gold[0]) : 0;
-    this.gold = [Math.max(0, Math.min(2 + this.turn, 10) + this.bonus_next + carry)]; this.gold_from = {base: Math.min(2 + this.turn, 10), bonus: this.bonus_next, carry};
+    const inv = this.hero === 'h_daytrader' && this.turn > 1 ? Math.min(TRADE_MAX, this.gold[0]) : 0, trade = inv ? this.rng.int(0, 2 * inv) : 0;   // Buy the Dip: anywhere from nothing to double
+    this.gold = [Math.max(0, Math.min(2 + this.turn, 10) + this.bonus_next + carry + trade)]; this.gold_from = {base: Math.min(2 + this.turn, 10), bonus: this.bonus_next, carry, inv, trade};
     this.bonus_next = 0; this.spent_start = this.spent;
     const pop = this.board.reduce((k, m) => k + (m.is_('Pop-Up Ad') ? m.g : 0), 0);
     if (pop && this.turn % 2 === 0) { this.gold[0] += pop; this.gold_from.ads = pop; }
@@ -734,6 +743,8 @@ class Player {
     this.expertGreatestHits(gold, feed);
     if (hp === 'h_serial' && this.canPower() && this.board.length) { const low = minBy(this.board.filter(m => !m.golden && m.tier < 6), m => [m.tier, this.value(m)]); if (low && low.tier <= this.tier) this.usePower(low, feed); }
     if (hp === 'h_lifecoach' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
+    if (hp === 'h_overachiever' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
+    if (hp === 'h_networker' && this.canPower() && tribeCount(this.board) >= 2) this.usePower(null, feed);
     if (hp === 'boomer' && this.canPower() && this.board.length) this.usePower(this.carry(), feed);
     this.playQueue(); this.botGigs(); this.playQueue();
     this.spendLikes();
@@ -882,7 +893,9 @@ const KEEP_PUNKS = new Set(['Greatest Hits', 'Reunion Tour', 'General Strike', '
 // Side Gigs: base cost and what they target ('hustler' = another Hustler, 'other' = another minion without Out of Office, 'any', 'none')
 const GIGS = {'Side Hustle': {cost: 1, target: 'hustler'}, 'Delivery Rider': {cost: 1, target: 'none'}, 'Task Rabbit': {cost: 2, target: 'other'},
   'Ghost Kitchen': {cost: 2, target: 'none'}, 'Battle Pass': {cost: 1, target: 'any'}, 'Paid Verification': {cost: 1, target: 'none'}, 'Sponsored Streamer': {cost: 2, target: 'none'}};
-const HERO_POWERS = {boomer: {cost: 1, target: true}, h_serial: {cost: 1, target: true}, h_overthinker: {cost: 2}, h_lifecoach: {cost: 1, target: true}};
+const HERO_POWERS = {boomer: {cost: 1, target: true}, h_serial: {cost: 1, target: true}, h_overthinker: {cost: 2}, h_lifecoach: {cost: 1, target: true},
+  h_overachiever: {cost: 2, target: true}, h_networker: {cost: 1}};
+let TRADE_MAX = 4, COLLECT = 4, PREP_EVERY = 5, COLLECT_W = 4;
 let BOT_FARM_MAX = 3, STYLE_PULL = 2.0, DOOM_EVERY = 5, COACH = 2, GYM_LIKES = 1, COMPLAIN_EVERY = 2, MINI_MAX = 4, MINI_BUFF = 2, GYM_EVERY = 2;
 
 // ======================================================================== combat
@@ -949,6 +962,7 @@ class Fight {
     const ev = (src, kind, tgts) => this.frame({type: 'soc', side: k, src: src.id, kind, tgts: (tgts || []).map(x => x.id)});
     const hero = me.p && me.p.hero;
     if (hero === 'remote' && b.length) { b[0].shield = true; this.frame({type: 'hero', side: k, hero, tgts: [b[0].id]}); }
+    if (hero === 'h_prepper' && me.p && me.p.health != null) { const kp = Math.floor((30 - me.p.health) / PREP_EVERY); if (kp > 0 && b.length) { for (const o of b) gain(o, 0, kp); this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); } }
     if (hero === 'h_minimalist' && b.length <= MINI_MAX) { const e2 = MINI_BUFF; for (const o of b) gain(o, e2, e2); this.frame({type: 'hero', side: k, hero, tgts: b.map(o => o.id)}); }
     const reach = (m, r) => { const i = b.indexOf(m); return b.filter((o, j) => o !== m && Math.abs(j - i) <= r); };
     // Existentialist: the bonus holds for this whole combat, so Followers summoned later get it too (see combatFollower)

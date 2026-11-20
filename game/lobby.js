@@ -4,7 +4,7 @@
 const E = root.LSEngine;
 
 const BOT_HEROES = ['remote', 'boomer', 'h_gymbro', 'h_procrastinator', 'h_bargainhunter', 'h_doomscroller', 'h_serial', 'h_overthinker',
-  'h_lifecoach', 'h_minimalist', 'h_complainer', 'h_ex'];
+  'h_lifecoach', 'h_minimalist', 'h_complainer', 'h_ex', 'h_daytrader', 'h_overachiever', 'h_collector', 'h_networker', 'h_prepper', 'h_trendchaser'];
 
 class Lobby {
   constructor(seed, opts = {}) {

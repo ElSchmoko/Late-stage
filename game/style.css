@@ -490,3 +490,4 @@ button{font:inherit;color:inherit}
 .avbtn{display:flex;align-items:center;justify-content:center;gap:6px}
 
 .logcard.locked.mystery{cursor:pointer}.logcard.mystery .card{filter:saturate(.55)}
+.heroscroll{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none}.heroscroll::-webkit-scrollbar{display:none}
