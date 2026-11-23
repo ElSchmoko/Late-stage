@@ -705,3 +705,18 @@ LEGENDS.append(_leg('Controversy Magnet', I, 4, 4, 7, 'Attention Seeker. After t
                     'Any press is good press. Especially the bad.', taunt=True))
 for _c in TECHIES:
     if _c.name == 'Robot Vacuum': _c.text = 'Connect to any minion. Start of combat: deal 2 damage to the enemy minion with the lowest Health.'
+
+# v17 (Nov 23): card packs replace the rewards tracks. Every card that is not in the starting collection belongs to one
+# pack set (c.set); the Levels track opens set 1 at level 1, set 2 at level 10, set 3 at level 20.
+_SET1 = ['Performance Review', 'Loyalty Card', 'Thirst Trap', 'Drama Channel', 'Magpie', 'Allotment', 'Ghostwriter', 'Encore',
+         'Bluetooth Speaker', 'Clutch Player', 'Gig Poster', 'Banner Drop', 'Mystery Cult', 'Debate Club',
+         'The Billionaire', 'Controversy Magnet', 'Apex Scavenger', 'Pop Diva', 'The Algorithm', 'Mohawk Legend', 'Renaissance Thinker', 'Housing Co-op']
+_SET2_STYLES = {'GE', 'LS', 'HB', 'RX', 'MT', 'MO', 'MN'}
+_SET2 = ['Tech Founder', 'Content Creator', 'Wise Old Owl', 'Punk Philosopher']
+_SET3 = ['Cashback Card', 'Recruitment Agency', 'Paid Verification', 'Comments Off', 'Fox Den', 'Botanical Garden', 'LAN Party', 'Smart Doorbell',
+         'Bootleg Merch', 'Sound System', 'Utopian Commune', 'TED Talk', 'Biopic', 'Crossover Hit', 'Parcel Locker', 'Neighbourhood Watch',
+         'Sponsored Streamer', 'Pension Fund', 'Startup Monk', 'Cover Band', 'The Heretic']
+for _c in ALL + LEGENDS:
+    _c.set = 1 if _c.name in _SET1 else 2 if (_c.name in _SET2 or _c.style in _SET2_STYLES) else 3 if _c.name in _SET3 else None
+_bad = [c.name for c in ALL + LEGENDS if (getattr(c, 'track', None) or getattr(c, 'legendary', False)) and not c.set]
+assert not _bad, _bad

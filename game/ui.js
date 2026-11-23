@@ -280,7 +280,8 @@ function showTitle() {
   anim(b, [{transform: 'scale(.95)'}, {transform: 'scale(1.03)'}, {transform: 'scale(.95)'}], {duration: 1800, iterations: Infinity, raw: true});
   b.onclick = showHeroSelect;
   const cb = el('button', 'btn', ico('<rect x="3" y="5" width="8" height="14" rx="2" fill="#ffc928"></rect><rect x="13" y="5" width="8" height="14" rx="2" fill="#ff8ab8"></rect>', 22, 2.4) + 'Collection', stage);
-  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = () => showTrack('xp');
+  css(cb, {left: 474, top: 262, width: 172, height: 50, fontSize: '20px'}); cb.onclick = () => showPacks();
+  if (freeTotal() || forkOpen().length) { const d = el('span', 'ab bd pk-badge', `${freeTotal() + forkOpen().length}`, cb); css(d, {right: -8, top: -10}); }
   if (PROF.unlocked.some(x => !PROF.seen.includes(x))) { const d = el('span', 'ab', '', cb); css(d, {right: -4, top: -6, width: 16, height: 16, borderRadius: '50%', background: '#ff6b5e', border: '2.5px solid #2b2140'}); }
   const t1 = makeToken({name: 'Main Character', tribe: 'Influencer', atk: 5, hp: 7, tier: 6}); stage.appendChild(t1); css(t1, {left: 672, top: 250}); t1.style.transform = 'rotate(8deg)';
   const t2 = makeToken({name: 'Trash Panda', tribe: 'Feral', atk: 2, hp: 1, tier: 1}); stage.appendChild(t2); css(t2, {left: 120, top: 254}); t2.style.transform = 'rotate(-9deg)';
@@ -294,9 +295,9 @@ function rankChip(r, fs = 14) {
 }
 function collectionTabs(on) {
   const tabs = el('div', 'ab colltabs', '', stage); css(tabs, {left: 30, top: 12});
-  for (const [k, label] of [['levels', `Levels <span>${rtLevel()}/${RT_LEVELS}</span>`], ['rating', `Rating <span>${rmLevel()}/${RM_TRACK.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
+  for (const [k, label] of [['packs', `Packs${freeTotal() || forkOpen().length ? ` <span class="dot">${freeTotal() + forkOpen().length}</span>` : ''}`], ['levels', `Levels <span>${rtLevel()}/${RT_LEVELS}</span>`], ['rating', `Style <span>${rmLevel()}/${RM_TRACK.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
     const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs);
-    b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : k === 'levels' ? showTrack('xp') : k === 'rating' ? showNightLine() : showCollection(); } };
+    b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : k === 'levels' ? showTrack('xp') : k === 'rating' ? showNightLine() : k === 'packs' ? showPacks() : showCollection(); } };
   }
   const back = el('button', 'btn', 'Back', stage); css(back, {left: 734, top: 10, width: 90, height: 40, fontSize: '17px'}); back.onclick = showTitle;
 }
@@ -333,6 +334,7 @@ function showCards(tribe = 'Hustler') {
   collectionTabs('cards');
   const p = el('div', 'panel logpanel', '', stage); css(p, {left: 24, top: 64, width: W - 48, height: H - 76});
   const nav = el('div', 'loghead', '', p); const tabs = el('div', 'logtabs', '', nav); tabs.style.justifyContent = 'flex-start';
+  el('span', 'wal clout-float', `${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i>`, p);
   const body = el('div', 'logbody deck', '', p);
   const show = (tribe, keep) => {
     tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === tribe));
@@ -340,10 +342,21 @@ function showCards(tribe = 'Hustler') {
     const all = CARDS_ALL().filter(c => inTribe(c, tribe));
     const addCard = (c, row) => {
       const fixed = neutral && !c.legendary, on = (fixed && !locked0(c)) || d.has(c.name), locked = !cardOpen(c);
-      const at = c.legendary ? `Rating ${(RM_AT[c.name] || 0).toLocaleString('en')}` : `Rewards Lv ${RT_CARD_LV[c.name] || c.track || ''}`;
-      const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked mystery' : ''), locked ? mysteryCardHTML(c, at) : cardHTML(c), row);   // locked cards stay a surprise
+      // cards you don't own: in a set you can open, they show and can be crafted; in a later set they stay a surprise
+      const mystery = locked && !setOpen(c.set), at = locked ? `${SET[c.set].name} · Lv ${SET[c.set].lv}` : '';
+      const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : '') + (mystery ? ' mystery' : ''), mystery ? mysteryCardHTML(c, at) : cardHTML(c), row);
       if (on && !fixed) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-      if (locked) { el('span', 'lock', LOCK, w); el('b', 'legat lv', at, w); w.setAttribute('aria-label', 'Mystery card'); w.onclick = () => { sfx('pop'); toast(`A surprise, unlocked at ${at}`); }; return; }
+      if (mystery) { el('span', 'lock', LOCK, w); el('b', 'legat lv', at, w); w.setAttribute('aria-label', 'Mystery card'); w.onclick = () => { sfx('pop'); toast(`In ${SET[c.set].name} packs, from level ${SET[c.set].lv}`); }; return; }
+      if (locked) {
+        const cost = craftCost(c), afford = (PROF.clout || 0) >= cost;
+        el('b', 'craftbdg bd' + (afford ? ' ok' : ''), `${CLOUT_ICO(14)} ${cost}`, w);
+        w.onclick = () => showDetail(c, null, [{label: `Craft ${CLOUT_ICO(18)} ${cost}`, color: '#b18cff', disabled: !afford, fn: () => {
+          PROF.clout -= cost; gainCardOwned(c); saveProfile(); sfx('triple'); toast(`${c.name} crafted${deckSet().has(c.name) ? ' and added to your pool' : ''}`); show(tribe, true);
+          const nw = body.querySelector(`[data-n="${CSS.escape(c.name)}"]`); if (nw) { const r = nw.getBoundingClientRect(), sr = stage.getBoundingClientRect(); confetti((r.left + r.width / 2 - sr.left) / SCALE, (r.top - sr.top) / SCALE + 60, 30); }
+        }}]);
+        w.dataset.n = c.name; return;
+      }
+      w.dataset.n = c.name;
       w.onclick = () => showDetail(c, null, fixed ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
         const r = deckToggle(c);
         if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
@@ -372,6 +385,7 @@ function showCards(tribe = 'Hustler') {
 }
 // New legendary cards: one pop-up per newly unlocked batch, with a three-step tutorial the first time.
 function legendPopup() {
+  return;   // legendaries come from packs now (v17)
   const seen = PROF.legSeen || [], fresh = LEGENDS().filter(c => legendOpen(c) && !seen.includes(c.name)); if (!fresh.length) return;
   PROF.legSeen = seen.concat(fresh.map(c => c.name)); const first = !PROF.flags.legendTut; PROF.flags.legendTut = true; saveProfile();
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.85)';
@@ -428,7 +442,7 @@ function showHeroCard(slug) {
 
 // ---------------------------------------------------------------- hero select
 function showHeroSelect() {
-  clear(); G.screen = 'heroes'; bg(false); G.rated = false; G.xpGain = 0; AU.music('hold');
+  clear(); G.screen = 'heroes'; bg(false); G.rated = false; G.xpGain = 0; G.cashGain = 0; AU.music('hold');
   const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
   G.seed = seed;
   const rng = E.RNG(seed);
@@ -459,7 +473,7 @@ function showHeroSelect() {
 // ---------------------------------------------------------------- run
 function startRun(slug) {
   const h = HERO[slug];
-  G.lobby = new window.LSLobby(G.seed, {human: true, heroSlug: slug, boundaries: h.boundaries, tribes: G.tribes, rating: PROF.rating, deck: deckSet()});
+  G.lobby = new window.LSLobby(G.seed, {human: true, heroSlug: slug, boundaries: h.boundaries + bonus('shield'), tribes: G.tribes, rating: PROF.rating, deck: deckSet()});
   G.me = G.lobby.human; G.me.rating = PROF.rating; G.hand = []; G.feed = []; G.heroSlug = slug; G.firstTurn = true; G.streak = 0; G.minHealth = 99; G.saved = false; NEW_UNLOCKS = [];
   G.me.board = [];
   RUN.start();
@@ -503,7 +517,7 @@ function applyLayout(on) {
     LY = Object.assign({}, LY, {x0: LAYOUTS.ff.x0 - EXT.l, w, bgap: Math.min(40, (w - 7 * 88) / 6), fgap: Math.min(48, (w - 6 * 88 - 60) / 5),
       cx0: LAYOUTS.ff.cx0 - EXT.l, cw: LAYOUTS.ff.cw + EXT.l + EXT.r, hand: Object.assign({}, LY.hand, {cx: LY.hand.cx + EXT.r / 2, avail: LY.hand.avail + EXT.r})});
   }
-  stage.classList.toggle('ff', LY.ff);
+  stage.classList.toggle('ff', LY.ff); stage.classList.toggle('themed', !!on);   // battle backgrounds only in the shop and fights
 }
 const HALF = () => LY.tok / 2;
 function rowX(i, n, gap) { return LY.x0 + (LY.w - (n * LY.tok + (n - 1) * gap)) / 2 + i * (LY.tok + gap); }
@@ -765,7 +779,7 @@ async function playCard(hc, pos = null, target = null, more = null) {
   G.firstTurn = G.firstTurn && me.turn <= 1;
   // sticker slap
   await afterAction(true);
-  if (m && S.tok.get(m.id)) { const t = S.tok.get(m.id), c = center(rectOf(t)); ring(c[0], c[1], '#ffffff', 80); if (card.kind === 'fi' || /^First Impression/.test(card.text)) { ring(c[0], c[1], '#ff6b5e', 110); } }
+  if (m && S.tok.get(m.id)) { const t = S.tok.get(m.id), c = center(rectOf(t)); ring(c[0], c[1], '#ffffff', 80); if (fxOn('slam')) { ring(c[0], c[1] + 10, '#ffc928', 170); confetti(c[0], c[1], 16); anim(stage, [{transform: `scale(${SCALE}) translate(0,0)`}, {transform: `scale(${SCALE}) translate(0,4px)`}, {transform: `scale(${SCALE}) translate(0,0)`}], {duration: 200}); } if (card.kind === 'fi' || /^First Impression/.test(card.text)) { ring(c[0], c[1], '#ff6b5e', 110); } }
 }
 async function sell(m) {
   if (G.busy) return;
@@ -1186,6 +1200,7 @@ async function playCombat(rec) {
         const lunge = `translate(${dx * .82}px,${dy * .78}px) scale(1.1) rotate(6deg)`;
         const A = a.animate([{transform: 'translate(0,0) scale(1)'}, {transform: `translate(${-dx * .06}px,${-dy * .12}px) scale(.92) rotate(-5deg)`, offset: .3},
           {transform: lunge, offset: .55, easing: 'cubic-bezier(.34,1.3,.64,1)'}, {transform: lunge, offset: .62}, {transform: 'translate(0,0) scale(1)'}], {duration: 667 / SP.v, easing: 'ease-in-out'});
+        if (fxOn('neon')) streak(center(ra), center(rt), '#ff3df2', 300);
         await sleep(367);
         sfx('hit', {n: fr.da || 1, gap: 0});
         anim(t, [{transform: 'translate(0,0)'}, {transform: 'translate(-6px,3px) rotate(-5deg)'}, {transform: 'translate(5px,-2px) rotate(4deg)'}, {transform: 'translate(0,0)'}], {duration: 320});
@@ -1198,7 +1213,7 @@ async function playCombat(rec) {
       } else place(fr.boards);
     } else if (fr.type === 'death') {
       const t = Cm.els.get(fr.id);
-      if (t) { sfx('death'); Cm.els.delete(fr.id); t.style.transition = 'none'; t.style.filter = 'grayscale(1)';
+      if (t) { sfx('death'); Cm.els.delete(fr.id); t.style.transition = 'none'; t.style.filter = 'grayscale(1)'; if (fxOn('confetti')) { const cc = center(rectOf(t)); confetti(cc[0], cc[1], 22); }
         anim(t, [{transform: 'rotate(0) translateY(0)', opacity: 1}, {transform: 'rotate(-14deg) translateY(-8px)', opacity: 1, offset: .3}, {transform: 'rotate(24deg) translateY(60px)', opacity: 0}], {duration: 380, easing: 'ease-in', fill: 'forwards'}).then(() => t.remove());
         const c = center(rectOf(t)); for (let i = 0; i < 5; i++) { const p = el('div', '', '', stage); css(p, {position: 'absolute', left: c[0], top: c[1] + 20, width: 12, height: 12, borderRadius: '50%', background: '#e6dccb', border: '2px solid #2b2140', zIndex: 83, pointerEvents: 'none'}); anim(p, [{transform: 'translate(0,0) scale(1)', opacity: 1}, {transform: `translate(${(i - 2) * 16}px,${-10 - Math.random() * 14}px) scale(.3)`, opacity: 0}], {duration: 420}).then(() => p.remove()); }
       }
@@ -1294,7 +1309,7 @@ function diffBursts(prev, next) {
     const tEl = findTok(m.id); if (!tEl) return;
     const c = center(rectOf(tEl));
     if (p.shield && !m.shield) { sfx('pop'); ring(c[0], c[1], '#8fd4ff', 90); floatText(c[0], c[1] - 34, 'OOO!', ''); }
-    if (m.hp < p.hp) burstAt(c[0] + 14, c[1] - 14, `−${p.hp - m.hp}`);
+    if (m.hp < p.hp) { burstAt(c[0] + 14, c[1] - 14, `−${p.hp - m.hp}`); if (fxOn('pow')) floatText(c[0] - 18, c[1] - 30, ['POW!', 'BAM!', 'BONK!', 'WHAM!', 'OOF!'][Math.floor(Math.random() * 5)], 'pow'); }
   }));
   prev.forEach(b => b.forEach(p => { if (!next.some(nb => nb.some(m => m.id === p.id))) { const t = findTok(p.id); if (t) { const c = center(rectOf(t)); burstAt(c[0] + 14, c[1] - 14, '✕'); } } }));
 }
@@ -1555,7 +1570,7 @@ function showEnd() {
   cnt.style.display = 'inline-block';
   const bA = bracketOf(before), bB = bracketOf(after);
   const right = el('div', 'panel', `<p class="bd" style="margin:0;font-size:13px;letter-spacing:.12em;color:#5a5270">RATING</p>
-    <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px"><span class="bd rnum" style="font-size:36px">${before.toLocaleString('en')}</span><span class="bd" style="font-size:22px;color:${delta >= 0 ? '#14a052' : '#ff6b5e'}">${delta >= 0 ? '+' : '−'}${Math.abs(delta)}</span>${G.xpGain ? `<span class="rt-xpchip">+${G.xpGain} XP</span>` : ''}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-top:2px"><span class="bd rnum" style="font-size:36px">${before.toLocaleString('en')}</span><span class="bd" style="font-size:22px;color:${delta >= 0 ? '#14a052' : '#ff6b5e'}">${delta >= 0 ? '+' : '−'}${Math.abs(delta)}</span>${G.xpGain ? `<span class="rt-xpchip">+${G.xpGain} XP</span>` : ''}${G.cashGain ? `<span class="rt-xpchip cash">${CASH_ICO(16)} +${G.cashGain}</span>` : ''}</div>
     <div class="rcw" style="margin-top:4px"></div>
     <p class="bd" style="margin:12px 0 0;font-size:13px;letter-spacing:.12em;color:#5a5270">YOUR FINAL BOARD</p><div class="fb" style="position:relative;height:84px;margin-top:10px"></div>`, stage);
   css(right, {left: 430, top: 22, width: 384, height: 266, padding: '18px 22px'});
@@ -1581,64 +1596,50 @@ function showUnlocks(list) {
   ov.onpointerup = () => { ov.remove(); showUnlocks(list); };
 }
 
-// ---------------------------------------------------------------- rewards track: runs give XP, XP levels up the track, levels unlock cards
-// Two tracks: Levels (XP from every run, regular cards) and the Night Line (your best rating this season, legendaries).
-// The order is explained in docs/card-plan-v14.md. Cards that are not in the game yet show as "?" placeholders.
+// ---------------------------------------------------------------- rewards (Nov 23): card packs, the Levels track, rating cosmetics
+// Runs give XP and Cash. XP levels up the Levels track: it opens a pack set at levels 1, 10 and 20, adds a card to that
+// set's packs at levels 5, 15 and 25, and offers a choice between two small bonuses on every other level (a fork).
+// Cash buys packs. A pack holds 2 cards (more after the size levels); duplicates turn into Clout, and Clout crafts the
+// cards you are missing. Rating (the Night Line) only opens cosmetics: card sleeves, battle backgrounds and effects.
 const RT_XP_PLACE = [110, 95, 85, 75, 60, 50, 45, 40];          // XP for finishing 1st..8th
-const rtCost = lv => 300 + 50 * (lv - 1);                        // XP needed for level lv: 300 … 2,050 (42,300 XP, about 600 runs in all)
-const RT_TRACK = (() => {
-  const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher', N = 'Neutral';
-  const two = (tribe, a, ta, b, tb) => ({tribe, cards: [{name: a, tribe, tier: ta}, {name: b, tribe, tier: tb}]});
-  const L = [
-    two(H, 'Performance Review', 2, 'Loyalty Card', 3), two(I, 'Thirst Trap', 2, 'Drama Channel', 2), two(F, 'Magpie', 2, 'Allotment', 3),
-    two(C, 'Ghostwriter', 2, 'Encore', 3), two(T, 'Bluetooth Speaker', 2, 'Clutch Player', 3), two(P, 'Gig Poster', 2, 'Banner Drop', 3),
-    two(PH, 'Mystery Cult', 3, 'Debate Club', 3),
-    two(H, 'Delivery Rider', 1, 'Five-Star Rating', 2), two(H, 'Task Rabbit', 3, 'Double Shift', 4),
-    two(H, 'Ghost Kitchen', 5, 'Platform Monopoly', 6),
-    two(I, 'Reaction Streamer', 1, 'Donation Goal', 2), two(I, 'Raid Party', 3, 'Subathon', 4), two(I, 'Hype Train', 5, 'Streamer House', 6),
-    two(H, 'Cashback Card', 4, 'Recruitment Agency', 5), two(I, 'Paid Verification', 4, 'Comments Off', 4),
-    two(F, 'Tulip Bulb', 1, 'Hedgehog', 2), two(F, 'Bat Colony', 3, 'Hibernating Bear', 4), two(F, 'Cicada Swarm', 5, 'Seed Vault', 6),
-    two(T, 'Pop-Up Ad', 1, 'Battle Pass', 2), two(T, 'Data Broker', 3, 'Auto-Renewal', 4), two(T, 'App Store', 5, 'Data Centre', 6),
-    two(F, 'Fox Den', 4, 'Botanical Garden', 5), two(T, 'LAN Party', 4, 'Smart Doorbell', 5),
-    two(P, 'Pogo Dancer', 1, 'Circle Pit', 2),
-    two(P, 'Bouncer', 3, 'Crowd Surfer', 4), two(P, 'Wall of Death', 5, 'Festival Pit', 6),
-    two(P, 'Bootleg Merch', 4, 'Sound System', 5),
-    two(PH, 'Van Lifer', 1, 'Digital Detox', 2), two(PH, 'Declutter Coach', 3, 'Silent Retreat', 4), two(PH, 'Capsule Wardrobe', 5, 'The Void', 6),
-    two(PH, 'Utopian Commune', 5, 'TED Talk', 5), two(N, 'Parcel Locker', 3, 'Neighbourhood Watch', 5),
-    two(C, 'Wedding Band', 1, 'Sampler', 2),
-    two(C, 'Tribute Act', 3, 'Plagiarist', 4), two(C, 'AI Art Generator', 5, 'Mashup Artist', 6),
-    two(C, 'Biopic', 4, 'Crossover Hit', 5),
-  ];
-  return L.map((r, i) => Object.assign(r, {lv: i + 1, cost: rtCost(i + 1)}));
-})();
-const RT_LEVELS = RT_TRACK.length;
-const RT_CARD_LV = {};   // card -> track level that unlocks it
-for (const r of RT_TRACK) for (const c of r.cards) RT_CARD_LV[c.name] = r.lv;
-// ---- the Night Line: legendaries unlock at rating stations (best rating this season counts, so a bad run never takes one away).
-// Two-tribe legendaries come one per station; single-tribe legendaries come in pairs from two tribes.
-const RM_TRACK = (() => {
-  const H = 'Hustler', I = 'Influencer', F = 'Feral', C = 'Creative', T = 'Techie', P = 'Punk', PH = 'Philosopher';
-  const L = (name, tribe, tier, tribe2) => ({name, tribe, tribe2, tier, legendary: true});
-  const S = [
-    [1000, L('The Billionaire', H, 5), L('The Heretic', PH, 4)],
-    [1500, L('Tech Founder', H, 4, T)],
-    [2000, L('Apex Scavenger', F, 5), L('Pop Diva', C, 5)],
-    [2500, L('Content Creator', I, 4, C), L('Controversy Magnet', I, 4)],
-    [3000, L('The Algorithm', T, 5), L('Mohawk Legend', P, 5)],
-    [3500, L('Wise Old Owl', F, 5, PH)],
-    [4000, L('Renaissance Thinker', PH, 4), L('Housing Co-op', 'Neutral', 5)],
-    [4500, L('Punk Philosopher', P, 5, PH)],
-    [5000, L('Sponsored Streamer', I, 5, T)],
-    [5500, L('Pension Fund', H, 5, F)],
-    [6000, L('Cover Band', C, 5, P)],
-    [6500, L('Startup Monk', T, 6, PH)],
-  ];
-  return S.map(([at, ...cards], i) => ({lv: i + 1, at, legend: true, tribe: cards[0].tribe, cards}));
-})();
-const RM_AT = {};
-for (const r of RM_TRACK) for (const c of r.cards) RM_AT[c.name] = r.at;
-const rmBest = () => Math.max(PROF.peak || 0, PROF.rating || 0);
-const rmLevel = () => RM_TRACK.filter(r => rmBest() >= r.at).length;
+const CASH_PLACE = [80, 70, 60, 50, 40, 32, 26, 20];            // Cash for finishing 1st..8th
+const RT_LEVELS = 30;
+const rtCost = lv => 200 + 40 * (lv - 1);                        // XP for level lv: 200 … 1,360 (23,400 XP, about 330 runs in all)
+const SETS = [
+  {id: 1, name: 'Side Hustles', lv: 1, price: 100, col: '#ffc928', col2: '#ff8a3d', blurb: 'Support for every playstyle'},
+  {id: 2, name: 'New Wave', lv: 10, price: 120, col: '#4fd1c5', col2: '#5ab8ff', blurb: 'A new playstyle for every tribe'},
+  {id: 3, name: 'Hot Takes', lv: 20, price: 140, col: '#ff8ab8', col2: '#ff6b5e', blurb: 'More support, more legendaries'},
+];
+const SET = Object.fromEntries(SETS.map(s => [s.id, s]));
+const setCards = id => CARDS_ALL().filter(c => c.set === id);
+// Rarity follows the tier: 1-2 common, 3-4 rare, 5-6 epic; legendaries are their own rarity.
+const RAR = {common: {label: 'Common', col: '#c9c2d6', clout: 5, craft: 40}, rare: {label: 'Rare', col: '#5ab8ff', clout: 15, craft: 100},
+  epic: {label: 'Epic', col: '#b18cff', clout: 30, craft: 240}, legendary: {label: 'Legendary', col: '#ffc928', clout: 100, craft: 600}};
+const RAR_ORDER = ['common', 'rare', 'epic', 'legendary'];
+const rarityOf = c => c.legendary ? 'legendary' : c.tier >= 5 ? 'epic' : c.tier >= 3 ? 'rare' : 'common';
+// Every card but the last: 65% common, 27% rare, 8% epic. The last card: rare or better (69 / 25 / 6% legendary).
+// Tuned so a full collection takes about 430 runs (half of the cards much sooner); see docs/card-packs.md.
+const ODDS = {first: [['common', 65], ['rare', 27], ['epic', 8]], last: [['rare', 69], ['epic', 25], ['legendary', 6]]};
+const PITY = 10;   // a legendary is guaranteed in the 10th pack of a set without one
+// ---- the Levels track: each fork offers two of these; a pick is permanent
+const BONUS = {
+  pack: {v: 5, label: 'Packs cost 5% less', sum: v => `Packs −${v}%`, ico: '<rect x="5" y="3" width="14" height="18" rx="2" fill="#ffc928"></rect><path d="M8 8h8M8 12h5"></path>'},
+  clout: {v: 10, label: '+10% Clout from duplicates', sum: v => `Clout +${v}%`, ico: '<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" fill="#b18cff"></path>'},
+  cash: {v: 5, label: '+5% Cash from runs', sum: v => `Cash +${v}%`, ico: '<rect x="3" y="6" width="18" height="12" rx="2" fill="#7fd99a"></rect><circle cx="12" cy="12" r="3"></circle>'},
+  xp: {v: 5, label: '+5% XP from runs', sum: v => `XP +${v}%`, ico: '<path d="M4 18l5-6 4 3 7-9" fill="none"></path><path d="M15 6h5v5" fill="none"></path>'},
+  craft: {v: 5, label: 'Crafting costs 5% less', sum: v => `Crafting −${v}%`, ico: '<path d="M5 19l8-8M13 6l5 5-3 3-5-5z" fill="#ffd98f"></path>'},
+  shield: {v: 1, label: '+1 Boundaries in every run', sum: v => `Boundaries +${v}`, ico: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z" fill="#c9c2d6"></path>'},
+  free: {v: 1, label: 'A free pack now', sum: v => `${v} free pack${v > 1 ? 's' : ''}`, ico: '<rect x="4" y="9" width="16" height="11" rx="2" fill="#ff8ab8"></rect><path d="M4 13h16M12 9v11M12 9c-2-4-6-4-6-1s6 1 6 1 6 2 6-1-4-3-6 1"></path>'},
+  pity: {v: 2, label: 'Legendary guaranteed 2 packs sooner', sum: v => `Legendary ${v} packs sooner`, ico: '<path d="M12 3l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 10l6-1z" fill="#ffd84a"></path>'},
+};
+const FORKS = {2: ['pack', 'clout'], 3: ['cash', 'xp'], 4: ['shield', 'free'], 6: ['craft', 'pity'], 7: ['pack', 'cash'], 8: ['clout', 'xp'], 9: ['free', 'craft'],
+  11: ['shield', 'pack'], 12: ['cash', 'clout'], 13: ['xp', 'free'], 14: ['craft', 'pity'], 16: ['pack', 'cash'], 17: ['free', 'clout'], 18: ['xp', 'craft'],
+  19: ['free', 'pity'], 21: ['cash', 'pack'], 22: ['clout', 'craft'], 23: ['shield', 'xp'], 24: ['free', 'cash'], 26: ['pack', 'clout'], 27: ['craft', 'pity'],
+  28: ['cash', 'xp'], 29: ['free', 'pack'], 30: ['craft', 'clout']};
+const RT_TRACK = Array.from({length: RT_LEVELS}, (_, i) => {
+  const lv = i + 1, cost = rtCost(lv), s = SETS.find(x => x.lv === lv), z = {5: 1, 15: 2, 25: 3}[lv];
+  return s ? {lv, cost, kind: 'set', set: s.id} : z ? {lv, cost, kind: 'size', set: z} : {lv, cost, kind: 'fork', opts: FORKS[lv]};
+});
 /** Level and progress for a total XP amount. */
 function rtProgressOf(total) {
   let level = 0, xp = total;
@@ -1647,29 +1648,180 @@ function rtProgressOf(total) {
 }
 const rtProgress = () => rtProgressOf(PROF.xp || 0);
 const rtLevel = () => rtProgress().level;
-if ((PROF.rtSeen || 0) > rtLevel()) { PROF.rtSeen = rtLevel(); saveProfile(); }   // after a cost change, re-reached levels pop up again
-// Profiles from before the track get the XP their past runs would have earned, without replaying every level-up.
-if (PROF.xp == null) { PROF.xp = (PROF.history || []).reduce((s, h) => s + (RT_XP_PLACE[(h.place || 8) - 1] || 40), 0); PROF.rtSeen = rtLevel(); saveProfile(); }
-/** Legendaries open at their Night Line station. */
-const legendOpen = c => rmBest() >= (RM_AT[c.name] ?? Infinity);
-/** Can this card go into the Feed pool? Legendaries open on the Night Line, rewards-track cards on the Levels track. */
-const cardOpen = c => c.legendary ? legendOpen(c) : !c.track || rtLevel() >= (RT_CARD_LV[c.name] || c.track);
-/** New cards from a level go straight into the Feed pool when their tier still has a free slot. */
-function rtAutoAdd(r) {
-  const added = [];
-  for (const x of r.cards) {
-    const c = CARD[x.name]; if (!c || c.legendary || c.token) continue;
-    const d = deckSet(); if (d.has(c.name)) continue;
-    if (tribesOf(c).every(t => CARDS_ALL().filter(o => inTribe(o, t) && o.tier === c.tier && d.has(o.name)).length < PER_TIER)) { PROF.deck.push(c.name); added.push(c.name); }
-  }
-  if (added.length) saveProfile();
-  return added;
+const forkPick = lv => (PROF.forks || {})[lv];
+const forkOpen = () => RT_TRACK.filter(r => r.kind === 'fork' && r.lv <= rtLevel() && forkPick(r.lv) == null);
+/** Sum of a bonus over the forks picked so far. */
+function bonus(k) { let s = 0; for (const r of RT_TRACK) if (r.kind === 'fork' && forkPick(r.lv) != null && r.opts[forkPick(r.lv)] === k) s += BONUS[k].v; return s; }
+const setOpen = id => rtLevel() >= SET[id].lv;
+const packSize = id => 2 + RT_TRACK.filter(r => r.kind === 'size' && r.set === id && r.lv <= rtLevel()).length;
+const packPrice = id => Math.round(SET[id].price * (1 - bonus('pack') / 100));
+const craftCost = c => Math.round(RAR[rarityOf(c)].craft * (1 - bonus('craft') / 100));
+const dupClout = c => Math.round(RAR[rarityOf(c)].clout * (1 + bonus('clout') / 100));
+const pityLimit = () => Math.max(4, PITY - bonus('pity'));
+const owns = name => (PROF.owned || []).includes(name);
+/** Can this card go into the Feed pool? Starting cards always; pack cards once you own them. */
+const cardOpen = c => !c.set || owns(c.name);
+const freePacks = id => (PROF.free || {})[id] || 0;
+const freeTotal = () => SETS.reduce((s, x) => s + (setOpen(x.id) ? freePacks(x.id) : 0), 0);
+// ---- moving profiles over from the tracks: cards they had unlocked stay theirs, plus some Cash to start with
+const OLD_TRACK = [['Performance Review', 'Loyalty Card'], ['Thirst Trap', 'Drama Channel'], ['Magpie', 'Allotment'], ['Ghostwriter', 'Encore'], ['Bluetooth Speaker', 'Clutch Player'],
+  ['Gig Poster', 'Banner Drop'], ['Mystery Cult', 'Debate Club'], ['Delivery Rider', 'Five-Star Rating'], ['Task Rabbit', 'Double Shift'], ['Ghost Kitchen', 'Platform Monopoly'],
+  ['Reaction Streamer', 'Donation Goal'], ['Raid Party', 'Subathon'], ['Hype Train', 'Streamer House'], ['Cashback Card', 'Recruitment Agency'], ['Paid Verification', 'Comments Off'],
+  ['Tulip Bulb', 'Hedgehog'], ['Bat Colony', 'Hibernating Bear'], ['Cicada Swarm', 'Seed Vault'], ['Pop-Up Ad', 'Battle Pass'], ['Data Broker', 'Auto-Renewal'], ['App Store', 'Data Centre'],
+  ['Fox Den', 'Botanical Garden'], ['LAN Party', 'Smart Doorbell'], ['Pogo Dancer', 'Circle Pit'], ['Bouncer', 'Crowd Surfer'], ['Wall of Death', 'Festival Pit'], ['Bootleg Merch', 'Sound System'],
+  ['Van Lifer', 'Digital Detox'], ['Declutter Coach', 'Silent Retreat'], ['Capsule Wardrobe', 'The Void'], ['Utopian Commune', 'TED Talk'], ['Parcel Locker', 'Neighbourhood Watch'],
+  ['Wedding Band', 'Sampler'], ['Tribute Act', 'Plagiarist'], ['AI Art Generator', 'Mashup Artist'], ['Biopic', 'Crossover Hit']];
+const OLD_LEGS = [[1000, ['The Billionaire', 'The Heretic']], [1500, ['Tech Founder']], [2000, ['Apex Scavenger', 'Pop Diva']], [2500, ['Content Creator', 'Controversy Magnet']],
+  [3000, ['The Algorithm', 'Mohawk Legend']], [3500, ['Wise Old Owl']], [4000, ['Renaissance Thinker', 'Housing Co-op']], [4500, ['Punk Philosopher']], [5000, ['Sponsored Streamer']],
+  [5500, ['Pension Fund']], [6000, ['Cover Band']], [6500, ['Startup Monk']]];
+const rmBest = () => Math.max(PROF.peak || 0, PROF.rating || 0);
+if (!PROF.packs) {
+  const own = new Set(); let xp = PROF.xp || 0;
+  for (let lv = 0; lv < OLD_TRACK.length && xp >= 300 + 50 * lv; lv++) { xp -= 300 + 50 * lv; OLD_TRACK[lv].forEach(n => own.add(n)); }
+  for (const [at, ns] of OLD_LEGS) if (rmBest() >= at) ns.forEach(n => own.add(n));
+  Object.assign(PROF, {packs: 1, owned: [...own], cash: (PROF.games || 0) > 0 ? 200 : 0, clout: 0, forks: {}, free: {}, pity: {}, lvGranted: 0, lvSeen: rtProgressOf(PROF.xp || 0).level, cos: {owned: [], eq: {}}});   // levels already reached: no pop-ups, just the open forks
+  saveProfile();
 }
-const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
-const tribeName = t => t === 'Neutral' ? 'Neighbours' : TP[t] || t;
-const rtTitle = r => r.set ? 'Legendaries for every tribe' : r.cards.map(c => c.name).join(' & ');
-const rtSub = r => r.set ? 'Legendary' : r.legend ? `Legendary · ${r.cards.map(c => [c.tribe, c.tribe2].filter(Boolean).map(tribeName).join(' + ')).join(' & ')}` : tribeName(r.tribe);
-const rtReal = c => CARD[c.name] && !CARD[c.name].token;   // the card exists in the game already
+/** Free packs for the set levels reached (also after an XP change while the app was closed). */
+function syncLevels() {
+  const lvl = rtLevel(); let changed = false;
+  for (let lv = (PROF.lvGranted || 0) + 1; lv <= lvl; lv++) { const r = RT_TRACK[lv - 1]; if (r.kind === 'set') { PROF.free[r.set] = freePacks(r.set) + 1; changed = true; } PROF.lvGranted = lv; changed = true; }
+  if (changed) saveProfile();
+}
+syncLevels();
+/** A new card goes straight into the Feed pool when its tier still has room (and, for a legendary, its tribe has none yet). */
+function poolAdd(c) {
+  const d = deckSet(); if (!PROF.deck || d.has(c.name) || c.tribe === 'Neutral' && !c.legendary) return false;
+  for (const t of tribesOf(c)) {
+    if (c.legendary ? CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name)) : CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && !x.legendary && d.has(x.name)).length >= PER_TIER) return false;
+  }
+  PROF.deck.push(c.name); return true;
+}
+function gainCardOwned(c) { if (owns(c.name)) return false; PROF.owned.push(c.name); poolAdd(c); return true; }
+/** Rolls the cards of one pack. */
+function rollPack(id) {
+  const by = {}; for (const c of setCards(id)) (by[rarityOf(c)] = by[rarityOf(c)] || []).push(c);
+  const have = r => by[r] && by[r].length;
+  // a set without that rarity gives the nearest one it has (never a legendary instead of something else)
+  const near = r => { if (have(r)) return r; const i = RAR_ORDER.indexOf(r); for (let d = 1; d < 4; d++) for (const j of [i - d, i + d]) { const x = RAR_ORDER[j]; if (x && x !== 'legendary' && have(x)) return x; } return 'legendary'; };
+  const roll = t => { let x = Math.random() * 100; for (const [r, w] of t) { if (x < w) return r; x -= w; } return t[t.length - 1][0]; };
+  const n = packSize(id), out = [];
+  PROF.pity[id] = (PROF.pity[id] || 0) + 1;
+  for (let i = 0; i < n; i++) {
+    const last = i === n - 1;
+    let r = roll(last ? ODDS.last : ODDS.first);
+    if (last && PROF.pity[id] >= pityLimit()) r = 'legendary';
+    r = near(r);
+    if (r === 'legendary') PROF.pity[id] = 0;
+    out.push(by[r][Math.floor(Math.random() * by[r].length)]);
+  }
+  return out;
+}
+/** Pays for a pack (a free one first), rolls it and books the result: new cards are yours, duplicates become Clout. */
+function buyPack(id) {
+  if (!setOpen(id)) return null;
+  if (freePacks(id) > 0) PROF.free[id] -= 1;
+  else { const p = packPrice(id); if ((PROF.cash || 0) < p) return null; PROF.cash -= p; }
+  const res = rollPack(id).map(c => { const fresh = !owns(c.name); if (fresh) gainCardOwned(c); else PROF.clout = (PROF.clout || 0) + dupClout(c); return {c, fresh, clout: fresh ? 0 : dupClout(c)}; });
+  PROF.packsOpened = (PROF.packsOpened || 0) + 1; saveProfile();
+  return res;
+}
+const canOpen = id => setOpen(id) && (freePacks(id) > 0 || (PROF.cash || 0) >= packPrice(id));
+// ---- money chips
+const CASH_ICO = (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#7fd99a" stroke="#2b2140" stroke-width="2.4"/><circle cx="12" cy="12" r="3" fill="#fff" stroke="#2b2140" stroke-width="2"/></svg>`;
+const CLOUT_ICO = (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.7 6 6.5.6-4.9 4.3 1.5 6.4L12 16.5l-5.8 3.3 1.5-6.4L2.8 9.1l6.5-.6z" fill="#b18cff" stroke="#2b2140" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
+const wallet = () => `<span class="wal">${CASH_ICO()}<b>${(PROF.cash || 0).toLocaleString('en')}</b><i>Cash</i></span><span class="wal">${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i></span>`;
+/** A pack: crimped foil wrapper in the set's colours. */
+function packHTML(s, o = {}) {
+  return `<div class="pack${o.locked ? ' locked' : ''}" style="--c1:${s.col};--c2:${s.col2}"><svg viewBox="0 0 120 160" aria-hidden="true">
+    <path d="M0 10 ${Array.from({length: 13}, (_, i) => `L${i * 10} ${i % 2 ? 4 : 10}`).join(' ')} L120 150 ${Array.from({length: 13}, (_, i) => `L${120 - i * 10} ${i % 2 ? 156 : 150}`).join(' ')} Z" fill="url(#pg${s.id})" stroke="#2b2140" stroke-width="4" stroke-linejoin="round"/>
+    <defs><linearGradient id="pg${s.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.col}"/><stop offset="1" stop-color="${s.col2}"/></linearGradient></defs>
+    <path d="M0 22H120M0 138H120" stroke="#2b2140" stroke-width="3"/><path d="M-10 120L60 10M20 150L110 10" stroke="#fff" stroke-opacity=".35" stroke-width="10"/>
+    <circle cx="60" cy="62" r="22" fill="#fff" stroke="#2b2140" stroke-width="3.5"/><path d="M60 46l4.5 9.5 10.5 1.3-7.8 7 2.2 10.4L60 69l-9.4 5.2 2.2-10.4-7.8-7 10.5-1.3z" fill="${s.col}" stroke="#2b2140" stroke-width="2.5" stroke-linejoin="round"/></svg>
+    <span class="pk-brand">LATE STAGE</span><span class="pk-name">${s.name}</span>${o.n ? `<span class="pk-n">${o.n} cards</span>` : ''}${o.locked ? `<span class="pk-lock">${LOCK}</span>` : ''}</div>`;
+}
+
+// ---------------------------------------------------------------- the Packs screen
+function showPacks() {
+  clear(); G.screen = 'packs'; bg(true); AU.music('hold');
+  collectionTabs('packs');
+  const p = el('div', 'panel pk-panel', '', stage); css(p, {left: 24, top: 64, width: W - 48, height: H - 76});
+  const top = el('div', 'pk-top', `<div class="pk-wallet">${wallet()}</div>`, p);
+  const odds = el('button', 'pk-odds bd', 'Odds & crafting', top); odds.onclick = showOdds;
+  SETS.forEach((s, i) => {
+    const open = setOpen(s.id), all = setCards(s.id), got = all.filter(c => owns(c.name)).length, fr = freePacks(s.id);
+    const col = el('div', 'pk-col' + (open ? '' : ' locked'), packHTML(s, {locked: !open, n: open ? packSize(s.id) : 0}) + `<p class="pk-t bd">${s.name}</p><p class="pk-b">${open ? s.blurb : `Opens at level ${s.lv}`}</p>
+      <div class="pk-prog"><i style="width:${Math.round(100 * got / all.length)}%"></i><b>${got} / ${all.length} cards</b></div>`, p);
+    css(col, {left: 22 + i * 262});
+    const pk = col.querySelector('.pack');
+    if (open) anim(pk, [{transform: 'rotate(-4deg) translateY(0)'}, {transform: 'rotate(-4deg) translateY(-5px)'}, {transform: 'rotate(-4deg) translateY(0)'}], {duration: 2200 + i * 300, iterations: Infinity, easing: 'ease-in-out', raw: true});
+    if (fr && open) el('span', 'pk-free bd', `${fr} free`, col);
+    const b = el('button', 'btn pk-buy', !open ? `${LOCK} Level ${s.lv}` : fr ? 'Open free pack' : `Open ${CASH_ICO(20)} ${packPrice(s.id)}`, col);
+    b.disabled = !canOpen(s.id); if (open && fr) b.classList.add('free');
+    b.onclick = () => { if (canOpen(s.id)) openPack(s.id); else { sfx('error'); toast(open ? 'Not enough Cash' : `Opens at level ${s.lv}`); } };
+    pk.onclick = () => b.onclick();
+  });
+}
+function showOdds() {
+  sfx('open');
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
+  const p = el('div', 'panel pk-oddsp', '', ov); css(p, {left: 122, top: 20, width: 600, height: 350});
+  const row = r => `<span class="rar" style="background:${RAR[r].col}">${RAR[r].label}</span>`;
+  p.innerHTML = `<p class="bd" style="margin:0;font-size:22px">How packs work</p>
+    <div class="pk-ocols"><div><p class="rt-cap">Every card but the last</p>${ODDS.first.map(([r, w]) => `<p>${row(r)} ${w}%</p>`).join('')}
+      <p class="rt-cap" style="margin-top:10px">The last card</p>${ODDS.last.map(([r, w]) => `<p>${row(r)} ${w}%</p>`).join('')}
+      <p class="pk-note">A legendary is guaranteed in the ${pityLimit()}th pack of a set without one.</p></div>
+    <div><p class="rt-cap">Duplicate gives · craft costs (Clout)</p>${RAR_ORDER.map(r => `<p>${row(r)} +${dupClout({tier: r === 'epic' ? 5 : r === 'rare' ? 3 : 1, legendary: r === 'legendary'})} · craft ${craftCost({tier: r === 'epic' ? 5 : r === 'rare' ? 3 : 1, legendary: r === 'legendary'})}</p>`).join('')}
+      <p class="pk-note">Rarity follows the tier: tiers 1–2 common, 3–4 rare, 5–6 epic. Craft missing cards in Collection › Cards.</p></div></div>
+    <button class="btn close">Got it</button>`;
+  p.querySelector('.close').onclick = () => ov.remove(); ov.querySelector('.dim').onclick = () => ov.remove();
+}
+/** Opening a pack: it shakes, tears open, the cards fan out face down and flip one by one (the best one last). */
+async function openPack(id) {
+  const res = buyPack(id); if (!res) return;
+  const s = SET[id];
+  res.sort((a, b) => RAR_ORDER.indexOf(rarityOf(a.c)) - RAR_ORDER.indexOf(rarityOf(b.c)));
+  sfx('open');
+  const ov = el('div', 'ab pk-open', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 98}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.9)';
+  const rays = el('div', 'pk-rays', '', ov);
+  const pk = el('div', 'ab', packHTML(s), ov); css(pk, {left: W / 2 - 75, top: 70, width: 150, height: 200});
+  await anim(pk, [{transform: 'translateY(240px) scale(.6) rotate(-12deg)'}, {transform: 'translateY(0) scale(1.05) rotate(3deg)', offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 520, easing: 'ease-out', raw: true}).finished;
+  for (let k = 0; k < 3; k++) { sfx('tick', {n: k, gap: 0}); await anim(pk, [{transform: 'rotate(0)'}, {transform: `rotate(${k % 2 ? -5 : 5}deg) scale(${1 + k * .04})`}, {transform: 'rotate(0)'}], {duration: 150, raw: true}).finished; }
+  // tear: the top strip flies off, the wrapper drops away
+  const strip = el('div', 'ab pk-strip', '', ov); css(strip, {left: W / 2 - 75, top: 64, width: 150, height: 30, background: s.col});
+  sfx('scroll'); ring(W / 2, 170, '#fff', 200);
+  anim(strip, [{transform: 'translate(0,0) rotate(0)', opacity: 1}, {transform: 'translate(160px,-120px) rotate(40deg)', opacity: 0}], {duration: 500, easing: 'ease-out', fill: 'forwards', raw: true});
+  anim(pk, [{transform: 'translateY(0)', opacity: 1}, {transform: 'translateY(260px) rotate(8deg)', opacity: 0}], {duration: 480, delay: 120, easing: 'ease-in', fill: 'forwards', raw: true});
+  const n = res.length, gap = n > 3 ? 172 : 196;
+  const flips = res.map((r, i) => {
+    const rar = rarityOf(r.c), w = el('div', `ab rt-flip pk-card rar-${rar}`, `<div class="rt-back"><span class="bd">LATE<br>STAGE</span></div><div class="rt-front">${cardHTML(r.c)}</div>`, ov);
+    const x = W / 2 - 70 + (i - (n - 1) / 2) * gap; css(w, {left: x, top: 64}); w.style.setProperty('--rot', `${(i - (n - 1) / 2) * 4}deg`);
+    w.style.transform = 'rotate(var(--rot)) scale(.58)';
+    anim(w, [{transform: `translate(${W / 2 - 70 - x}px,40px) rotate(0) scale(.3)`, opacity: 0}, {transform: 'rotate(var(--rot)) scale(.58)', opacity: 1}], {duration: 460, delay: 140 + i * 90, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    return {w, r, rar, x};
+  });
+  await sleep(700 + n * 90);
+  for (const f of flips) {
+    const big = f.rar === 'legendary' || f.rar === 'epic';
+    if (big) { f.w.classList.add('charge'); sfx('windup'); await sleep(f.rar === 'legendary' ? 900 : 450); }
+    f.w.classList.add('on'); sfx(f.rar === 'legendary' ? 'triple' : 'pop');
+    const cx = f.x + 70, cy = 160;
+    if (f.rar === 'legendary') { ring(cx, cy, '#ffc928', 220); confetti(cx, cy, 50); rays.classList.add('on'); }
+    else if (f.rar === 'epic') ring(cx, cy, '#b18cff', 160);
+    const tag = el('div', 'ab pk-tag bd', `<span class="rar" style="background:${RAR[f.rar].col}">${RAR[f.rar].label}</span>${f.r.fresh ? '<span class="new">NEW</span>' : `<span class="dup">${CLOUT_ICO(14)} +${f.r.clout}</span>`}`, ov);
+    css(tag, {left: f.x - 30, top: 284, width: 200});
+    anim(tag, [{transform: 'translateY(10px)', opacity: 0}, {transform: 'translateY(0)', opacity: 1}], {duration: 260, raw: true});
+    await sleep(380);
+  }
+  const fresh = res.filter(r => r.fresh).length, cl = res.reduce((a, r) => a + r.clout, 0);
+  const sum = el('p', 'ab bd pk-sum', `${fresh ? `${fresh} new card${fresh > 1 ? 's' : ''}` : 'No new cards'}${cl ? ` · ${CLOUT_ICO(16)} +${cl} Clout` : ''}`, ov); css(sum, {left: 0, right: 0, top: 18});
+  const again = el('button', 'btn', canOpen(id) ? (freePacks(id) ? 'Open another (free)' : `Open another ${CASH_ICO(18)} ${packPrice(id)}`) : 'Out of Cash', ov);
+  css(again, {left: W / 2 - 210, top: 326, width: 230, height: 46, fontSize: '17px', background: '#ffc928'}); again.disabled = !canOpen(id);
+  const done = el('button', 'btn', 'Done', ov); css(done, {left: W / 2 + 36, top: 328, width: 130, height: 42, fontSize: '18px', background: '#2ecb6e'});
+  again.onclick = () => { ov.remove(); openPack(id); };
+  done.onclick = () => { ov.remove(); if (G.screen === 'packs') showPacks(); };
+  for (const f of flips) f.w.onclick = () => showDetail(f.r.c, null);
+}
 
 // ---- scenery: three small props per stop, themed after the tribe it unlocks
 const RT_PROPS = (() => {
@@ -1715,49 +1867,51 @@ const RT_PROPS = (() => {
 })();
 const RT_GROUND = {Hustler: '#bfe9cd', Influencer: '#ffd3e4', Feral: '#e6efa6', Creative: '#ddd0ff', Techie: '#c6e5ff', Punk: '#ffd2b3', Philosopher: '#bdeee9', Neutral: '#efe7d7', Legend: '#ffeaa0'};
 
+
+/** A locked card in Collection: tribe and tier show, the rest stays a surprise. */
+function mysteryCardHTML(c, at) {
+  const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();
+  const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${TC[tr]} 50%,${TC[c.tribe2]} 50%)` : `background-color:${TC[tr]}`;
+  const tag = c.tribe2 ? `<span class="trb" style="background:${TC[tr]}">${lab}</span><span class="trb" style="background:${TC[c.tribe2]}">${c.tribe2.toUpperCase()}</span>` : `<span class="trb" style="background:${TC[tr]}">${lab}</span>`;
+  return `<div class="card rt-card${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}">${RT_SIL}<span class="rt-q">?</span></div>${c.legendary ? '<i class="foil"></i>' : ''}
+    <p class="nm" style="font-size:21px">???</p><div class="meta${c.tribe2 ? ' duo' : ''}">${tag}${fmtStars(c.tier, c.tribe2 ? 11 : c.tier <= 4 ? 16 : 13)}</div>
+    <p class="txt" style="font-size:14px;color:#8f86a6">A surprise.</p><div class="sa">?</div><div class="sh">?</div></div>`;
+}
+
+// ---------------------------------------------------------------- Levels track: a board-game road with packs, pack sizes and forks
 const RT_SIL = '<svg class="rt-sil" viewBox="0 0 68 68" aria-hidden="true"><circle cx="34" cy="27" r="13"/><path d="M7 72c2-17 13-26 27-26s25 9 27 26z"/></svg>';
 const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
-/** A reward on the track. Locked rewards stay a mystery: only the tribe colour (or the legendary frame) shows;
- *  unlocked cards and the next level's cards show the real card. */
-function rtTok(c, state, o = {}) {
-  const show = rtReal(c) && state === 'done', t = el('div', 'tok rt-tok' + (c.legendary ? ' gold' : '') + (state === 'locked' ? ' rt-locked' : ''));
-  paintTribe(t, c.tribe, c.tribe2);
-  t.innerHTML = `<div class="clip">${show ? `<img src="${artOf(c.name)}" alt="" draggable="false">` : RT_SIL + '<span class="rt-q">?</span>'}${c.legendary ? '<i class="foil"></i>' : ''}</div>`
-    + (show && c.tier && !o.noStars ? `<div class="tier">${STAR(13).repeat(c.tier)}</div>` : '')
-    + (state === 'done' && !o.noTick ? `<span class="rt-got">${RT_TICK}</span>` : '');
-  t.setAttribute('role', 'button'); t.setAttribute('aria-label', show ? c.name : 'Mystery card');
-  t.onclick = e => { e.stopPropagation(); if (show) showDetail(CARD[c.name], null); else { sfx('pop'); toast(o.lv ? `A surprise, unlocked at ${o.lv}` : 'A surprise'); } };
-  return t;
-}
-/** Small label under a milestone: just the tribe, or the legendary. */
-function rtTag(r) {
-  const c = r.cards[0], col = r.legend ? '#ffc928' : TC[r.tribe];
-  const t2 = c.tribe2 || (r.cards[1] && r.cards[1].tribe);
-  const dot = r.legend && t2 ? `background:linear-gradient(135deg,${TC[c.tribe]} 50%,${TC[t2]} 50%)` : r.set ? 'background:conic-gradient(#14a052,#ff8ab8,#d4e24a,#b18cff,#5ab8ff,#ff8a3d,#4fd1c5,#14a052)' : `background:${col}`;
-  return `<span class="rt-tag${r.legend ? ' leg' : ''}"><i style="${dot}"></i>${r.legend ? 'Legendary' : tribeName(r.tribe)}</span>`;
-}
-const rtWhen = r => r.at ? `${r.at.toLocaleString('en')} rating` : `level ${r.lv}`;
-function rtToks(r, st, parent) {
-  const box = el('div', 'rt-toks' + (r.set ? ' fan' : ''), '', parent);
-  if (r.set) r.cards.forEach((c, i) => { const t = rtTok(c, st, {noStars: true, noTick: true, lv: rtWhen(r)}); t.style.zIndex = 10 - Math.abs(i - 3); t.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 3}px)`; box.appendChild(t); });
-  else r.cards.forEach(c => box.appendChild(rtTok(c, st, {lv: rtWhen(r)})));
+const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
+const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
+const rtWhat = r => r.kind === 'set' ? `New packs: ${SET[r.set].name}` : r.kind === 'size' ? `${SET[r.set].name} packs: +1 card` : 'Choose a bonus';
+const rtTribeOf = r => TRIBE_ORDER[(r.lv * 3) % 8];   // scenery only
+/** What a stop on the road offers: a pack, or a fork with its two options. */
+function rtReward(r, st, parent, o = {}) {
+  const box = el('div', 'rt-rw ' + r.kind, '', parent);
+  if (r.kind !== 'fork') {
+    const s = SET[r.set];
+    box.innerHTML = `<div class="rt-mini">${packHTML(s, {locked: st === 'locked'})}${r.kind === 'size' ? '<span class="rt-plus bd">+1</span>' : ''}</div><p class="rt-glab">${r.kind === 'set' ? `<small>New packs</small>${s.name}` : `<small>Bigger packs</small>${s.name} +1 card`}</p>`;
+    return box;
+  }
+  const pick = forkPick(r.lv), choose = st === 'done' && pick == null;
+  box.innerHTML = r.opts.map((k, i) => `<button class="rt-opt${pick === i ? ' on' : pick != null ? ' off' : ''}${choose ? ' choose' : ''}" data-i="${i}">${ico(BONUS[k].ico, 18, 2.2)}<span>${BONUS[k].label}</span></button>`).join('<b class="rt-or">or</b>');
+  box.querySelectorAll('.rt-opt').forEach(b => b.onclick = e => { e.stopPropagation(); if (choose) forkPop(r, o.after); else { sfx('pop'); toast(pick != null ? (pick === +b.dataset.i ? 'Your pick' : 'Not picked') : `Choose at level ${r.lv}`); } });
   return box;
 }
-/** Side panel: the latest unlock with its names; before the first unlock, the first reward as a mystery. */
-const rtLatest = (last, first, capL, capN) => `<div class="rt-nexthead"><p class="rt-cap">${last ? capL(last) : capN(first)}</p>${rtTag(last || first)}</div><div class="rt-nextrow"></div><p class="rt-nextl">${last ? rtTitle(last) : 'A surprise'}</p>`;
-const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
-
+function bonusSummary() {
+  const on = Object.keys(BONUS).filter(k => k !== 'free').map(k => [k, bonus(k)]).filter(([, v]) => v);
+  return on.length ? on.map(([k, v]) => `<span class="rt-bon">${ico(BONUS[k].ico, 14, 2.4)}${BONUS[k].sum(v)}</span>`).join('') : '<span class="rt-bon none">No bonuses yet</span>';
+}
 function showTrack(kind = 'xp') {
   if (kind === 'rating') return showNightLine();
   clear(); G.screen = 'rewards'; bg(true); AU.music('hold');
   collectionTabs('levels');
   const P = rtProgress(), done = P.level >= RT_LEVELS, nxt = RT_TRACK[Math.min(P.level, RT_LEVELS - 1)];
-  PROF.rtSeen = Math.max(PROF.rtSeen || 0, P.level); saveProfile();
   const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
   side.innerHTML = `<div class="rt-head"><div class="rt-lvl"><span class="bd">${P.level}</span></div><p class="bd rt-lvlt">Level ${P.level}<small>of ${RT_LEVELS}</small></p></div>
-    ${rtXpBar(P, 182)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} … 8th +${RT_XP_PLACE[7]} XP</p>
-    ${rtLatest(P.level ? RT_TRACK[P.level - 1] : null, nxt, r => `Latest · Lv ${r.lv}`, r => `Next · Lv ${r.lv}`)}`;
-  rtToks(P.level ? RT_TRACK[P.level - 1] : nxt, P.level ? 'done' : 'next', side.querySelector('.rt-nextrow'));
+    ${rtXpBar(P, 182)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} XP, +${CASH_PLACE[0]} Cash</p>
+    <div class="rt-nexthead"><p class="rt-cap">${done ? 'Track complete' : `Next · Lv ${nxt.lv}`}</p></div><p class="rt-nextw bd">${done ? 'Every level reached' : rtWhat(nxt)}</p>
+    <div class="rt-nexthead"><p class="rt-cap">Your bonuses</p></div><div class="rt-bons">${bonusSummary()}</div>`;
   const p = el('div', 'panel rt-roadp', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
   const body = el('div', 'rt-scroll', '', p);
   const ROW = 164, TOP = 136, XL = 226, XR = 314, Wd = 540, Hd = TOP + (RT_LEVELS - 1) * ROW + 90;
@@ -1766,29 +1920,26 @@ function showTrack(kind = 'xp') {
   const seg = (a, b) => { const [x1, y1] = pos(a), [x2, y2] = pos(b); return `M${x1} ${y1}C${x1} ${y1 + ROW * .62} ${x2} ${y2 - ROW * .62} ${x2} ${y2}`; };
   let all = '', path = '';
   for (let i = 0; i < RT_TRACK.length - 1; i++) { const s = seg(RT_TRACK[i], RT_TRACK[i + 1]); all += s; if (i + 1 < P.level) path += s; }
-  // the start of the road leads in from the top; level 0 sits just above level 1
   const start = {lv: 0}, first = seg(start, RT_TRACK[0]);
   const part = P.level === 0 ? first : done ? '' : seg(RT_TRACK[P.level - 1], RT_TRACK[P.level]), frac = P.need ? P.xp / P.need : 1;
   for (const r of RT_TRACK) {   // scenery goes in first, under the road
-    const [x, y] = pos(r), left = r.lv % 2, key = r.legend ? 'Legend' : r.tribe, set = RT_PROPS[key], st = rtState(r, P.level);
+    const [x, y] = pos(r), left = r.lv % 2, key = r.kind === 'fork' ? rtTribeOf(r) : 'Legend', set = RT_PROPS[key], st = rtState(r, P.level);
     const sc = el('div', `rt-scene ${st}`, '', inner);
     css(sc, left ? {left: x + 62, top: y - 66} : {left: x - 62 - 200, top: y - 66});
-    const [a, b, c] = [0, 1, 2].map(k => set[(r.lv + k) % 3]), side = left ? 'left' : 'right';
-    sc.innerHTML = `<i class="rt-ground" style="background:${RT_GROUND[key]}"></i><span class="pr big" style="${side}:30px">${a}</span><span class="pr mid" style="${side}:96px">${b}</span><span class="pr small" style="${side}:148px">${c}</span>`;
+    const [a, b, c] = [0, 1, 2].map(k => set[(r.lv + k) % 3]), sd = left ? 'left' : 'right';
+    sc.innerHTML = `<i class="rt-ground" style="background:${RT_GROUND[key]}"></i><span class="pr big" style="${sd}:30px">${a}</span><span class="pr mid" style="${sd}:96px">${b}</span><span class="pr small" style="${sd}:148px">${c}</span>`;
   }
   inner.insertAdjacentHTML('beforeend', `<svg class="rt-road" width="${Wd}" height="${Hd}" aria-hidden="true">
     <path d="${first + all}" class="r0"/><path d="${first + all}" class="r1"/><path d="${first + all}" class="r2"/>
     <path d="${P.level ? first + path : ''}" class="r3"/>${part ? `<path d="${part}" class="r3" pathLength="1" stroke-dasharray="${frac} 2"/><path d="${part}" class="rpart" style="display:none"/>` : ''}</svg>`);
   for (const r of RT_TRACK) {
-    const [x, y] = pos(r), st = rtState(r, P.level), left = r.lv % 2;
-    const n = el('div', `rt-node ${st}${r.legend ? ' leg' : ''}${r.set ? ' set' : ''}`, `<span class="bd">${r.lv}</span>`, inner);
-    css(n, {left: x, top: y}); if (st === 'done' && !r.legend) n.style.background = TC[r.tribe];
-    if (st === 'done') el('i', 'rt-ok', RT_TICK, n);
-    const g = el('div', `rt-grp ${left ? 'l' : 'r'} ${st}`, '', inner); css(g, left ? {right: Wd - x + 54, top: y - 52} : {left: x + 54, top: y - 52});
-    rtToks(r, st, g);
-    g.insertAdjacentHTML('beforeend', rtTag(r));
+    const [x, y] = pos(r), st = rtState(r, P.level), left = r.lv % 2, todo = r.kind === 'fork' && st === 'done' && forkPick(r.lv) == null;
+    const n = el('div', `rt-node ${st}${r.kind !== 'fork' ? ' leg' : ''}${r.kind === 'set' ? ' set' : ''}${todo ? ' todo' : ''}`, `<span class="bd">${r.lv}</span>`, inner);
+    css(n, {left: x, top: y}); if (st === 'done' && r.kind === 'fork') n.style.background = todo ? '#ffc928' : '#c6e5ff';
+    if (st === 'done' && !todo) el('i', 'rt-ok', RT_TICK, n);
+    const g = el('div', `rt-grp ${left ? 'l' : 'r'} ${st} k-${r.kind}`, '', inner); css(g, left ? {right: Wd - x + 54, top: y - (r.kind === 'fork' ? 58 : 66)} : {left: x + 54, top: y - (r.kind === 'fork' ? 58 : 66)});
+    rtReward(r, st, g, {after: () => showTrack('xp')});
   }
-  // your hero rides the road like a board-game peg
   const pe = inner.querySelector('.rpart'), [ex, ey] = pos(RT_TRACK[RT_LEVELS - 1]);
   let pt = {x: ex, y: ey};
   if (pe) { pe.style.display = ''; pt = pe.getPointAtLength(pe.getTotalLength() * frac); pe.style.display = 'none'; }
@@ -1796,26 +1947,69 @@ function showTrack(kind = 'xp') {
   const peg = el('div', 'rt-peg', `<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>${P.need ? `<span class="bd">${P.xp}/${P.need}</span>` : ''}`, inner);
   css(peg, {left: pt.x, top: pt.y});
   anim(peg.firstChild, [{translate: '0 0'}, {translate: '0 -5px'}, {translate: '0 0'}], {duration: 1400, iterations: Infinity, easing: 'ease-in-out', raw: true});
-  body.scrollTop = Math.max(0, (P.level ? pos(RT_TRACK[P.level - 1])[1] : 0) - 74);
+  const fo = forkOpen()[0];
+  body.scrollTop = Math.max(0, pos(fo || (P.level ? RT_TRACK[P.level - 1] : RT_TRACK[0]))[1] - 110);
+}
+/** A fork: two bonuses, pick one for good. */
+function forkPop(r, onDone) {
+  sfx('open');
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 97}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.86)';
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level ${r.lv}: choose one</span>`, ov); css(head, {left: 0, right: 0, top: 24, textAlign: 'center'});
+  const sub = el('p', 'ab bd', 'Your pick is permanent.', ov); css(sub, {left: 0, right: 0, top: 80, margin: 0, textAlign: 'center', color: '#fff', fontSize: '17px'});
+  r.opts.forEach((k, i) => {
+    const b = el('button', 'ab fork-card', `<span class="fk-ico">${ico(BONUS[k].ico, 54, 1.8)}</span><b class="bd">${BONUS[k].label}</b><i>${k === 'free' ? `A ${SET[latestSet()].name} pack, right away` : k === 'shield' ? 'Start every run with more Boundaries' : 'Stacks with later picks'}</i>`, ov);
+    css(b, {left: W / 2 - 250 + i * 270, top: 118, width: 230, height: 200});
+    anim(b, [{transform: 'translateY(80px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 380, delay: 120 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    b.onclick = () => {
+      PROF.forks[r.lv] = i;
+      if (k === 'free') { const s = latestSet(); PROF.free[s] = freePacks(s) + 1; }
+      saveProfile(); sfx('unlock'); confetti(W / 2 - 135 + i * 270, 200, 30);
+      anim(b, [{transform: 'scale(1)'}, {transform: 'scale(1.08)'}, {transform: 'scale(1)'}], {duration: 300, raw: true});
+      setTimeout(() => { ov.remove(); onDone && onDone(); }, 520);
+    };
+  });
+  el('span', 'ab fk-or bd', 'or', ov).style.cssText += `left:${W / 2 - 18}px;top:200px`;
+}
+const latestSet = () => SETS.filter(s => setOpen(s.id)).pop().id;
+/** Level-up moments after a run: new packs, bigger packs and forks, one at a time; then Night Line cosmetics. */
+function rtLevelPop(r, onDone) {
+  if (r.kind === 'fork') return forkPop(r, onDone);
+  const s = SET[r.set];
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.86)';
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level up! Level ${r.lv}</span>`, ov); css(head, {left: 0, right: 0, top: 16, textAlign: 'center'});
+  const sub = el('p', 'ab bd', r.kind === 'set' ? `New packs: ${s.name}. Your first one is free!` : `${s.name} packs now hold ${packSize(r.set)} cards`, ov); css(sub, {left: 0, right: 0, top: 70, margin: 0, textAlign: 'center', color: '#fff', fontSize: '19px'});
+  const pk = el('div', 'ab pk-pop', packHTML(s, {n: packSize(r.set)}), ov); css(pk, {left: W / 2 - 75, top: 108, width: 150, height: 200});
+  anim(pk, [{transform: 'translateY(200px) rotate(-20deg) scale(.5)', opacity: 0}, {transform: 'translateY(0) rotate(-4deg) scale(1)', opacity: 1}], {duration: 520, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true, fill: 'forwards'});
+  setTimeout(() => confetti(W / 2, 180, 40), 500); sfx('unlock');
+  const go = el('button', 'btn', r.kind === 'set' ? 'Open it' : 'To the packs', ov); css(go, {left: W / 2 - 160, top: 330, width: 150, height: 44, background: '#ffc928', fontSize: '18px'});
+  const ok = el('button', 'btn', 'Later', ov); css(ok, {left: W / 2 + 12, top: 332, width: 120, height: 40, fontSize: '17px'});
+  go.onclick = () => { ov.remove(); showPacks(); if (r.kind === 'set' && canOpen(r.set)) openPack(r.set); };
+  ok.onclick = () => { ov.remove(); onDone && onDone(); };
+}
+function rtAwardRun(place) {
+  const g = Math.round((RT_XP_PLACE[place - 1] || RT_XP_PLACE[7]) * (1 + bonus('xp') / 100)), c = Math.round((CASH_PLACE[place - 1] || CASH_PLACE[7]) * (1 + bonus('cash') / 100));
+  PROF.xp = (PROF.xp || 0) + g; PROF.cash = (PROF.cash || 0) + c; G.cashGain = c; syncLevels(); return g;
+}
+function rtAfterRun() {
+  if (G.screen !== 'end') return;
+  const lvl = rtLevel(), seen = PROF.lvSeen || 0;
+  if (lvl <= seen) { const f = forkOpen()[0]; if (f) return forkPop(f, rtAfterRun); rmAfterRun(); return; }
+  PROF.lvSeen = seen + 1; saveProfile();
+  rtLevelPop(RT_TRACK[seen], rtAfterRun);
 }
 
 // ---------------------------------------------------------------- the Night Line: a night train through the city, one station per rating reward
 // Side view, scrolls sideways. Layers back to front: sky, far skyline, fog, houses, fog, viaduct with café arches, stations, train + headlight, cards.
 const RM_X0 = 190, RM_X1 = 400, RM_SP = 270, RM_H = 306, RM_DECK = 282;
 const rmX = r => r.lv ? RM_X1 + (r.lv - 1) * RM_SP : RM_X0;
-const RM_W = RM_X1 + (RM_TRACK.length - 1) * RM_SP + 420;
+const RM_STOPS = 12;   // stations on the Night Line (RM_TRACK, below)
+const RM_W = RM_X1 + (RM_STOPS - 1) * RM_SP + 420;
 /** Where the front of the train is for a rating: between the start and the first station, then station to station. */
 function rmTrainX(rating) {
   if (rating < RM_TRACK[0].at) return RM_X0 + (RM_X1 - RM_X0) * Math.max(0, rating) / RM_TRACK[0].at;
   for (let i = 1; i < RM_TRACK.length; i++) { const a = RM_TRACK[i - 1], b = RM_TRACK[i]; if (rating < b.at) return rmX(a) + (rmX(b) - rmX(a)) * (rating - a.at) / (b.at - a.at); }
   return rmX(RM_TRACK[RM_TRACK.length - 1]);
 }
-function rmProgress() {
-  const best = rmBest(), lv = rmLevel(), prev = lv ? RM_TRACK[lv - 1].at : 0, next = RM_TRACK[lv];
-  return {best, lv, prev, next, frac: next ? Math.max(0, (best - prev) / (next.at - prev)) : 1};
-}
-const rmBar = (P, w) => `<div class="rt-xp rm-xp" style="width:${w}px"><i style="width:${Math.round(100 * Math.min(1, P.frac))}%"></i><b>${P.next ? `${P.best.toLocaleString('en')} / ${P.next.at.toLocaleString('en')}` : 'Last stop reached'}</b></div>`;
-
 /** The city, drawn once per visit. A seeded random keeps it the same every time. */
 function rmCity() {
   let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }, pick = a => a[Math.floor(rnd() * a.length)];
@@ -1918,16 +2112,72 @@ const rmStation = (r, st) => `<div class="rm-stn ${st}" style="left:${rmX(r)}px"
   <path d="M18 24v54M132 24v54" stroke-width="4"/><path d="M75 24v6"/><path d="M71 30h8l-2 6h-4z" fill="${st === 'locked' ? '#6a628c' : '#fff6c2'}"/></g></svg>
   <span class="rm-sign bd">${STAR(11)}${r.at.toLocaleString('en')}</span></div>`;
 
+
+// ---------------------------------------------------------------- the Night Line: rating opens cosmetics
+const COS = [
+  {at: 1000, kind: 'sleeve', id: 'gold', name: 'Gold Foil'}, {at: 1500, kind: 'bg', id: 'dusk', name: 'Dusk'}, {at: 2000, kind: 'fx', id: 'neon', name: 'Neon Trails'},
+  {at: 2500, kind: 'sleeve', id: 'holo', name: 'Holo'}, {at: 3000, kind: 'bg', id: 'night', name: 'Night Shift'}, {at: 3500, kind: 'fx', id: 'pow', name: 'Comic Hits'},
+  {at: 4000, kind: 'sleeve', id: 'marble', name: 'Marble'}, {at: 4500, kind: 'bg', id: 'neon', name: 'Neon City'}, {at: 5000, kind: 'fx', id: 'confetti', name: 'Confetti KOs'},
+  {at: 5500, kind: 'sleeve', id: 'black', name: 'Black Card'}, {at: 6000, kind: 'bg', id: 'golden', name: 'Golden Hour'}, {at: 6500, kind: 'fx', id: 'slam', name: 'Big Entrance'}];
+const COS_KIND = {sleeve: 'Card sleeve', bg: 'Battle background', fx: 'Effect'};
+const cosKey = c => c.kind + ':' + c.id;
+const RM_TRACK = COS.map((c, i) => ({lv: i + 1, at: c.at, cos: c}));
+const rmLevel = () => RM_TRACK.filter(r => rmBest() >= r.at).length;
+// cosmetics stay yours after a season reset
+const cosOwned = c => rmBest() >= c.at || (PROF.cos.owned || []).includes(cosKey(c));
+function cosSync() { let ch = false; for (const c of COS) if (rmBest() >= c.at && !PROF.cos.owned.includes(cosKey(c))) { PROF.cos.owned.push(cosKey(c)); ch = true; } if (ch) saveProfile(); }
+cosSync();
+const cosOn = kind => (PROF.cos.eq || {})[kind] || null;
+const fxOn = id => cosOn('fx') === id;
+function applyCos() {
+  stage.className = stage.className.split(' ').filter(x => !/^(sl|bgt|cfx)-/.test(x)).join(' ');
+  for (const k of ['sleeve', 'bg', 'fx']) { const v = cosOn(k); if (v) stage.classList.add((k === 'sleeve' ? 'sl-' : k === 'bg' ? 'bgt-' : 'cfx-') + v); }
+}
+applyCos();
+function equipCos(c) {
+  if (!cosOwned(c)) { sfx('error'); toast(`Unlocks at ${c.at.toLocaleString('en')} rating`); return; }
+  PROF.cos.eq = PROF.cos.eq || {}; const on = cosOn(c.kind) === c.id;
+  PROF.cos.eq[c.kind] = on ? null : c.id; saveProfile(); applyCos(); sfx(on ? 'pop' : 'buy');
+  toast(on ? `${c.name} taken off` : `${c.name} on`);
+}
+/** A small preview of a cosmetic. */
+function cosPreview(c) {
+  if (c.kind === 'sleeve') return `<i class="cp-sleeve sl-prev-${c.id}"></i>`;
+  if (c.kind === 'bg') return `<img class="cp-bg bgt-prev-${c.id}" src="${ART.city}" alt="">`;
+  const I = {neon: '<path d="M3 17C8 15 9 7 21 5" stroke="#ff3df2" stroke-width="3.4" fill="none"></path><circle cx="21" cy="5" r="2.6" fill="#fff"></circle>',
+    pow: '<path d="M12 2l2 6 6-3-3 6 6 2-6 2 3 6-6-3-2 6-2-6-6 3 3-6-6-2 6-2-3-6 6 3z" fill="#ffc928"></path>',
+    confetti: '<rect x="4" y="4" width="4" height="7" fill="#ff8ab8" transform="rotate(-20 6 7)"></rect><rect x="14" y="3" width="4" height="7" fill="#8fd4ff" transform="rotate(25 16 6)"></rect><rect x="9" y="13" width="4" height="7" fill="#2ecb6e" transform="rotate(10 11 16)"></rect><rect x="17" y="13" width="4" height="7" fill="#ffc928"></rect>',
+    slam: '<circle cx="12" cy="12" r="4" fill="#ffc928"></circle><circle cx="12" cy="12" r="9" fill="none"></circle><path d="M12 1v3M12 20v3M1 12h3M20 12h3"></path>'};
+  return `<span class="cp-fx">${ico(I[c.id], 40, 2)}</span>`;
+}
+function cosTok(c, st) {
+  const t = el('div', `tok rt-tok cos-tok k-${c.kind}${st === 'locked' ? ' rt-locked' : ''}${cosOn(c.kind) === c.id ? ' worn' : ''}`);
+  t.innerHTML = `<div class="clip">${cosPreview(c)}</div>${st === 'done' ? `<span class="rt-got">${RT_TICK}</span>` : ''}`;
+  t.setAttribute('role', 'button'); t.setAttribute('aria-label', c.name); t.onclick = e => { e.stopPropagation(); equipCos(c); showNightLine(); };
+  return t;
+}
+function rmProgress() {
+  const best = rmBest(), lv = rmLevel(), prev = lv ? RM_TRACK[lv - 1].at : 0, next = RM_TRACK[lv];
+  return {best, lv, prev, next, frac: next ? Math.max(0, (best - prev) / (next.at - prev)) : 1};
+}
+const rmBar = (P, w) => `<div class="rt-xp rm-xp" style="width:${w}px"><i style="width:${Math.round(100 * Math.min(1, P.frac))}%"></i><b>${P.next ? `${P.best.toLocaleString('en')} / ${P.next.at.toLocaleString('en')}` : 'Last stop reached'}</b></div>`;
 function showNightLine() {
   clear(); G.screen = 'nightline'; bg(true); AU.music('hold');
   collectionTabs('rating');
-  const P = rmProgress(), done = !P.next, nxt = P.next || RM_TRACK[RM_TRACK.length - 1];
+  const P = rmProgress();
   const side = el('div', 'panel rt-side rm-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
-  const b = bracketOf(PROF.rating);
   side.innerHTML = `<div class="rt-head"><div class="rt-lvl rm-badge"><span class="bd">${P.lv}</span></div><p class="bd rt-lvlt">Station ${P.lv}<small>of ${RM_TRACK.length}</small></p></div>
-    ${rmBar(P, 182)}<p class="rt-per">Your best rating this season counts</p>
-    ${rtLatest(P.lv ? RM_TRACK[P.lv - 1] : null, nxt, r => `Latest · ${r.at.toLocaleString('en')}`, r => `Next · ${r.at.toLocaleString('en')}`)}`;
-  rtToks(P.lv ? RM_TRACK[P.lv - 1] : nxt, P.lv ? 'done' : 'next', side.querySelector('.rt-nextrow'));
+    ${rmBar(P, 182)}<p class="rt-per">Your best rating opens cosmetics</p><div class="rt-nexthead"><p class="rt-cap">Your style</p></div><div class="cos-rows"></div>`;
+  const rows = side.querySelector('.cos-rows');
+  for (const k of ['sleeve', 'bg', 'fx']) {   // tap a row to cycle through what you own
+    const mine = COS.filter(c => c.kind === k && cosOwned(c)), cur = COS.find(c => c.kind === k && c.id === cosOn(k));
+    const r = el('button', 'cos-row', `<span class="cr-prev">${cur ? cosPreview(cur) : '<i class="cp-none"></i>'}</span><span><small>${COS_KIND[k]}</small><b>${cur ? cur.name : 'Default'}</b></span><i class="cr-n">${mine.length ? '⟳' : ''}</i>`, rows);
+    r.onclick = () => {
+      if (!mine.length) { sfx('error'); toast(`Reach ${COS.find(c => c.kind === k).at.toLocaleString('en')} rating for your first one`); return; }
+      const i = cur ? mine.indexOf(cur) : -1, nx = mine[i + 1] || null;
+      PROF.cos.eq[k] = nx ? nx.id : null; saveProfile(); applyCos(); sfx('pop'); showNightLine();
+    };
+  }
   const p = el('div', 'panel rt-roadp rm-panel', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
   const body = el('div', 'rm-scroll', '', p);
   const inner = el('div', 'rm-inner', '', body); css(inner, {width: RM_W, height: RM_H});
@@ -1941,87 +2191,38 @@ function showNightLine() {
       <path d="M0 ${C.deck - 1}H${tx - 4}" stroke="#ffc928" stroke-width="4"/></svg>
     <i class="rm-fog f3"></i><i class="rm-haze"></i>`;
   for (const r of RM_TRACK) inner.insertAdjacentHTML('beforeend', rmStation(r, rtState(r, P.lv)));
-  // the train, its headlight cutting through the fog, and your hero in the cab
   const hero = avatarHero();
   const train = el('div', 'rm-train', `<i class="rm-beam"></i><i class="rm-beamfog"></i>${RM_TRAIN}<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>`, inner);
   css(train, {left: tx, top: C.deck - 51});
   anim(train.querySelector('.rm-trainsvg'), [{translate: '0 0'}, {translate: '0 -1px'}, {translate: '0 0'}], {duration: 380, iterations: Infinity, raw: true});
-  // the rewards float above each station
-  for (const r of RM_TRACK) {
-    const st = rtState(r, P.lv), g = el('div', `rt-grp rm-grp ${st}`, '', inner); css(g, {left: rmX(r), top: 54});
-    rtToks(r, st, g);
+  for (const r of RM_TRACK) {   // the cosmetic floats above its station
+    const st = cosOwned(r.cos) ? 'done' : rtState(r, P.lv), g = el('div', `rt-grp rm-grp ${st}`, '', inner); css(g, {left: rmX(r), top: 44});
+    const box = el('div', 'rt-toks', '', g); box.appendChild(cosTok(r.cos, st));
+    el('p', 'rm-cosl bd', `${r.cos.name}<small>${COS_KIND[r.cos.kind]}</small>`, g);
   }
-  // far skyline drifts slower than the street
   const far = inner.querySelector('.rm-far'), f1 = inner.querySelector('.f1');
   body.onscroll = () => { const s = body.scrollLeft; far.style.transform = `translateX(${s * .45}px)`; f1.style.translate = `${s * .2}px 0`; };
   body.scrollLeft = Math.max(0, tx - 230); body.onscroll();
 }
-/** After a run: a pop-up for each Night Line station passed but not shown yet. */
+/** After a run: a pop-up for each new cosmetic. */
 function rmAfterRun() {
   if (G.screen !== 'end') return;
-  const seen = PROF.legSeen || [], r = RM_TRACK.find(x => rmBest() >= x.at && x.cards.some(c => !seen.includes(c.name)));
-  if (!r) return;
-  PROF.legSeen = seen.concat(r.cards.map(c => c.name)); const first = !PROF.flags.legendTut; PROF.flags.legendTut = true; saveProfile();
-  rtRewardPop(r, {head: `Station ${r.at.toLocaleString('en')}`, sub: first ? 'New legendary! Add it to your Feed pool in Collection › Cards (one per tribe)' : r.cards.length > 1 ? 'Two new legendaries' : 'A new legendary',
-    bar: rmBar(rmProgress(), 280), track: showNightLine, onDone: rmAfterRun});
+  const seen = PROF.cos.seen || [], c = COS.find(x => cosOwned(x) && !seen.includes(cosKey(x)));
+  cosSync();
+  if (!c) return;
+  PROF.cos.seen = seen.concat(cosKey(c)); saveProfile();
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(23,18,48,.9)';
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Station ${c.at.toLocaleString('en')}</span>`, ov); css(head, {left: 0, right: 0, top: 16, textAlign: 'center'});
+  const sub = el('p', 'ab bd', `New ${COS_KIND[c.kind].toLowerCase()}: ${c.name}`, ov); css(sub, {left: 0, right: 0, top: 70, margin: 0, textAlign: 'center', color: '#fff', fontSize: '20px'});
+  const pv = el('div', `ab cos-big k-${c.kind}`, cosPreview(c), ov); css(pv, {left: W / 2 - 90, top: 110, width: 180, height: 180});
+  anim(pv, [{transform: 'scale(.4) rotate(-12deg)', opacity: 0}, {transform: 'scale(1) rotate(0)', opacity: 1}], {duration: 480, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true});
+  setTimeout(() => confetti(W / 2, 180, 40), 400); sfx('unlock');
+  const go = el('button', 'btn', 'Use it', ov); css(go, {left: W / 2 - 150, top: 320, width: 140, height: 44, background: '#ffc928', fontSize: '18px'});
+  const ok = el('button', 'btn', 'Later', ov); css(ok, {left: W / 2 + 12, top: 322, width: 120, height: 40, fontSize: '17px'});
+  go.onclick = () => { PROF.cos.eq[c.kind] = c.id; saveProfile(); applyCos(); ov.remove(); rmAfterRun(); };
+  ok.onclick = () => { ov.remove(); rmAfterRun(); };
 }
 
-// ---------------------------------------------------------------- reward moment, after the end screen: one pop-up per new level
-/** A locked card in Collection: tribe and tier show, the rest stays a surprise. */
-function mysteryCardHTML(c, at) {
-  const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();
-  const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${TC[tr]} 50%,${TC[c.tribe2]} 50%)` : `background-color:${TC[tr]}`;
-  const tag = c.tribe2 ? `<span class="trb" style="background:${TC[tr]}">${lab}</span><span class="trb" style="background:${TC[c.tribe2]}">${c.tribe2.toUpperCase()}</span>` : `<span class="trb" style="background:${TC[tr]}">${lab}</span>`;
-  return `<div class="card rt-card${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}">${RT_SIL}<span class="rt-q">?</span></div>${c.legendary ? '<i class="foil"></i>' : ''}
-    <p class="nm" style="font-size:21px">???</p><div class="meta${c.tribe2 ? ' duo' : ''}">${tag}${fmtStars(c.tier, c.tribe2 ? 11 : c.tier <= 4 ? 16 : 13)}</div>
-    <p class="txt" style="font-size:14px;color:#8f86a6">A surprise.</p><div class="sa">?</div><div class="sh">?</div></div>`;
-}
-function rtCardHTML(c) {
-  if (rtReal(c)) return cardHTML(CARD[c.name]);
-  const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();
-  const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${TC[tr]} 50%,${TC[c.tribe2]} 50%)` : `background-color:${TC[tr]}`;
-  return `<div class="card rt-card${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}">${RT_SIL}<span class="rt-q">?</span></div>${c.legendary ? '<i class="foil"></i>' : ''}
-    <p class="nm" style="font-size:${c.name.length > 15 ? 17 : 21}px">${c.name}</p><div class="meta"><span class="trb" style="background:${TC[tr]}">${lab}</span>${c.tier ? fmtStars(c.tier, 16) : ''}</div>
-    <p class="txt" style="font-size:14px;color:#8f86a6">Coming in a future update.</p><div class="sa">?</div><div class="sh">?</div></div>`;
-}
-function rtLevelUp(lv, onDone) {
-  const r = RT_TRACK[lv - 1];
-  rtRewardPop(r, {head: `Level up! Level ${lv}`, sub: rtSub(r), bar: rtXpBar(rtProgress(), 280), track: () => showTrack('xp'), onDone});
-}
-function rtRewardPop(r, o) {
-  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.84)';
-  const head = el('div', 'ab bd', `<span class="rt-lvpill">${o.head}</span>`, ov); css(head, {left: 0, right: 0, top: 12, textAlign: 'center'});
-  const sub = el('p', 'ab bd', o.sub, ov); css(sub, {left: 0, right: 0, top: 62, margin: 0, textAlign: 'center', color: '#fff', fontSize: '19px'});
-  if (r.set) {
-    const fan = el('div', 'ab legfan', '', ov); css(fan, {left: 0, right: 0, top: 96, height: 180});
-    r.cards.forEach((c, i) => { const w = el('div', 'logcard', rtCardHTML(c), fan); w.style.marginLeft = i ? '-58px' : '0'; w.style.transform = `rotate(${(i - 3) * 6}deg) translateY(${Math.abs(i - 3) * 4}px)`; anim(w, [{opacity: 0, transform: 'translateY(60px) scale(.6)'}, {opacity: 1}], {duration: 380, delay: 90 * i, fill: 'backwards', raw: true}); });
-  } else r.cards.forEach((c, i) => {
-    const w = el('div', 'ab rt-flip', `<div class="rt-back"><span class="bd">LATE<br>STAGE</span></div><div class="rt-front">${rtCardHTML(c)}</div>`, ov);
-    const n = r.cards.length, x = 422 - 120 + (i - (n - 1) / 2) * 186;
-    css(w, {left: x, top: 92}); w.style.setProperty('--rot', `${(i - (n - 1) / 2) * 6}deg`);
-    anim(w, [{transform: 'translateY(260px) rotate(-20deg) scale(.5)', opacity: 0}, {transform: `translateY(0) rotate(var(--rot)) scale(.58)`, opacity: 1}], {duration: 420, delay: 200 + i * 140, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
-    w.style.transform = `rotate(var(--rot)) scale(.58)`;
-    setTimeout(() => { w.classList.add('on'); sfx('pop'); }, 900 + i * 260);
-  });
-  const bar = el('div', 'ab rt-gain', o.bar, ov); css(bar, {left: 0, right: 0, top: 308});
-  const ok = el('button', 'btn', 'Nice!', ov); css(ok, {left: 300, top: 342, width: 120, height: 40, background: '#2ecb6e', fontSize: '20px'});
-  const tr = el('button', 'btn', 'See the track', ov); css(tr, {left: 436, top: 344, width: 150, height: 36, fontSize: '15px'});
-  setTimeout(() => confetti(422, 120, 40), 900); sfx('unlock');
-  ok.onclick = () => { ov.remove(); o.onDone && o.onDone(); };
-  tr.onclick = () => { ov.remove(); o.track(); };
-}
-/** After a run: XP for the placing, then a pop-up for each level not shown yet. */
-function rtAwardRun(place) { const g = RT_XP_PLACE[place - 1] || RT_XP_PLACE[7]; PROF.xp = (PROF.xp || 0) + g; return g; }
-function rtAfterRun() {
-  if (G.screen !== 'end') return;
-  const lvl = rtLevel(), seen = PROF.rtSeen || 0;
-  if (lvl <= seen) { rmAfterRun(); return; }
-  PROF.rtSeen = seen + 1; saveProfile();
-  const added = rtAutoAdd(RT_TRACK[seen]);
-  rtLevelUp(seen + 1, rtAfterRun);
-  if (added.length) setTimeout(() => toast(`${added.join(' and ')} joined your Feed pool`, 2600), 1800);
-}
-
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();
