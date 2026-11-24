@@ -873,3 +873,15 @@ button{font:inherit;color:inherit}
 .rd-me .av img{width:100%;height:100%;object-fit:cover}
 .rd-next{margin:4px 0 0;font-size:14px;line-height:1.15}
 .rd-card{background:#fff6c2}
+/* v21 shop: a scrolling shelf with room for more sets; Cash on a white till display */
+.sh-rack{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;z-index:1;-webkit-overflow-scrolling:touch;touch-action:pan-x}.sh-rack::-webkit-scrollbar{display:none}
+.sh-row{position:relative;height:244px}
+.sh-plank{position:absolute;left:0;right:0;top:176px;height:16px;background:#a8703f;border:3px solid #2b2140;border-radius:4px;box-shadow:0 6px 0 rgba(43,33,64,.25);box-sizing:border-box}
+.sh-plank .br{position:absolute;top:12px;width:14px;height:22px;background:#8a5a3a;border:3px solid #2b2140;border-top:0}.sh-plank .br.l{left:30px}.sh-plank .br.r{right:30px}
+.sh-soon{width:112px;height:110px;box-sizing:border-box;border:3px dashed #a8703f;border-radius:10px;background:rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#8a5a3a;cursor:pointer}
+.sh-soon b{font-size:15px;line-height:1.05}.sh-soon i{font-style:normal;font-size:10px;margin-top:4px;color:#a8703f}
+.sh-fade{width:34px;z-index:2;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:30px;color:#2b2140;opacity:0;pointer-events:none;transition:opacity .2s;cursor:pointer}
+.sh-fade.l{background:linear-gradient(90deg,#f3d9b6 30%,rgba(243,217,182,0))}.sh-fade.r{background:linear-gradient(270deg,#f3d9b6 30%,rgba(243,217,182,0))}
+.sh-fade.on{opacity:1;pointer-events:auto}
+.sh-till .scr{background:#fff;color:#2b2140;border-color:#2b2140;font-size:18px}
+.sh-fade{width:32px;height:32px;border-radius:50%;background:#fff !important;border:3px solid #2b2140;box-shadow:2px 3px 0 #2b2140;font-size:24px;line-height:1;padding-bottom:3px;box-sizing:border-box}

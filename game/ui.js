@@ -1875,7 +1875,7 @@ function showPacks() {
   clear(); G.screen = 'packs'; AU.music('hold'); edgeBg('#f3d9b6');
   const shop = el('div', 'ab shop', `<div class="sh-wall"></div><div class="sh-win"><i></i><i></i></div><div class="sh-neon bd">Late Stage <span>Cards</span></div>
     <div class="sh-poster p1"><b class="bd">GOTTA<br>HIRE 'EM<br>ALL</b></div><div class="sh-poster p2"><b class="bd">NO<br>REFUNDS</b><i>(it's late stage)</i></div><div class="sh-poster p3"><b class="bd">1 LEGENDARY<br>PER BOX*</b><i>*maybe</i></div>
-    <div class="sh-shelf"><i class="br l"></i><i class="br r"></i></div><div class="sh-counter"><i class="top"></i></div>`, stage);
+    <div class="sh-counter"><i class="top"></i></div>`, stage);
   css(shop, {left: 0, top: 0, width: W, height: H});
   collectionTabs('packs');
   // the shopkeeper leans on the counter, the till shows your Cash, a jar holds your Clout
@@ -1887,15 +1887,20 @@ function showPacks() {
   const leaf = el('button', 'ab sh-leaf bd', '<b>Odds &amp;<br>crafting</b><i>read me</i>', shop); css(leaf, {left: 614, top: 116}); leaf.onclick = showOdds;
   const bell = el('div', 'ab sh-bell', '<i></i><b></b>', shop); css(bell, {left: 600, top: 340});
   bell.onclick = () => { sfx('tick'); anim(bell, [{transform: 'rotate(0)'}, {transform: 'rotate(-12deg)'}, {transform: 'rotate(10deg)'}, {transform: 'rotate(0)'}], {duration: 300, raw: true}); toast(['Be right with you.', 'We do not do refunds.', 'Have you tried opening more packs?', 'Legendaries? Out back. Somewhere.'][Math.floor(Math.random() * 4)]); };
+  // the shelf: one slot per pack set and an empty slot for stock to come; with more sets than fit, it scrolls sideways
+  const rack = el('div', 'ab sh-rack', '', shop); css(rack, {left: 112, top: 90, width: 492, height: 244});
+  const row = el('div', 'sh-row', '', rack), SLOT = 164;
+  css(row, {width: (SETS.length + 1) * SLOT + 8});
+  el('div', 'sh-plank', '<i class="br l"></i><i class="br r"></i>', row);
   SETS.forEach((s, i) => {
     const open = setOpen(s.id), fr = freePacks(s.id), all = setCards(s.id), got = all.filter(c => owns(c.name)).length;
-    const x = 150 + i * 166, sc = .5;
-    const pw = packEl(s, sc, {locked: !open, n: open ? packSize(s.id) : 0, free: open && fr > 0}, shop); pw.classList.add('ab', 'sh-pack'); css(pw, {left: x, top: 100});
+    const x = 8 + i * SLOT + 20, sc = .5;
+    const pw = packEl(s, sc, {locked: !open, n: open ? packSize(s.id) : 0, free: open && fr > 0}, row); pw.classList.add('ab', 'sh-pack'); css(pw, {left: x, top: 8});
     if (open) anim(pw, [{transform: 'rotate(-2deg) translateY(0)'}, {transform: 'rotate(1deg) translateY(-4px)'}, {transform: 'rotate(-2deg) translateY(0)'}], {duration: 2600 + i * 400, iterations: Infinity, easing: 'ease-in-out', raw: true});
     else pw.style.transform = 'rotate(-2deg)';
     // a paper price tag on a string below the shelf
-    const tag = el('div', `ab sh-tag bd${open ? '' : ' lock'}${fr && open ? ' free' : ''}`, `<i class="str"></i><b>${!open ? `${LOCK} Level ${s.lv}` : fr ? `FREE${fr > 1 ? ` ×${fr}` : ''}` : `${CASH_ICO(15)} ${packPrice(s.id)}`}</b><span>${s.name} · ${got}/${all.length}</span>`, shop);
-    css(tag, {left: x + 6, top: 278}); tag.style.transform = `rotate(${[-3, 2, -1][i]}deg)`;
+    const tag = el('div', `ab sh-tag bd${open ? '' : ' lock'}${fr && open ? ' free' : ''}`, `<i class="str"></i><b>${!open ? `${LOCK} Level ${s.lv}` : fr ? `FREE${fr > 1 ? ` ×${fr}` : ''}` : `${CASH_ICO(15)} ${packPrice(s.id)}`}</b><span>${s.name} · ${got}/${all.length}</span>`, row);
+    css(tag, {left: x + 6, top: 188}); tag.style.transform = `rotate(${[-3, 2, -1, 3][i % 4]}deg)`;
     const go = () => {
       if (!open) { sfx('error'); anim(pw, [{transform: 'rotate(-2deg) translateX(0)'}, {transform: 'rotate(-2deg) translateX(-5px)'}, {transform: 'rotate(-2deg) translateX(5px)'}, {transform: 'rotate(-2deg) translateX(0)'}], {duration: 260, raw: true}); toast(`${s.name} opens at level ${s.lv}`); return; }
       if (!canOpen(s.id)) { sfx('error'); toast('Not enough Cash'); anim(till, [{transform: 'translateX(0)'}, {transform: 'translateX(-5px)'}, {transform: 'translateX(5px)'}, {transform: 'translateX(0)'}], {duration: 260, raw: true}); return; }
@@ -1903,6 +1908,15 @@ function showPacks() {
     };
     pw.onclick = go; tag.onclick = go;
   });
+  const soon = el('div', 'ab sh-soon bd', '<b>New stock<br>soon</b><i>check back</i>', row); css(soon, {left: 8 + SETS.length * SLOT + 22, top: 52});
+  soon.onclick = () => { sfx('pop'); toast('More packs are on the way'); };
+  // fades at the edges show there is more shelf to scroll to
+  const fl = el('div', 'ab sh-fade l', '', shop), fr2 = el('div', 'ab sh-fade r', '‹›'.slice(1), shop);
+  css(fl, {left: 98, top: 158}); css(fr2, {left: 590, top: 158});
+  fr2.onclick = () => rack.scrollBy({left: SLOT, behavior: 'smooth'}); fl.onclick = () => rack.scrollBy({left: -SLOT, behavior: 'smooth'});
+  const edges = () => { fl.classList.toggle('on', rack.scrollLeft > 4); fr2.classList.toggle('on', rack.scrollLeft + rack.clientWidth < rack.scrollWidth - 4); };
+  rack.onscroll = edges; edges();
+  fl.textContent = '‹';
 }
 function showOdds() {
   sfx('open');
