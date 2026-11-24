@@ -303,7 +303,7 @@ function collectionTabs(on) {
 }
 const TRIBE_ORDER = ['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'];
 const CARDS_ALL = () => window.LS_CARDS.filter(c => !c.token && c.name !== 'Follower');
-// ---- the Feed pool ("deck"): per tribe 2-4 cards per tier, 18 at most, 1 legendary (see deckToggle)
+// ---- the Feed pool ("deck"): per tribe 2-3 cards per tier, plus 1 legendary (see deckToggle)
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
 function deckSet() {
   if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
@@ -318,7 +318,7 @@ const tribeCount = (d, t) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, 
 function deckToggle(c) {
   const d = deckSet(), on = d.has(c.name);
   if (on) {
-    if (!c.legendary) for (const t of tribesOf(c)) if (t !== 'Neutral' && tierCount(d, t, c.tier) <= TIER_MIN) return 'min';
+    if (!c.legendary) for (const t of tribesOf(c)) if (t !== 'Neutral' && tierCount(d, t, c.tier) <= tierMin(t, c.tier)) return 'min';
     PROF.deck = PROF.deck.filter(n => n !== c.name);
   } else {
     if (!cardOpen(c)) return 'locked';
@@ -333,8 +333,22 @@ function deckToggle(c) {
 }
 const locked0 = c => !cardOpen(c);
 const LOCK = ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 26);
-const TOGGLE_MSG = {min: `Keep at least ${TIER_MIN} per tier`, full: `${TIER_MAX} per tier at most`, legend: 'One legendary per tribe'};
-/** Collection › Cards: a card book per tribe on a shelf; each spread shows two tiers, the legendaries have the last page.
+const TOGGLE_MSG = {min: c => `Keep at least ${tierMin(tribesOf(c).find(t => t !== 'Neutral'), c.tier)} in this tier`, full: `${TIER_MAX} per tier at most`, legend: 'One legendary per tribe'};
+// the minimum drops when a tier has fewer cards you could get yet (e.g. only one in the sets you can open)
+const tierMin = (t, tier) => Math.min(TIER_MIN, CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && x.tier === tier && (cardOpen(x) || setOpen(x.set))).length);
+const tierState = (n, min = TIER_MIN) => n < min ? 'low' : n > TIER_MAX ? 'over' : 'ok';
+const tierOk = (d, t, k) => tierState(tierCount(d, t, k), tierMin(t, k)) === 'ok';
+const tribeOk = (d, t) => t === 'Neutral' || [1, 2, 3, 4, 5, 6].every(k => tierOk(d, t, k));
+const WARN_ICO = ico('<path d="M12 3L22 20H2z" fill="#ff6b5e"></path><path d="M12 9.5v4.5" stroke="#fff"></path><circle cx="12" cy="17" r=".6" fill="#fff" stroke="#fff"></circle>', 16, 2.4);
+const OK_ICO = ico('<circle cx="12" cy="12" r="10" fill="#2ecb6e"></circle><path d="M7.5 12.5l3 3 6-6.5" stroke="#fff"></path>', 16, 2.4);
+/** The pool meter of a book page: three slots, two you must fill and one you may, in red when off. */
+function poolMeter(n, legend, min = legend ? 0 : TIER_MIN) {
+  const max = legend ? 1 : TIER_MAX, st = legend ? (n > 1 ? 'over' : 'ok') : tierState(n, min);
+  let pips = '';
+  for (let i = 0; i < Math.max(max, n); i++) pips += `<i class="${i < n ? (i >= max ? 'x' : 'f') : i < min ? 'need' : 'opt'}"></i>`;
+  return `<span class="bk-meter ${st}">${st === 'ok' ? OK_ICO : WARN_ICO}<b class="bd">${n}/${max}</b><span class="bk-pips">${pips}</span></span>`;
+}
+/** Collection › Cards: a card book per tribe on a shelf; each tier fills a whole spread, the legendaries have the last one.
  *  Tap a card you own to put it in or take it out of your Feed pool; the ⓘ shows it big. Cards from packs you can
  *  open but don't own are greyed out and can be crafted; cards from packs you can't open yet stay a "?". */
 function showCards(tribe = 'Hustler', o = {}) {
@@ -344,12 +358,12 @@ function showCards(tribe = 'Hustler', o = {}) {
   const clout = el('span', 'ab wal bk-clout', '', stage); css(clout, {left: 586, top: 15});
   const shelf = el('div', 'ab bk-shelf', '', stage); css(shelf, {left: 14, top: 64, width: 106, height: 318});
   const book = el('div', 'ab bk-book', '', stage); css(book, {left: 130, top: 70, width: 700, height: 312});
-  const SPREADS = [[1, 2], [3, 4], [5, 6], ['L', null]];   // the legendaries get the last page to themselves
-  let cur = tribe, spread = o.tier ? SPREADS.findIndex(s => s.includes(o.tier)) : 0, mark = o.mark || null;
+  const SPREADS = [1, 2, 3, 4, 5, 6, 'L'];   // one tier per spread, the legendaries last
+  let cur = tribe, spread = Math.max(0, SPREADS.indexOf(o.tier || 1)), mark = o.mark || null;
   const renderShelf = () => {
     shelf.innerHTML = ''; const d = deckSet();
     for (const t of TRIBE_ORDER) {
-      const n = t === 'Neutral' ? null : tribeCount(d, t), sp = el('button', 'bk-spine' + (t === cur ? ' on' : ''), `<b class="bd">${t === 'Neutral' ? 'Neighbours' : TP[t]}</b>${n != null ? `<i>${n}/${TRIBE_MAX}</i>` : '<i>always in</i>'}`, shelf);
+      const n = t === 'Neutral' ? null : tribeCount(d, t), sp = el('button', 'bk-spine' + (t === cur ? ' on' : ''), `<b class="bd">${t === 'Neutral' ? 'Neighbours' : TP[t]}</b>${n != null ? `<i>${n}/${TRIBE_MAX}${tribeOk(d, t) ? '' : `<span class="bk-warn">${WARN_ICO}</span>`}</i>` : '<i>always in</i>'}`, shelf);
       sp.style.setProperty('--tc', TC[t]);
       sp.onclick = () => { if (t === cur) return; sfx('pickup'); cur = t; spread = 0; mark = null; renderShelf(); renderBook(true); };
     }
@@ -379,34 +393,40 @@ function showCards(tribe = 'Hustler', o = {}) {
   };
   const toggle = c => {
     const was = deckSet().has(c.name), r = deckToggle(c);
-    if (r !== 'ok') { sfx('error'); toast(TOGGLE_MSG[r] || 'Not possible'); const ct = book.querySelector(`.bk-count[data-t="${c.legendary ? 'L' : c.tier}"]`); if (ct) anim(ct, [{transform: 'scale(1)'}, {transform: 'scale(1.35)'}, {transform: 'scale(1)'}], {duration: 360, raw: true}); return; }
+    if (r !== 'ok') { sfx('error'); const m = TOGGLE_MSG[r]; toast(typeof m === 'function' ? m(c) : m || 'Not possible'); const ct = book.querySelector('.bk-meter'); if (ct) anim(ct, [{transform: 'scale(1)'}, {transform: 'scale(1.3)', background: '#ffe9e6'}, {transform: 'scale(1)'}], {duration: 420, raw: true}); return; }
     sfx(was ? 'pop' : 'buy'); mark = c.name; renderShelf(); renderBook(false);
   };
-  const pageEl = (key, side, d) => {
-    const pg = el('div', `bk-page ${side}`, '', null);
-    if (key == null) { pg.classList.add('blank'); return pg; }
+  // one tier per spread: the cards are split over both pages, the left header carries the pool meter
+  const spreadEls = (key, d) => {
     const cs = CARDS_ALL().filter(c => inTribe(c, cur) && (key === 'L' ? c.legendary : !c.legendary && c.tier === key)).sort((a, b) => (cardOpen(b) - cardOpen(a)) || a.name.localeCompare(b.name));
-    const n = key === 'L' ? cs.filter(c => d.has(c.name)).length : cur === 'Neutral' ? cs.filter(c => cardOpen(c)).length : tierCount(d, cur, key);
-    const need = key === 'L' ? 1 : TIER_MIN, ok = key === 'L' ? n <= 1 : cur === 'Neutral' || n >= TIER_MIN;
-    pg.innerHTML = `<div class="bk-ph">${key === 'L' ? '<span class="bd leg">Legendaries</span>' : fmtStars(key, 15)}<span class="bk-count bd${ok ? '' : ' low'}" data-t="${key}">${cur === 'Neutral' && key !== 'L' ? `${n} owned` : `${n}/${need}`}</span></div>`;
-    const grid = el('div', 'bk-grid' + (cs.length > 6 ? ' dense' : ''), '', pg);
-    for (const c of cs) cardEl(c, grid, d);
-    if (!cs.length) el('p', 'bk-empty', 'No cards here', grid);
-    return pg;
+    const neutral = cur === 'Neutral' && key !== 'L', legend = key === 'L';
+    const n = legend ? cs.filter(c => d.has(c.name)).length : neutral ? cs.filter(c => cardOpen(c)).length : tierCount(d, cur, key);
+    const min = legend || neutral ? 0 : tierMin(cur, key), st = neutral ? 'ok' : legend ? (n > 1 ? 'over' : 'ok') : tierState(n, min);
+    const per = Math.ceil(cs.length / 2), size = per <= 3 ? ' big' : ' quad';   // one row of up to 3, or 2 by 2
+    const L = el('div', 'bk-page l', '', null), R = el('div', 'bk-page r', '', null);
+    L.innerHTML = `<div class="bk-ph"><span class="bk-tier">${legend ? '<span class="bd leg">Legendaries</span>' : `${fmtStars(key, 15)}<b class="bd">Tier ${key}</b>`}</span>${neutral ? `<span class="bk-count bd">${n} owned</span>` : poolMeter(n, legend, legend ? 0 : min)}</div>`;
+    const hint = neutral ? 'Neighbours are always in your pool' : legend ? (n ? 'Your legendary is in' : 'Optional: one at most') :
+      st === 'low' ? `Pick ${min - n} more` : st === 'over' ? `${n - TIER_MAX} too many` : `Pick ${min} to ${TIER_MAX}`;
+    R.innerHTML = `<div class="bk-ph r"><span class="bk-hint bd ${st}">${st === 'ok' ? '' : WARN_ICO}${hint}</span></div>`;
+    [[L, cs.slice(0, per)], [R, cs.slice(per)]].forEach(([pg, part]) => {
+      const grid = el('div', 'bk-grid' + size, '', pg);
+      for (const c of part) cardEl(c, grid, d);
+    });
+    if (!cs.length) el('p', 'bk-empty', 'No cards here', L.querySelector('.bk-grid'));
+    return [L, R];
   };
   const renderBook = (fresh, dir = 0) => {
     const d = deckSet();
     book.style.setProperty('--tc', TC[cur]);
     book.innerHTML = `<div class="bk-cover"></div><div class="bk-gutter"></div>`;
     const tabs = el('div', 'bk-tabs', '', book);
-    SPREADS.forEach((sp, i) => {
-      for (const k of sp) { if (k == null) continue;
-        const tb = el('button', 'bk-tab bd' + (i === spread ? ' on' : ''), k === 'L' ? '✦' : `${k}★`, tabs);
-        tb.onclick = () => { if (i === spread) return; const dd = i > spread ? 1 : -1; spread = i; sfx('scroll'); renderBook(false, dd); };
-      }
+    SPREADS.forEach((k, i) => {
+      const bad = cur !== 'Neutral' && k !== 'L' && !tierOk(d, cur, k);
+      const tb = el('button', 'bk-tab bd' + (i === spread ? ' on' : '') + (bad ? ' bad' : ''), k === 'L' ? '✦' : `${k}★`, tabs);
+      if (bad) el('span', 'bk-tabwarn', '!', tb);
+      tb.onclick = () => { if (i === spread) return; const dd = i > spread ? 1 : -1; spread = i; sfx('scroll'); renderBook(false, dd); };
     });
-    const [a, b] = SPREADS[spread];
-    const L = pageEl(a, 'l', d), R = pageEl(b, 'r', d); book.appendChild(L); book.appendChild(R);
+    const [L, R] = spreadEls(SPREADS[spread], d); book.appendChild(L); book.appendChild(R);
     el('div', 'bk-title bd', `${cur === 'Neutral' ? 'Neighbours' : TP[cur]}`, book);
     const arrows = [[-1, 'prev', '‹'], [1, 'next', '›']];
     for (const [dd, cls, t] of arrows) { const ar = el('button', `bk-arrow ${cls} bd`, t, book); ar.disabled = spread + dd < 0 || spread + dd >= SPREADS.length; ar.onclick = () => { spread += dd; sfx('scroll'); renderBook(false, dd); }; }
@@ -1638,7 +1658,7 @@ function showUnlocks(list) {
 // Runs give XP and Cash. XP levels up the Levels track: it opens a pack set at levels 1, 10 and 20, adds a card to that
 // set's packs at levels 5, 15 and 25, and offers a choice between two small bonuses on every other level (a fork).
 // Cash buys packs. A pack holds 2 cards (more after the size levels); duplicates turn into Clout, and Clout crafts the
-// cards you are missing. Rating (the Night Line) only opens cosmetics: card sleeves, battle backgrounds and effects.
+// cards you are missing. Rating (the Night Line) only opens cosmetics: battle backgrounds and battle animations.
 const RT_XP_PLACE = [110, 95, 85, 75, 60, 50, 45, 40];          // XP for finishing 1st..8th
 const CASH_PLACE = [80, 70, 60, 50, 40, 32, 26, 20];            // Cash for finishing 1st..8th
 const RT_LEVELS = 30;
@@ -2094,7 +2114,7 @@ function rtAfterRun() {
 // Side view, scrolls sideways. Layers back to front: sky, far skyline, fog, houses, fog, viaduct with café arches, stations, train + headlight, cards.
 const RM_X0 = 190, RM_X1 = 400, RM_SP = 270, RM_H = 306, RM_DECK = 282;
 const rmX = r => r.lv ? RM_X1 + (r.lv - 1) * RM_SP : RM_X0;
-const RM_STOPS = 12;   // stations on the Night Line (RM_TRACK, below)
+const RM_STOPS = 8;   // stations on the Night Line (RM_TRACK, below)
 const RM_W = RM_X1 + (RM_STOPS - 1) * RM_SP + 420;
 /** Where the front of the train is for a rating: between the start and the first station, then station to station. */
 function rmTrainX(rating) {
@@ -2206,24 +2226,27 @@ const rmStation = (r, st) => `<div class="rm-stn ${st}" style="left:${rmX(r)}px"
 
 
 // ---------------------------------------------------------------- the Night Line: rating opens cosmetics
-const COS = [
-  {at: 1000, kind: 'sleeve', id: 'gold', name: 'Gold Foil'}, {at: 1500, kind: 'bg', id: 'dusk', name: 'Dusk'}, {at: 2000, kind: 'fx', id: 'neon', name: 'Neon Trails'},
-  {at: 2500, kind: 'sleeve', id: 'holo', name: 'Holo'}, {at: 3000, kind: 'bg', id: 'night', name: 'Night Shift'}, {at: 3500, kind: 'fx', id: 'pow', name: 'Comic Hits'},
-  {at: 4000, kind: 'sleeve', id: 'marble', name: 'Marble'}, {at: 4500, kind: 'bg', id: 'neon', name: 'Neon City'}, {at: 5000, kind: 'fx', id: 'confetti', name: 'Confetti KOs'},
-  {at: 5500, kind: 'sleeve', id: 'black', name: 'Black Card'}, {at: 6000, kind: 'bg', id: 'golden', name: 'Golden Hour'}, {at: 6500, kind: 'fx', id: 'slam', name: 'Big Entrance'}];
-const COS_KIND = {sleeve: 'Card sleeve', bg: 'Battle background', fx: 'Effect'};
+const COS = [   // rating opens battle backgrounds and battle effects (no card sleeves for now)
+  {at: 1000, kind: 'bg', id: 'dusk', name: 'Dusk'}, {at: 1750, kind: 'fx', id: 'neon', name: 'Neon Trails'},
+  {at: 2500, kind: 'bg', id: 'night', name: 'Night Shift'}, {at: 3250, kind: 'fx', id: 'pow', name: 'Comic Hits'},
+  {at: 4000, kind: 'bg', id: 'neon', name: 'Neon City'}, {at: 4750, kind: 'fx', id: 'confetti', name: 'Confetti KOs'},
+  {at: 5500, kind: 'bg', id: 'golden', name: 'Golden Hour'}, {at: 6500, kind: 'fx', id: 'slam', name: 'Big Entrance'}];
+const COS_KIND = {bg: 'Battle background', fx: 'Battle animation'};
+const COS_KINDS = ['bg', 'fx'];
 const cosKey = c => c.kind + ':' + c.id;
 const RM_TRACK = COS.map((c, i) => ({lv: i + 1, at: c.at, cos: c}));
 const rmLevel = () => RM_TRACK.filter(r => rmBest() >= r.at).length;
 // cosmetics stay yours after a season reset
 const cosOwned = c => rmBest() >= c.at || (PROF.cos.owned || []).includes(cosKey(c));
-function cosSync() { let ch = false; for (const c of COS) if (rmBest() >= c.at && !PROF.cos.owned.includes(cosKey(c))) { PROF.cos.owned.push(cosKey(c)); ch = true; } if (ch) saveProfile(); }
+function cosSync() { let ch = false;
+  if (PROF.cos.eq && PROF.cos.eq.sleeve) { delete PROF.cos.eq.sleeve; ch = true; }   // sleeves were taken out
+  if ((PROF.cos.owned || []).some(k => k.startsWith('sleeve:'))) { PROF.cos.owned = PROF.cos.owned.filter(k => !k.startsWith('sleeve:')); ch = true; } for (const c of COS) if (rmBest() >= c.at && !PROF.cos.owned.includes(cosKey(c))) { PROF.cos.owned.push(cosKey(c)); ch = true; } if (ch) saveProfile(); }
 cosSync();
 const cosOn = kind => (PROF.cos.eq || {})[kind] || null;
 const fxOn = id => cosOn('fx') === id;
 function applyCos() {
   stage.className = stage.className.split(' ').filter(x => !/^(sl|bgt|cfx)-/.test(x)).join(' ');
-  for (const k of ['sleeve', 'bg', 'fx']) { const v = cosOn(k); if (v) stage.classList.add((k === 'sleeve' ? 'sl-' : k === 'bg' ? 'bgt-' : 'cfx-') + v); }
+  for (const k of COS_KINDS) { const v = cosOn(k); if (v) stage.classList.add((k === 'bg' ? 'bgt-' : 'cfx-') + v); }
 }
 applyCos();
 function equipCos(c) {
@@ -2234,7 +2257,6 @@ function equipCos(c) {
 }
 /** A small preview of a cosmetic. */
 function cosPreview(c) {
-  if (c.kind === 'sleeve') return `<i class="cp-sleeve sl-prev-${c.id}"></i>`;
   if (c.kind === 'bg') return `<img class="cp-bg bgt-prev-${c.id}" src="${ART.city}" alt="">`;
   const I = {neon: '<path d="M3 17C8 15 9 7 21 5" stroke="#ff3df2" stroke-width="3.4" fill="none"></path><circle cx="21" cy="5" r="2.6" fill="#fff"></circle>',
     pow: '<path d="M12 2l2 6 6-3-3 6 6 2-6 2 3 6-6-3-2 6-2-6-6 3 3-6-6-2 6-2-3-6 6 3z" fill="#ffc928"></path>',
@@ -2261,7 +2283,7 @@ function showNightLine() {
   side.innerHTML = `<div class="rt-head"><div class="rt-lvl rm-badge"><span class="bd">${P.lv}</span></div><p class="bd rt-lvlt">Station ${P.lv}<small>of ${RM_TRACK.length}</small></p></div>
     ${rmBar(P, 182)}<p class="rt-per">Your best rating opens cosmetics</p><div class="rt-nexthead"><p class="rt-cap">Your style</p></div><div class="cos-rows"></div>`;
   const rows = side.querySelector('.cos-rows');
-  for (const k of ['sleeve', 'bg', 'fx']) {   // tap a row to cycle through what you own
+  for (const k of COS_KINDS) {   // tap a row to cycle through what you own
     const mine = COS.filter(c => c.kind === k && cosOwned(c)), cur = COS.find(c => c.kind === k && c.id === cosOn(k));
     const r = el('button', 'cos-row', `<span class="cr-prev">${cur ? cosPreview(cur) : '<i class="cp-none"></i>'}</span><span><small>${COS_KIND[k]}</small><b>${cur ? cur.name : 'Default'}</b></span><i class="cr-n">${mine.length ? '⟳' : ''}</i>`, rows);
     r.onclick = () => {
@@ -2315,6 +2337,6 @@ function rmAfterRun() {
   ok.onclick = () => { ov.remove(); rmAfterRun(); };
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), afterRun: () => { G.screen = 'end'; G.talentAsked = false; rtAfterRun(); }, cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), afterRun: () => { G.screen = 'end'; G.talentAsked = false; rtAfterRun(); }, cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), books: (t, o) => showCards(t, o || {}), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();

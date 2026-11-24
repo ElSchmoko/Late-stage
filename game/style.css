@@ -580,7 +580,6 @@ button{font:inherit;color:inherit}
 /* Night Line cosmetics */
 .cos-tok .clip{background:#fff6dc}
 .cos-tok.worn{box-shadow:0 0 0 4px #2ecb6e,0 0 0 6.5px var(--ink),2px 6px 0 6.5px #171230 !important}
-.cp-sleeve{position:absolute;left:14px;top:8px;width:38px;height:52px;border:2.5px solid var(--ink);border-radius:8px;transform:rotate(-8deg)}
 .cp-bg{position:absolute;left:-40px;top:0;width:150px;height:72px;object-fit:cover;object-position:50% 0}
 .cp-fx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .cp-none{display:block;width:100%;height:100%;background:repeating-linear-gradient(45deg,#f1edf6 0 5px,#fff 5px 10px)}
@@ -590,18 +589,10 @@ button{font:inherit;color:inherit}
 .cos-row{display:flex;align-items:center;gap:8px;padding:2px 6px;height:36px;box-sizing:border-box;border:2.5px solid var(--ink);border-radius:12px;background:#fff;text-align:left;cursor:pointer;color:var(--ink);font-family:'Baloo 2',sans-serif;font-weight:800}
 .cos-row small{display:block;font-size:9.5px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;line-height:1.1}.cos-row b{font-size:14px;line-height:1}
 .cos-row .cr-prev{position:relative;width:28px;height:28px;flex:none;border-radius:8px;border:2px solid var(--ink);overflow:hidden;background:#fff6dc}
-.cos-row .cr-prev .cp-sleeve{left:5px;top:2px;width:15px;height:20px;border-width:2px;border-radius:4px}.cos-row .cr-prev .cp-bg{left:-20px;top:-4px;width:76px;height:44px}.cos-row .cr-prev svg{width:24px;height:24px}
+.cos-row .cr-prev .cp-bg{left:-20px;top:-4px;width:76px;height:44px}.cos-row .cr-prev svg{width:24px;height:24px}
 .cos-row .cr-n{margin-left:auto;font-style:normal;font-size:16px;color:var(--muted)}
 .cos-big{border:4px solid var(--ink);border-radius:30px;background:#fff6dc;overflow:hidden;box-shadow:0 0 0 4px #fff,6px 8px 0 4px #171230}
-.cos-big .cp-sleeve{left:46px;top:26px;width:88px;height:124px;border-width:4px;border-radius:14px}
 .cos-big .cp-bg{left:-90px;top:0;width:360px;height:180px;object-position:50% 0}.cos-big .cp-fx svg{width:110px;height:110px}
-/* sleeves: hand cards, pack card backs, previews */
-.sl-prev-gold,.sl-gold .hc,.sl-gold .rt-back{background:linear-gradient(150deg,#fff6c2 0%,#ffd84a 45%,#e0a800 100%) !important}
-.sl-prev-holo,.sl-holo .hc,.sl-holo .rt-back{background:linear-gradient(120deg,#ffd6ec,#fff2b0,#c8f2e4,#cfe2ff,#ead6ff,#ffd6ec) !important;background-size:200% 200% !important}
-.sl-prev-marble,.sl-marble .hc,.sl-marble .rt-back{background:linear-gradient(125deg,transparent 40%,rgba(120,110,140,.35) 41%,transparent 43%),linear-gradient(35deg,transparent 60%,rgba(120,110,140,.3) 61%,transparent 63%),#f4f1ec !important}
-.sl-prev-black,.sl-black .hc,.sl-black .rt-back{background:linear-gradient(150deg,#3a3050,#171230) !important}
-.sl-black .hc .hn{color:#fff}
-.sl-gold .rt-back span,.sl-holo .rt-back span,.sl-marble .rt-back span{color:#fff}
 /* battle backgrounds (shop and fights only) */
 .bgt-prev-dusk,.themed.bgt-dusk .bg{filter:sepia(.35) saturate(1.5) hue-rotate(-22deg) brightness(.96)}
 .bgt-prev-night,.themed.bgt-night .bg{filter:brightness(.62) sepia(.5) hue-rotate(195deg) saturate(2.2) contrast(1.05)}
@@ -792,3 +783,22 @@ button{font:inherit;color:inherit}
 .sh-shelf{left:110px;width:540px}
 .bk-card.off .card{filter:saturate(.75);opacity:.88;box-shadow:5px 7px 0 var(--ink),0 0 0 8px #fff,0 0 0 11px #c9c2d6}
 .bk-page.blank{background-image:repeating-linear-gradient(transparent 0 23px,rgba(43,33,64,.05) 23px 24px),radial-gradient(circle at 50% 50%,rgba(43,33,64,.04),transparent 60%)}
+/* v19 books: one tier per spread, a pool meter that turns red */
+.bk-ph{height:28px;margin:0 0 4px}
+.bk-ph.r{justify-content:flex-end}
+.bk-tier{display:flex;align-items:center;gap:6px}.bk-tier b{font-size:14px;color:var(--ink)}
+.bk-meter{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px 3px 5px;background:#e6f8ee;border:2.5px solid #2ecb6e}
+.bk-meter b{font-size:14px;line-height:1;padding-top:2px;color:#1f9a55}
+.bk-meter.low,.bk-meter.over{background:#ffe9e6;border-color:#ff6b5e}.bk-meter.low b,.bk-meter.over b{color:#e8392b}
+.bk-pips{display:inline-flex;gap:3px}
+.bk-pips i{width:12px;height:12px;border-radius:50%;box-sizing:border-box;border:2px solid #2b2140}
+.bk-pips i.f{background:#2ecb6e}.bk-pips i.x{background:#ff6b5e}
+.bk-pips i.need{border-color:#ff6b5e;background:#fff}.bk-pips i.opt{border-color:#b9b1cc;background:#fff}
+.bk-hint{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:#8f86a6}
+.bk-hint.low,.bk-hint.over{color:#e8392b;font-size:13.5px}
+.bk-grid{height:calc(100% - 32px);justify-content:center;align-content:center;gap:16px 14px}
+.bk-grid.big{gap:10px}.bk-grid.big .bk-card{width:91px;height:128px}.bk-grid.big .bk-card .card{transform:scale(.38)}
+.bk-grid.quad{gap:8px 24px;padding:0 60px}.bk-grid.quad .bk-card{width:77px;height:108px}.bk-grid.quad .bk-card .card{transform:scale(.32)}
+.bk-tab{position:relative}.bk-tab.bad{background:#ffd9d4}.bk-tab.bad.on{background:#ff8a7e}
+.bk-tabwarn{position:absolute;right:-5px;top:-7px;width:15px;height:15px;border-radius:50%;background:#ff4d3d;color:#fff;border:2px solid var(--ink);font-size:10px;line-height:13px;text-align:center}
+.bk-spine i{display:flex;align-items:center;gap:4px}.bk-warn{display:inline-flex}.bk-warn svg{width:13px;height:13px}
