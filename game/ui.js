@@ -306,7 +306,8 @@ const CARDS_ALL = () => window.LS_CARDS.filter(c => !c.token && c.name !== 'Foll
 // ---- the Feed pool ("deck"): per tribe 2-3 cards per tier, plus 1 legendary (see deckToggle)
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
 function deckSet() {
-  if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
+  if (!PROF.deck) { PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name); PROF.flags.pool18 = false; }
+  if (!PROF.flags.pool18) { PROF.flags.pool18 = true; fixPool(); saveProfile(); }   // once: Update 7 moved cards between tiers
   return new Set(PROF.deck.filter(n => CARD[n] && cardOpen(CARD[n])).concat(CARDS_ALL().filter(c => c.tribe === 'Neutral' && !c.legendary && cardOpen(c)).map(c => c.name)));
 }
 const tribesOf = c => [c.tribe, c.tribe2].filter(Boolean);
@@ -315,6 +316,18 @@ const inTribe = (c, t) => tribesOf(c).includes(t);
 const TIER_MIN = 2, TIER_MAX = 3, TRIBE_MAX = 18;   // TRIBE_MAX is only shown, the tiers already cap it
 const tierCount = (d, t, tier) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && x.tier === tier && d.has(x.name)).length;
 const tribeCount = (d, t) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && d.has(x.name)).length;
+/** Brings every tribe back to 2-3 per tier: drops the extra cards of a full tier, fills a short one with cards you own. */
+function fixPool() {
+  const inPool = n => PROF.deck.includes(n), count = (t, k) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && x.tier === k && inPool(x.name) && cardOpen(x)).length;
+  for (const t of TRIBE_ORDER) { if (t === 'Neutral') continue;
+    for (let k = 1; k <= 6; k++) {
+      const tier = CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && x.tier === k);
+      for (const x of tier.filter(x => inPool(x.name)).reverse()) if (count(t, k) > TIER_MAX) PROF.deck = PROF.deck.filter(n => n !== x.name);
+      for (const x of tier.filter(x => !inPool(x.name) && cardOpen(x)))
+        if (count(t, k) < TIER_MIN && tribesOf(x).every(u => u === 'Neutral' || count(u, k) < TIER_MAX)) PROF.deck.push(x.name);
+    }
+  }
+}
 function deckToggle(c) {
   const d = deckSet(), on = d.has(c.name);
   if (on) {
@@ -353,7 +366,7 @@ function poolMeter(n, legend, min = legend ? 0 : TIER_MIN) {
  *  open but don't own are greyed out and can be crafted; cards from packs you can't open yet stay a "?". */
 function showCards(tribe = 'Hustler', o = {}) {
   clear(); G.screen = 'cards'; AU.music('hold');
-  const room = el('div', 'ab bk-room', '', stage); css(room, {left: 0, top: 0, width: W, height: H});
+  const room = el('div', 'ab bk-room', '', stage); css(room, {left: -600, top: -400, width: W + 1200, height: H + 800});   // bleeds past the game area to the screen edges
   collectionTabs('cards');
   const clout = el('span', 'ab wal bk-clout', '', stage); css(clout, {left: 586, top: 15});
   const shelf = el('div', 'ab bk-shelf', '', stage); css(shelf, {left: 14, top: 64, width: 106, height: 318});
@@ -374,6 +387,7 @@ function showCards(tribe = 'Hustler', o = {}) {
     const w = el('div', 'bk-card' + (on ? ' on' : own ? ' off' : craft ? ' craft' : ' lock') + (c.name === mark ? ' mark' : ''), hidden ? mysteryCardHTML(c, `${SET[c.set].name} packs · level ${SET[c.set].lv}`) : cardHTML(c), page);
     if (on) el('span', 'bk-tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 18, 3.6), w);
     if (neutral && own) el('span', 'bk-always bd', 'Always in', w);
+    else if (on) el('span', 'bk-always bk-in bd', 'In pool', w);
     if (hidden) { el('span', 'bk-lock', LOCK, w); w.onclick = () => { sfx('pop'); toast(`In ${SET[c.set].name} packs, from level ${SET[c.set].lv}`); }; return w; }
     if (craft) {
       const cost = craftCost(c), afford = (PROF.clout || 0) >= cost;
@@ -402,14 +416,14 @@ function showCards(tribe = 'Hustler', o = {}) {
     const neutral = cur === 'Neutral' && key !== 'L', legend = key === 'L';
     const n = legend ? cs.filter(c => d.has(c.name)).length : neutral ? cs.filter(c => cardOpen(c)).length : tierCount(d, cur, key);
     const min = legend || neutral ? 0 : tierMin(cur, key), st = neutral ? 'ok' : legend ? (n > 1 ? 'over' : 'ok') : tierState(n, min);
-    const per = Math.ceil(cs.length / 2), size = per <= 3 ? ' big' : ' quad';   // one row of up to 3, or 2 by 2
+    const per = Math.ceil(cs.length / 2);   // the tier is split over both pages, small cards in up to two rows per page
     const L = el('div', 'bk-page l', '', null), R = el('div', 'bk-page r', '', null);
     L.innerHTML = `<div class="bk-ph"><span class="bk-tier">${legend ? '<span class="bd leg">Legendaries</span>' : `${fmtStars(key, 15)}<b class="bd">Tier ${key}</b>`}</span>${neutral ? `<span class="bk-count bd">${n} owned</span>` : poolMeter(n, legend, legend ? 0 : min)}</div>`;
     const hint = neutral ? 'Neighbours are always in your pool' : legend ? (n ? 'Your legendary is in' : 'Optional: one at most') :
       st === 'low' ? `Pick ${min - n} more` : st === 'over' ? `${n - TIER_MAX} too many` : `Pick ${min} to ${TIER_MAX}`;
     R.innerHTML = `<div class="bk-ph r"><span class="bk-hint bd ${st}">${st === 'ok' ? '' : WARN_ICO}${hint}</span></div>`;
     [[L, cs.slice(0, per)], [R, cs.slice(per)]].forEach(([pg, part]) => {
-      const grid = el('div', 'bk-grid' + size, '', pg);
+      const grid = el('div', 'bk-grid sm', '', pg);   // two pockets per row, filled from the top like a binder page
       for (const c of part) cardEl(c, grid, d);
     });
     if (!cs.length) el('p', 'bk-empty', 'No cards here', L.querySelector('.bk-grid'));

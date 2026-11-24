@@ -11,7 +11,8 @@ OUT = R / 'game/changelog.js'
 sys.path.insert(0, str(R / 'sim'))
 from cards import RENAMED   # v15: cards that moved tribe got new names; the log shows them as changed cards
 VERSIONS = [  # (label, date, base rev, head rev; None = working copy). Group releases into larger updates.
-    ('Update 6', '2026-11-19', '238be25', None),   # playstyle swap (Followers <-> Attention Seekers), Connect, card updates
+    ('Update 7', '2026-11-24', '01dc89a', None),   # Philosophers: three tier-3 cards move to tier 4
+    ('Update 6', '2026-11-19', '238be25', '01dc89a'),   # playstyle swap (Followers <-> Attention Seekers), Connect, card updates
     ('Update 5', '2026-11-10', '34d6ceb', '238be25'),   # rewards track: the other 64 cards, 7 new playstyles
     ('Update 4', '2026-11-10', 'f44361b', '34d6ceb'),   # rewards track: first 14 track cards, Crust Punk wording
     ('Update 3', '2026-11-08', '0265f56', 'f44361b'),

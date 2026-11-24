@@ -720,3 +720,9 @@ for _c in ALL + LEGENDS:
     _c.set = 1 if _c.name in _SET1 else 2 if (_c.name in _SET2 or _c.style in _SET2_STYLES) else 3 if _c.name in _SET3 else None
 _bad = [c.name for c in ALL + LEGENDS if (getattr(c, 'track', None) or getattr(c, 'legendary', False)) and not c.set]
 assert not _bad, _bad
+
+# v18 (Nov 24): Philosophers had 8 cards at tier 3 and 2 at tier 4. Three move up, so tier 3 and 4 hold five each
+# and both keep a Biggest Idea, a Followers and a Minimalism card.
+_V18 = {'The Academy': (4, 4, 5), 'Thought Experiment': (4, 4, 4), 'Mystery Cult': (4, 3, 6)}
+for _c in PHILOSOPHERS:
+    if _c.name in _V18: _c.tier, _c.atk, _c.hp = _V18[_c.name]

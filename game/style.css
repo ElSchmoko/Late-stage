@@ -802,3 +802,23 @@ button{font:inherit;color:inherit}
 .bk-tab{position:relative}.bk-tab.bad{background:#ffd9d4}.bk-tab.bad.on{background:#ff8a7e}
 .bk-tabwarn{position:absolute;right:-5px;top:-7px;width:15px;height:15px;border-radius:50%;background:#ff4d3d;color:#fff;border:2px solid var(--ink);font-size:10px;line-height:13px;text-align:center}
 .bk-spine i{display:flex;align-items:center;gap:4px}.bk-warn{display:inline-flex}.bk-warn svg{width:13px;height:13px}
+/* v19: rooms bleed past the 844x390 game area so wide or notched screens show no hard edge */
+.bk-room::after{top:766px;bottom:0;height:auto}
+.shop,.po{overflow:visible}
+.sh-wall{inset:-400px -600px}
+.sh-counter{left:-600px;right:-600px;bottom:-400px}
+.po-bg{inset:-400px -600px}
+/* v19b: small cards (as with 8 per page), selected cards stand out */
+.bk-grid.sm{width:190px;margin:0 auto;gap:22px 48px;padding-top:6px;box-sizing:border-box;justify-content:flex-start;align-content:flex-start}
+.bk-grid.sm .bk-card{width:71px;height:100px}.bk-grid.sm .bk-card .card{transform:scale(.295)}
+.bk-card{transition:transform .18s}
+.bk-card .card{z-index:1}
+.bk-card.on{transform:translateY(-3px)}
+.bk-card.on::before{content:'';position:absolute;left:-6px;top:-6px;right:-6px;bottom:-6px;border-radius:11px;background:#2ecb6e;border:2.5px solid var(--ink);box-shadow:0 0 0 3px #fff,0 0 16px 4px rgba(46,203,110,.75);z-index:0}
+.bk-card.on .card{box-shadow:none}
+.bk-card.off .card{filter:saturate(.25) brightness(1.05);opacity:.5;box-shadow:none}
+.bk-card.off::before{content:'';position:absolute;left:-4px;top:-4px;right:-4px;bottom:-4px;border-radius:9px;border:2px dashed #b9b1cc;z-index:0}
+.bk-tick{width:24px;height:24px;right:-10px;top:-11px}.bk-tick svg{width:15px;height:15px}
+.bk-info{left:-10px;top:-11px}
+.bk-in{background:#2ecb6e;bottom:-12px;font-size:9.5px;padding:2px 7px 1px;box-shadow:0 0 0 2px #fff}
+.bk-card .bk-always{bottom:-12px}
