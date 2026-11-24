@@ -303,8 +303,7 @@ function collectionTabs(on) {
 }
 const TRIBE_ORDER = ['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher', 'Neutral'];
 const CARDS_ALL = () => window.LS_CARDS.filter(c => !c.token && c.name !== 'Follower');
-// ---- the Feed pool ("deck"): 3 cards per tier per tribe, 1 legendary per tribe; legendaries unlock on the rewards track (or at 1000 rating before it existed)
-const PER_TIER = 3;
+// ---- the Feed pool ("deck"): per tribe 2-4 cards per tier, 18 at most, 1 legendary (see deckToggle)
 const LEGENDS = () => CARDS_ALL().filter(c => c.legendary);
 function deckSet() {
   if (!PROF.deck) PROF.deck = CARDS_ALL().filter(c => c.tribe !== 'Neutral' && E.inDeck(c, null)).map(c => c.name);
@@ -312,16 +311,22 @@ function deckSet() {
 }
 const tribesOf = c => [c.tribe, c.tribe2].filter(Boolean);
 const inTribe = (c, t) => tribesOf(c).includes(t);
+// ---- Feed pool rules: per tribe, 2 to 4 cards per tier and at most 18 in all; one legendary per tribe (not counted)
+const TIER_MIN = 2, TIER_MAX = 4, TRIBE_MAX = 18;
+const tierCount = (d, t, tier) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && x.tier === tier && d.has(x.name)).length;
+const tribeCount = (d, t) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && d.has(x.name)).length;
 function deckToggle(c) {
   const d = deckSet(), on = d.has(c.name);
   if (on) {
-    if (!c.legendary) for (const t of tribesOf(c)) if (CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length <= 1) return 'last';
+    if (!c.legendary) for (const t of tribesOf(c)) if (t !== 'Neutral' && tierCount(d, t, c.tier) <= TIER_MIN) return 'min';
     PROF.deck = PROF.deck.filter(n => n !== c.name);
   } else {
     if (!cardOpen(c)) return 'locked';
     for (const t of tribesOf(c)) {
-      if (t !== 'Neutral' && CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && d.has(x.name)).length >= PER_TIER) return 'full';
-      if (c.legendary && CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name))) return 'legend';
+      if (c.legendary) { if (CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name))) return 'legend'; continue; }
+      if (t === 'Neutral') continue;
+      if (tierCount(d, t, c.tier) >= TIER_MAX) return 'full';
+      if (tribeCount(d, t) >= TRIBE_MAX) return 'tribe';
     }
     PROF.deck.push(c.name);
   }
@@ -329,59 +334,100 @@ function deckToggle(c) {
 }
 const locked0 = c => !cardOpen(c);
 const LOCK = ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 26);
-function showCards(tribe = 'Hustler') {
-  clear(); G.screen = 'cards'; bg(true); AU.music('hold');
+const TOGGLE_MSG = {min: `Keep at least ${TIER_MIN} per tier`, full: `${TIER_MAX} per tier at most`, tribe: `${TRIBE_MAX} cards per tribe at most`, legend: 'One legendary per tribe'};
+/** Collection › Cards: a card book per tribe on a shelf; each spread shows two tiers (the last one the legendaries).
+ *  Tap a card you own to put it in or take it out of your Feed pool; the ⓘ shows it big. Cards from packs you can
+ *  open but don't own are greyed out and can be crafted; cards from packs you can't open yet stay a "?". */
+function showCards(tribe = 'Hustler', o = {}) {
+  clear(); G.screen = 'cards'; AU.music('hold');
+  const room = el('div', 'ab bk-room', '', stage); css(room, {left: 0, top: 0, width: W, height: H});
   collectionTabs('cards');
-  const p = el('div', 'panel logpanel', '', stage); css(p, {left: 24, top: 64, width: W - 48, height: H - 76});
-  const nav = el('div', 'loghead', '', p); const tabs = el('div', 'logtabs', '', nav); tabs.style.justifyContent = 'flex-start';
-  el('span', 'wal clout-float', `${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i>`, p);
-  const body = el('div', 'logbody deck', '', p);
-  const show = (tribe, keep) => {
-    tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === tribe));
-    const st = body.scrollTop; body.innerHTML = ''; const d = deckSet(), neutral = tribe === 'Neutral';
-    const all = CARDS_ALL().filter(c => inTribe(c, tribe));
-    const addCard = (c, row) => {
-      const fixed = neutral && !c.legendary, on = (fixed && !locked0(c)) || d.has(c.name), locked = !cardOpen(c);
-      // cards you don't own: in a set you can open, they show and can be crafted; in a later set they stay a surprise
-      const mystery = locked && !setOpen(c.set), at = locked ? `${SET[c.set].name} · Lv ${SET[c.set].lv}` : '';
-      const w = el('div', 'logcard pick' + (on ? ' on' : '') + (locked ? ' locked' : '') + (mystery ? ' mystery' : ''), mystery ? mysteryCardHTML(c, at) : cardHTML(c), row);
-      if (on && !fixed) el('span', 'tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 22, 3.6), w);
-      if (mystery) { el('span', 'lock', LOCK, w); el('b', 'legat lv', at, w); w.setAttribute('aria-label', 'Mystery card'); w.onclick = () => { sfx('pop'); toast(`In ${SET[c.set].name} packs, from level ${SET[c.set].lv}`); }; return; }
-      if (locked) {
-        const cost = craftCost(c), afford = (PROF.clout || 0) >= cost;
-        el('b', 'craftbdg bd' + (afford ? ' ok' : ''), `${CLOUT_ICO(14)} ${cost}`, w);
-        w.onclick = () => showDetail(c, null, [{label: `Craft ${CLOUT_ICO(18)} ${cost}`, color: '#b18cff', disabled: !afford, fn: () => {
-          PROF.clout -= cost; gainCardOwned(c); saveProfile(); sfx('triple'); toast(`${c.name} crafted${deckSet().has(c.name) ? ' and added to your pool' : ''}`); show(tribe, true);
-          const nw = body.querySelector(`[data-n="${CSS.escape(c.name)}"]`); if (nw) { const r = nw.getBoundingClientRect(), sr = stage.getBoundingClientRect(); confetti((r.left + r.width / 2 - sr.left) / SCALE, (r.top - sr.top) / SCALE + 60, 30); }
-        }}]);
-        w.dataset.n = c.name; return;
-      }
-      w.dataset.n = c.name;
-      w.onclick = () => showDetail(c, null, fixed ? [] : [{label: on ? 'Remove from pool' : 'Add to pool', fn: () => {
-        const r = deckToggle(c);
-        if (r === 'ok') { sfx(on ? 'pop' : 'buy'); show(tribe, true); return; }
-        sfx('error'); show(tribe, true);
-        const rr = body.querySelector(`.tierrow[data-tier="${c.tier}"]`);
-        if (r === 'legend') { const g = body.querySelector('.legrow'); g && g.classList.add('flash'); toast('One legendary per tribe'); }
-        else if (rr) { rr.classList.add('flash'); toast(r === 'last' ? 'Keep at least one per tier' : `${PER_TIER} per tier`); }
-      }}]);
-    };
-    if (all.some(c => c.legendary)) {   // legendaries first, in their own row; they still take a slot in their tier
-      const lg = all.filter(c => c.legendary), on = lg.filter(c => d.has(c.name)).length;
-      const row = el('div', 'tierrow legrow', `<div class="tierlab"><span class="gem${on ? ' on' : ''}"></span></div>`, body);
-      for (const c of lg) addCard(c, row);
+  const clout = el('span', 'ab wal bk-clout', '', stage); css(clout, {left: 586, top: 15});
+  const shelf = el('div', 'ab bk-shelf', '', stage); css(shelf, {left: 14, top: 64, width: 106, height: 318});
+  const book = el('div', 'ab bk-book', '', stage); css(book, {left: 130, top: 70, width: 700, height: 312});
+  const SPREADS = [[1, 2], [3, 4], [5, 6], ['L', 'info']];
+  let cur = tribe, spread = o.tier ? SPREADS.findIndex(s => s.includes(o.tier)) : 0, mark = o.mark || null;
+  const renderShelf = () => {
+    shelf.innerHTML = ''; const d = deckSet();
+    for (const t of TRIBE_ORDER) {
+      const n = t === 'Neutral' ? null : tribeCount(d, t), sp = el('button', 'bk-spine' + (t === cur ? ' on' : ''), `<b class="bd">${t === 'Neutral' ? 'Neighbours' : TP[t]}</b>${n != null ? `<i>${n}/${TRIBE_MAX}</i>` : '<i>always in</i>'}`, shelf);
+      sp.style.setProperty('--tc', TC[t]);
+      sp.onclick = () => { if (t === cur) return; sfx('pickup'); cur = t; spread = 0; mark = null; renderShelf(); renderBook(true); };
     }
-    for (let t = 1; t <= 6; t++) {
-      const cs = all.filter(c => c.tier === t && !c.legendary).sort((a, b) => a.name.localeCompare(b.name)); if (!cs.length) continue;
-      const n = all.filter(c => c.tier === t && d.has(c.name)).length;
-      const row = el('div', 'tierrow', `<div class="tierlab">${fmtStars(t, 13)}${neutral ? '' : `<div class="slots">${[0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`}</div>`, body);
-      row.dataset.tier = t;
-      for (const c of cs) addCard(c, row);
-    }
-    if (keep) body.scrollTop = st;
   };
-  for (const t of TRIBE_ORDER) { const b = el('button', 'logtab', t === 'Neutral' ? 'Neighbours' : TP[t] || t + 's', tabs); b.dataset.t = t; b.onclick = () => { sfx('pop'); show(t); }; }
-  show(tribe);
+  const cardEl = (c, page, d) => {
+    const neutral = cur === 'Neutral' && !c.legendary, own = cardOpen(c), on = own && (neutral || d.has(c.name));
+    const craft = !own && setOpen(c.set), hidden = !own && !craft;
+    const w = el('div', 'bk-card' + (on ? ' on' : own ? ' off' : craft ? ' craft' : ' lock') + (c.name === mark ? ' mark' : ''), hidden ? mysteryCardHTML(c, `${SET[c.set].name} packs · level ${SET[c.set].lv}`) : cardHTML(c), page);
+    if (on) el('span', 'bk-tick', ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 18, 3.6), w);
+    if (neutral && own) el('span', 'bk-always bd', 'Always in', w);
+    if (hidden) { el('span', 'bk-lock', LOCK, w); w.onclick = () => { sfx('pop'); toast(`In ${SET[c.set].name} packs, from level ${SET[c.set].lv}`); }; return w; }
+    if (craft) {
+      const cost = craftCost(c), afford = (PROF.clout || 0) >= cost;
+      el('span', 'bk-craft bd' + (afford ? ' ok' : ''), `${CLOUT_ICO(13)} ${cost}`, w);
+      w.onclick = () => showDetail(c, null, [{label: `Craft ${CLOUT_ICO(18)} ${cost}`, color: '#b18cff', disabled: !afford, fn: () => {
+        PROF.clout -= cost; gainCardOwned(c); saveProfile(); sfx('triple'); mark = c.name;
+        toast(`${c.name} crafted${deckSet().has(c.name) ? ' and put in your pool' : ''}`); renderShelf(); renderBook(false);
+        const nw = book.querySelector('.bk-card.mark'); if (nw) { const r = rectOf(nw); confetti(r.x + r.w / 2, r.y + r.h / 2, 30); }
+      }}]);
+      return w;
+    }
+    const info = el('button', 'bk-info bd', 'i', w);
+    info.onclick = e => { e.stopPropagation(); showDetail(c, null, neutral ? [] : [{label: on ? 'Take out of the pool' : 'Put in the pool', color: on ? '#ffc928' : '#2ecb6e', fn: () => toggle(c)}]); };
+    if (!neutral) w.onclick = () => toggle(c);
+    else w.onclick = () => showDetail(c, null);
+    return w;
+  };
+  const toggle = c => {
+    const was = deckSet().has(c.name), r = deckToggle(c);
+    if (r !== 'ok') { sfx('error'); toast(TOGGLE_MSG[r] || 'Not possible'); const ct = book.querySelector(`.bk-count[data-t="${c.legendary ? 'L' : c.tier}"]`); if (ct) anim(ct, [{transform: 'scale(1)'}, {transform: 'scale(1.35)'}, {transform: 'scale(1)'}], {duration: 360, raw: true}); return; }
+    sfx(was ? 'pop' : 'buy'); mark = c.name; renderShelf(); renderBook(false);
+  };
+  const pageEl = (key, side, d) => {
+    const pg = el('div', `bk-page ${side}`, '', null);
+    if (key === 'info') {
+      const n = cur === 'Neutral' ? null : tribeCount(d, cur);
+      pg.innerHTML = `<p class="bk-ph bd">Your Feed pool</p><div class="bk-rules">
+        ${n != null ? `<p class="big bd">${n}<small>/${TRIBE_MAX}</small></p><p>${TP[cur]} in your Feed pool</p>` : '<p class="big bd">∞</p><p>Neighbours are always in the Feed</p>'}
+        <ul><li><b>${TIER_MIN}–${TIER_MAX}</b> cards per tier</li><li>At most <b>${TRIBE_MAX}</b> per tribe</li><li><b>1</b> legendary per tribe</li></ul>
+        <p class="hint">Tap a card to put it in or take it out. ⓘ shows it big. Greyed-out cards can be crafted with ${CLOUT_ICO(13)} Clout.</p></div>`;
+      return pg;
+    }
+    const cs = CARDS_ALL().filter(c => inTribe(c, cur) && (key === 'L' ? c.legendary : !c.legendary && c.tier === key)).sort((a, b) => (cardOpen(b) - cardOpen(a)) || a.name.localeCompare(b.name));
+    const n = key === 'L' ? cs.filter(c => d.has(c.name)).length : cur === 'Neutral' ? cs.filter(c => cardOpen(c)).length : tierCount(d, cur, key);
+    const need = key === 'L' ? 1 : TIER_MIN, ok = key === 'L' ? n <= 1 : cur === 'Neutral' || n >= TIER_MIN;
+    pg.innerHTML = `<div class="bk-ph">${key === 'L' ? '<span class="bd leg">Legendaries</span>' : fmtStars(key, 15)}<span class="bk-count bd${ok ? '' : ' low'}" data-t="${key}">${cur === 'Neutral' && key !== 'L' ? `${n} owned` : `${n}/${need}`}</span></div>`;
+    const grid = el('div', 'bk-grid' + (cs.length > 6 ? ' dense' : ''), '', pg);
+    for (const c of cs) cardEl(c, grid, d);
+    if (!cs.length) el('p', 'bk-empty', 'No cards here', grid);
+    return pg;
+  };
+  const renderBook = (fresh, dir = 0) => {
+    const d = deckSet();
+    book.style.setProperty('--tc', TC[cur]);
+    book.innerHTML = `<div class="bk-cover"></div><div class="bk-gutter"></div>`;
+    const tabs = el('div', 'bk-tabs', '', book);
+    SPREADS.forEach((sp, i) => {
+      for (const k of sp) { if (k === 'info') continue;
+        const tb = el('button', 'bk-tab bd' + (i === spread ? ' on' : ''), k === 'L' ? '✦' : `${k}★`, tabs);
+        tb.onclick = () => { if (i === spread) return; const dd = i > spread ? 1 : -1; spread = i; sfx('scroll'); renderBook(false, dd); };
+      }
+    });
+    const [a, b] = SPREADS[spread];
+    const L = pageEl(a, 'l', d), R = pageEl(b, 'r', d); book.appendChild(L); book.appendChild(R);
+    el('div', 'bk-title bd', `${cur === 'Neutral' ? 'Neighbours' : TP[cur]}`, book);
+    const arrows = [[-1, 'prev', '‹'], [1, 'next', '›']];
+    for (const [dd, cls, t] of arrows) { const ar = el('button', `bk-arrow ${cls} bd`, t, book); ar.disabled = spread + dd < 0 || spread + dd >= SPREADS.length; ar.onclick = () => { spread += dd; sfx('scroll'); renderBook(false, dd); }; }
+    clout.innerHTML = `${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i>`;
+    if (fresh) anim(book, [{transform: 'translateX(-40px) rotate(-2deg)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 360, easing: 'cubic-bezier(.3,1.3,.5,1)', raw: true});
+    else if (dir) {   // a page turns
+      const turn = dir > 0 ? R : L;
+      anim(turn, [{transform: `rotateY(${dir > 0 ? 75 : -75}deg)`, opacity: .3}, {transform: 'rotateY(0)', opacity: 1}], {duration: 380, easing: 'cubic-bezier(.3,1.2,.5,1)', raw: true});
+      anim(dir > 0 ? L : R, [{opacity: .4}, {opacity: 1}], {duration: 300, raw: true});
+    }
+    const mk = book.querySelector('.bk-card.mark'); if (mk && fresh !== false) setTimeout(() => mk.scrollIntoView({block: 'nearest'}), 50);
+  };
+  renderShelf(); renderBook(true);
 }
 // New legendary cards: one pop-up per newly unlocked batch, with a three-step tutorial the first time.
 function legendPopup() {
@@ -442,7 +488,7 @@ function showHeroCard(slug) {
 
 // ---------------------------------------------------------------- hero select
 function showHeroSelect() {
-  clear(); G.screen = 'heroes'; bg(false); G.rated = false; G.xpGain = 0; G.cashGain = 0; AU.music('hold');
+  clear(); G.screen = 'heroes'; bg(false); G.rated = false; G.xpGain = 0; G.cashGain = 0; G.talentAsked = false; AU.music('hold');
   const seed = (Date.now() ^ (Math.random() * 1e9)) >>> 0;
   G.seed = seed;
   const rng = E.RNG(seed);
@@ -1621,25 +1667,49 @@ const rarityOf = c => c.legendary ? 'legendary' : c.tier >= 5 ? 'epic' : c.tier 
 // Tuned so a full collection takes about 430 runs (half of the cards much sooner); see docs/card-packs.md.
 const ODDS = {first: [['common', 65], ['rare', 27], ['epic', 8]], last: [['rare', 69], ['epic', 25], ['legendary', 6]]};
 const PITY = 10;   // a legendary is guaranteed in the 10th pack of a set without one
-// ---- the Levels track: each fork offers two of these; a pick is permanent
-const BONUS = {
-  pack: {v: 5, label: 'Packs cost 5% less', sum: v => `Packs −${v}%`, ico: '<rect x="5" y="3" width="14" height="18" rx="2" fill="#ffc928"></rect><path d="M8 8h8M8 12h5"></path>'},
-  clout: {v: 10, label: '+10% Clout from duplicates', sum: v => `Clout +${v}%`, ico: '<path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" fill="#b18cff"></path>'},
-  cash: {v: 5, label: '+5% Cash from runs', sum: v => `Cash +${v}%`, ico: '<rect x="3" y="6" width="18" height="12" rx="2" fill="#7fd99a"></rect><circle cx="12" cy="12" r="3"></circle>'},
-  xp: {v: 5, label: '+5% XP from runs', sum: v => `XP +${v}%`, ico: '<path d="M4 18l5-6 4 3 7-9" fill="none"></path><path d="M15 6h5v5" fill="none"></path>'},
-  craft: {v: 5, label: 'Crafting costs 5% less', sum: v => `Crafting −${v}%`, ico: '<path d="M5 19l8-8M13 6l5 5-3 3-5-5z" fill="#ffd98f"></path>'},
-  shield: {v: 1, label: '+1 Boundaries in every run', sum: v => `Boundaries +${v}`, ico: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z" fill="#c9c2d6"></path>'},
-  free: {v: 1, label: 'A free pack now', sum: v => `${v} free pack${v > 1 ? 's' : ''}`, ico: '<rect x="4" y="9" width="16" height="11" rx="2" fill="#ff8ab8"></rect><path d="M4 13h16M12 9v11M12 9c-2-4-6-4-6-1s6 1 6 1 6 2 6-1-4-3-6 1"></path>'},
-  pity: {v: 2, label: 'Legendary guaranteed 2 packs sooner', sum: v => `Legendary ${v} packs sooner`, ico: '<path d="M12 3l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 10l6-1z" fill="#ffd84a"></path>'},
+// ---- the Levels track is a talent tree. Levels 1, 5, 10 … 30 are milestones (packs, bigger packs); every other level
+// you pick one talent from one of three directions. A pick is permanent.
+const TALENT_ICO = {
+  cash: '<rect x="2.5" y="6" width="19" height="12" rx="2.5" fill="#7fd99a"></rect><circle cx="12" cy="12" r="3" fill="#fff"></circle>',
+  pack: '<rect x="6" y="2.5" width="12" height="19" rx="2" fill="#ffc928"></rect><path d="M6 6.5h12M6 17.5h12"></path><path d="M12 9l1.4 2.6 2.6.4-2 1.8.5 2.7-2.5-1.4-2.5 1.4.5-2.7-2-1.8 2.6-.4z" fill="#fff" stroke-width="1.4"></path>',
+  flat: '<circle cx="12" cy="12" r="8.5" fill="#ffc928"></circle><path d="M12 7.5v9M9.5 9.5h4a1.8 1.8 0 0 1 0 3.5h-3a1.8 1.8 0 0 0 0 3.5h4"></path>',
+  free: '<rect x="4" y="9" width="16" height="11" rx="2" fill="#ff8ab8"></rect><path d="M4 13h16M12 9v11M12 9c-2-4-6-4-6-1s6 1 6 1 6 2 6-1-4-3-6 1"></path>',
+  clout: '<path d="M12 2.5l2.7 6 6.5.6-4.9 4.3 1.5 6.4L12 16.5l-5.8 3.3 1.5-6.4L2.8 9.1l6.5-.6z" fill="#b18cff"></path>',
+  craft: '<path d="M4 20l8.5-8.5" stroke-width="3"></path><path d="M12 6.5l5.5 5.5 3-3L15 3.5z" fill="#ffd98f"></path>',
+  pity: '<path d="M12 3l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6L3 10l6-1z" fill="#ffd84a"></path><path d="M12 9v4l2 1.5" stroke-width="1.8"></path>',
+  luck: '<path d="M12 21c-5-3.5-8-6.5-8-10.5a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 4-3 7-8 10.5z" fill="#2ecb6e"></path><path d="M12 9v12"></path>',
+  xp: '<path d="M3 18l6-6.5 4 3.5 8-9" fill="none"></path><path d="M15 5.5h6v6" fill="none"></path>',
+  top4: '<path d="M7 3h10v6a5 5 0 0 1-10 0z" fill="#ffc928"></path><path d="M12 14v4M8 21h8"></path>',
+  shield: '<path d="M12 2.5l8 3v6.5c0 5-4 8.5-8 9.5-4-1-8-4.5-8-9.5V5.5z" fill="#c9c2d6"></path>',
 };
-const FORKS = {2: ['pack', 'clout'], 3: ['cash', 'xp'], 4: ['shield', 'free'], 6: ['craft', 'pity'], 7: ['pack', 'cash'], 8: ['clout', 'xp'], 9: ['free', 'craft'],
-  11: ['shield', 'pack'], 12: ['cash', 'clout'], 13: ['xp', 'free'], 14: ['craft', 'pity'], 16: ['pack', 'cash'], 17: ['free', 'clout'], 18: ['xp', 'craft'],
-  19: ['free', 'pity'], 21: ['cash', 'pack'], 22: ['clout', 'craft'], 23: ['shield', 'xp'], 24: ['free', 'cash'], 26: ['pack', 'clout'], 27: ['craft', 'pity'],
-  28: ['cash', 'xp'], 29: ['free', 'pack'], 30: ['craft', 'clout']};
-const RT_TRACK = Array.from({length: RT_LEVELS}, (_, i) => {
-  const lv = i + 1, cost = rtCost(lv), s = SETS.find(x => x.lv === lv), z = {5: 1, 15: 2, 25: 3}[lv];
-  return s ? {lv, cost, kind: 'set', set: s.id} : z ? {lv, cost, kind: 'size', set: z} : {lv, cost, kind: 'fork', opts: FORKS[lv]};
-});
+const BONUS = {
+  cash: {v: 5, label: '+5% Cash from runs', sum: v => `Cash +${v}%`},
+  pack: {v: 3, label: 'Packs cost 3% less', sum: v => `Packs −${v}%`},
+  flat: {v: 4, label: '+4 Cash after every run', sum: v => `+${v} Cash a run`},
+  free: {v: 1, label: 'A free pack, right now', sum: v => `${v} free pack${v > 1 ? 's' : ''}`},
+  clout: {v: 10, label: '+10% Clout from duplicates', sum: v => `Clout +${v}%`},
+  craft: {v: 4, label: 'Crafting costs 4% less', sum: v => `Crafting −${v}%`},
+  pity: {v: 1, label: 'Guaranteed legendary 1 pack sooner', sum: v => `Pity −${v}`},
+  luck: {v: 1, label: '+1% legendary chance', sum: v => `Legendary +${v}%`},
+  xp: {v: 5, label: '+5% XP from runs', sum: v => `XP +${v}%`},
+  top4: {v: 10, label: '+10 XP for a top-4 finish', sum: v => `Top 4 +${v} XP`},
+  shield: {v: 1, label: '+1 Boundaries in every run', sum: v => `Boundaries +${v}`},
+};
+const DIRS = [
+  {id: 'money', name: 'Passive Income', col: '#2ecb6e', pale: '#d9f6e2', ico: 'cash', blurb: 'More Cash, cheaper packs, free packs', cycle: ['cash', 'pack', 'flat', 'free']},
+  {id: 'clout', name: 'Clout Chasing', col: '#b18cff', pale: '#ece3ff', ico: 'clout', blurb: 'More Clout, cheaper crafting, luckier packs', cycle: ['clout', 'craft', 'luck', 'pity']},
+  {id: 'grind', name: 'Grindset', col: '#ff8a3d', pale: '#ffe4d1', ico: 'xp', blurb: 'Level faster, start runs sturdier', cycle: ['xp', 'top4', 'xp', 'top4']},
+];
+const MILESTONES = {1: {kind: 'set', set: 1}, 5: {kind: 'size', set: 1}, 10: {kind: 'set', set: 2}, 15: {kind: 'size', set: 2}, 20: {kind: 'set', set: 3}, 25: {kind: 'size', set: 3}, 30: {kind: 'final'}};
+const RT_TRACK = (() => {
+  let row = 0;
+  return Array.from({length: RT_LEVELS}, (_, i) => {
+    const lv = i + 1, cost = rtCost(lv), m = MILESTONES[lv];
+    if (m) return Object.assign({lv, cost}, m);
+    const k = row++;   // talent rows: each direction cycles through its talents; Grindset's Boundaries come three times
+    return {lv, cost, kind: 'talent', row: k, opts: DIRS.map(d => d.id === 'grind' && [9, 19, 29].includes(lv) ? 'shield' : d.cycle[k % 4])};
+  });
+})();
 /** Level and progress for a total XP amount. */
 function rtProgressOf(total) {
   let level = 0, xp = total;
@@ -1648,12 +1718,14 @@ function rtProgressOf(total) {
 }
 const rtProgress = () => rtProgressOf(PROF.xp || 0);
 const rtLevel = () => rtProgress().level;
-const forkPick = lv => (PROF.forks || {})[lv];
-const forkOpen = () => RT_TRACK.filter(r => r.kind === 'fork' && r.lv <= rtLevel() && forkPick(r.lv) == null);
-/** Sum of a bonus over the forks picked so far. */
-function bonus(k) { let s = 0; for (const r of RT_TRACK) if (r.kind === 'fork' && forkPick(r.lv) != null && r.opts[forkPick(r.lv)] === k) s += BONUS[k].v; return s; }
+const forkPick = lv => (PROF.talents || {})[lv];
+const forkOpen = () => RT_TRACK.filter(r => r.kind === 'talent' && r.lv <= rtLevel() && forkPick(r.lv) == null);
+/** Sum of a bonus over the talents picked so far. */
+function bonus(k) { let s = 0; for (const r of RT_TRACK) if (r.kind === 'talent' && forkPick(r.lv) != null && r.opts[forkPick(r.lv)] === k) s += BONUS[k].v; return s; }
+const dirPoints = i => RT_TRACK.filter(r => r.kind === 'talent' && forkPick(r.lv) === i).length;
 const setOpen = id => rtLevel() >= SET[id].lv;
 const packSize = id => 2 + RT_TRACK.filter(r => r.kind === 'size' && r.set === id && r.lv <= rtLevel()).length;
+const legChance = () => ODDS.last.find(x => x[0] === 'legendary')[1] + bonus('luck');
 const packPrice = id => Math.round(SET[id].price * (1 - bonus('pack') / 100));
 const craftCost = c => Math.round(RAR[rarityOf(c)].craft * (1 - bonus('craft') / 100));
 const dupClout = c => Math.round(RAR[rarityOf(c)].clout * (1 + bonus('clout') / 100));
@@ -1679,13 +1751,14 @@ if (!PROF.packs) {
   const own = new Set(); let xp = PROF.xp || 0;
   for (let lv = 0; lv < OLD_TRACK.length && xp >= 300 + 50 * lv; lv++) { xp -= 300 + 50 * lv; OLD_TRACK[lv].forEach(n => own.add(n)); }
   for (const [at, ns] of OLD_LEGS) if (rmBest() >= at) ns.forEach(n => own.add(n));
-  Object.assign(PROF, {packs: 1, owned: [...own], cash: (PROF.games || 0) > 0 ? 200 : 0, clout: 0, forks: {}, free: {}, pity: {}, lvGranted: 0, lvSeen: rtProgressOf(PROF.xp || 0).level, cos: {owned: [], eq: {}}});   // levels already reached: no pop-ups, just the open forks
+  Object.assign(PROF, {packs: 1, owned: [...own], cash: (PROF.games || 0) > 0 ? 200 : 0, clout: 0, talents: {}, free: {}, pity: {}, lvGranted: 0, lvSeen: rtProgressOf(PROF.xp || 0).level, cos: {owned: [], eq: {}}});   // levels already reached: no pop-ups, just the open forks
   saveProfile();
 }
+PROF.talents = PROF.talents || {}; PROF.free = PROF.free || {}; PROF.pity = PROF.pity || {};
 /** Free packs for the set levels reached (also after an XP change while the app was closed). */
 function syncLevels() {
   const lvl = rtLevel(); let changed = false;
-  for (let lv = (PROF.lvGranted || 0) + 1; lv <= lvl; lv++) { const r = RT_TRACK[lv - 1]; if (r.kind === 'set') { PROF.free[r.set] = freePacks(r.set) + 1; changed = true; } PROF.lvGranted = lv; changed = true; }
+  for (let lv = (PROF.lvGranted || 0) + 1; lv <= lvl; lv++) { const r = RT_TRACK[lv - 1]; if (r.kind === 'set') { PROF.free[r.set] = freePacks(r.set) + 1; changed = true; } if (r.kind === 'final') for (const x of SETS) PROF.free[x.id] = freePacks(x.id) + 1; PROF.lvGranted = lv; changed = true; }
   if (changed) saveProfile();
 }
 syncLevels();
@@ -1693,7 +1766,7 @@ syncLevels();
 function poolAdd(c) {
   const d = deckSet(); if (!PROF.deck || d.has(c.name) || c.tribe === 'Neutral' && !c.legendary) return false;
   for (const t of tribesOf(c)) {
-    if (c.legendary ? CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name)) : CARDS_ALL().filter(x => inTribe(x, t) && x.tier === c.tier && !x.legendary && d.has(x.name)).length >= PER_TIER) return false;
+    if (c.legendary ? CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name)) : tierCount(d, t, c.tier) >= TIER_MAX || tribeCount(d, t) >= TRIBE_MAX) return false;
   }
   PROF.deck.push(c.name); return true;
 }
@@ -1709,7 +1782,7 @@ function rollPack(id) {
   PROF.pity[id] = (PROF.pity[id] || 0) + 1;
   for (let i = 0; i < n; i++) {
     const last = i === n - 1;
-    let r = roll(last ? ODDS.last : ODDS.first);
+    let r = roll(last ? ODDS.last.map(([q, w]) => [q, q === 'legendary' ? legChance() : q === 'rare' ? w - bonus('luck') : w]) : ODDS.first);
     if (last && PROF.pity[id] >= pityLimit()) r = 'legendary';
     r = near(r);
     if (r === 'legendary') PROF.pity[id] = 0;
@@ -1731,269 +1804,296 @@ const canOpen = id => setOpen(id) && (freePacks(id) > 0 || (PROF.cash || 0) >= p
 const CASH_ICO = (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2.5" fill="#7fd99a" stroke="#2b2140" stroke-width="2.4"/><circle cx="12" cy="12" r="3" fill="#fff" stroke="#2b2140" stroke-width="2"/></svg>`;
 const CLOUT_ICO = (s = 18) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.7 6 6.5.6-4.9 4.3 1.5 6.4L12 16.5l-5.8 3.3 1.5-6.4L2.8 9.1l6.5-.6z" fill="#b18cff" stroke="#2b2140" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
 const wallet = () => `<span class="wal">${CASH_ICO()}<b>${(PROF.cash || 0).toLocaleString('en')}</b><i>Cash</i></span><span class="wal">${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i></span>`;
-/** A pack: crimped foil wrapper in the set's colours. */
+/** A pack, the size of a card (240 x 336): crimped foil wrapper, the set's featured legendary in a window. */
+const PACK_FEATURE = {1: 'The Billionaire', 2: 'Tech Founder', 3: 'Cover Band'};
 function packHTML(s, o = {}) {
-  return `<div class="pack${o.locked ? ' locked' : ''}" style="--c1:${s.col};--c2:${s.col2}"><svg viewBox="0 0 120 160" aria-hidden="true">
-    <path d="M0 10 ${Array.from({length: 13}, (_, i) => `L${i * 10} ${i % 2 ? 4 : 10}`).join(' ')} L120 150 ${Array.from({length: 13}, (_, i) => `L${120 - i * 10} ${i % 2 ? 156 : 150}`).join(' ')} Z" fill="url(#pg${s.id})" stroke="#2b2140" stroke-width="4" stroke-linejoin="round"/>
-    <defs><linearGradient id="pg${s.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.col}"/><stop offset="1" stop-color="${s.col2}"/></linearGradient></defs>
-    <path d="M0 22H120M0 138H120" stroke="#2b2140" stroke-width="3"/><path d="M-10 120L60 10M20 150L110 10" stroke="#fff" stroke-opacity=".35" stroke-width="10"/>
-    <circle cx="60" cy="62" r="22" fill="#fff" stroke="#2b2140" stroke-width="3.5"/><path d="M60 46l4.5 9.5 10.5 1.3-7.8 7 2.2 10.4L60 69l-9.4 5.2 2.2-10.4-7.8-7 10.5-1.3z" fill="${s.col}" stroke="#2b2140" stroke-width="2.5" stroke-linejoin="round"/></svg>
-    <span class="pk-brand">LATE STAGE</span><span class="pk-name">${s.name}</span>${o.n ? `<span class="pk-n">${o.n} cards</span>` : ''}${o.locked ? `<span class="pk-lock">${LOCK}</span>` : ''}</div>`;
+  const W2 = 240, H2 = 336, crimp = (y, d) => Array.from({length: 25}, (_, i) => `L${i * 10} ${y + (i % 2 ? d : 0)}`).join(' ');
+  const feat = CARD[PACK_FEATURE[s.id]];
+  return `<div class="pack${o.locked ? ' locked' : ''}" style="--c1:${s.col};--c2:${s.col2}"><svg viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" aria-hidden="true">
+    <defs><linearGradient id="pg${s.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${s.col}"/><stop offset=".55" stop-color="${s.col2}"/><stop offset="1" stop-color="${s.col}"/></linearGradient>
+    <linearGradient id="ps${s.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity=".35"/></linearGradient></defs>
+    <path d="M0 26 ${crimp(26, -7).replace('L0 26 ', '')} L240 310 ${Array.from({length: 25}, (_, i) => `L${240 - i * 10} ${310 + (i % 2 ? 7 : 0)}`).join(' ')} Z" fill="url(#pg${s.id})" stroke="#2b2140" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M6 4h228v22H6z" fill="url(#ps${s.id})" stroke="#2b2140" stroke-width="4"/><path d="M6 310h228v22H6z" fill="url(#ps${s.id})" stroke="#2b2140" stroke-width="4"/>
+    ${Array.from({length: 23}, (_, i) => `<path d="M${10 + i * 10} 6v18M${10 + i * 10} 312v18" stroke="#2b2140" stroke-opacity=".25" stroke-width="2"/>`).join('')}
+    <path d="M-20 250L150 26M60 310L240 70" stroke="#fff" stroke-opacity=".28" stroke-width="22"/><path d="M110 310L240 140" stroke="#fff" stroke-opacity=".18" stroke-width="10"/>
+    <circle cx="120" cy="138" r="72" fill="#fff6dc" stroke="#2b2140" stroke-width="5"/><circle cx="120" cy="138" r="80" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="3 9"/></svg>
+    <div class="pk-win" style="background:${s.col}"><img src="${ART[feat ? feat.art : 'follower']}" alt="" draggable="false"></div>
+    <span class="pk-brand">LATE STAGE</span><span class="pk-set">SET ${s.id}</span><span class="pk-name">${s.name}</span>
+    ${o.n ? `<span class="pk-n">${o.n} cards</span>` : ''}${o.locked ? `<span class="pk-lock">${LOCK}</span>` : ''}${o.free ? `<span class="pk-freeb">FREE</span>` : ''}</div>`;
+}
+/** A pack element at a scale of the card size. */
+function packEl(s, scale, o = {}, parent = null) {
+  const w = el('div', 'packw', packHTML(s, o), parent); css(w, {width: 240 * scale, height: 336 * scale}); w.firstChild.style.transform = `scale(${scale})`; return w;
 }
 
-// ---------------------------------------------------------------- the Packs screen
+// ---------------------------------------------------------------- the card shop
 function showPacks() {
-  clear(); G.screen = 'packs'; bg(true); AU.music('hold');
+  clear(); G.screen = 'packs'; AU.music('hold');
+  const shop = el('div', 'ab shop', `<div class="sh-wall"></div><div class="sh-win"><i></i><i></i></div><div class="sh-neon bd">Late Stage <span>Cards</span></div>
+    <div class="sh-poster p1"><b class="bd">GOTTA<br>HIRE 'EM<br>ALL</b></div><div class="sh-poster p2"><b class="bd">NO<br>REFUNDS</b><i>(it's late stage)</i></div><div class="sh-poster p3"><b class="bd">1 LEGENDARY<br>PER BOX*</b><i>*maybe</i></div>
+    <div class="sh-shelf"><i class="br l"></i><i class="br r"></i></div><div class="sh-counter"><i class="top"></i></div>`, stage);
+  css(shop, {left: 0, top: 0, width: W, height: H});
   collectionTabs('packs');
-  const p = el('div', 'panel pk-panel', '', stage); css(p, {left: 24, top: 64, width: W - 48, height: H - 76});
-  const top = el('div', 'pk-top', `<div class="pk-wallet">${wallet()}</div>`, p);
-  const odds = el('button', 'pk-odds bd', 'Odds & crafting', top); odds.onclick = showOdds;
+  // the shopkeeper leans on the counter, the till shows your Cash, a jar holds your Clout
+  const keeper = el('img', 'ab sh-keeper', null, shop); keeper.src = ART.h_collector; css(keeper, {left: 692, top: 186, width: 150, height: 150});
+  anim(keeper, [{transform: 'translateY(0) rotate(0)'}, {transform: 'translateY(-3px) rotate(-2deg)'}, {transform: 'translateY(0) rotate(0)'}], {duration: 3200, iterations: Infinity, easing: 'ease-in-out', raw: true});
+  el('div', 'ab sh-front', '', shop);
+  const till = el('div', 'ab sh-till bd', `<div class="scr">${CASH_ICO(16)}<b>${(PROF.cash || 0).toLocaleString('en')}</b></div><i class="keys"></i><span>Cash</span>`, shop); css(till, {left: 18, top: 312});
+  const jar = el('div', 'ab sh-jar bd', `<div class="lid"></div><div class="glass">${CLOUT_ICO(14).repeat(Math.min(6, 1 + Math.floor((PROF.clout || 0) / 150)))}</div><b>${(PROF.clout || 0).toLocaleString('en')}</b><span>Clout</span>`, shop); css(jar, {left: 646, top: 306});
+  const leaf = el('button', 'ab sh-leaf bd', '<b>Odds &amp;<br>crafting</b><i>read me</i>', shop); css(leaf, {left: 614, top: 116}); leaf.onclick = showOdds;
+  const bell = el('div', 'ab sh-bell', '<i></i><b></b>', shop); css(bell, {left: 600, top: 340});
+  bell.onclick = () => { sfx('tick'); anim(bell, [{transform: 'rotate(0)'}, {transform: 'rotate(-12deg)'}, {transform: 'rotate(10deg)'}, {transform: 'rotate(0)'}], {duration: 300, raw: true}); toast(['Be right with you.', 'We do not do refunds.', 'Have you tried opening more packs?', 'Legendaries? Out back. Somewhere.'][Math.floor(Math.random() * 4)]); };
   SETS.forEach((s, i) => {
-    const open = setOpen(s.id), all = setCards(s.id), got = all.filter(c => owns(c.name)).length, fr = freePacks(s.id);
-    const col = el('div', 'pk-col' + (open ? '' : ' locked'), packHTML(s, {locked: !open, n: open ? packSize(s.id) : 0}) + `<p class="pk-t bd">${s.name}</p><p class="pk-b">${open ? s.blurb : `Opens at level ${s.lv}`}</p>
-      <div class="pk-prog"><i style="width:${Math.round(100 * got / all.length)}%"></i><b>${got} / ${all.length} cards</b></div>`, p);
-    css(col, {left: 22 + i * 262});
-    const pk = col.querySelector('.pack');
-    if (open) anim(pk, [{transform: 'rotate(-4deg) translateY(0)'}, {transform: 'rotate(-4deg) translateY(-5px)'}, {transform: 'rotate(-4deg) translateY(0)'}], {duration: 2200 + i * 300, iterations: Infinity, easing: 'ease-in-out', raw: true});
-    if (fr && open) el('span', 'pk-free bd', `${fr} free`, col);
-    const b = el('button', 'btn pk-buy', !open ? `${LOCK} Level ${s.lv}` : fr ? 'Open free pack' : `Open ${CASH_ICO(20)} ${packPrice(s.id)}`, col);
-    b.disabled = !canOpen(s.id); if (open && fr) b.classList.add('free');
-    b.onclick = () => { if (canOpen(s.id)) openPack(s.id); else { sfx('error'); toast(open ? 'Not enough Cash' : `Opens at level ${s.lv}`); } };
-    pk.onclick = () => b.onclick();
+    const open = setOpen(s.id), fr = freePacks(s.id), all = setCards(s.id), got = all.filter(c => owns(c.name)).length;
+    const x = 150 + i * 166, sc = .5;
+    const pw = packEl(s, sc, {locked: !open, n: open ? packSize(s.id) : 0, free: open && fr > 0}, shop); pw.classList.add('ab', 'sh-pack'); css(pw, {left: x, top: 100});
+    if (open) anim(pw, [{transform: 'rotate(-2deg) translateY(0)'}, {transform: 'rotate(1deg) translateY(-4px)'}, {transform: 'rotate(-2deg) translateY(0)'}], {duration: 2600 + i * 400, iterations: Infinity, easing: 'ease-in-out', raw: true});
+    else pw.style.transform = 'rotate(-2deg)';
+    // a paper price tag on a string below the shelf
+    const tag = el('div', `ab sh-tag bd${open ? '' : ' lock'}${fr && open ? ' free' : ''}`, `<i class="str"></i><b>${!open ? `${LOCK} Level ${s.lv}` : fr ? `FREE${fr > 1 ? ` ×${fr}` : ''}` : `${CASH_ICO(15)} ${packPrice(s.id)}`}</b><span>${s.name} · ${got}/${all.length}</span>`, shop);
+    css(tag, {left: x + 6, top: 278}); tag.style.transform = `rotate(${[-3, 2, -1][i]}deg)`;
+    const go = () => {
+      if (!open) { sfx('error'); anim(pw, [{transform: 'rotate(-2deg) translateX(0)'}, {transform: 'rotate(-2deg) translateX(-5px)'}, {transform: 'rotate(-2deg) translateX(5px)'}, {transform: 'rotate(-2deg) translateX(0)'}], {duration: 260, raw: true}); toast(`${s.name} opens at level ${s.lv}`); return; }
+      if (!canOpen(s.id)) { sfx('error'); toast('Not enough Cash'); anim(till, [{transform: 'translateX(0)'}, {transform: 'translateX(-5px)'}, {transform: 'translateX(5px)'}, {transform: 'translateX(0)'}], {duration: 260, raw: true}); return; }
+      openPack(s.id, rectOf(pw));
+    };
+    pw.onclick = go; tag.onclick = go;
   });
 }
 function showOdds() {
   sfx('open');
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
-  const p = el('div', 'panel pk-oddsp', '', ov); css(p, {left: 122, top: 20, width: 600, height: 350});
-  const row = r => `<span class="rar" style="background:${RAR[r].col}">${RAR[r].label}</span>`;
+  const p = el('div', 'panel pk-oddsp sh-paper', '', ov); css(p, {left: 122, top: 20, width: 600, height: 350});
+  const row = r => `<span class="rar" style="background:${RAR[r].col}">${RAR[r].label}</span>`, fake = r => ({tier: r === 'epic' ? 5 : r === 'rare' ? 3 : 1, legendary: r === 'legendary'});
+  const last = ODDS.last.map(([q, w]) => [q, q === 'legendary' ? legChance() : q === 'rare' ? w - bonus('luck') : w]);
   p.innerHTML = `<p class="bd" style="margin:0;font-size:22px">How packs work</p>
     <div class="pk-ocols"><div><p class="rt-cap">Every card but the last</p>${ODDS.first.map(([r, w]) => `<p>${row(r)} ${w}%</p>`).join('')}
-      <p class="rt-cap" style="margin-top:10px">The last card</p>${ODDS.last.map(([r, w]) => `<p>${row(r)} ${w}%</p>`).join('')}
+      <p class="rt-cap" style="margin-top:10px">The last card</p>${last.map(([r, w]) => `<p>${row(r)} ${w}%</p>`).join('')}
       <p class="pk-note">A legendary is guaranteed in the ${pityLimit()}th pack of a set without one.</p></div>
-    <div><p class="rt-cap">Duplicate gives · craft costs (Clout)</p>${RAR_ORDER.map(r => `<p>${row(r)} +${dupClout({tier: r === 'epic' ? 5 : r === 'rare' ? 3 : 1, legendary: r === 'legendary'})} · craft ${craftCost({tier: r === 'epic' ? 5 : r === 'rare' ? 3 : 1, legendary: r === 'legendary'})}</p>`).join('')}
-      <p class="pk-note">Rarity follows the tier: tiers 1–2 common, 3–4 rare, 5–6 epic. Craft missing cards in Collection › Cards.</p></div></div>
+    <div><p class="rt-cap">Duplicate gives · craft costs (Clout)</p>${RAR_ORDER.map(r => `<p>${row(r)} +${dupClout(fake(r))} · craft ${craftCost(fake(r))}</p>`).join('')}
+      <p class="pk-note">Rarity follows the tier: tiers 1–2 common, 3–4 rare, 5–6 epic. Craft missing cards in your card books (Collection › Cards).</p></div></div>
     <button class="btn close">Got it</button>`;
   p.querySelector('.close').onclick = () => ov.remove(); ov.querySelector('.dim').onclick = () => ov.remove();
 }
-/** Opening a pack: it shakes, tears open, the cards fan out face down and flip one by one (the best one last). */
-async function openPack(id) {
+/** Opening a pack, in a dark room under a spotlight: swipe across the top to tear it (or tap it three times), the cards
+ *  slide out and are dealt face down with a glow that hints at their rarity; tap each to reveal (the best one last). */
+async function openPack(id, from = null) {
   const res = buyPack(id); if (!res) return;
   const s = SET[id];
   res.sort((a, b) => RAR_ORDER.indexOf(rarityOf(a.c)) - RAR_ORDER.indexOf(rarityOf(b.c)));
-  sfx('open');
-  const ov = el('div', 'ab pk-open', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 98}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.9)';
-  const rays = el('div', 'pk-rays', '', ov);
-  const pk = el('div', 'ab', packHTML(s), ov); css(pk, {left: W / 2 - 75, top: 70, width: 150, height: 200});
-  await anim(pk, [{transform: 'translateY(240px) scale(.6) rotate(-12deg)'}, {transform: 'translateY(0) scale(1.05) rotate(3deg)', offset: .7}, {transform: 'scale(1) rotate(0)'}], {duration: 520, easing: 'ease-out', raw: true}).finished;
-  for (let k = 0; k < 3; k++) { sfx('tick', {n: k, gap: 0}); await anim(pk, [{transform: 'rotate(0)'}, {transform: `rotate(${k % 2 ? -5 : 5}deg) scale(${1 + k * .04})`}, {transform: 'rotate(0)'}], {duration: 150, raw: true}).finished; }
-  // tear: the top strip flies off, the wrapper drops away
-  const strip = el('div', 'ab pk-strip', '', ov); css(strip, {left: W / 2 - 75, top: 64, width: 150, height: 30, background: s.col});
-  sfx('scroll'); ring(W / 2, 170, '#fff', 200);
-  anim(strip, [{transform: 'translate(0,0) rotate(0)', opacity: 1}, {transform: 'translate(160px,-120px) rotate(40deg)', opacity: 0}], {duration: 500, easing: 'ease-out', fill: 'forwards', raw: true});
-  anim(pk, [{transform: 'translateY(0)', opacity: 1}, {transform: 'translateY(260px) rotate(8deg)', opacity: 0}], {duration: 480, delay: 120, easing: 'ease-in', fill: 'forwards', raw: true});
-  const n = res.length, gap = n > 3 ? 172 : 196;
-  const flips = res.map((r, i) => {
-    const rar = rarityOf(r.c), w = el('div', `ab rt-flip pk-card rar-${rar}`, `<div class="rt-back"><span class="bd">LATE<br>STAGE</span></div><div class="rt-front">${cardHTML(r.c)}</div>`, ov);
-    const x = W / 2 - 70 + (i - (n - 1) / 2) * gap; css(w, {left: x, top: 64}); w.style.setProperty('--rot', `${(i - (n - 1) / 2) * 4}deg`);
-    w.style.transform = 'rotate(var(--rot)) scale(.58)';
-    anim(w, [{transform: `translate(${W / 2 - 70 - x}px,40px) rotate(0) scale(.3)`, opacity: 0}, {transform: 'rotate(var(--rot)) scale(.58)', opacity: 1}], {duration: 460, delay: 140 + i * 90, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
-    return {w, r, rar, x};
+  sfx('pickup');
+  const ov = el('div', 'ab po', '<div class="po-bg"></div><div class="po-spot"></div><div class="po-dust"></div><div class="po-rays"></div><div class="po-flash"></div>', stage);
+  css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 98});
+  const dust = ov.querySelector('.po-dust'); for (let i = 0; i < 26; i++) { const d = el('i', '', '', dust); css(d, {left: Math.random() * W, top: Math.random() * H}); d.style.animationDelay = `-${(Math.random() * 6).toFixed(1)}s`; d.style.animationDuration = `${5 + Math.random() * 5}s`; }
+  anim(ov.querySelector('.po-bg'), [{opacity: 0}, {opacity: 1}], {duration: 400, fill: 'forwards', raw: true});
+  // the pack: a torn-off strip on top, the body below, the cards hidden inside
+  const SC = .78, PW = 240 * SC, PH = 336 * SC, px = W / 2 - PW / 2, py = 34;
+  const box = el('div', 'ab po-pack', '', ov); css(box, {left: px, top: py, width: PW, height: PH});
+  const stack = el('div', 'po-stack', res.map(() => '<div class="rt-back"><span class="bd">LATE<br>STAGE</span></div>').join(''), box);
+  const body = packEl(s, SC, {}, box); body.classList.add('po-body');
+  const strip = packEl(s, SC, {}, box); strip.classList.add('po-strip');
+  const hint = el('div', 'ab po-hint bd', `<span class="hand">👆</span> Swipe across the top to open`, ov); css(hint, {left: 0, right: 0, top: 352});
+  const f = from ? from : {x: W / 2 - 60, y: 120, w: 120, h: 168};
+  await anim(box, [{transform: `translate(${f.x + f.w / 2 - W / 2}px,${f.y + f.h / 2 - py - PH / 2}px) scale(${f.w / PW}) rotate(-6deg)`}, {transform: 'translate(0,-8px) scale(1.04) rotate(2deg)', offset: .75}, {transform: 'none'}], {duration: 620, easing: 'cubic-bezier(.3,1.3,.5,1)', raw: true}).finished;
+  anim(box, [{transform: 'translateY(0) rotate(0)'}, {transform: 'translateY(-4px) rotate(.8deg)'}, {transform: 'translateY(0) rotate(0)'}], {duration: 2200, iterations: Infinity, easing: 'ease-in-out', raw: true});
+  // tearing: follow the finger along the top; three taps tear it too
+  await new Promise(done => {
+    let prog = 0, sx = null, taps = 0, fin = false;
+    const set = p => { prog = Math.max(prog, Math.min(1, p)); strip.style.transform = `translate(${prog * 14}px,${-prog * 16}px) rotate(${-prog * 16}deg)`; strip.style.setProperty('--rip', `${Math.round(prog * 100)}%`); };
+    const finish = () => { if (fin) return; fin = true; ov.onpointerdown = ov.onpointermove = ov.onpointerup = null; done(); };
+    let moved = false, base = 0;
+    ov.onpointerdown = e => { sx = e.clientX; moved = false; base = prog; };
+    ov.onpointermove = e => { if (sx == null) return; const dx = (e.clientX - sx) / SCALE; if (Math.abs(dx) > 6) moved = true; const d = base + dx / PW; if (moved && d > prog) { set(d); if (Math.random() < .3) sfx('scroll', {gap: .08}); } if (prog > .8) finish(); };
+    ov.onpointerup = () => { sx = null; if (!moved) { taps++; set(taps / 3); sfx('tick', {n: taps, gap: 0}); anim(box, [{transform: 'rotate(0)'}, {transform: `rotate(${taps % 2 ? -3 : 3}deg) scale(1.03)`}, {transform: 'rotate(0)'}], {duration: 160, raw: true}); if (taps >= 3) finish(); } else if (prog < .8) set(prog); };
+    setTimeout(() => { if (!fin && prog === 0) hint.classList.add('nudge'); }, 2500);
   });
-  await sleep(700 + n * 90);
-  for (const f of flips) {
-    const big = f.rar === 'legendary' || f.rar === 'epic';
-    if (big) { f.w.classList.add('charge'); sfx('windup'); await sleep(f.rar === 'legendary' ? 900 : 450); }
-    f.w.classList.add('on'); sfx(f.rar === 'legendary' ? 'triple' : 'pop');
-    const cx = f.x + 70, cy = 160;
-    if (f.rar === 'legendary') { ring(cx, cy, '#ffc928', 220); confetti(cx, cy, 50); rays.classList.add('on'); }
-    else if (f.rar === 'epic') ring(cx, cy, '#b18cff', 160);
-    const tag = el('div', 'ab pk-tag bd', `<span class="rar" style="background:${RAR[f.rar].col}">${RAR[f.rar].label}</span>${f.r.fresh ? '<span class="new">NEW</span>' : `<span class="dup">${CLOUT_ICO(14)} +${f.r.clout}</span>`}`, ov);
-    css(tag, {left: f.x - 30, top: 284, width: 200});
-    anim(tag, [{transform: 'translateY(10px)', opacity: 0}, {transform: 'translateY(0)', opacity: 1}], {duration: 260, raw: true});
-    await sleep(380);
-  }
-  const fresh = res.filter(r => r.fresh).length, cl = res.reduce((a, r) => a + r.clout, 0);
-  const sum = el('p', 'ab bd pk-sum', `${fresh ? `${fresh} new card${fresh > 1 ? 's' : ''}` : 'No new cards'}${cl ? ` · ${CLOUT_ICO(16)} +${cl} Clout` : ''}`, ov); css(sum, {left: 0, right: 0, top: 18});
-  const again = el('button', 'btn', canOpen(id) ? (freePacks(id) ? 'Open another (free)' : `Open another ${CASH_ICO(18)} ${packPrice(id)}`) : 'Out of Cash', ov);
-  css(again, {left: W / 2 - 210, top: 326, width: 230, height: 46, fontSize: '17px', background: '#ffc928'}); again.disabled = !canOpen(id);
-  const done = el('button', 'btn', 'Done', ov); css(done, {left: W / 2 + 36, top: 328, width: 130, height: 42, fontSize: '18px', background: '#2ecb6e'});
-  again.onclick = () => { ov.remove(); openPack(id); };
-  done.onclick = () => { ov.remove(); if (G.screen === 'packs') showPacks(); };
-  for (const f of flips) f.w.onclick = () => showDetail(f.r.c, null);
+  hint.remove(); box.getAnimations().forEach(a => a.cancel());
+  sfx('scroll'); sfx('sparkle');
+  anim(strip, [{transform: getComputedStyle(strip).transform}, {transform: 'translate(220px,-170px) rotate(-70deg)', opacity: 0}], {duration: 520, easing: 'ease-in', fill: 'forwards', raw: true});
+  const glow = el('div', 'po-glow', '', box); anim(glow, [{opacity: 0}, {opacity: 1, offset: .3}, {opacity: 0}], {duration: 900, fill: 'forwards', raw: true});
+  // the cards rise out, the wrapper drops away
+  await sleep(220);
+  await anim(stack, [{transform: 'translateY(0)'}, {transform: `translateY(-${PH * .55}px)`}], {duration: 520, easing: 'cubic-bezier(.3,1.2,.6,1)', fill: 'forwards', raw: true}).finished;
+  anim(body, [{transform: 'translateY(0)', opacity: 1}, {transform: 'translateY(260px) rotate(6deg)', opacity: 0}], {duration: 480, easing: 'ease-in', fill: 'forwards', raw: true});
+  await sleep(160);
+  stack.style.visibility = 'hidden';
+  // deal face down; the glow at the edges hints at what is inside
+  const n = res.length, CS = .62, CW = 240 * CS, gap = n > 2 ? 194 : 220;
+  const cards = res.map((r, i) => {
+    const rar = rarityOf(r.c), x = W / 2 - CW / 2 + (i - (n - 1) / 2) * gap, y = 54;
+    const w = el('div', `ab rt-flip po-card rar-${rar}`, `<div class="rt-back"><span class="bd">LATE<br>STAGE</span></div><div class="rt-front">${cardHTML(r.c)}</div>`, ov);
+    css(w, {left: x, top: y}); w.style.transformOrigin = 'top left';
+    const rot = (i - (n - 1) / 2) * 3;
+    w.animate([{transform: `translate(${W / 2 - CW / 2 - x}px,${py + 20 - y}px) scale(${CS * .8}) rotate(0)`}, {transform: `translate(0,0) scale(${CS}) rotate(${rot}deg)`}], {duration: 460, delay: i * 120, easing: 'cubic-bezier(.3,1.3,.5,1)', fill: 'both'});
+    setTimeout(() => sfx('pick', {gap: 0}), i * 120);
+    return {w, r, rar, x, y, rot, shown: false};
+  });
+  await sleep(460 + n * 120);
+  const reveal = el('button', 'btn po-all', 'Reveal all', ov); css(reveal, {left: W / 2 - 70, top: 336, width: 140, height: 40, fontSize: '16px'});
+  const tip = el('div', 'ab po-hint bd', 'Tap a card to reveal it', ov); css(tip, {left: 0, right: 0, top: 300});
+  let busy = false;
+  const flip = async c => {
+    if (c.shown) return; c.shown = true; tip.remove();
+    const big = c.rar === 'legendary' || c.rar === 'epic';
+    if (big) { c.w.classList.add('charge'); sfx('charge'); await sleep(c.rar === 'legendary' ? 1000 : 520); c.w.classList.remove('charge'); }
+    c.w.classList.add('on'); sfx(c.rar === 'legendary' ? 'triple' : c.rar === 'epic' ? 'levelup' : 'pop');
+    const cx = c.x + CW / 2, cy = c.y + 336 * CS / 2;
+    if (c.rar === 'legendary') { anim(ov.querySelector('.po-flash'), [{opacity: .9}, {opacity: 0}], {duration: 700, raw: true}); ov.querySelector('.po-rays').classList.add('on'); ring(cx, cy, '#ffc928', 260); confetti(cx, cy, 60); anim(ov, [{transform: 'translate(0,0)'}, {transform: 'translate(4px,-3px)'}, {transform: 'translate(-3px,2px)'}, {transform: 'translate(0,0)'}], {duration: 260, raw: true}); }
+    else if (c.rar === 'epic') { ring(cx, cy, '#b18cff', 190); confetti(cx, cy, 18); }
+    else if (c.rar === 'rare') ring(cx, cy, '#5ab8ff', 140);
+    await sleep(420);
+    const face = c.w.querySelector('.rt-front');
+    if (c.r.fresh) {
+      const nb = el('div', 'po-new bd', 'NEW', face); anim(nb, [{transform: 'scale(2.4) rotate(-30deg)', opacity: 0}, {transform: 'scale(1) rotate(-12deg)', opacity: 1}], {duration: 320, easing: 'cubic-bezier(.3,1.5,.5,1)', fill: 'both', raw: true}); sfx('sparkle');
+    } else {
+      // a duplicate fades back and shows what it turned into
+      anim(face.firstChild, [{opacity: 1, filter: 'grayscale(0)'}, {opacity: .42, filter: 'grayscale(.6)'}], {duration: 600, easing: 'ease-out', fill: 'forwards', raw: true});
+      const st = el('div', 'po-dup bd', `${CLOUT_ICO(44)}<b>+${c.r.clout}</b><i>duplicate</i>`, face);
+      anim(st, [{transform: 'translate(-50%,-50%) scale(2.2) rotate(18deg)', opacity: 0}, {transform: 'translate(-50%,-50%) scale(1) rotate(-6deg)', opacity: 1}], {duration: 360, delay: 260, easing: 'cubic-bezier(.3,1.5,.5,1)', fill: 'both', raw: true});
+      setTimeout(() => sfx('coin'), 300);
+    }
+  };
+  const after = () => {
+    reveal.remove();
+    const fresh = res.filter(r => r.fresh), cl = res.reduce((a, r) => a + r.clout, 0);
+    const sum = el('div', 'ab po-sum bd', `${fresh.length ? `${fresh.length} new card${fresh.length > 1 ? 's' : ''}` : 'No new cards'}${cl ? ` <span>${CLOUT_ICO(16)} +${cl} Clout</span>` : ''}`, ov); css(sum, {left: 0, right: 0, top: 12});
+    anim(sum, [{transform: 'translateY(-20px)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 300, raw: true});
+    const bar = el('div', 'ab po-bar', '', ov); css(bar, {left: 0, right: 0, top: 334});
+    const col = el('button', 'btn', `${ico('<rect x="4" y="4" width="7" height="16" rx="1.5" fill="#ff8ab8"></rect><rect x="13" y="4" width="7" height="16" rx="1.5" fill="#8fd4ff"></rect>', 20)} Collection`, bar); col.style.background = '#8fd4ff';
+    const again = el('button', 'btn', canOpen(id) ? (freePacks(id) ? 'Open another · free' : `Open another ${CASH_ICO(18)} ${packPrice(id)}`) : 'Out of Cash', bar); again.style.background = '#ffc928'; again.disabled = !canOpen(id);
+    const back = el('button', 'btn', 'Back to the shop', bar); back.style.background = '#2ecb6e';
+    const first = (fresh[0] || res[res.length - 1]).c;
+    col.onclick = () => { ov.remove(); showCards(first.tribe, {tier: first.legendary ? 'L' : first.tier, mark: first.name}); };
+    again.onclick = () => { ov.remove(); showPacks(); openPack(id); };
+    back.onclick = () => { ov.remove(); showPacks(); };
+    for (const c of cards) c.w.onclick = () => showDetail(c.r.c, null);
+  };
+  for (const c of cards) c.w.onclick = async () => { if (busy || c.shown) return; busy = true; await flip(c); busy = false; if (cards.every(x => x.shown)) after(); };
+  reveal.onclick = async () => { if (busy) return; busy = true; reveal.disabled = true; for (const c of cards) await flip(c); busy = false; after(); };
 }
 
-// ---- scenery: three small props per stop, themed after the tribe it unlocks
-const RT_PROPS = (() => {
-  const g = s => `<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="#2b2140" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">${s}</g></svg>`;
-  return {
-    Hustler: [
-      g('<rect x="16" y="6" width="32" height="54" rx="3" fill="#b8ecc9"/><path d="M24 14h4M36 14h4M24 24h4M36 24h4M24 34h4M36 34h4"/><rect x="27" y="46" width="10" height="14" fill="#14a052"/>'),
-      g('<path d="M12 44v8c0 4 9 7 20 7s20-3 20-7v-8" fill="#e0a800"/><ellipse cx="32" cy="44" rx="20" ry="7" fill="#ffc928"/><path d="M18 30v8c0 4 6 6 14 6s14-2 14-6v-8" fill="#e0a800"/><ellipse cx="32" cy="30" rx="14" ry="6" fill="#ffc928"/>'),
-      g('<path d="M24 22v-6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6" fill="none"/><rect x="8" y="22" width="48" height="34" rx="6" fill="#a0694a"/><path d="M8 36h48"/><rect x="28" y="32" width="8" height="8" rx="2" fill="#ffc928"/>')],
-    Influencer: [
-      g('<rect x="18" y="4" width="28" height="56" rx="7" fill="#fff"/><path d="M32 42c-7-5-11-8-11-13a5.5 5.5 0 0 1 11-2 5.5 5.5 0 0 1 11 2c0 5-4 8-11 13z" fill="#ff6b5e"/><path d="M28 10h8"/>'),
-      g('<path d="M32 42v18M22 60h20"/><circle cx="32" cy="24" r="18" fill="none" stroke-width="10"/><circle cx="32" cy="24" r="18" fill="none" stroke="#fff6c2" stroke-width="4"/>'),
-      g('<path d="M6 10h52v30H28l-11 11V40H6z" fill="#ff8ab8"/><path d="M32 33c-5-3-8-6-8-9a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 3-3 6-8 9z" fill="#fff" stroke-width="2.5"/>')],
-    Feral: [
-      g('<path d="M32 60V36" stroke-width="6"/><circle cx="32" cy="25" r="20" fill="#9bd65a"/><circle cx="24" cy="20" r="4" fill="#d4e24a" stroke="none"/><circle cx="40" cy="30" r="3" fill="#d4e24a" stroke="none"/>'),
-      g('<path d="M5 58c-2-10 6-17 13-14 2-9 15-11 19-2 9-4 20 3 17 11 6 2 6 5 4 5z" fill="#7cc24a"/><circle cx="22" cy="48" r="2.5" fill="#ff6b5e" stroke="none"/><circle cx="40" cy="44" r="2.5" fill="#ff6b5e" stroke="none"/>'),
-      g('<path d="M22 16l-4-10 9 6M42 16l4-10-9 6" fill="#9aa7b8"/><path d="M14 22h36l-4 38H18z" fill="#9aa7b8"/><rect x="10" y="14" width="44" height="9" rx="3" fill="#6f7d92"/><path d="M27 30v22M37 30v22"/>')],
-    Creative: [
-      g('<path d="M20 61l12-50 12 50M25 50h14" fill="none"/><rect x="10" y="8" width="44" height="32" rx="3" fill="#fff"/><path d="M16 34l9-11 6 6 7-9 10 14z" fill="#b18cff"/><circle cx="44" cy="16" r="3" fill="#ffc928"/>'),
-      g('<path d="M24 46V13l26-7v34" fill="none" stroke-width="4"/><ellipse cx="17" cy="47" rx="9" ry="7" fill="#b18cff"/><ellipse cx="43" cy="41" rx="9" ry="7" fill="#b18cff"/>'),
-      g('<path d="M32 8C16 8 6 20 6 32s10 24 22 24c6 0 7-6 3-10s0-8 6-8h10c8 0 12-6 12-12C59 16 46 8 32 8z" fill="#ffe08a"/><circle cx="19" cy="27" r="4.5" fill="#ff6b5e"/><circle cx="31" cy="18" r="4.5" fill="#5ab8ff"/><circle cx="44" cy="23" r="4.5" fill="#2ecb6e"/>')],
-    Techie: [
-      g('<path d="M18 34V12M46 34V12"/><path d="M23 24a13 13 0 0 1 18 0M27.5 29a6 6 0 0 1 9 0" fill="none"/><rect x="8" y="34" width="48" height="20" rx="6" fill="#5ab8ff"/><circle cx="18" cy="44" r="2.5" fill="#2ecb6e"/><circle cx="27" cy="44" r="2.5" fill="#2ecb6e"/>'),
-      g('<path d="M8 14a30 30 0 0 0 40 40z" fill="#e8f4ff"/><path d="M28 34l15-15"/><circle cx="45" cy="17" r="4.5" fill="#5ab8ff"/><path d="M26 61h22l-5-10H31z" fill="#9aa7b8"/>'),
-      g('<rect x="16" y="4" width="32" height="56" rx="4" fill="#3d4a66"/><path d="M16 22h32M16 40h32M30 13h12M30 31h12M30 49h12"/><circle cx="23" cy="13" r="2.5" fill="#2ecb6e"/><circle cx="23" cy="31" r="2.5" fill="#ffc928"/><circle cx="23" cy="49" r="2.5" fill="#2ecb6e"/>')],
-    Punk: [
-      g('<rect x="10" y="8" width="44" height="52" rx="5" fill="#3a3045"/><circle cx="32" cy="38" r="14" fill="#6a5d7a"/><circle cx="32" cy="38" r="5" fill="#2b2140"/><path d="M16 17h10M38 17h2M44 17h2" stroke="#ff8a3d"/>'),
-      g('<rect x="21" y="20" width="22" height="40" rx="6" fill="#ff8a3d"/><rect x="27" y="11" width="10" height="9" rx="2" fill="#fff"/><path d="M45 12l7-4M46 17h8M45 22l7 4"/><path d="M21 34h22" /><path d="M27 42l4 8 4-6 3 5" stroke="#fff" stroke-width="2.5" fill="none"/>'),
-      g('<rect x="6" y="16" width="52" height="42" rx="2" fill="#e8b89c"/><path d="M6 30h52M6 44h52M22 16v14M42 16v14M32 30v14M16 44v14M48 44v14"/><path d="M34 18l-10 18h10l-6 18 16-24H34l6-12z" fill="#ffc928" stroke-width="2.5"/>')],
-    Philosopher: [
-      g('<rect x="12" y="6" width="40" height="9" rx="2" fill="#fff"/><rect x="17" y="15" width="30" height="37" fill="#e3f8f5"/><path d="M25 17v33M32 17v33M39 17v33"/><rect x="10" y="52" width="44" height="9" rx="2" fill="#fff"/>'),
-      g('<rect x="10" y="46" width="46" height="12" rx="2" fill="#4fd1c5"/><rect x="14" y="34" width="40" height="12" rx="2" fill="#ff8ab8"/><rect x="8" y="22" width="42" height="12" rx="2" fill="#ffc928"/><path d="M14 22l4-14 6 14" fill="#fff"/>'),
-      g('<path d="M32 4a17 17 0 0 0-10 30c3 3 4 6 4 10h12c0-4 1-7 4-10A17 17 0 0 0 32 4z" fill="#fff1a6"/><path d="M26 50h12M28 57h8M27 26l5 6 5-6"/>')],
-    Neutral: [
-      g('<path d="M8 30L32 10l24 20v30H8z" fill="#f2ead9"/><rect x="27" y="40" width="11" height="20" fill="#c88a5a"/><rect x="14" y="34" width="9" height="9" fill="#8fd4ff"/><rect x="42" y="34" width="9" height="9" fill="#8fd4ff"/>'),
-      g('<path d="M8 60V30l5-6 5 6v30M26 60V30l5-6 5 6v30M44 60V30l5-6 5 6v30" fill="#fff"/><path d="M4 38h56M4 50h56"/>'),
-      g('<rect x="14" y="20" width="36" height="40" rx="3" fill="#ffc928"/><path d="M14 32h36M32 20v40"/><path d="M24 20l8-10 8 10" fill="#ff8ab8"/>')],
-    Legend: [
-      g('<path d="M20 8h24v15a12 12 0 0 1-24 0z" fill="#ffc928"/><path d="M20 13h-8c0 8 4 12 10 13M44 13h8c0 8-4 12-10 13" fill="none"/><path d="M32 35v10"/><path d="M22 60h20l-3-15H25z" fill="#e0a800"/>'),
-      g('<path d="M32 4l8 17 19 3-14 13 4 19-17-9-17 9 4-19L5 24l19-3z" fill="#ffd84a"/>'),
-      g('<path d="M10 60l14-44h16l14 44z" fill="#fff6c2" stroke-dasharray="4 5"/><rect x="20" y="6" width="24" height="12" rx="4" fill="#3a3045"/>')],
-  };
-})();
-const RT_GROUND = {Hustler: '#bfe9cd', Influencer: '#ffd3e4', Feral: '#e6efa6', Creative: '#ddd0ff', Techie: '#c6e5ff', Punk: '#ffd2b3', Philosopher: '#bdeee9', Neutral: '#efe7d7', Legend: '#ffeaa0'};
-
-
-/** A locked card in Collection: tribe and tier show, the rest stays a surprise. */
+/** A locked card: tribe and tier show, the rest stays a surprise. */
 function mysteryCardHTML(c, at) {
   const tr = c.tribe, lab = tr === 'Neutral' ? 'NEIGHBOUR' : tr.toUpperCase();
   const bgc = c.tribe2 ? `background-image:linear-gradient(135deg,${TC[tr]} 50%,${TC[c.tribe2]} 50%)` : `background-color:${TC[tr]}`;
   const tag = c.tribe2 ? `<span class="trb" style="background:${TC[tr]}">${lab}</span><span class="trb" style="background:${TC[c.tribe2]}">${c.tribe2.toUpperCase()}</span>` : `<span class="trb" style="background:${TC[tr]}">${lab}</span>`;
   return `<div class="card rt-card${c.legendary ? ' legend' : ''}"><div class="art" style="${bgc}">${RT_SIL}<span class="rt-q">?</span></div>${c.legendary ? '<i class="foil"></i>' : ''}
     <p class="nm" style="font-size:21px">???</p><div class="meta${c.tribe2 ? ' duo' : ''}">${tag}${fmtStars(c.tier, c.tribe2 ? 11 : c.tier <= 4 ? 16 : 13)}</div>
-    <p class="txt" style="font-size:14px;color:#8f86a6">A surprise.</p><div class="sa">?</div><div class="sh">?</div></div>`;
+    <p class="txt" style="font-size:14px;color:#8f86a6">${at || 'A surprise.'}</p><div class="sa">?</div><div class="sh">?</div></div>`;
 }
 
-// ---------------------------------------------------------------- Levels track: a board-game road with packs, pack sizes and forks
+// ---------------------------------------------------------------- Levels: the talent tree
 const RT_SIL = '<svg class="rt-sil" viewBox="0 0 68 68" aria-hidden="true"><circle cx="34" cy="27" r="13"/><path d="M7 72c2-17 13-26 27-26s25 9 27 26z"/></svg>';
 const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
 const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
-const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Track complete'}</b></div>`;
-const rtWhat = r => r.kind === 'set' ? `New packs: ${SET[r.set].name}` : r.kind === 'size' ? `${SET[r.set].name} packs: +1 card` : 'Choose a bonus';
-const rtTribeOf = r => TRIBE_ORDER[(r.lv * 3) % 8];   // scenery only
-/** What a stop on the road offers: a pack, or a fork with its two options. */
-function rtReward(r, st, parent, o = {}) {
-  const box = el('div', 'rt-rw ' + r.kind, '', parent);
-  if (r.kind !== 'fork') {
-    const s = SET[r.set];
-    box.innerHTML = `<div class="rt-mini">${packHTML(s, {locked: st === 'locked'})}${r.kind === 'size' ? '<span class="rt-plus bd">+1</span>' : ''}</div><p class="rt-glab">${r.kind === 'set' ? `<small>New packs</small>${s.name}` : `<small>Bigger packs</small>${s.name} +1 card`}</p>`;
-    return box;
-  }
-  const pick = forkPick(r.lv), choose = st === 'done' && pick == null;
-  box.innerHTML = r.opts.map((k, i) => `<button class="rt-opt${pick === i ? ' on' : pick != null ? ' off' : ''}${choose ? ' choose' : ''}" data-i="${i}">${ico(BONUS[k].ico, 18, 2.2)}<span>${BONUS[k].label}</span></button>`).join('<b class="rt-or">or</b>');
-  box.querySelectorAll('.rt-opt').forEach(b => b.onclick = e => { e.stopPropagation(); if (choose) forkPop(r, o.after); else { sfx('pop'); toast(pick != null ? (pick === +b.dataset.i ? 'Your pick' : 'Not picked') : `Choose at level ${r.lv}`); } });
-  return box;
-}
+const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Tree complete'}</b></div>`;
+const latestSet = () => SETS.filter(s => setOpen(s.id)).pop().id;
+const msText = r => r.kind === 'set' ? [`New packs: ${SET[r.set].name}`, 'Your first pack is free'] : r.kind === 'size' ? [`${SET[r.set].name} packs: +1 card`, `${packSize(r.set) + (r.lv > rtLevel() ? 1 : 0)} cards a pack`] : ['The last level', 'A free pack of every set'];
+const tIco = (k, s = 24, sw = 2.2) => ico(TALENT_ICO[k], s, sw);
 function bonusSummary() {
   const on = Object.keys(BONUS).filter(k => k !== 'free').map(k => [k, bonus(k)]).filter(([, v]) => v);
-  return on.length ? on.map(([k, v]) => `<span class="rt-bon">${ico(BONUS[k].ico, 14, 2.4)}${BONUS[k].sum(v)}</span>`).join('') : '<span class="rt-bon none">No bonuses yet</span>';
+  return on.length ? on.map(([k, v]) => `<span class="rt-bon">${tIco(k, 13, 2.4)}${BONUS[k].sum(v)}</span>`).join('') : '<span class="rt-bon none">No talents yet</span>';
 }
 function showTrack(kind = 'xp') {
   if (kind === 'rating') return showNightLine();
   clear(); G.screen = 'rewards'; bg(true); AU.music('hold');
   collectionTabs('levels');
-  const P = rtProgress(), done = P.level >= RT_LEVELS, nxt = RT_TRACK[Math.min(P.level, RT_LEVELS - 1)];
-  const side = el('div', 'panel rt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
-  side.innerHTML = `<div class="rt-head"><div class="rt-lvl"><span class="bd">${P.level}</span></div><p class="bd rt-lvlt">Level ${P.level}<small>of ${RT_LEVELS}</small></p></div>
+  const P = rtProgress(), lvl = P.level;
+  const side = el('div', 'panel rt-side tt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
+  side.innerHTML = `<div class="rt-head"><div class="rt-lvl"><span class="bd">${lvl}</span></div><p class="bd rt-lvlt">Level ${lvl}<small>of ${RT_LEVELS}</small></p></div>
     ${rtXpBar(P, 182)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} XP, +${CASH_PLACE[0]} Cash</p>
-    <div class="rt-nexthead"><p class="rt-cap">${done ? 'Track complete' : `Next · Lv ${nxt.lv}`}</p></div><p class="rt-nextw bd">${done ? 'Every level reached' : rtWhat(nxt)}</p>
-    <div class="rt-nexthead"><p class="rt-cap">Your bonuses</p></div><div class="rt-bons">${bonusSummary()}</div>`;
-  const p = el('div', 'panel rt-roadp', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
-  const body = el('div', 'rt-scroll', '', p);
-  const ROW = 164, TOP = 136, XL = 226, XR = 314, Wd = 540, Hd = TOP + (RT_LEVELS - 1) * ROW + 90;
-  const pos = r => r.lv ? [r.lv % 2 ? XL : XR, TOP + (r.lv - 1) * ROW] : [XL, 58];   // level 0 = the start, just above level 1
-  const inner = el('div', 'rt-inner', '', body); css(inner, {width: Wd, height: Hd});
-  const seg = (a, b) => { const [x1, y1] = pos(a), [x2, y2] = pos(b); return `M${x1} ${y1}C${x1} ${y1 + ROW * .62} ${x2} ${y2 - ROW * .62} ${x2} ${y2}`; };
-  let all = '', path = '';
-  for (let i = 0; i < RT_TRACK.length - 1; i++) { const s = seg(RT_TRACK[i], RT_TRACK[i + 1]); all += s; if (i + 1 < P.level) path += s; }
-  const start = {lv: 0}, first = seg(start, RT_TRACK[0]);
-  const part = P.level === 0 ? first : done ? '' : seg(RT_TRACK[P.level - 1], RT_TRACK[P.level]), frac = P.need ? P.xp / P.need : 1;
-  for (const r of RT_TRACK) {   // scenery goes in first, under the road
-    const [x, y] = pos(r), left = r.lv % 2, key = r.kind === 'fork' ? rtTribeOf(r) : 'Legend', set = RT_PROPS[key], st = rtState(r, P.level);
-    const sc = el('div', `rt-scene ${st}`, '', inner);
-    css(sc, left ? {left: x + 62, top: y - 66} : {left: x - 62 - 200, top: y - 66});
-    const [a, b, c] = [0, 1, 2].map(k => set[(r.lv + k) % 3]), sd = left ? 'left' : 'right';
-    sc.innerHTML = `<i class="rt-ground" style="background:${RT_GROUND[key]}"></i><span class="pr big" style="${sd}:30px">${a}</span><span class="pr mid" style="${sd}:96px">${b}</span><span class="pr small" style="${sd}:148px">${c}</span>`;
+    <div class="tt-dirs">${DIRS.map((d, i) => `<div class="tt-dir" style="--dc:${d.col};--dp:${d.pale}"><span class="ic">${tIco(d.ico, 18)}</span><b class="bd">${d.name}</b><i>${dirPoints(i)}</i></div>`).join('')}</div>
+    <div class="rt-nexthead"><p class="rt-cap">Your talents</p></div><div class="rt-bons">${bonusSummary()}</div>`;
+  const p = el('div', 'panel tt-panel', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
+  const head = el('div', 'tt-head', `<span></span>${DIRS.map(d => `<div class="tt-h" style="--dc:${d.col};--dp:${d.pale}"><span class="ic">${tIco(d.ico, 18)}</span><b class="bd">${d.name}</b></div>`).join('')}`, p);
+  const body = el('div', 'tt-scroll', '', p);
+  const inner = el('div', 'tt-inner', '', body);
+  const COLX = [168, 300, 432], RH = 78, MH = 92;   // column centres, talent row and milestone row heights
+  let y = 18; const ys = {};
+  for (const r of RT_TRACK) { ys[r.lv] = y + (r.kind === 'talent' ? RH : MH) / 2; y += r.kind === 'talent' ? RH : MH; }
+  const Hh = y + 24; css(inner, {height: Hh});
+  // the level rail on the left fills up to your XP
+  const yAt = lv => lv <= 0 ? 0 : ys[lv], cur = lvl >= RT_LEVELS ? ys[RT_LEVELS] : yAt(lvl) + (ys[lvl + 1] - yAt(lvl)) * (P.need ? P.xp / P.need : 0);
+  let svg = `<svg class="tt-lines" width="540" height="${Hh}" aria-hidden="true"><path d="M44 0V${Hh}" class="rail"/><path d="M44 0V${cur}" class="railon"/>`;
+  for (const x of COLX) svg += `<path d="M${x} 0V${Hh}" class="col"/>`;
+  // your path through the tree: one line from pick to pick
+  let prev = null;
+  for (const r of RT_TRACK) if (r.kind === 'talent' && forkPick(r.lv) != null) {
+    const pt = [COLX[forkPick(r.lv)], ys[r.lv]];
+    if (prev) svg += `<path d="M${prev[0]} ${prev[1]}C${prev[0]} ${prev[1] + 40} ${pt[0]} ${pt[1] - 40} ${pt[0]} ${pt[1]}" class="path" style="stroke:${DIRS[forkPick(r.lv)].col}"/>`;
+    prev = pt;
   }
-  inner.insertAdjacentHTML('beforeend', `<svg class="rt-road" width="${Wd}" height="${Hd}" aria-hidden="true">
-    <path d="${first + all}" class="r0"/><path d="${first + all}" class="r1"/><path d="${first + all}" class="r2"/>
-    <path d="${P.level ? first + path : ''}" class="r3"/>${part ? `<path d="${part}" class="r3" pathLength="1" stroke-dasharray="${frac} 2"/><path d="${part}" class="rpart" style="display:none"/>` : ''}</svg>`);
+  inner.insertAdjacentHTML('beforeend', svg + '</svg>');
   for (const r of RT_TRACK) {
-    const [x, y] = pos(r), st = rtState(r, P.level), left = r.lv % 2, todo = r.kind === 'fork' && st === 'done' && forkPick(r.lv) == null;
-    const n = el('div', `rt-node ${st}${r.kind !== 'fork' ? ' leg' : ''}${r.kind === 'set' ? ' set' : ''}${todo ? ' todo' : ''}`, `<span class="bd">${r.lv}</span>`, inner);
-    css(n, {left: x, top: y}); if (st === 'done' && r.kind === 'fork') n.style.background = todo ? '#ffc928' : '#c6e5ff';
-    if (st === 'done' && !todo) el('i', 'rt-ok', RT_TICK, n);
-    const g = el('div', `rt-grp ${left ? 'l' : 'r'} ${st} k-${r.kind}`, '', inner); css(g, left ? {right: Wd - x + 54, top: y - (r.kind === 'fork' ? 58 : 66)} : {left: x + 54, top: y - (r.kind === 'fork' ? 58 : 66)});
-    rtReward(r, st, g, {after: () => showTrack('xp')});
+    const st = rtState(r, lvl), cy = ys[r.lv];
+    const lb = el('div', `tt-lv bd ${st}`, `${r.lv}`, inner); css(lb, {left: 44, top: cy});
+    if (r.kind !== 'talent') {   // milestone: a ribbon across the tree with the pack
+      const [a, b] = msText(r), ms = el('div', `tt-ms ${st}`, `<div class="pk"></div><div><b class="bd">${a}</b><i>${b}</i></div>${st === 'done' ? `<span class="ok">${RT_TICK}</span>` : ''}`, inner);
+      css(ms, {left: 92, top: cy - 34});
+      const pkb = ms.querySelector('.pk');
+      if (r.kind === 'final') SETS.forEach((s, i) => { const w = packEl(s, .17, {locked: st !== 'done'}, pkb); w.style.marginLeft = i ? '-26px' : '0'; w.style.transform = `rotate(${(i - 1) * 8}deg)`; });
+      else packEl(SET[r.set], .19, {locked: st === 'locked'}, pkb);
+      continue;
+    }
+    const pick = forkPick(r.lv), open = st === 'done' && pick == null;
+    r.opts.forEach((k, i) => {
+      const d = DIRS[i], on = pick === i, n = el('button', `tt-node ${st}${on ? ' on' : pick != null ? ' off' : ''}${open ? ' open' : ''}`, `<span class="c">${tIco(k, 22)}</span><span class="l">${BONUS[k].label}</span>`, inner);
+      css(n, {left: COLX[i], top: cy}); n.style.setProperty('--dc', d.col); n.style.setProperty('--dp', d.pale);
+      n.onclick = () => { if (open) talentPop(r, () => showTrack('xp'), i); else { sfx('pop'); toast(on ? 'Your pick' : pick != null ? 'Not picked' : `Reach level ${r.lv} to choose`); } };
+    });
   }
-  const pe = inner.querySelector('.rpart'), [ex, ey] = pos(RT_TRACK[RT_LEVELS - 1]);
-  let pt = {x: ex, y: ey};
-  if (pe) { pe.style.display = ''; pt = pe.getPointAtLength(pe.getTotalLength() * frac); pe.style.display = 'none'; }
-  const hero = avatarHero();
-  const peg = el('div', 'rt-peg', `<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>${P.need ? `<span class="bd">${P.xp}/${P.need}</span>` : ''}`, inner);
-  css(peg, {left: pt.x, top: pt.y});
-  anim(peg.firstChild, [{translate: '0 0'}, {translate: '0 -5px'}, {translate: '0 0'}], {duration: 1400, iterations: Infinity, easing: 'ease-in-out', raw: true});
   const fo = forkOpen()[0];
-  body.scrollTop = Math.max(0, pos(fo || (P.level ? RT_TRACK[P.level - 1] : RT_TRACK[0]))[1] - 110);
+  body.scrollTop = Math.max(0, (fo ? ys[fo.lv] : cur) - 120);
 }
-/** A fork: two bonuses, pick one for good. */
-function forkPop(r, onDone) {
+/** Choosing a talent: three cards, one per direction. */
+function talentPop(r, onDone, hi = null) {
   sfx('open');
-  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 97}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.86)';
-  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level ${r.lv}: choose one</span>`, ov); css(head, {left: 0, right: 0, top: 24, textAlign: 'center'});
-  const sub = el('p', 'ab bd', 'Your pick is permanent.', ov); css(sub, {left: 0, right: 0, top: 80, margin: 0, textAlign: 'center', color: '#fff', fontSize: '17px'});
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 97}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.88)';
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level ${r.lv}: choose a talent</span>`, ov); css(head, {left: 0, right: 0, top: 16, textAlign: 'center'});
+  const sub = el('p', 'ab bd', 'One pick per level, for good.', ov); css(sub, {left: 0, right: 0, top: 70, margin: 0, textAlign: 'center', color: '#fff', fontSize: '16px'});
   r.opts.forEach((k, i) => {
-    const b = el('button', 'ab fork-card', `<span class="fk-ico">${ico(BONUS[k].ico, 54, 1.8)}</span><b class="bd">${BONUS[k].label}</b><i>${k === 'free' ? `A ${SET[latestSet()].name} pack, right away` : k === 'shield' ? 'Start every run with more Boundaries' : 'Stacks with later picks'}</i>`, ov);
-    css(b, {left: W / 2 - 250 + i * 270, top: 118, width: 230, height: 200});
-    anim(b, [{transform: 'translateY(80px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 380, delay: 120 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    const d = DIRS[i], b = el('button', 'ab tal-card' + (hi === i ? ' hi' : ''), `<span class="dir bd" style="background:${d.col}">${d.name}</span><span class="fk-ico">${tIco(k, 50, 1.9)}</span><b class="bd">${BONUS[k].label}</b><i>${k === 'free' ? `A ${SET[latestSet()].name} pack` : `${d.name}: ${dirPoints(i)} → ${dirPoints(i) + 1}`}</i>`, ov);
+    b.style.setProperty('--dc', d.col); b.style.setProperty('--dp', d.pale);
+    css(b, {left: W / 2 - 300 + i * 206, top: 104, width: 186, height: 210});
+    anim(b, [{transform: 'translateY(80px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 380, delay: 100 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
     b.onclick = () => {
-      PROF.forks[r.lv] = i;
+      PROF.talents = PROF.talents || {}; PROF.talents[r.lv] = i;
       if (k === 'free') { const s = latestSet(); PROF.free[s] = freePacks(s) + 1; }
-      saveProfile(); sfx('unlock'); confetti(W / 2 - 135 + i * 270, 200, 30);
-      anim(b, [{transform: 'scale(1)'}, {transform: 'scale(1.08)'}, {transform: 'scale(1)'}], {duration: 300, raw: true});
-      setTimeout(() => { ov.remove(); onDone && onDone(); }, 520);
+      saveProfile(); sfx('unlock'); confetti(W / 2 - 207 + i * 206, 200, 30);
+      ov.querySelectorAll('.tal-card').forEach(x => { if (x !== b) anim(x, [{opacity: 1}, {opacity: .25, transform: 'scale(.92)'}], {duration: 300, fill: 'forwards', raw: true}); });
+      anim(b, [{transform: 'scale(1)'}, {transform: 'scale(1.08)'}, {transform: 'scale(1.03)'}], {duration: 320, fill: 'forwards', raw: true});
+      setTimeout(() => { ov.remove(); onDone && onDone(); }, 620);
     };
   });
-  el('span', 'ab fk-or bd', 'or', ov).style.cssText += `left:${W / 2 - 18}px;top:200px`;
+  const later = el('button', 'btn', 'Later', ov); css(later, {left: W / 2 - 60, top: 334, width: 120, height: 40, fontSize: '16px'}); later.onclick = () => { ov.remove(); if (G.screen === 'end') rmAfterRun(); };
 }
-const latestSet = () => SETS.filter(s => setOpen(s.id)).pop().id;
-/** Level-up moments after a run: new packs, bigger packs and forks, one at a time; then Night Line cosmetics. */
+/** Level-up moments: milestones show their packs, talent levels ask for a pick. */
 function rtLevelPop(r, onDone) {
-  if (r.kind === 'fork') return forkPop(r, onDone);
-  const s = SET[r.set];
+  if (r.kind === 'talent') return talentPop(r, onDone);
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.86)';
-  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level up! Level ${r.lv}</span>`, ov); css(head, {left: 0, right: 0, top: 16, textAlign: 'center'});
-  const sub = el('p', 'ab bd', r.kind === 'set' ? `New packs: ${s.name}. Your first one is free!` : `${s.name} packs now hold ${packSize(r.set)} cards`, ov); css(sub, {left: 0, right: 0, top: 70, margin: 0, textAlign: 'center', color: '#fff', fontSize: '19px'});
-  const pk = el('div', 'ab pk-pop', packHTML(s, {n: packSize(r.set)}), ov); css(pk, {left: W / 2 - 75, top: 108, width: 150, height: 200});
-  anim(pk, [{transform: 'translateY(200px) rotate(-20deg) scale(.5)', opacity: 0}, {transform: 'translateY(0) rotate(-4deg) scale(1)', opacity: 1}], {duration: 520, easing: 'cubic-bezier(.34,1.56,.64,1)', raw: true, fill: 'forwards'});
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level up! Level ${r.lv}</span>`, ov); css(head, {left: 0, right: 0, top: 14, textAlign: 'center'});
+  const [a, b] = msText(r);
+  const sub = el('p', 'ab bd', `${a}. ${b}!`, ov); css(sub, {left: 0, right: 0, top: 66, margin: 0, textAlign: 'center', color: '#fff', fontSize: '18px'});
+  const sets = r.kind === 'final' ? SETS : [SET[r.set]];
+  sets.forEach((s, i) => {
+    const w = packEl(s, .62, {n: packSize(s.id), free: r.kind !== 'size'}, ov); w.classList.add('ab'); css(w, {left: W / 2 - 75 + (i - (sets.length - 1) / 2) * 120, top: 98});
+    anim(w, [{transform: 'translateY(220px) rotate(-20deg) scale(.5)', opacity: 0}, {transform: `translateY(0) rotate(${(i - (sets.length - 1) / 2) * 6 - 3}deg) scale(1)`, opacity: 1}], {duration: 560, delay: i * 120, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'both', raw: true});
+  });
   setTimeout(() => confetti(W / 2, 180, 40), 500); sfx('unlock');
-  const go = el('button', 'btn', r.kind === 'set' ? 'Open it' : 'To the packs', ov); css(go, {left: W / 2 - 160, top: 330, width: 150, height: 44, background: '#ffc928', fontSize: '18px'});
-  const ok = el('button', 'btn', 'Later', ov); css(ok, {left: W / 2 + 12, top: 332, width: 120, height: 40, fontSize: '17px'});
+  const go = el('button', 'btn', r.kind === 'size' ? 'To the shop' : 'Open it', ov); css(go, {left: W / 2 - 160, top: 334, width: 150, height: 44, background: '#ffc928', fontSize: '18px'});
+  const ok = el('button', 'btn', 'Later', ov); css(ok, {left: W / 2 + 12, top: 336, width: 120, height: 40, fontSize: '17px'});
   go.onclick = () => { ov.remove(); showPacks(); if (r.kind === 'set' && canOpen(r.set)) openPack(r.set); };
   ok.onclick = () => { ov.remove(); onDone && onDone(); };
 }
 function rtAwardRun(place) {
-  const g = Math.round((RT_XP_PLACE[place - 1] || RT_XP_PLACE[7]) * (1 + bonus('xp') / 100)), c = Math.round((CASH_PLACE[place - 1] || CASH_PLACE[7]) * (1 + bonus('cash') / 100));
+  const g = Math.round((RT_XP_PLACE[place - 1] || RT_XP_PLACE[7]) * (1 + bonus('xp') / 100)) + (place <= 4 ? bonus('top4') : 0);
+  const c = Math.round((CASH_PLACE[place - 1] || CASH_PLACE[7]) * (1 + bonus('cash') / 100)) + bonus('flat');
   PROF.xp = (PROF.xp || 0) + g; PROF.cash = (PROF.cash || 0) + c; G.cashGain = c; syncLevels(); return g;
 }
 function rtAfterRun() {
   if (G.screen !== 'end') return;
   const lvl = rtLevel(), seen = PROF.lvSeen || 0;
-  if (lvl <= seen) { const f = forkOpen()[0]; if (f) return forkPop(f, rtAfterRun); rmAfterRun(); return; }
+  if (lvl <= seen) { const f = forkOpen()[0]; if (f && !G.talentAsked) { G.talentAsked = true; return talentPop(f, rtAfterRun); } rmAfterRun(); return; }
   PROF.lvSeen = seen + 1; saveProfile();
   rtLevelPop(RT_TRACK[seen], rtAfterRun);
 }
@@ -2223,6 +2323,6 @@ function rmAfterRun() {
   ok.onclick = () => { ov.remove(); rmAfterRun(); };
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), afterRun: () => { G.screen = 'end'; G.talentAsked = false; rtAfterRun(); }, cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();
