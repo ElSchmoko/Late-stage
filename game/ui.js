@@ -425,7 +425,7 @@ function showCards(tribe = 'Hustler', o = {}) {
       st === 'low' ? `Pick ${min - n} more` : st === 'over' ? `${n - TIER_MAX} too many` : `Pick ${min} to ${TIER_MAX}`;
     R.innerHTML = `<div class="bk-ph r"><span class="bk-hint bd ${st}">${st === 'ok' ? '' : WARN_ICO}${hint}</span></div>`;
     [[L, cs.slice(0, per)], [R, cs.slice(per)]].forEach(([pg, part]) => {
-      const grid = el('div', 'bk-grid sm', '', pg);   // two pockets per row, filled from the top like a binder page
+      const grid = el('div', 'bk-grid sm', '', pg);   // small cards (8 would fit a page), one row per page
       for (const c of part) cardEl(c, grid, d);
     });
     if (!cs.length) el('p', 'bk-empty', 'No cards here', L.querySelector('.bk-grid'));

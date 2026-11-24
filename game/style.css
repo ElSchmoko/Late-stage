@@ -826,3 +826,10 @@ button{font:inherit;color:inherit}
 .bk-card.on{transform:translateY(-7px)}
 .bk-card.on::before{content:none}
 .bk-card.on .card{box-shadow:none;filter:drop-shadow(0 42px 26px rgba(43,33,64,.42))}
+/* v19d: the size that fits 8 cards per page (4 by 2); a tier is split over both pages, one row each */
+.bk-grid.sm{width:auto;margin:0;gap:22px 10px;padding-top:0;justify-content:center;align-content:center}
+.bk-grid.sm .bk-card{width:68px;height:95px}.bk-grid.sm .bk-card .card{transform:scale(.283)}
+.bk-grid.sm .bk-tick{width:20px;height:20px;right:-7px;top:-8px}.bk-grid.sm .bk-tick svg{width:12px;height:12px}
+.bk-grid.sm .bk-info{width:18px;height:18px;font-size:11px;left:-7px;top:-8px}
+.bk-grid.sm .bk-always{font-size:8.5px;padding:1px 5px 0;bottom:-9px}
+.bk-grid.sm .bk-card.on{transform:translateY(-6px)}
