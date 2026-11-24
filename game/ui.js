@@ -418,7 +418,7 @@ function showCards(tribe = 'Hustler', o = {}) {
     const neutral = cur === 'Neutral' && key !== 'L', legend = key === 'L';
     const n = legend ? cs.filter(c => d.has(c.name)).length : neutral ? cs.filter(c => cardOpen(c)).length : tierCount(d, cur, key);
     const min = legend || neutral ? 0 : tierMin(cur, key), st = neutral ? 'ok' : legend ? (n > 1 ? 'over' : 'ok') : tierState(n, min);
-    const per = Math.ceil(cs.length / 2);   // the tier is split over both pages, small cards in up to two rows per page
+    const per = 8;   // a page holds 8 cards (4 by 2): the left page fills first, the rest go on the right
     const L = el('div', 'bk-page l', '', null), R = el('div', 'bk-page r', '', null);
     L.innerHTML = `<div class="bk-ph"><span class="bk-tier">${legend ? '<span class="bd leg">Legendaries</span>' : `${fmtStars(key, 15)}<b class="bd">Tier ${key}</b>`}</span>${neutral ? `<span class="bk-count bd">${n} owned</span>` : poolMeter(n, legend, legend ? 0 : min)}</div>`;
     const hint = neutral ? 'Neighbours are always in your pool' : legend ? (n ? 'Your legendary is in' : 'Optional: one at most') :
@@ -1718,7 +1718,7 @@ const BONUS = {
   cash: {v: 5, label: '+5% Cash from runs', sum: v => `Cash +${v}%`},
   pack: {v: 3, label: 'Packs cost 3% less', sum: v => `Packs −${v}%`},
   flat: {v: 4, label: '+4 Cash after every run', sum: v => `+${v} Cash a run`},
-  free: {v: 1, label: 'A free pack, right now', sum: v => `${v} free pack${v > 1 ? 's' : ''}`},
+  free: {v: 1, label: 'A free pack', sum: v => `${v} free pack${v > 1 ? 's' : ''}`},
   clout: {v: 10, label: '+10% Clout from duplicates', sum: v => `Clout +${v}%`},
   craft: {v: 4, label: 'Crafting costs 4% less', sum: v => `Crafting −${v}%`},
   pity: {v: 1, label: 'Guaranteed legendary 1 pack sooner', sum: v => `Pity −${v}`},
@@ -1727,21 +1727,15 @@ const BONUS = {
   top4: {v: 10, label: '+10 XP for a top-4 finish', sum: v => `Top 4 +${v} XP`},
   shield: {v: 1, label: '+1 Boundaries in every run', sum: v => `Boundaries +${v}`},
 };
-const DIRS = [
-  {id: 'money', name: 'Passive Income', col: '#2ecb6e', pale: '#d9f6e2', ico: 'cash', blurb: 'More Cash, cheaper packs, free packs', cycle: ['cash', 'pack', 'flat', 'free']},
-  {id: 'clout', name: 'Clout Chasing', col: '#b18cff', pale: '#ece3ff', ico: 'clout', blurb: 'More Clout, cheaper crafting, luckier packs', cycle: ['clout', 'craft', 'luck', 'pity']},
-  {id: 'grind', name: 'Grindset', col: '#ff8a3d', pale: '#ffe4d1', ico: 'xp', blurb: 'Level faster, start runs sturdier', cycle: ['xp', 'top4', 'xp', 'top4']},
-];
 const MILESTONES = {1: {kind: 'set', set: 1}, 5: {kind: 'size', set: 1}, 10: {kind: 'set', set: 2}, 15: {kind: 'size', set: 2}, 20: {kind: 'set', set: 3}, 25: {kind: 'size', set: 3}, 30: {kind: 'final'}};
-const RT_TRACK = (() => {
-  let row = 0;
-  return Array.from({length: RT_LEVELS}, (_, i) => {
-    const lv = i + 1, cost = rtCost(lv), m = MILESTONES[lv];
-    if (m) return Object.assign({lv, cost}, m);
-    const k = row++;   // talent rows: each direction cycles through its talents; Grindset's Boundaries come three times
-    return {lv, cost, kind: 'talent', row: k, opts: DIRS.map(d => d.id === 'grind' && [9, 19, 29].includes(lv) ? 'shield' : d.cycle[k % 4])};
-  });
-})();
+// One road. Most levels give a fixed bonus; now and then the road forks and you pick one of two, for good.
+const ROAD = {2: 'cash', 3: 'xp', 4: ['pack', 'clout'], 6: 'flat', 7: 'free', 8: ['shield', 'top4'], 9: 'craft',
+  11: 'cash', 12: 'xp', 13: ['luck', 'pity'], 14: 'clout', 16: 'pack', 17: 'free', 18: ['cash', 'craft'], 19: 'top4',
+  21: 'flat', 22: 'xp', 23: ['shield', 'free'], 24: 'clout', 26: 'pack', 27: 'luck', 28: ['cash', 'clout'], 29: 'free'};
+const RT_TRACK = Array.from({length: RT_LEVELS}, (_, i) => {
+  const lv = i + 1, cost = rtCost(lv), m = MILESTONES[lv], b = ROAD[lv];
+  return m ? Object.assign({lv, cost}, m) : Array.isArray(b) ? {lv, cost, kind: 'fork', opts: b} : {lv, cost, kind: 'bonus', key: b};
+});
 /** Level and progress for a total XP amount. */
 function rtProgressOf(total) {
   let level = 0, xp = total;
@@ -1751,10 +1745,17 @@ function rtProgressOf(total) {
 const rtProgress = () => rtProgressOf(PROF.xp || 0);
 const rtLevel = () => rtProgress().level;
 const forkPick = lv => (PROF.talents || {})[lv];
-const forkOpen = () => RT_TRACK.filter(r => r.kind === 'talent' && r.lv <= rtLevel() && forkPick(r.lv) == null);
-/** Sum of a bonus over the talents picked so far. */
-function bonus(k) { let s = 0; for (const r of RT_TRACK) if (r.kind === 'talent' && forkPick(r.lv) != null && r.opts[forkPick(r.lv)] === k) s += BONUS[k].v; return s; }
-const dirPoints = i => RT_TRACK.filter(r => r.kind === 'talent' && forkPick(r.lv) === i).length;
+const forkOpen = () => RT_TRACK.filter(r => r.kind === 'fork' && r.lv <= rtLevel() && forkPick(r.lv) == null);
+/** Sum of a bonus over the levels reached: fixed bonuses plus the forks you picked. */
+function bonus(k) {
+  let s = 0; const lvl = rtLevel();
+  for (const r of RT_TRACK) {
+    if (r.lv > lvl) break;
+    if (r.kind === 'bonus' && r.key === k) s += BONUS[k].v;
+    if (r.kind === 'fork' && forkPick(r.lv) != null && r.opts[forkPick(r.lv)] === k) s += BONUS[k].v;
+  }
+  return s;
+}
 const setOpen = id => rtLevel() >= SET[id].lv;
 const packSize = id => 2 + RT_TRACK.filter(r => r.kind === 'size' && r.set === id && r.lv <= rtLevel()).length;
 const legChance = () => ODDS.last.find(x => x[0] === 'legendary')[1] + bonus('luck');
@@ -1795,10 +1796,13 @@ if (!PROF.flags.lvReset1) {
   Object.assign(PROF, {xp: 0, talents: {}, free: {}, lvGranted: 0, lvSeen: 0});
   saveProfile();
 }
+// Nov 24: the talent tree became one road with a few forks; picks from the tree don't carry over.
+if (!PROF.flags.road1) { PROF.flags.road1 = true; PROF.talents = {}; saveProfile(); }
 /** Free packs for the set levels reached (also after an XP change while the app was closed). */
 function syncLevels() {
   const lvl = rtLevel(); let changed = false;
-  for (let lv = (PROF.lvGranted || 0) + 1; lv <= lvl; lv++) { const r = RT_TRACK[lv - 1]; if (r.kind === 'set') { PROF.free[r.set] = freePacks(r.set) + 1; changed = true; } if (r.kind === 'final') for (const x of SETS) PROF.free[x.id] = freePacks(x.id) + 1; PROF.lvGranted = lv; changed = true; }
+  for (let lv = (PROF.lvGranted || 0) + 1; lv <= lvl; lv++) { const r = RT_TRACK[lv - 1]; if (r.kind === 'set') { PROF.free[r.set] = freePacks(r.set) + 1; changed = true; }
+    if (r.kind === 'bonus' && r.key === 'free') { const s = SETS.filter(x => x.lv <= lv).pop().id; PROF.free[s] = freePacks(s) + 1; } if (r.kind === 'final') for (const x of SETS) PROF.free[x.id] = freePacks(x.id) + 1; PROF.lvGranted = lv; changed = true; }
   if (changed) saveProfile();
 }
 syncLevels();
@@ -2022,84 +2026,96 @@ function mysteryCardHTML(c, at) {
     <p class="txt" style="font-size:14px;color:#8f86a6">${at || 'A surprise.'}</p><div class="sa">?</div><div class="sh">?</div></div>`;
 }
 
-// ---------------------------------------------------------------- Levels: the talent tree
+// ---------------------------------------------------------------- Levels: one road with a few forks
 const RT_SIL = '<svg class="rt-sil" viewBox="0 0 68 68" aria-hidden="true"><circle cx="34" cy="27" r="13"/><path d="M7 72c2-17 13-26 27-26s25 9 27 26z"/></svg>';
 const RT_TICK = ico('<path d="M5 12.5l4.5 4.5L19 7.5"></path>', 16, 3.6);
 const rtState = (r, lvl) => r.lv <= lvl ? 'done' : r.lv === lvl + 1 ? 'next' : 'locked';
-const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Tree complete'}</b></div>`;
+const rtXpBar = (P, w) => `<div class="rt-xp" style="width:${w}px"><i style="width:${P.need ? Math.round(100 * P.xp / P.need) : 100}%"></i><b>${P.need ? `${P.xp.toLocaleString('en')} / ${P.need.toLocaleString('en')} XP` : 'Road complete'}</b></div>`;
 const latestSet = () => SETS.filter(s => setOpen(s.id)).pop().id;
 const msText = r => r.kind === 'set' ? [`New packs: ${SET[r.set].name}`, 'Your first pack is free'] : r.kind === 'size' ? [`${SET[r.set].name} packs: +1 card`, `${packSize(r.set) + (r.lv > rtLevel() ? 1 : 0)} cards a pack`] : ['The last level', 'A free pack of every set'];
 const tIco = (k, s = 24, sw = 2.2) => ico(TALENT_ICO[k], s, sw);
 function bonusSummary() {
   const on = Object.keys(BONUS).filter(k => k !== 'free').map(k => [k, bonus(k)]).filter(([, v]) => v);
-  return on.length ? on.map(([k, v]) => `<span class="rt-bon">${tIco(k, 13, 2.4)}${BONUS[k].sum(v)}</span>`).join('') : '<span class="rt-bon none">No talents yet</span>';
+  return on.length ? on.map(([k, v]) => `<span class="rt-bon">${tIco(k, 13, 2.4)}${BONUS[k].sum(v)}</span>`).join('') : '<span class="rt-bon none">No bonuses yet</span>';
 }
+const roadText = r => r.kind === 'bonus' ? BONUS[r.key].label : r.kind === 'fork' ? r.opts.map(k => BONUS[k].label).join(' or ') : msText(r).join(' · ');
 function showTrack(kind = 'xp') {
   if (kind === 'rating') return showNightLine();
   clear(); G.screen = 'rewards'; bg(true); AU.music('hold');
   collectionTabs('levels');
-  const P = rtProgress(), lvl = P.level;
+  const P = rtProgress(), lvl = P.level, nx = RT_TRACK[lvl];
   const side = el('div', 'panel rt-side tt-side', '', stage); css(side, {left: 24, top: 64, width: 222, height: 312});
   side.innerHTML = `<div class="rt-head"><div class="rt-lvl"><span class="bd">${lvl}</span></div><p class="bd rt-lvlt">Level ${lvl}<small>of ${RT_LEVELS}</small></p></div>
     ${rtXpBar(P, 182)}<p class="rt-per">Per run: 1st +${RT_XP_PLACE[0]} XP, +${CASH_PLACE[0]} Cash</p>
-    <div class="tt-dirs">${DIRS.map((d, i) => `<div class="tt-dir" style="--dc:${d.col};--dp:${d.pale}"><span class="ic">${tIco(d.ico, 18)}</span><b class="bd">${d.name}</b><i>${dirPoints(i)}</i></div>`).join('')}</div>
-    <div class="rt-nexthead"><p class="rt-cap">Your talents</p></div><div class="rt-bons">${bonusSummary()}</div>`;
+    ${nx ? `<div class="rt-nexthead"><p class="rt-cap">Next · level ${nx.lv}</p></div><p class="rd-next bd">${nx.kind === 'fork' ? 'The road forks: pick a bonus' : roadText(nx)}</p>` : ''}
+    <div class="rt-nexthead"><p class="rt-cap">Your bonuses</p></div><div class="rt-bons">${bonusSummary()}</div>`;
   const p = el('div', 'panel tt-panel', '', stage); css(p, {left: 262, top: 64, width: 558, height: 312});
-  const head = el('div', 'tt-head', `<span></span>${DIRS.map(d => `<div class="tt-h" style="--dc:${d.col};--dp:${d.pale}"><span class="ic">${tIco(d.ico, 18)}</span><b class="bd">${d.name}</b></div>`).join('')}`, p);
-  const body = el('div', 'tt-scroll', '', p);
+  const body = el('div', 'tt-scroll rd-scroll', '', p);
   const inner = el('div', 'tt-inner', '', body);
-  const COLX = [168, 300, 432], RH = 78, MH = 92;   // column centres, talent row and milestone row heights
-  let y = 18; const ys = {};
-  for (const r of RT_TRACK) { ys[r.lv] = y + (r.kind === 'talent' ? RH : MH) / 2; y += r.kind === 'talent' ? RH : MH; }
-  const Hh = y + 24; css(inner, {height: Hh});
-  // the level rail on the left fills up to your XP
-  const yAt = lv => lv <= 0 ? 0 : ys[lv], cur = lvl >= RT_LEVELS ? ys[RT_LEVELS] : yAt(lvl) + (ys[lvl + 1] - yAt(lvl)) * (P.need ? P.xp / P.need : 0);
-  let svg = `<svg class="tt-lines" width="540" height="${Hh}" aria-hidden="true"><path d="M44 0V${Hh}" class="rail"/><path d="M44 0V${cur}" class="railon"/>`;
-  for (const x of COLX) svg += `<path d="M${x} 0V${Hh}" class="col"/>`;
-  // your path through the tree: one line from pick to pick
-  let prev = null;
-  for (const r of RT_TRACK) if (r.kind === 'talent' && forkPick(r.lv) != null) {
-    const pt = [COLX[forkPick(r.lv)], ys[r.lv]];
-    if (prev) svg += `<path d="M${prev[0]} ${prev[1]}C${prev[0]} ${prev[1] + 40} ${pt[0]} ${pt[1] - 40} ${pt[0]} ${pt[1]}" class="path" style="stroke:${DIRS[forkPick(r.lv)].col}"/>`;
-    prev = pt;
+  const X = 270, BR = 84, RH = {bonus: 70, fork: 124, set: 96, size: 96, final: 96};
+  let y = 46; const ys = {0: 22};
+  for (const r of RT_TRACK) { ys[r.lv] = y + RH[r.kind] / 2; y += RH[r.kind]; }
+  const Hh = y + 20; css(inner, {height: Hh});
+  // the road: grey everywhere, yellow where you have been; at a fork it splits around the two choices and joins again
+  const xs = r => !r ? [X] : r.kind === 'fork' ? [X - BR, X + BR] : [X];
+  const okFrom = (r, i) => !r || r.kind !== 'fork' || forkPick(r.lv) === i, okTo = (r, i) => r.lv <= lvl && (r.kind !== 'fork' || forkPick(r.lv) === i);
+  let base = '', done = '';
+  for (let n = 0; n < RT_TRACK.length; n++) {
+    const a = n ? RT_TRACK[n - 1] : null, b = RT_TRACK[n], ya = ys[a ? a.lv : 0], yb = ys[b.lv], m = (yb - ya) / 2;
+    xs(a).forEach((sx, si) => xs(b).forEach((tx, ti) => {
+      const d = `M${sx} ${ya}C${sx} ${ya + m} ${tx} ${yb - m} ${tx} ${yb}`;
+      base += `<path d="${d}"/>`; if (okFrom(a, si) && okTo(b, ti)) done += `<path d="${d}"/>`;
+    }));
   }
-  inner.insertAdjacentHTML('beforeend', svg + '</svg>');
+  inner.insertAdjacentHTML('beforeend', `<svg class="rd-road" width="540" height="${Hh}" aria-hidden="true"><g class="edge">${base}</g><g class="base">${base}</g><g class="done">${done}</g><g class="mid">${base}</g></svg>`);
+  const start = el('div', 'rd-start bd', 'Start', inner); css(start, {left: X, top: ys[0]});
+  let side2 = 0;
   for (const r of RT_TRACK) {
     const st = rtState(r, lvl), cy = ys[r.lv];
-    const lb = el('div', `tt-lv bd ${st}`, `${r.lv}`, inner); css(lb, {left: 44, top: cy});
-    if (r.kind !== 'talent') {   // milestone: a ribbon across the tree with the pack
-      const [a, b] = msText(r), ms = el('div', `tt-ms ${st}`, `<div class="pk"></div><div><b class="bd">${a}</b><i>${b}</i></div>${st === 'done' ? `<span class="ok">${RT_TICK}</span>` : ''}`, inner);
-      css(ms, {left: 92, top: cy - 34});
-      const pkb = ms.querySelector('.pk');
-      if (r.kind === 'final') SETS.forEach((s, i) => { const w = packEl(s, .17, {locked: st !== 'done'}, pkb); w.style.marginLeft = i ? '-26px' : '0'; w.style.transform = `rotate(${(i - 1) * 8}deg)`; });
-      else packEl(SET[r.set], .19, {locked: st === 'locked'}, pkb);
+    const lb = el('div', `rd-lv bd ${st}${r.kind === 'fork' ? ' fk' : ''}`, `${r.lv}`, inner); css(lb, {left: X, top: cy});
+    if (r.kind === 'fork') {
+      el('span', 'rd-or bd', 'or', lb);
+      const pick = forkPick(r.lv), open = st === 'done' && pick == null;
+      r.opts.forEach((k, i) => {
+        const on = pick === i, n = el('button', `rd-opt ${i ? 'r' : 'l'} ${st}${on ? ' on' : pick != null ? ' off' : ''}${open ? ' open' : ''}`, `<span class="c">${tIco(k, 24)}</span><span class="l bd">${BONUS[k].label}</span>`, inner);
+        css(n, {left: X + (i ? BR : -BR), top: cy});
+        n.onclick = () => { if (open) forkPop(r, () => showTrack('xp'), i); else { sfx('pop'); toast(on ? 'Your pick' : pick != null ? 'The other way' : `Reach level ${r.lv} to choose`); } };
+      });
       continue;
     }
-    const pick = forkPick(r.lv), open = st === 'done' && pick == null;
-    r.opts.forEach((k, i) => {
-      const d = DIRS[i], on = pick === i, n = el('button', `tt-node ${st}${on ? ' on' : pick != null ? ' off' : ''}${open ? ' open' : ''}`, `<span class="c">${tIco(k, 22)}</span><span class="l">${BONUS[k].label}</span>`, inner);
-      css(n, {left: COLX[i], top: cy}); n.style.setProperty('--dc', d.col); n.style.setProperty('--dp', d.pale);
-      n.onclick = () => { if (open) talentPop(r, () => showTrack('xp'), i); else { sfx('pop'); toast(on ? 'Your pick' : pick != null ? 'Not picked' : `Reach level ${r.lv} to choose`); } };
-    });
+    const left = side2++ % 2 === 0;
+    if (r.kind === 'bonus') {
+      const c = el('div', `rd-chip ${left ? 'l' : 'r'} ${st}`, `<span class="c">${tIco(r.key, 20)}</span><b class="bd">${BONUS[r.key].label}</b>${st === 'done' ? `<span class="ok">${RT_TICK}</span>` : ''}`, inner);
+      css(c, {top: cy, [left ? 'right' : 'left']: left ? 540 - X + 26 : X + 26});
+      continue;
+    }
+    const [a, b] = msText(r), ms = el('div', `tt-ms rd-ms ${st}`, `<div class="pk"></div><div><b class="bd">${a}</b><i>${b}</i></div>${st === 'done' ? `<span class="ok">${RT_TICK}</span>` : ''}`, inner);
+    css(ms, {top: cy - 34, [left ? 'right' : 'left']: left ? 540 - X + 26 : X + 26});
+    const pkb = ms.querySelector('.pk');
+    if (r.kind === 'final') SETS.forEach((s2, i) => { const w = packEl(s2, .17, {locked: st !== 'done'}, pkb); w.style.marginLeft = i ? '-26px' : '0'; w.style.transform = `rotate(${(i - 1) * 8}deg)`; });
+    else packEl(SET[r.set], .19, {locked: st === 'locked'}, pkb);
   }
+  // you, on the road, part of the way to the next level
+  const cr = RT_TRACK[lvl - 1], fx = cr && cr.kind === 'fork' && forkPick(cr.lv) != null ? X + (forkPick(cr.lv) ? BR : -BR) : X;
+  const f = P.need ? P.xp / P.need : 0, dy = (ys[lvl + 1] || ys[lvl]) - ys[lvl], ty = ys[lvl] + Math.max(0, dy - 36) * f, tx = fx + (X - fx) * Math.min(1, f * dy / Math.max(1, dy - 36));   // stops short of the next stop
+  const hero = avatarHero(), me = el('div', 'rd-me', `<div class="av" style="background:${hero.col}"><img src="${ART[hero.slug]}" alt=""></div>`, inner); css(me, {left: tx, top: ty});
   const fo = forkOpen()[0];
-  body.scrollTop = Math.max(0, (fo ? ys[fo.lv] : cur) - 120);
+  body.scrollTop = Math.max(0, (fo ? ys[fo.lv] : ty) - 140);
 }
-/** Choosing a talent: three cards, one per direction. */
-function talentPop(r, onDone, hi = null) {
+/** A fork in the road: two cards, pick one for good. */
+function forkPop(r, onDone, hi = null) {
   sfx('open');
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 97}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.88)';
-  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level ${r.lv}: choose a talent</span>`, ov); css(head, {left: 0, right: 0, top: 16, textAlign: 'center'});
-  const sub = el('p', 'ab bd', 'One pick per level, for good.', ov); css(sub, {left: 0, right: 0, top: 70, margin: 0, textAlign: 'center', color: '#fff', fontSize: '16px'});
+  const head = el('div', 'ab bd', `<span class="rt-lvpill">Level ${r.lv}: the road forks</span>`, ov); css(head, {left: 0, right: 0, top: 16, textAlign: 'center'});
+  const sub = el('p', 'ab bd', 'Pick one. You can’t switch later.', ov); css(sub, {left: 0, right: 0, top: 70, margin: 0, textAlign: 'center', color: '#fff', fontSize: '16px'});
   r.opts.forEach((k, i) => {
-    const d = DIRS[i], b = el('button', 'ab tal-card' + (hi === i ? ' hi' : ''), `<span class="dir bd" style="background:${d.col}">${d.name}</span><span class="fk-ico">${tIco(k, 50, 1.9)}</span><b class="bd">${BONUS[k].label}</b><i>${k === 'free' ? `A ${SET[latestSet()].name} pack` : `${d.name}: ${dirPoints(i)} → ${dirPoints(i) + 1}`}</i>`, ov);
-    b.style.setProperty('--dc', d.col); b.style.setProperty('--dp', d.pale);
-    css(b, {left: W / 2 - 300 + i * 206, top: 104, width: 186, height: 210});
+    const b = el('button', 'ab tal-card rd-card' + (hi === i ? ' hi' : ''), `<span class="fk-ico">${tIco(k, 50, 1.9)}</span><b class="bd">${BONUS[k].label}</b>${k === 'free' ? `<i>A ${SET[latestSet()].name} pack</i>` : ''}`, ov);
+    css(b, {left: W / 2 - 203 + i * 220, top: 104, width: 186, height: 210});
     anim(b, [{transform: 'translateY(80px) scale(.8)', opacity: 0}, {transform: 'translateY(0) scale(1)', opacity: 1}], {duration: 380, delay: 100 * i, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
     b.onclick = () => {
       PROF.talents = PROF.talents || {}; PROF.talents[r.lv] = i;
-      if (k === 'free') { const s = latestSet(); PROF.free[s] = freePacks(s) + 1; }
-      saveProfile(); sfx('unlock'); confetti(W / 2 - 207 + i * 206, 200, 30);
+      if (k === 'free') { const s2 = latestSet(); PROF.free[s2] = freePacks(s2) + 1; }
+      saveProfile(); sfx('unlock'); confetti(W / 2 - 110 + i * 220, 200, 30);
       ov.querySelectorAll('.tal-card').forEach(x => { if (x !== b) anim(x, [{opacity: 1}, {opacity: .25, transform: 'scale(.92)'}], {duration: 300, fill: 'forwards', raw: true}); });
       anim(b, [{transform: 'scale(1)'}, {transform: 'scale(1.08)'}, {transform: 'scale(1.03)'}], {duration: 320, fill: 'forwards', raw: true});
       setTimeout(() => { ov.remove(); onDone && onDone(); }, 620);
@@ -2107,16 +2123,25 @@ function talentPop(r, onDone, hi = null) {
   });
   const later = el('button', 'btn', 'Later', ov); css(later, {left: W / 2 - 60, top: 334, width: 120, height: 40, fontSize: '16px'}); later.onclick = () => { ov.remove(); if (G.screen === 'end') rmAfterRun(); };
 }
-/** Level-up moments: milestones show their packs, talent levels ask for a pick. */
+/** Level-up moments: packs for milestones, the bonus for plain levels, a choice at forks. */
 function rtLevelPop(r, onDone) {
-  if (r.kind === 'talent') return talentPop(r, onDone);
+  if (r.kind === 'fork') return forkPop(r, onDone);
   const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 96}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.86)';
   const head = el('div', 'ab bd', `<span class="rt-lvpill">Level up! Level ${r.lv}</span>`, ov); css(head, {left: 0, right: 0, top: 14, textAlign: 'center'});
+  if (r.kind === 'bonus') {
+    const c = el('div', 'ab tal-card rd-card', `<span class="fk-ico">${tIco(r.key, 50, 1.9)}</span><b class="bd">${BONUS[r.key].label}</b>${r.key === 'free' ? `<i>A ${SET[latestSet()].name} pack, in the shop</i>` : ''}`, ov);
+    css(c, {left: W / 2 - 93, top: 96, width: 186, height: 210});
+    anim(c, [{transform: 'translateY(80px) scale(.8)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 420, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'backwards', raw: true});
+    setTimeout(() => confetti(W / 2, 180, 26), 300); sfx('unlock');
+    const ok = el('button', 'btn', 'Nice', ov); css(ok, {left: W / 2 - 60, top: 334, width: 120, height: 42, background: '#ffc928', fontSize: '17px'});
+    ok.onclick = () => { ov.remove(); onDone && onDone(); };
+    return;
+  }
   const [a, b] = msText(r);
   const sub = el('p', 'ab bd', `${a}. ${b}!`, ov); css(sub, {left: 0, right: 0, top: 66, margin: 0, textAlign: 'center', color: '#fff', fontSize: '18px'});
   const sets = r.kind === 'final' ? SETS : [SET[r.set]];
-  sets.forEach((s, i) => {
-    const w = packEl(s, .62, {n: packSize(s.id), free: r.kind !== 'size'}, ov); w.classList.add('ab'); css(w, {left: W / 2 - 75 + (i - (sets.length - 1) / 2) * 120, top: 98});
+  sets.forEach((s2, i) => {
+    const w = packEl(s2, .62, {n: packSize(s2.id), free: r.kind !== 'size'}, ov); w.classList.add('ab'); css(w, {left: W / 2 - 75 + (i - (sets.length - 1) / 2) * 120, top: 98});
     anim(w, [{transform: 'translateY(220px) rotate(-20deg) scale(.5)', opacity: 0}, {transform: `translateY(0) rotate(${(i - (sets.length - 1) / 2) * 6 - 3}deg) scale(1)`, opacity: 1}], {duration: 560, delay: i * 120, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'both', raw: true});
   });
   setTimeout(() => confetti(W / 2, 180, 40), 500); sfx('unlock');
@@ -2133,7 +2158,7 @@ function rtAwardRun(place) {
 function rtAfterRun() {
   if (G.screen !== 'end') return;
   const lvl = rtLevel(), seen = PROF.lvSeen || 0;
-  if (lvl <= seen) { const f = forkOpen()[0]; if (f && !G.talentAsked) { G.talentAsked = true; return talentPop(f, rtAfterRun); } rmAfterRun(); return; }
+  if (lvl <= seen) { const f = forkOpen()[0]; if (f && !G.talentAsked) { G.talentAsked = true; return forkPop(f, rtAfterRun); } rmAfterRun(); return; }
   PROF.lvSeen = seen + 1; saveProfile();
   rtLevelPop(RT_TRACK[seen], rtAfterRun);
 }

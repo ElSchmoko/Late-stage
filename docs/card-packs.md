@@ -21,16 +21,28 @@ Base cards are owned from the start. A set's packs hold 2 cards, 3 after level 5
 - Cash per run: 80, 70, 60, 50, 40, 32, 26, 20 (1st..8th). XP per level: 200 + 40 per level (30 levels).
 - Simulated (`/tmp` econ model): a full collection takes about 430 runs; level 10 at ~55 runs, level 20 at ~165.
 
-## Levels: the talent tree
-Levels 1, 5, 10, 15, 20, 25 and 30 are milestones: 1/10/20 open a set (with a free pack), 5/15/25 add a card to that
-set's packs, 30 gives a free pack of every set. Every other level (24 in all) is a talent: pick one of three, one per
-direction, for good (`PROF.talents[level] = direction`). Your picks draw a path through the tree.
+## Levels: one road with a few forks
+Levels 1, 10 and 20 open a pack set (first pack free), 5, 15 and 25 add a card to that set's packs, 30 gives a free pack
+of every set. The other levels give a fixed bonus, except six forks where the road splits and you pick one of two, for
+good (`PROF.talents[level] = 0 or 1`). Fixed free packs go to the newest set open at that level.
 
-| Direction | Talents (they cycle row by row) |
+| Level | Reward |
 | --- | --- |
-| Passive Income | +5% Cash · packs −3% · +4 Cash a run · a free pack now |
-| Clout Chasing | +10% Clout · crafting −4% · +1% legendary chance · pity 1 pack sooner |
-| Grindset | +5% XP · +10 XP for a top-4 finish (alternating); +1 Boundaries at levels 9, 19 and 29 |
+| 2 / 3 | +5% Cash / +5% XP |
+| 4 | fork: packs −3% or +10% Clout |
+| 6 / 7 | +4 Cash a run / a free pack |
+| 8 | fork: +1 Boundaries or +10 XP for a top-4 finish |
+| 9 / 11 / 12 | crafting −4% / +5% Cash / +5% XP |
+| 13 | fork: +1% legendary chance or pity 1 pack sooner |
+| 14 / 16 / 17 | +10% Clout / packs −3% / a free pack |
+| 18 | fork: +5% Cash or crafting −4% |
+| 19 / 21 / 22 | +10 XP for a top 4 / +4 Cash a run / +5% XP |
+| 23 | fork: +1 Boundaries or a free pack |
+| 24 / 26 / 27 | +10% Clout / packs −3% / +1% legendary chance |
+| 28 | fork: +5% Cash or +10% Clout |
+| 29 | a free pack |
+
+Picks from the earlier talent tree were cleared once (`flags.road1`).
 
 ## Rating (the Night Line) — cosmetics
 8 stations, 1,000–6,500 rating (Collection › Rating): 4 battle backgrounds (recolours of the city in the shop and fights)
