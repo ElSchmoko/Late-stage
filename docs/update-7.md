@@ -22,3 +22,15 @@ pack opening now fill wide and notched screens edge to edge.
 Every player starts the Levels track again from level 0 (once, on the first start after the update). Talents and unopened
 free packs from levels are cleared and come back as the levels are reached again; owned cards, Cash, Clout, rating and
 cosmetics stay. The old XP, talents and free packs are kept in the profile (`before1`) in case they need restoring.
+
+## Collection reset
+Owned cards are reset too (`flags.cards1`): everyone collects again from the starting cards. Cash and Clout stay; the
+old collection and pity counters are kept in the profile (`before2`). Feed pools are repaired on next use.
+
+## Clout and crafting
+- The Clout jar in the shop has a purple "Craft" sign with the number of cards you can craft right now; it and the
+  Clout wallet in the card books open a short explainer (get Clout from duplicates, find a grey card, craft it) with a
+  button that jumps to a card you can craft.
+- In the books, craftable cards carry a hammer and their price (purple and pulsing when you can afford it); book spines
+  and tier tabs show a purple hammer where something is craftable now.
+- The pack summary after duplicates points to the books.

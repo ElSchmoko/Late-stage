@@ -370,15 +370,16 @@ function showCards(tribe = 'Hustler', o = {}) {
   clear(); G.screen = 'cards'; AU.music('hold'); edgeBg('#6b4a33');
   const room = el('div', 'ab bk-room', '', stage); css(room, {left: -600, top: -400, width: W + 1200, height: H + 800});   // bleeds past the game area to the screen edges
   collectionTabs('cards');
-  const clout = el('span', 'ab wal bk-clout', '', stage); css(clout, {left: 586, top: 15});
+  const clout = el('button', 'ab wal bk-clout', '', stage); css(clout, {left: 566, top: 15}); clout.onclick = cloutInfo;
   const shelf = el('div', 'ab bk-shelf', '', stage); css(shelf, {left: 14, top: 64, width: 106, height: 318});
   const book = el('div', 'ab bk-book', '', stage); css(book, {left: 130, top: 70, width: 700, height: 312});
   const SPREADS = [1, 2, 3, 4, 5, 6, 'L'];   // one tier per spread, the legendaries last
   let cur = tribe, spread = Math.max(0, SPREADS.indexOf(o.tier || 1)), mark = o.mark || null;
+  const canHere = (t, k) => affordable().some(c => inTribe(c, t) && (k == null || (k === 'L' ? c.legendary : !c.legendary && c.tier === k)));
   const renderShelf = () => {
     shelf.innerHTML = ''; const d = deckSet();
     for (const t of TRIBE_ORDER) {
-      const n = t === 'Neutral' ? null : tribeCount(d, t), sp = el('button', 'bk-spine' + (t === cur ? ' on' : ''), `<b class="bd">${t === 'Neutral' ? 'Neighbours' : TP[t]}</b>${n != null ? `<i>${n}/${TRIBE_MAX}${tribeOk(d, t) ? '' : `<span class="bk-warn">${WARN_ICO}</span>`}</i>` : '<i>always in</i>'}`, shelf);
+      const n = t === 'Neutral' ? null : tribeCount(d, t), sp = el('button', 'bk-spine' + (t === cur ? ' on' : ''), `<b class="bd">${t === 'Neutral' ? 'Neighbours' : TP[t]}</b>${n != null ? `<i>${n}/${TRIBE_MAX}${tribeOk(d, t) ? '' : `<span class="bk-warn">${WARN_ICO}</span>`}${canHere(t) ? `<span class="bk-hammer">${HAMMER(10)}</span>` : ''}</i>` : '<i>always in</i>'}`, shelf);
       sp.style.setProperty('--tc', TC[t]);
       sp.onclick = () => { if (t === cur) return; sfx('pickup'); cur = t; spread = 0; mark = null; renderShelf(); renderBook(true); };
     }
@@ -393,7 +394,7 @@ function showCards(tribe = 'Hustler', o = {}) {
     if (hidden) { el('span', 'bk-lock', LOCK, w); w.onclick = () => { sfx('pop'); toast(`In ${SET[c.set].name} packs, from level ${SET[c.set].lv}`); }; return w; }
     if (craft) {
       const cost = craftCost(c), afford = (PROF.clout || 0) >= cost;
-      el('span', 'bk-craft bd' + (afford ? ' ok' : ''), `${CLOUT_ICO(13)} ${cost}`, w);
+      el('span', 'bk-craft bd' + (afford ? ' ok' : ''), `${HAMMER(11)}${cost}`, w);
       w.onclick = () => showDetail(c, null, [{label: `Craft ${CLOUT_ICO(18)} ${cost}`, color: '#b18cff', disabled: !afford, fn: () => {
         PROF.clout -= cost; gainCardOwned(c); saveProfile(); sfx('triple'); mark = c.name;
         toast(`${c.name} crafted${deckSet().has(c.name) ? ' and put in your pool' : ''}`); renderShelf(); renderBook(false);
@@ -440,13 +441,14 @@ function showCards(tribe = 'Hustler', o = {}) {
       const bad = cur !== 'Neutral' && k !== 'L' && !tierOk(d, cur, k);
       const tb = el('button', 'bk-tab bd' + (i === spread ? ' on' : '') + (bad ? ' bad' : ''), k === 'L' ? '✦' : `${k}★`, tabs);
       if (bad) el('span', 'bk-tabwarn', '!', tb);
+      else if (canHere(cur, k)) el('span', 'bk-tabcraft', HAMMER(10), tb);
       tb.onclick = () => { if (i === spread) return; const dd = i - spread; spread = i; sfx('scroll'); renderBook(false, dd); };
     });
     const [L, R] = spreadEls(SPREADS[spread], d); book.appendChild(L); book.appendChild(R);
     el('div', 'bk-title bd', `${cur === 'Neutral' ? 'Neighbours' : TP[cur]}`, book);
     const arrows = [[-1, 'prev', '‹'], [1, 'next', '›']];
     for (const [dd, cls, t] of arrows) { const ar = el('button', `bk-arrow ${cls} bd`, t, book); ar.disabled = spread + dd < 0 || spread + dd >= SPREADS.length; ar.onclick = () => { spread += dd; sfx('scroll'); renderBook(false, dd); }; }
-    clout.innerHTML = `${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i>`;
+    clout.innerHTML = `${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i>${affordable().length ? `<span class="bk-cando">${HAMMER(12)}${affordable().length}</span>` : ''}`;
     if (fresh) anim(book, [{transform: 'translateX(-40px) rotate(-2deg)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 360, easing: 'cubic-bezier(.3,1.3,.5,1)', raw: true});
     else if (dir) {   // paper sheets turn over the gutter, one per tier skipped (up to 3); the far page shows when they land
       const n = Math.min(3, Math.abs(dir)), fwd = dir > 0, D = 420;
@@ -1798,6 +1800,35 @@ if (!PROF.flags.lvReset1) {
 }
 // Nov 24: the talent tree became one road with a few forks; picks from the tree don't carry over.
 if (!PROF.flags.road1) { PROF.flags.road1 = true; PROF.talents = {}; saveProfile(); }
+// Nov 24: unlocked cards are reset too; everyone collects again from the starting cards. Cash and Clout stay; the old
+// collection is kept in the profile. The Feed pools are repaired on next use (flags.pool18).
+if (!PROF.flags.cards1) {
+  PROF.flags.cards1 = true;
+  if ((PROF.owned || []).length) PROF.before2 = {owned: PROF.owned, pity: PROF.pity};
+  Object.assign(PROF, {owned: [], pity: {}}); PROF.flags.pool18 = false; saveProfile();
+}
+// ---- Clout: where it comes from and where it goes
+const craftable = () => CARDS_ALL().filter(c => c.set && !owns(c.name) && setOpen(c.set));
+const affordable = () => craftable().filter(c => craftCost(c) <= (PROF.clout || 0));
+const HAMMER = (s = 16) => ico(TALENT_ICO.craft, s, 2.2);
+/** A short explainer for Clout, with a way straight to a card you can craft. */
+function cloutInfo() {
+  sfx('open');
+  const ov = el('div', 'ab', '', stage); css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 99}); el('div', 'dim', '', ov).style.background = 'rgba(43,33,64,.82)';
+  const p = el('div', 'panel sh-paper cl-info', '', ov); css(p, {left: 172, top: 26, width: 500, height: 338});
+  const all = craftable(), can = affordable(), cheap = all.slice().sort((a, b) => craftCost(a) - craftCost(b))[0];
+  const status = can.length ? `You can craft <b>${can.length} card${can.length > 1 ? 's' : ''}</b> right now.` : cheap ? `Your cheapest craft costs <b>${CLOUT_ICO(14)} ${craftCost(cheap)}</b>.` : 'Nothing to craft yet: open your first pack set at level 1.';
+  p.innerHTML = `<div class="cl-head"><span class="cl-big bd">${CLOUT_ICO(30)} ${(PROF.clout || 0).toLocaleString('en')}</span><b class="bd">Clout</b></div>
+    <div class="cl-steps">
+      <div><span class="n bd">1</span><span class="i">${CLOUT_ICO(26)}</span><p><b>Get it</b>Duplicates from packs turn into Clout.</p></div>
+      <div><span class="n bd">2</span><span class="i grey">?</span><p><b>Find a grey card</b>In your card books, grey cards with a price are ones you can craft.</p></div>
+      <div><span class="n bd">3</span><span class="i">${HAMMER(26)}</span><p><b>Craft it</b>Tap the card, then Craft. It goes straight into your collection.</p></div>
+    </div><p class="cl-status bd">${status}</p><div class="cl-btns"></div>`;
+  const bt = p.querySelector('.cl-btns'), target = can[0] || cheap;
+  if (target) { const go = el('button', 'btn', `${HAMMER(18)} ${can.length ? 'Craft a card' : 'See craftable cards'}`, bt); go.style.background = '#b18cff'; go.onclick = () => { ov.remove(); showCards(target.tribe, {tier: target.legendary ? 'L' : target.tier, mark: target.name}); }; }
+  const ok = el('button', 'btn', 'Got it', bt); ok.onclick = () => ov.remove(); ov.querySelector('.dim').onclick = () => ov.remove();
+}
+
 /** Free packs for the set levels reached (also after an XP change while the app was closed). */
 function syncLevels() {
   const lvl = rtLevel(); let changed = false;
@@ -1883,7 +1914,8 @@ function showPacks() {
   anim(keeper, [{transform: 'translateY(0) rotate(0)'}, {transform: 'translateY(-3px) rotate(-2deg)'}, {transform: 'translateY(0) rotate(0)'}], {duration: 3200, iterations: Infinity, easing: 'ease-in-out', raw: true});
   el('div', 'ab sh-front', '', shop);
   const till = el('div', 'ab sh-till bd', `<div class="scr">${CASH_ICO(16)}<b>${(PROF.cash || 0).toLocaleString('en')}</b></div><i class="keys"></i><span>Cash</span>`, shop); css(till, {left: 18, top: 312});
-  const jar = el('div', 'ab sh-jar bd', `<div class="lid"></div><div class="glass">${CLOUT_ICO(14).repeat(Math.min(6, 1 + Math.floor((PROF.clout || 0) / 150)))}</div><b>${(PROF.clout || 0).toLocaleString('en')}</b><span>Clout</span>`, shop); css(jar, {left: 646, top: 306});
+  const jar = el('button', 'ab sh-jar bd', `<div class="lid"></div><div class="glass">${CLOUT_ICO(14).repeat(Math.min(6, 1 + Math.floor((PROF.clout || 0) / 150)))}</div><b>${(PROF.clout || 0).toLocaleString('en')}</b><span>Clout</span>`, shop); css(jar, {left: 646, top: 306}); jar.onclick = cloutInfo;
+  const jsign = el('button', 'ab sh-jsign bd', `${HAMMER(13)} Craft${affordable().length ? ` <i>${affordable().length}</i>` : ''}`, shop); css(jsign, {left: 640, top: 262}); jsign.onclick = cloutInfo;
   const leaf = el('button', 'ab sh-leaf bd', '<b>Odds &amp;<br>crafting</b><i>read me</i>', shop); css(leaf, {left: 614, top: 116}); leaf.onclick = showOdds;
   const bell = el('div', 'ab sh-bell', '<i></i><b></b>', shop); css(bell, {left: 600, top: 340});
   bell.onclick = () => { sfx('tick'); anim(bell, [{transform: 'rotate(0)'}, {transform: 'rotate(-12deg)'}, {transform: 'rotate(10deg)'}, {transform: 'rotate(0)'}], {duration: 300, raw: true}); toast(['Be right with you.', 'We do not do refunds.', 'Have you tried opening more packs?', 'Legendaries? Out back. Somewhere.'][Math.floor(Math.random() * 4)]); };
@@ -2014,7 +2046,7 @@ async function openPack(id, from = null) {
   const after = () => {
     reveal.remove();
     const fresh = res.filter(r => r.fresh), cl = res.reduce((a, r) => a + r.clout, 0);
-    const sum = el('div', 'ab po-sum bd', `${fresh.length ? `${fresh.length} new card${fresh.length > 1 ? 's' : ''}` : 'No new cards'}${cl ? ` <span>${CLOUT_ICO(16)} +${cl} Clout</span>` : ''}`, ov); css(sum, {left: 0, right: 0, top: 12});
+    const sum = el('div', 'ab po-sum bd', `${fresh.length ? `${fresh.length} new card${fresh.length > 1 ? 's' : ''}` : 'No new cards'}${cl ? ` <span>${CLOUT_ICO(16)} +${cl} Clout</span><small>Spend Clout on cards you're missing in your card books</small>` : ''}`, ov); css(sum, {left: 0, right: 0, top: 12});
     anim(sum, [{transform: 'translateY(-20px)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 300, raw: true});
     const bar = el('div', 'ab po-bar', '', ov); css(bar, {left: 0, right: 0, top: 334});
     const col = el('button', 'btn', `${ico('<rect x="4" y="4" width="7" height="16" rx="1.5" fill="#ff8ab8"></rect><rect x="13" y="4" width="7" height="16" rx="1.5" fill="#8fd4ff"></rect>', 20)} Collection`, bar); col.style.background = '#8fd4ff';
