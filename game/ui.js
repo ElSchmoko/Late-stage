@@ -258,7 +258,9 @@ const tierLevel = () => G.me ? Math.min(1, (G.me.tier - 1) / 5 + (G.me.health + 
 const G = {lobby: null, me: null, hand: [], feed: [], heroUsed: false, busy: false, mode: null, screen: null, firstTurn: true};
 
 // ---------------------------------------------------------------- title
-function clear() { stage.innerHTML = ''; applyLayout(false); }
+function clear() { stage.innerHTML = ''; applyLayout(false); screenEl.style.background = ''; }
+// the colour around the game area on wide or notched screens, for scenes that are not the city
+const edgeBg = c => { screenEl.style.background = c; };
 function bg(dim) {
   // the city, plus mirrored copies of it on each side so the buildings continue to the screen edges on wide phones
   el('img', 'bg mir l', null, stage).src = ART.city; el('img', 'bg mir r', null, stage).src = ART.city;
@@ -365,7 +367,7 @@ function poolMeter(n, legend, min = legend ? 0 : TIER_MIN) {
  *  Tap a card you own to put it in or take it out of your Feed pool; the ⓘ shows it big. Cards from packs you can
  *  open but don't own are greyed out and can be crafted; cards from packs you can't open yet stay a "?". */
 function showCards(tribe = 'Hustler', o = {}) {
-  clear(); G.screen = 'cards'; AU.music('hold');
+  clear(); G.screen = 'cards'; AU.music('hold'); edgeBg('#6b4a33');
   const room = el('div', 'ab bk-room', '', stage); css(room, {left: -600, top: -400, width: W + 1200, height: H + 800});   // bleeds past the game area to the screen edges
   collectionTabs('cards');
   const clout = el('span', 'ab wal bk-clout', '', stage); css(clout, {left: 586, top: 15});
@@ -1854,7 +1856,7 @@ function packEl(s, scale, o = {}, parent = null) {
 
 // ---------------------------------------------------------------- the card shop
 function showPacks() {
-  clear(); G.screen = 'packs'; AU.music('hold');
+  clear(); G.screen = 'packs'; AU.music('hold'); edgeBg('#f3d9b6');
   const shop = el('div', 'ab shop', `<div class="sh-wall"></div><div class="sh-win"><i></i><i></i></div><div class="sh-neon bd">Late Stage <span>Cards</span></div>
     <div class="sh-poster p1"><b class="bd">GOTTA<br>HIRE 'EM<br>ALL</b></div><div class="sh-poster p2"><b class="bd">NO<br>REFUNDS</b><i>(it's late stage)</i></div><div class="sh-poster p3"><b class="bd">1 LEGENDARY<br>PER BOX*</b><i>*maybe</i></div>
     <div class="sh-shelf"><i class="br l"></i><i class="br r"></i></div><div class="sh-counter"><i class="top"></i></div>`, stage);
@@ -1909,7 +1911,7 @@ async function openPack(id, from = null) {
   res.sort((a, b) => RAR_ORDER.indexOf(rarityOf(a.c)) - RAR_ORDER.indexOf(rarityOf(b.c)));
   sfx('pickup');
   const ov = el('div', 'ab po', '<div class="po-bg"></div><div class="po-spot"></div><div class="po-dust"></div><div class="po-rays"></div><div class="po-flash"></div>', stage);
-  css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 98});
+  css(ov, {left: 0, top: 0, width: W, height: H, zIndex: 98}); edgeBg('#120d22');
   const dust = ov.querySelector('.po-dust'); for (let i = 0; i < 26; i++) { const d = el('i', '', '', dust); css(d, {left: Math.random() * W, top: Math.random() * H}); d.style.animationDelay = `-${(Math.random() * 6).toFixed(1)}s`; d.style.animationDuration = `${5 + Math.random() * 5}s`; }
   anim(ov.querySelector('.po-bg'), [{opacity: 0}, {opacity: 1}], {duration: 400, fill: 'forwards', raw: true});
   // the pack: a torn-off strip on top, the body below, the cards hidden inside
@@ -2351,6 +2353,6 @@ function rmAfterRun() {
   ok.onclick = () => { ov.remove(); rmAfterRun(); };
 }
 
-window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), afterRun: () => { G.screen = 'end'; G.talentAsked = false; rtAfterRun(); }, cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), books: (t, o) => showCards(t, o || {}), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
+window.LSUI = {showTitle, G, rc: () => renderChrome(), rebuild: () => { buildShop(); }, end: () => showEnd(), playCard, prof: () => PROF, test: {levelPop: lv => rtLevelPop(RT_TRACK[lv - 1], () => {}), afterRun: () => { G.screen = 'end'; G.talentAsked = false; rtAfterRun(); }, cosPop: () => { G.screen = 'end'; PROF.cos.seen = []; rmAfterRun(); }, buy: () => buy(G.feed[0]), ready: () => ready(), levelUp: () => levelUp(), scroll: () => scroll(), stats: r => showStats(r), backup: () => showBackup(), rewards: () => showTrack('xp'), night: () => showNightLine(), books: (t, o) => showCards(t, o || {}), packs: () => showPacks(), open: id => openPack(id), rmPop: () => { G.screen = 'end'; rmAfterRun(); }, levelUp: l => rtLevelUp(l)}};
 showTitle();
 })();
