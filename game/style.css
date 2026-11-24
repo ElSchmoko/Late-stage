@@ -833,3 +833,11 @@ button{font:inherit;color:inherit}
 .bk-grid.sm .bk-info{width:18px;height:18px;font-size:11px;left:-7px;top:-8px}
 .bk-grid.sm .bk-always{font-size:8.5px;padding:1px 5px 0;bottom:-9px}
 .bk-grid.sm .bk-card.on{transform:translateY(-6px)}
+/* v19e: tier pages laid out like the binder (4 per row, from the top left); a paper sheet turns when you pick a tier */
+.bk-grid.sm{justify-content:flex-start;align-content:flex-start;gap:20px 8px;padding:8px 0 0 2px}
+.bk-sheet{position:absolute;top:10px;bottom:10px;width:336px;box-sizing:border-box;border:3px solid var(--ink);background:#fffdf5;background-image:repeating-linear-gradient(transparent 0 23px,rgba(43,33,64,.05) 23px 24px);z-index:5;pointer-events:none;backface-visibility:visible}
+.bk-sheet.r{left:352px;border-radius:4px 12px 12px 4px;transform-origin:-2px 50%}
+.bk-sheet.l{left:12px;border-radius:12px 4px 4px 12px;transform-origin:calc(100% + 2px) 50%}
+.bk-book{perspective:2600px}
+.bk-grid.sm{gap:20px 11px;padding:8px 0 0}
+.bk-grid.sm .bk-tick{right:-5px}.bk-grid.sm .bk-info{left:-5px}

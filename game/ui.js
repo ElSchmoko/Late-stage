@@ -440,7 +440,7 @@ function showCards(tribe = 'Hustler', o = {}) {
       const bad = cur !== 'Neutral' && k !== 'L' && !tierOk(d, cur, k);
       const tb = el('button', 'bk-tab bd' + (i === spread ? ' on' : '') + (bad ? ' bad' : ''), k === 'L' ? '✦' : `${k}★`, tabs);
       if (bad) el('span', 'bk-tabwarn', '!', tb);
-      tb.onclick = () => { if (i === spread) return; const dd = i > spread ? 1 : -1; spread = i; sfx('scroll'); renderBook(false, dd); };
+      tb.onclick = () => { if (i === spread) return; const dd = i - spread; spread = i; sfx('scroll'); renderBook(false, dd); };
     });
     const [L, R] = spreadEls(SPREADS[spread], d); book.appendChild(L); book.appendChild(R);
     el('div', 'bk-title bd', `${cur === 'Neutral' ? 'Neighbours' : TP[cur]}`, book);
@@ -448,10 +448,14 @@ function showCards(tribe = 'Hustler', o = {}) {
     for (const [dd, cls, t] of arrows) { const ar = el('button', `bk-arrow ${cls} bd`, t, book); ar.disabled = spread + dd < 0 || spread + dd >= SPREADS.length; ar.onclick = () => { spread += dd; sfx('scroll'); renderBook(false, dd); }; }
     clout.innerHTML = `${CLOUT_ICO()}<b>${(PROF.clout || 0).toLocaleString('en')}</b><i>Clout</i>`;
     if (fresh) anim(book, [{transform: 'translateX(-40px) rotate(-2deg)', opacity: 0}, {transform: 'none', opacity: 1}], {duration: 360, easing: 'cubic-bezier(.3,1.3,.5,1)', raw: true});
-    else if (dir) {   // a page turns
-      const turn = dir > 0 ? R : L;
-      anim(turn, [{transform: `rotateY(${dir > 0 ? 75 : -75}deg)`, opacity: .3}, {transform: 'rotateY(0)', opacity: 1}], {duration: 380, easing: 'cubic-bezier(.3,1.2,.5,1)', raw: true});
-      anim(dir > 0 ? L : R, [{opacity: .4}, {opacity: 1}], {duration: 300, raw: true});
+    else if (dir) {   // paper sheets turn over the gutter, one per tier skipped (up to 3); the far page shows when they land
+      const n = Math.min(3, Math.abs(dir)), fwd = dir > 0, D = 420;
+      for (let i = 0; i < n; i++) {
+        const sh = el('div', `bk-sheet ${fwd ? 'r' : 'l'}`, '', book);
+        anim(sh, [{transform: 'rotateY(0)', filter: 'brightness(1)'}, {transform: `rotateY(${fwd ? -90 : 90}deg)`, filter: 'brightness(.82)', offset: .5}, {transform: `rotateY(${fwd ? -180 : 180}deg)`, filter: 'brightness(1)'}],
+          {duration: D, delay: i * 110, easing: 'cubic-bezier(.45,.05,.4,1)', fill: 'both', raw: true}).then(() => sh.remove());
+      }
+      for (const ch of (fwd ? L : R).children) anim(ch, [{opacity: 0}, {opacity: 0, offset: .8}, {opacity: 1}], {duration: D + (n - 1) * 110, raw: true});
     }
     const mk = book.querySelector('.bk-card.mark'); if (mk && fresh !== false) setTimeout(() => mk.scrollIntoView({block: 'nearest'}), 50);
   };
