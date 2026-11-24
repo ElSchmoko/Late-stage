@@ -822,3 +822,7 @@ button{font:inherit;color:inherit}
 .bk-info{left:-10px;top:-11px}
 .bk-in{background:#2ecb6e;bottom:-12px;font-size:9.5px;padding:2px 7px 1px;box-shadow:0 0 0 2px #fff}
 .bk-card .bk-always{bottom:-12px}
+/* v19c: selected cards float a little instead of a thick green frame */
+.bk-card.on{transform:translateY(-7px)}
+.bk-card.on::before{content:none}
+.bk-card.on .card{box-shadow:none;filter:drop-shadow(0 42px 26px rgba(43,33,64,.42))}

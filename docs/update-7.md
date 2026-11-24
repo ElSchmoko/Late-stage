@@ -14,6 +14,6 @@ Feed pools are repaired once on load: a tier with more than 3 cards drops the ex
 with cards you own.
 
 ## Card books
-Small cards, two per row and filled from the top like a binder page. Cards in your pool lift, get a green glowing frame
-and an "In pool" label; cards you own but left out are faded with a dashed outline. The book room, the card shop and the
+Small cards, two per row and filled from the top like a binder page. Cards in your pool float a little above the page
+with a soft shadow and an "In pool" label; cards you own but left out are faded with a dashed outline. The book room, the card shop and the
 pack opening now fill wide and notched screens edge to edge.
