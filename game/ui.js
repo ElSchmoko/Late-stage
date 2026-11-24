@@ -295,7 +295,7 @@ function rankChip(r, fs = 14) {
 }
 function collectionTabs(on) {
   const tabs = el('div', 'ab colltabs', '', stage); css(tabs, {left: 30, top: 12});
-  for (const [k, label] of [['packs', `Packs${freeTotal() || forkOpen().length ? ` <span class="dot">${freeTotal() + forkOpen().length}</span>` : ''}`], ['levels', `Levels <span>${rtLevel()}/${RT_LEVELS}</span>`], ['rating', `Style <span>${rmLevel()}/${RM_TRACK.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
+  for (const [k, label] of [['packs', `Packs${freeTotal() || forkOpen().length ? ` <span class="dot">${freeTotal() + forkOpen().length}</span>` : ''}`], ['levels', `Levels <span>${rtLevel()}/${RT_LEVELS}</span>`], ['rating', `Rating <span>${rmLevel()}/${RM_TRACK.length}</span>`], ['cards', `Cards <span>${CARDS_ALL().length}</span>`], ['heroes', `Heroes <span>${PROF.unlocked.length}/${HEROES.length}</span>`]]) {
     const b = el('button', 'logtab' + (k === on ? ' on' : ''), label, tabs);
     b.onclick = () => { if (k !== on) { sfx('pop'); k === 'cards' ? showCards() : k === 'levels' ? showTrack('xp') : k === 'rating' ? showNightLine() : k === 'packs' ? showPacks() : showCollection(); } };
   }
@@ -311,8 +311,8 @@ function deckSet() {
 }
 const tribesOf = c => [c.tribe, c.tribe2].filter(Boolean);
 const inTribe = (c, t) => tribesOf(c).includes(t);
-// ---- Feed pool rules: per tribe, 2 to 4 cards per tier and at most 18 in all; one legendary per tribe (not counted)
-const TIER_MIN = 2, TIER_MAX = 4, TRIBE_MAX = 18;
+// ---- Feed pool rules: per tribe 2 to 3 cards per tier (so 18 at most), plus one legendary
+const TIER_MIN = 2, TIER_MAX = 3, TRIBE_MAX = 18;   // TRIBE_MAX is only shown, the tiers already cap it
 const tierCount = (d, t, tier) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && x.tier === tier && d.has(x.name)).length;
 const tribeCount = (d, t) => CARDS_ALL().filter(x => !x.legendary && inTribe(x, t) && d.has(x.name)).length;
 function deckToggle(c) {
@@ -326,7 +326,6 @@ function deckToggle(c) {
       if (c.legendary) { if (CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name))) return 'legend'; continue; }
       if (t === 'Neutral') continue;
       if (tierCount(d, t, c.tier) >= TIER_MAX) return 'full';
-      if (tribeCount(d, t) >= TRIBE_MAX) return 'tribe';
     }
     PROF.deck.push(c.name);
   }
@@ -334,8 +333,8 @@ function deckToggle(c) {
 }
 const locked0 = c => !cardOpen(c);
 const LOCK = ico('<rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#ffc928"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path>', 26);
-const TOGGLE_MSG = {min: `Keep at least ${TIER_MIN} per tier`, full: `${TIER_MAX} per tier at most`, tribe: `${TRIBE_MAX} cards per tribe at most`, legend: 'One legendary per tribe'};
-/** Collection › Cards: a card book per tribe on a shelf; each spread shows two tiers (the last one the legendaries).
+const TOGGLE_MSG = {min: `Keep at least ${TIER_MIN} per tier`, full: `${TIER_MAX} per tier at most`, legend: 'One legendary per tribe'};
+/** Collection › Cards: a card book per tribe on a shelf; each spread shows two tiers, the legendaries have the last page.
  *  Tap a card you own to put it in or take it out of your Feed pool; the ⓘ shows it big. Cards from packs you can
  *  open but don't own are greyed out and can be crafted; cards from packs you can't open yet stay a "?". */
 function showCards(tribe = 'Hustler', o = {}) {
@@ -345,7 +344,7 @@ function showCards(tribe = 'Hustler', o = {}) {
   const clout = el('span', 'ab wal bk-clout', '', stage); css(clout, {left: 586, top: 15});
   const shelf = el('div', 'ab bk-shelf', '', stage); css(shelf, {left: 14, top: 64, width: 106, height: 318});
   const book = el('div', 'ab bk-book', '', stage); css(book, {left: 130, top: 70, width: 700, height: 312});
-  const SPREADS = [[1, 2], [3, 4], [5, 6], ['L', 'info']];
+  const SPREADS = [[1, 2], [3, 4], [5, 6], ['L', null]];   // the legendaries get the last page to themselves
   let cur = tribe, spread = o.tier ? SPREADS.findIndex(s => s.includes(o.tier)) : 0, mark = o.mark || null;
   const renderShelf = () => {
     shelf.innerHTML = ''; const d = deckSet();
@@ -385,14 +384,7 @@ function showCards(tribe = 'Hustler', o = {}) {
   };
   const pageEl = (key, side, d) => {
     const pg = el('div', `bk-page ${side}`, '', null);
-    if (key === 'info') {
-      const n = cur === 'Neutral' ? null : tribeCount(d, cur);
-      pg.innerHTML = `<p class="bk-ph bd">Your Feed pool</p><div class="bk-rules">
-        ${n != null ? `<p class="big bd">${n}<small>/${TRIBE_MAX}</small></p><p>${TP[cur]} in your Feed pool</p>` : '<p class="big bd">∞</p><p>Neighbours are always in the Feed</p>'}
-        <ul><li><b>${TIER_MIN}–${TIER_MAX}</b> cards per tier</li><li>At most <b>${TRIBE_MAX}</b> per tribe</li><li><b>1</b> legendary per tribe</li></ul>
-        <p class="hint">Tap a card to put it in or take it out. ⓘ shows it big. Greyed-out cards can be crafted with ${CLOUT_ICO(13)} Clout.</p></div>`;
-      return pg;
-    }
+    if (key == null) { pg.classList.add('blank'); return pg; }
     const cs = CARDS_ALL().filter(c => inTribe(c, cur) && (key === 'L' ? c.legendary : !c.legendary && c.tier === key)).sort((a, b) => (cardOpen(b) - cardOpen(a)) || a.name.localeCompare(b.name));
     const n = key === 'L' ? cs.filter(c => d.has(c.name)).length : cur === 'Neutral' ? cs.filter(c => cardOpen(c)).length : tierCount(d, cur, key);
     const need = key === 'L' ? 1 : TIER_MIN, ok = key === 'L' ? n <= 1 : cur === 'Neutral' || n >= TIER_MIN;
@@ -408,7 +400,7 @@ function showCards(tribe = 'Hustler', o = {}) {
     book.innerHTML = `<div class="bk-cover"></div><div class="bk-gutter"></div>`;
     const tabs = el('div', 'bk-tabs', '', book);
     SPREADS.forEach((sp, i) => {
-      for (const k of sp) { if (k === 'info') continue;
+      for (const k of sp) { if (k == null) continue;
         const tb = el('button', 'bk-tab bd' + (i === spread ? ' on' : ''), k === 'L' ? '✦' : `${k}★`, tabs);
         tb.onclick = () => { if (i === spread) return; const dd = i > spread ? 1 : -1; spread = i; sfx('scroll'); renderBook(false, dd); };
       }
@@ -1766,7 +1758,7 @@ syncLevels();
 function poolAdd(c) {
   const d = deckSet(); if (!PROF.deck || d.has(c.name) || c.tribe === 'Neutral' && !c.legendary) return false;
   for (const t of tribesOf(c)) {
-    if (c.legendary ? CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name)) : tierCount(d, t, c.tier) >= TIER_MAX || tribeCount(d, t) >= TRIBE_MAX) return false;
+    if (c.legendary ? CARDS_ALL().some(x => x.legendary && inTribe(x, t) && d.has(x.name)) : tierCount(d, t, c.tier) >= TIER_MAX) return false;
   }
   PROF.deck.push(c.name); return true;
 }

@@ -791,3 +791,4 @@ button{font:inherit;color:inherit}
 .sh-poster.p3{left:16px;top:236px;width:70px;height:50px;background:#8fd4ff;transform:rotate(-3deg)}.sh-poster.p3 b{font-size:9.5px;line-height:1.05}.sh-poster.p3 i{font-size:7.5px;font-weight:800;font-style:normal}
 .sh-shelf{left:110px;width:540px}
 .bk-card.off .card{filter:saturate(.75);opacity:.88;box-shadow:5px 7px 0 var(--ink),0 0 0 8px #fff,0 0 0 11px #c9c2d6}
+.bk-page.blank{background-image:repeating-linear-gradient(transparent 0 23px,rgba(43,33,64,.05) 23px 24px),radial-gradient(circle at 50% 50%,rgba(43,33,64,.04),transparent 60%)}

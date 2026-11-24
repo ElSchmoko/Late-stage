@@ -33,9 +33,9 @@ direction, for good (`PROF.talents[level] = direction`). Your picks draw a path 
 | Grindset | +5% XP · +10 XP for a top-4 finish (alternating); +1 Boundaries at levels 9, 19 and 29 |
 
 ## Rating (the Night Line) — cosmetics
-12 stations, 1,000–6,500 rating: 4 card sleeves (hand cards and pack card backs), 4 battle backgrounds (recolours of the
+12 stations, 1,000–6,500 rating (Collection › Rating): 4 card sleeves (hand cards and pack card backs), 4 battle backgrounds (recolours of the
 city in the shop and fights), 4 effects (neon attack trails, comic hit words, confetti knock-outs, a big entrance when you
-play a minion). Cosmetics stay yours after a season reset. Equip in Collection › Style.
+play a minion). Cosmetics stay yours after a season reset. Equip in Collection › Rating.
 
 ## Old profiles
 Cards unlocked on the old tracks and legendaries reached on the old Night Line stay owned; players with past runs get
@@ -49,6 +49,6 @@ Duplicates fade back and get a Clout stamp; new cards get a NEW sticker. Buttons
 card), Open another, Back to the shop.
 
 ## Card books (Collection › Cards)
-One book per tribe on a shelf; each spread shows two tiers (the last: legendaries and the pool rules). Tap a card you own
-to put it in or take it out of the Feed pool, ⓘ for details. Rules per tribe: 2–4 cards per tier (counter "X/2"), 18 at
-most, 1 legendary. Unowned cards from open sets are greyed out and craftable; cards from sets you can't open yet are "?".
+One book per tribe on a shelf; each spread shows two tiers, the legendaries have the last page to themselves. Tap a card
+you own to put it in or take it out of the Feed pool, ⓘ for details. Rules per tribe: 2–3 cards per tier (counter "X/2"),
+so 18 at most, plus 1 legendary as a 19th card. Unowned cards from open sets are greyed out and craftable; cards from sets you can't open yet are "?".
