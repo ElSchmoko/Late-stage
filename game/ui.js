@@ -1783,6 +1783,14 @@ if (!PROF.packs) {
   saveProfile();
 }
 PROF.talents = PROF.talents || {}; PROF.free = PROF.free || {}; PROF.pity = PROF.pity || {};
+// Nov 24: every player starts the Levels track again from level 0. Talents and the free packs from levels go with it
+// (they come back as the levels are reached again); cards, Cash, Clout, rating and cosmetics stay. The old values are kept.
+if (!PROF.flags.lvReset1) {
+  PROF.flags.lvReset1 = true;
+  if (PROF.xp || Object.keys(PROF.talents).length) PROF.before1 = {xp: PROF.xp || 0, talents: PROF.talents, free: PROF.free};
+  Object.assign(PROF, {xp: 0, talents: {}, free: {}, lvGranted: 0, lvSeen: 0});
+  saveProfile();
+}
 /** Free packs for the set levels reached (also after an XP change while the app was closed). */
 function syncLevels() {
   const lvl = rtLevel(); let changed = false;

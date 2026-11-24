@@ -17,3 +17,8 @@ with cards you own.
 Small cards, two per row and filled from the top like a binder page. Cards in your pool float a little above the page
 with a soft shadow and an "In pool" label; cards you own but left out are faded with a dashed outline. The book room, the card shop and the
 pack opening now fill wide and notched screens edge to edge.
+
+## Levels reset
+Every player starts the Levels track again from level 0 (once, on the first start after the update). Talents and unopened
+free packs from levels are cleared and come back as the levels are reached again; owned cards, Cash, Clout, rating and
+cosmetics stay. The old XP, talents and free packs are kept in the profile (`before1`) in case they need restoring.
