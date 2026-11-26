@@ -1,0 +1,470 @@
+{
+ "targets": [
+  3,
+  6,
+  9,
+  13
+ ],
+ "seeds": 6,
+ "tribes": {
+  "Hustler": {
+   "peak": {
+    "3": 18,
+    "6": 100,
+    "9": 772,
+    "13": 2757
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 0,
+    "13": 0
+   },
+   "boards": {
+    "3": [
+     "Delivery Rider 8/5",
+     "Side Hustle 2/3"
+    ],
+    "6": [
+     "Side Hustle 7/8",
+     "Thought Leader 6/7",
+     "Five-Star Rating 24/26",
+     "Loyalty Card 7/10",
+     "Crypto Bro 5/6"
+    ],
+    "9": [
+     "Tech Founder 26/27",
+     "Tech Founder 26/27",
+     "Thought Leader 70/71",
+     "★ Private Equity 354/367",
+     "New Neighbours 5/7",
+     "Unicorn Startup 8/10",
+     "Too Big to Fail 74/74"
+    ],
+    "13": [
+     "★ Unicorn Startup 160/164",
+     "★ Platform Monopoly 198/204",
+     "Cashback Card 81/84",
+     "★ Private Equity 798/829",
+     "★ Consultant 282/284",
+     "Side Hustle 80/81",
+     "New Neighbours 9/11"
+    ]
+   },
+   "curve": [
+    5,
+    5,
+    12,
+    12,
+    35,
+    75,
+    121,
+    183,
+    523,
+    905,
+    1556,
+    2249,
+    3265
+   ],
+   "rating": {
+    "3": 113,
+    "6": 152,
+    "9": 166,
+    "13": 90
+   },
+   "overall": 136
+  },
+  "Influencer": {
+   "peak": {
+    "3": 14,
+    "6": 60,
+    "9": 1551,
+    "13": 8521
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 0,
+    "13": 0
+   },
+   "boards": {
+    "3": [
+     "Package Hoarder 2/5",
+     "Package Hoarder 2/5"
+    ],
+    "6": [
+     "Personal Brand 4/6",
+     "★ Package Hoarder 20/26",
+     "Personal Brand 4/6"
+    ],
+    "9": [
+     "★ Engagement Bot 82/82",
+     "Content Creator 4/6",
+     "Shock Jock 4/9",
+     "Main Character 910/912",
+     "★ Ring Light Studio 8/16",
+     "★ Personal Brand 8/12",
+     "Main Character 10/12"
+    ],
+    "13": [
+     "★ Content Creator 8/12",
+     "Ring Light Studio 4/8",
+     "★ Main Character 5804/5808",
+     "★ Main Character 20/24",
+     "★ Streamer House 12/18",
+     "Crisis PR Firm 3/9"
+    ]
+   },
+   "curve": [
+    0,
+    0,
+    0,
+    0,
+    14,
+    22,
+    97,
+    146,
+    695,
+    791,
+    4569,
+    8261,
+    11730
+   ],
+   "rating": {
+    "3": 88,
+    "6": 91,
+    "9": 334,
+    "13": 277
+   },
+   "overall": 201
+  },
+  "Feral": {
+   "peak": {
+    "3": 16,
+    "6": 65,
+    "9": 631,
+    "13": 14261
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 0,
+    "13": 0
+   },
+   "boards": {
+    "3": [
+     "Tulip Bulb 5/4",
+     "Package Hoarder 2/5"
+    ],
+    "6": [
+     "Windowsill Succulent 6/6",
+     "Tulip Bulb 21/20",
+     "Bat Colony 3/3",
+     "Bat Colony 3/3"
+    ],
+    "9": [
+     "Guerrilla Gardener 71/73",
+     "Windowsill Succulent 106/106",
+     "Ancient Oak 71/76",
+     "★ Botanical Garden 102/114",
+     "Apex Scavenger 54/57",
+     "Apex Scavenger 54/57",
+     "World Tree 65/69"
+    ],
+    "13": [
+     "Botanical Garden 1876/1882",
+     "Botanical Garden 1876/1882",
+     "Ancient Oak 1821/1826",
+     "★ Ancient Oak 1998/2014",
+     "★ Apex Scavenger 228/236",
+     "World Tree 1701/1705",
+     "New Neighbours 5/7"
+    ]
+   },
+   "curve": [
+    4,
+    4,
+    16,
+    16,
+    32,
+    42,
+    52,
+    88,
+    327,
+    1129,
+    5137,
+    11217,
+    19057
+   ],
+   "rating": {
+    "3": 100,
+    "6": 98,
+    "9": 136,
+    "13": 463
+   },
+   "overall": 183
+  },
+  "Creative": {
+   "peak": {
+    "3": 21,
+    "6": 74,
+    "9": 390,
+    "13": 1749
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 0,
+    "13": 0
+   },
+   "boards": {
+    "3": [
+     "Wedding Band 8/9",
+     "Art Student 2/2"
+    ],
+    "6": [
+     "Merch Stand 2/3",
+     "Busker 10/10",
+     "Open Mic Poet 6/6",
+     "★ Conceptual Artist 14/16",
+     "Indie Band 9/10",
+     "Indie Band 9/10",
+     "Struggling Artist 6/6"
+    ],
+    "9": [
+     "Content Creator 33/35",
+     "Festival Headliner 13/14",
+     "★ Museum Retrospective 34/42",
+     "★ Busker 93/93",
+     "World Tour 30/32",
+     "Festival Headliner 17/18",
+     "Dead Rock Star 15/15"
+    ],
+    "13": [
+     "★ Festival Headliner 110/112",
+     "Mashup Artist 162/164",
+     "★ Dead Rock Star 300/300",
+     "★ World Tour 364/368",
+     "★ World Tour 216/220",
+     "Dead Rock Star 79/79",
+     "Mashup Artist 42/44"
+    ]
+   },
+   "curve": [
+    4,
+    4,
+    11,
+    11,
+    28,
+    28,
+    62,
+    67,
+    98,
+    184,
+    536,
+    1097,
+    2560
+   ],
+   "rating": {
+    "3": 131,
+    "6": 112,
+    "9": 84,
+    "13": 57
+   },
+   "overall": 96
+  },
+  "Techie": {
+   "peak": {
+    "3": 14,
+    "6": 74,
+    "9": 425,
+    "13": 3636
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 0,
+    "13": 0
+   },
+   "boards": {
+    "3": [
+     "Package Hoarder 2/5",
+     "Package Hoarder 2/5"
+    ],
+    "6": [
+     "Battle Pass 5/6",
+     "World Record 8/9",
+     "Pop-Up Ad 19/25",
+     "★ Loot Box 8/8"
+    ],
+    "9": [
+     "The Landlord 39/41",
+     "★ Pop-Up Ad 20/29",
+     "★ World Record 87/90",
+     "★ Pro Gamer 94/94",
+     "★ Tech Founder 20/22",
+     "Smart Home Hub 5/8"
+    ],
+    "13": [
+     "Smart Plug 1336/1419",
+     "★ Startup Monk 1020/1077"
+    ]
+   },
+   "curve": [
+    4,
+    5,
+    10,
+    12,
+    26,
+    28,
+    114,
+    174,
+    298,
+    352,
+    735,
+    2072,
+    4852
+   ],
+   "rating": {
+    "3": 88,
+    "6": 112,
+    "9": 91,
+    "13": 118
+   },
+   "overall": 102
+  },
+  "Punk": {
+   "peak": {
+    "3": 14,
+    "6": 53,
+    "9": 465,
+    "13": 2169
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 0,
+    "13": 0
+   },
+   "boards": {
+    "3": [
+     "Circle Pit 3/4",
+     "Circle Pit 3/4"
+    ],
+    "6": [
+     "Circle Pit 6/10",
+     "Caretaker 2/5",
+     "Mosh Pit 7/10",
+     "Circle Pit 4/6",
+     "Pirate Radio 2/3"
+    ],
+    "9": [
+     "Banner Drop 34/36",
+     "★ Mosh Pit 47/51",
+     "Bootleg Merch 35/36",
+     "★ Reunion Tour 59/67",
+     "Greatest Hits 32/33",
+     "Reunion Tour 36/40",
+     "Stage Diver 12/12"
+    ],
+    "13": [
+     "Mosh Pit 210/212",
+     "Mosh Pit 210/212",
+     "Stage Diver 203/203",
+     "★ Reunion Tour 214/222",
+     "Anarchist Barista 185/186",
+     "Stage Diver 189/189",
+     "Greatest Hits 19/20"
+    ]
+   },
+   "curve": [
+    0,
+    0,
+    3,
+    3,
+    19,
+    25,
+    60,
+    74,
+    224,
+    224,
+    250,
+    2087,
+    2474
+   ],
+   "rating": {
+    "3": 88,
+    "6": 80,
+    "9": 100,
+    "13": 70
+   },
+   "overall": 86
+  },
+  "Philosopher": {
+   "peak": {
+    "3": 17,
+    "6": 66,
+    "9": 387,
+    "13": 3077
+   },
+   "next": {
+    "3": 0,
+    "6": 0,
+    "9": 29,
+    "13": 63
+   },
+   "boards": {
+    "3": [
+     "Van Lifer 5/5",
+     "Package Hoarder 2/5"
+    ],
+    "6": [
+     "Utilitarian 5/6",
+     "★ Van Lifer 20/17",
+     "Keynote Speaker 9/6",
+     "Utilitarian 5/6"
+    ],
+    "9": [
+     "Debate Club 26/28",
+     "Wise Old Owl 32/36",
+     "Bestselling Author 32/35",
+     "★ Silent Retreat 38/48",
+     "Wise Old Owl 24/28",
+     "★ TED Talk 35/37",
+     "Grand Unified Theory 25/29"
+    ],
+    "13": [
+     "Wise Old Owl 470/474",
+     "Grand Unified Theory 491/495",
+     "Bestselling Author 469/472",
+     "★ TED Talk 548/550",
+     "Thought Experiment 280/280",
+     "Grand Unified Theory 437/441",
+     "★ New Neighbours 490/494"
+    ]
+   },
+   "curve": [
+    0,
+    0,
+    3,
+    3,
+    15,
+    15,
+    37,
+    70,
+    343,
+    779,
+    2431,
+    4423,
+    6391
+   ],
+   "rating": {
+    "3": 106,
+    "6": 100,
+    "9": 83,
+    "13": 100
+   },
+   "overall": 96
+  }
+ }
+}
