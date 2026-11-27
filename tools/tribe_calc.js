@@ -11,6 +11,8 @@ const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2);
 const TARGETS = (args.find(a => /^[\d,]+$/.test(a)) || '3,6,9,13').split(',').map(Number);
 let BATTLE = !args.includes('--no-battle');
+// design what-ifs: --variant=apexBase,oakPos,... (described in tools/whatif.js)
+const V = new Set(((args.find(a => a.startsWith('--variant=')) || '').slice(10) || process.env.VARIANT || '').split(',').filter(Boolean));
 const TRIBES = ['Hustler', 'Influencer', 'Feral', 'Creative', 'Techie', 'Punk', 'Philosopher'];
 const CARDS = LS_CARDS.filter(c => !c.token && c.name !== 'Follower');
 const BY = Object.fromEntries(CARDS.map(c => [c.name, c]));
@@ -44,9 +46,10 @@ const small = arr => arr.length ? arr.reduce((a, o) => (o.atk + o.hp < a.atk + a
 const nbrs = (st, m) => { const i = st.board.indexOf(m); return [st.board[i - 1], st.board[i + 1]].filter(Boolean); };
 function buff(st, m, a, h, kind = 'perm', src = null) {
   if (!m) return;
-  if (st.inEot && src && isT(m, 'Feral', st)) { a *= st.oak; h *= st.oak; }   // Ancient Oak
+  if (st.inEot && src && isT(m, 'Feral', st)) { const k = V.has('oakPos') ? (st.oakBy && st.oakBy.get(src)) || 1 : st.oak; a *= k; h *= k; }   // Ancient Oak
   if (kind === 'temp') { m.ta += a; m.th += h; } else { m.atk += a; m.hp += h; }
   if (st.track && src) st.track[src.c.name] = (st.track[src.c.name] || 0) + a + h;
+  if (st.track0 && src && src.c) st.track0[src.c.name] = (st.track0[src.c.name] || 0) + a + h;
 }
 const pDie = st => Math.min(1, ASSUME.deaths[phase(st.t)] / Math.max(1, st.board.length));
 const gold = (st, n) => { st.goldNext += n; };
@@ -94,7 +97,7 @@ const R = {
   'Engagement Bot': {fi: (st, m) => likes(st, 2 * m.g)},
   'Stan Account': {eot: (st, m) => likes(st, 2 * m.g)},
   'Hype Man': {battle: (st, m) => likes(st, m.g * st.att(m))},
-  'Personal Brand': {fi: (st, m) => { likes(st, 2 * m.g); st.likeBonus += 1; }},
+  'Personal Brand': {fi: (st, m) => { likes(st, 2 * m.g); st.likeBonus = V.has('likesCap') ? Math.min(2, st.likeBonus + 1) : st.likeBonus + 1; }},
   'Ring Light Studio': {fi: (st, m) => likes(st, 2 * m.g)},
   'Main Character': {battle: (st, m) => likes(st, 3 * m.g * st.att(m))},
   'Thirst Trap': {battle: (st, m) => likes(st, Math.min(2, ASSUME.deaths[phase(st.t)]) * m.g)},
@@ -137,7 +140,7 @@ const R = {
   'Seed Vault': {eot: (st, m) => { for (const o of others(st, m, 'Feral')) buff(st, o, Math.min(4, o.turns) * m.g, Math.min(4, o.turns) * m.g, 'perm', m); }},
   'Fox Den': {battle: (st, m) => { const n = st.board.filter(o => isT(o, 'Feral', st) && (o.c.rebrand || o.rebrand)).length * pDie(st); for (const o of others(st, m, 'Feral').slice(0, Math.round(n))) buff(st, o, 3 * m.g, 3 * m.g, 'perm', m); }},
   'Botanical Garden': {eot: (st, m) => { const n = st.board.filter(o => isT(o, 'Feral', st)).length; feedBuff(st, 'Feral', n * m.g, n * m.g); }},
-  'Apex Scavenger': {eot: (st, m) => { const x = Math.floor(feedBest(st.tier, st.feed.Feral, 'Feral').a / 2); for (const o of others(st, m, 'Feral')) buff(st, o, x * m.g, x * m.g, 'perm', m); }},
+  'Apex Scavenger': {eot: (st, m) => { const x = V.has('apexBase') ? Math.min(2 * st.tier, Math.floor(feedBest(st.tier, null, 'Feral').a / 2)) : Math.floor(feedBest(st.tier, st.feed.Feral, 'Feral').a / 2); for (const o of others(st, m, 'Feral')) buff(st, o, x * m.g, x * m.g, 'perm', m); }},
   'Wise Old Owl': {eot: (st, m) => { const k = tribesOf(st); for (const o of st.board) if (isT(o, 'Feral', st) || isT(o, 'Philosopher', st)) buff(st, o, k * m.g, k * m.g, 'perm', m); }},
   // Creatives
   'Busker': {hire: (st, m, x) => { if (x !== m && isT(x, 'Creative', st)) for (let r = 0; r < st.tour; r++) buff(st, m, m.g, m.g, 'perm', m); }},
@@ -171,17 +174,17 @@ const R = {
   'Pop-Up Ad': {sot: (st, m) => { if (st.t % 2 === 0) st.gold += m.g; }},
   'Battle Pass': {gig: {cost: 1, fn: (st, m) => { m.uses = (m.uses || 0) + 1; buff(st, big(others(st, m)), m.uses * m.g, m.uses * m.g, 'perm', m); }}},
   'Data Broker': {afterGig: (st, m) => { if (st.used(m, 'db', 2)) gold(st, m.g); }},
-  'Auto-Renewal': {sot: (st, m) => { if (st.gold >= 1) { st.gold -= 1; st.spent += 1; for (const o of st.board) if (isT(o, 'Techie', st)) buff(st, o, 2 * m.g, 2 * m.g, 'perm', m); } }},
+  'Auto-Renewal': {sot: (st, m) => { const k = V.has('techBuff') ? 3 : 2; if (st.gold >= 1) { st.gold -= 1; st.spent += 1; for (const o of st.board) if (isT(o, 'Techie', st)) buff(st, o, k * m.g, k * m.g, 'perm', m); } }},
   'App Store': {gigDiscount: 1, afterGig: (st, m) => buff(st, m, 2 * m.g, 2 * m.g, 'perm', m)},
   'Smart Doorbell': {fi: (st, m) => { const o = big(others(st, m).filter(x => !isT(x, 'Techie', st))); if (o) o.techie = true; },
     battle: (st, m) => { const p = pDie(st) * st.lawyer; for (const o of st.board) if (isT(o, 'Techie', st)) buff(st, o, m.g * p, m.g * p, 'perm', m); }},
-  'The Algorithm': {eot: (st, m) => { for (const o of st.board) if (o.connects) buff(st, o, o.connects * m.g, o.connects * m.g, 'perm', m); }},
+  'The Algorithm': {eot: (st, m) => { const k = V.has('techBuff') ? 2 : 1; for (const o of st.board) if (o.connects) buff(st, o, k * o.connects * m.g, k * o.connects * m.g, 'perm', m); }},
   // Punks
   'Anarchist Barista': {sold: (st, m) => gold(st, m.g)},
   'Zine Maker': {sold: (st, m, right) => buff(st, right, 2 * m.g, 2 * m.g, 'perm', m)},
   'Sellout Frontman': {sold: (st, m) => { for (const o of others(st, m, 'Punk')) buff(st, o, 2 * m.g, 2 * m.g, 'perm', m); feedBuff(st, 'Punk', 2 * m.g, 2 * m.g); }},
   'Mosh Pit': {battle: (st, m) => { const k = st.att(m); for (const o of st.board) if (isT(o, 'Punk', st)) buff(st, o, k * m.g, 0, 'perm', m); }},
-  'Jingle Writer': {sold: (st, m) => { const k = Math.min(16, 2 * st.punksSold); for (const o of others(st, m, 'Punk')) buff(st, o, k * m.g, k * m.g, 'perm', m); }},
+  'Jingle Writer': {sold: (st, m) => { const k = V.has('jingleTurn') ? 2 * (st.soldThisTurn || 0) : Math.min(16, 2 * st.punksSold); for (const o of others(st, m, 'Punk')) buff(st, o, k * m.g, k * m.g, 'perm', m); }},
   'Reunion Tour': {reunion: true},
   'Stage Diver': {battle: (st, m) => buff(st, m, 4 * m.g * st.mohawk, 0, 'perm', m)},
   'Greatest Hits': {sell: (st, m, x) => { if (isT(x, 'Punk', st)) for (const o of st.board) if (isT(o, 'Punk', st)) buff(st, o, m.g, m.g, 'perm', m); }},
@@ -206,7 +209,7 @@ const R = {
   'Van Lifer': {eot: (st, m) => { if (st.board.length <= 4) buff(st, m, m.g, m.g, 'perm', m); }},
   'Declutter Coach': {sell: (st, m) => buff(st, big(others(st, m)), 2 * m.g, 2 * m.g, 'perm', m)},
   'Capsule Wardrobe': {eot: (st, m) => { const k = (7 - st.board.length) * m.g; for (const o of st.board) buff(st, o, k, k, 'perm', m); }},
-  'TED Talk': {eot: (st, m) => { const k = (1 + nbrs(st, m).filter(o => isT(o, 'Philosopher', st)).length) * m.g; for (const o of st.board) buff(st, o, k, k, 'temp', m); }},
+  'TED Talk': {eot: (st, m) => { const k = (V.has('philBuff') ? 2 : 1) * (1 + nbrs(st, m).filter(o => isT(o, 'Philosopher', st)).length) * m.g; for (const o of st.board) buff(st, o, k, k, 'temp', m); }},
   'Epicurean': {eot: (st, m) => { st.followerBuff.a += m.g; st.followerBuff.h += m.g; for (const o of st.board) if (o.follower) buff(st, o, m.g, m.g, 'perm', m); }},
   'Pythagorean': {fi: (st, m) => { for (let i = 0; i < 2 * m.g; i++) summonFollower(st, m); likes(st, 2 * m.g); }},
   'Philosopher King': {battle: (st, m) => { const fd = Math.min(ASSUME.deaths[phase(st.t)], st.board.filter(o => o.follower).length + (st.has('Hemlock Martyr') ? 2 : 0)); for (const o of st.board) if (isT(o, 'Philosopher', st)) buff(st, o, 3 * fd * m.g, 3 * fd * m.g, 'perm', m); }},
@@ -235,7 +238,7 @@ function mk(c, g, st) {
  *  for its When sold effect when there's gold to spare. Returns the board stats at the end of turn T (after end of turn). */
 function play(tribe, plan, T, track = null) {
   const want = plan.cards.slice().sort((a, b) => BY[a.n].tier - BY[b.n].tier);
-  const st = {t: 0, tier: 1, tribe, board: [], hand: [], gold: 0, goldNext: 0, spent: 0, likes: 0, likeBonus: 0, feed: {}, followerBuff: {a: 0, h: 0}, followersSummoned: 0,
+  const st = {track0: {}, t: 0, tier: 1, tribe, board: [], hand: [], gold: 0, goldNext: 0, spent: 0, likes: 0, likeBonus: 0, feed: {}, followerBuff: {a: 0, h: 0}, followersSummoned: 0,
     creativesPlayed: 0, creativeAtk: 0, punksSold: 0, turnsAtTier: 0, track, uses: new Map(), gigs: 0, crossover: 0};
   st.used = (m, key, max) => { const k = (m.id || (m.id = Math.random())) + key, n = st.uses.get(k) || 0; if (n >= max) return false; st.uses.set(k, n + 1); return true; };
   st.has = n => st.board.some(o => o.c.name === n);
@@ -269,14 +272,14 @@ function play(tribe, plan, T, track = null) {
   function sellM(m) {
     const i = st.board.indexOf(m), right = st.board[i + 1] || null; st.board.splice(i, 1);
     st.gold += 1 + ((R[m.c.name] && R[m.c.name].sellGold) || 0) * m.g;
-    const reps = isT(m, 'Punk', st) ? st.reunion : 1;
+    const reps = !isT(m, 'Punk', st) ? 1 : V.has('reunionOnce') ? (st.reunion > 1 && !st.reunionUsed ? (st.reunionUsed = 2) : 1) : st.reunion;
     if (R[m.c.name] && R[m.c.name].sold) for (let r = 0; r < reps; r++) R[m.c.name].sold(st, m, right);
-    if (isT(m, 'Punk', st)) st.punksSold += 1;
+    if (isT(m, 'Punk', st)) { st.punksSold += 1; st.soldThisTurn = (st.soldThisTurn || 0) + 1; }
     refresh(); hook('sell', m);
   }
   const pending = want.map(w => ({n: w.n, g: w.g, copies: 0}));
   for (let t = 1; t <= T; t++) {
-    st.t = t; st.uses = new Map(); st.gigs = 0;
+    st.t = t; st.uses = new Map(); st.gigs = 0; st.soldThisTurn = 0; st.reunionUsed = 0;
     for (const o of st.board) { o.turns += 1; o.ta = o.th = 0; }
     st.gold = Math.min(2 + t, 10) + st.goldNext; st.goldNext = 0; st.spent = 0;
     if (t > 1) st.turnsAtTier += 1;
@@ -324,7 +327,17 @@ function play(tribe, plan, T, track = null) {
     // end of turn, in board order (Bestselling Author and Grand Unified Theory last), twice with New Neighbours
     st.inEot = true;
     const order = st.board.slice().sort((a, b) => ((R[a.c.name] && R[a.c.name].late ? 1 : 0) - (R[b.c.name] && R[b.c.name].late ? 1 : 0)));
-    for (let rep = 0; rep < st.nn; rep++) for (const o of order) { const r = R[o.c.name]; if (r && r.eot && st.board.includes(o)) r.eot(st, o); }
+    if (V.has('oakPos') || V.has('nnPos')) {   // positional: Oak doubles the two end-of-turn minions next to it, New Neighbours repeats the one to its left
+      const eots = st.board.filter(o => R[o.c.name] && R[o.c.name].eot && !R[o.c.name].late);
+      const score = o => (st.track0 && st.track0[o.c.name]) || (o.c.tier * 10);
+      eots.sort((a, b) => score(b) - score(a));
+      st.oakBy = new Map(); const oaks = st.board.filter(o => o.c.name === 'Ancient Oak');
+      oaks.forEach((k, i) => { for (const o of eots.slice(i * 2, i * 2 + 2)) st.oakBy.set(o, (st.oakBy.get(o) || 1) + k.g); });
+      st.nnBy = new Map(); const nns = st.board.filter(o => o.c.name === 'New Neighbours');
+      nns.forEach((k, i) => { const o = eots[i]; if (o) st.nnBy.set(o, (st.nnBy.get(o) || 1) + k.g); });
+    }
+    if (V.has('nnPos')) { for (const o of order) { const r = R[o.c.name]; if (!r || !r.eot) continue; for (let rep = 0; rep < (st.nnBy.get(o) || 1); rep++) if (st.board.includes(o)) r.eot(st, o); } }
+    else for (let rep = 0; rep < st.nn; rep++) for (const o of order) { const r = R[o.c.name]; if (r && r.eot && st.board.includes(o)) r.eot(st, o); }   // the engine's order: all end-of-turn effects, then again
     for (const a of st.attached || []) { const r = R[a.c.name]; if (r && r.eot) for (let rep = 0; rep < st.nn; rep++) r.eot(st, a); }
     st.inEot = false;
     st.board = st.board.filter(o => !o.dead);
@@ -332,7 +345,7 @@ function play(tribe, plan, T, track = null) {
     if (st.likes > 0 && st.board.length) {
       const mc = st.board.find(o => o.c.name === 'Main Character'), tgt = mc || big(st.board);
       const ring = st.board.some(o => o.c.name === 'Ring Light Studio') ? (st.board.some(o => o.c.name === 'Ring Light Studio' && o.g === 2) ? 3 : 2) : 1;
-      const v = (1 + st.likeBonus) * (mc ? 2 * mc.g : 1) * ring;
+      const v = (1 + st.likeBonus) * (mc ? (V.has('likesCap') ? mc.g + 1 : 2 * mc.g) : 1) * ring;
       buff(st, tgt, v * st.likes, v * st.likes, 'perm', {c: {name: 'Likes'}}); st.likes = 0;
     }
     if (t === T) break;
@@ -354,12 +367,18 @@ function legal(plan) {
   if (plan.cycle && BY[plan.cycle].tribe !== 'Neutral') (per[BY[plan.cycle].tier] = per[BY[plan.cycle].tier] || new Set()).add(plan.cycle);
   return legs <= 1 && Object.values(per).every(s => s.size <= 3) && new Set(plan.cards.map(x => x.n)).size === plan.cards.length;
 }
-function best(tribe, T, start = null) {
+function best(tribe, T, start = null, must = null) {
   const cs = pool(tribe).filter(c => c.tier <= (CURVE[T] || 6));
   const slots = c => (CONNECT.has(c.name) ? 0 : 1);
   const cycles = [null, ...cs.filter(c => c.tribe === tribe && (SELL_GOOD(c.name) || c.tribe === 'Punk')).map(c => c.name)];
-  let plan = start ? {cards: start.cards.filter(x => BY[x.n].tier <= (CURVE[T] || 6)), cycle: start.cycle && BY[start.cycle].tier <= (CURVE[T] || 6) ? start.cycle : null} : {cards: [], cycle: null}, val = play(tribe, plan, T).stats;
-  const tryPlan = p => (legal(p) && p.cards.reduce((k, x) => k + slots(BY[x.n]), 0) <= 7 ? play(tribe, p, T).stats : -1);
+  let plan = must && start && !start.cards.some(x => x.n === must) ? null : start ? {cards: start.cards.filter(x => BY[x.n].tier <= (CURVE[T] || 6)), cycle: start.cycle && BY[start.cycle].tier <= (CURVE[T] || 6) ? start.cycle : null} : {cards: [], cycle: null}, val = plan ? play(tribe, plan, T).stats : -1;
+  const tryPlan = p => (legal(p) && (!must || p.cards.some(x => x.n === must) || p.cycle === must) && p.cards.reduce((k, x) => k + slots(BY[x.n]), 0) <= 7 ? play(tribe, p, T).stats : -1);
+  if (!plan) {   // a forced card: put it in place of each card of the start board in turn, keep the best
+    const base = {cards: start.cards.filter(x => BY[x.n].tier <= (CURVE[T] || 6)), cycle: start.cycle && BY[start.cycle].tier <= (CURVE[T] || 6) ? start.cycle : null};
+    const opts = [{cards: base.cards.concat([{n: must, g: 1}]), cycle: base.cycle}, ...base.cards.map(x => ({cards: base.cards.filter(y => y !== x).concat([{n: must, g: 1}]), cycle: base.cycle})), {cards: [{n: must, g: 1}], cycle: null}];
+    plan = opts[0]; val = -1;
+    for (const p of opts) { const v = tryPlan(p); if (v > val) { val = v; plan = p; } }
+  }
   for (let round = 0; round < 40; round++) {
     let bestP = null, bestV = val;
     const moves = [];
@@ -410,6 +429,7 @@ const rating = {};
 for (const T of TARGETS) { const med = median(TRIBES.map(t => out.tribes[t][T].stats)); for (const t of TRIBES) (rating[t] = rating[t] || {})[T] = Math.round(100 * out.tribes[t][T].stats / med); }
 for (const t of TRIBES) rating[t].overall = Math.round(TARGETS.reduce((s, T, i) => s + W[i] * rating[t][T], 0));
 out.rating = rating;
+if (args.includes('--json')) { console.log(JSON.stringify(Object.fromEntries(TRIBES.map(t => [t, Object.fromEntries(TARGETS.map(T => [T, {stats: out.tribes[t][T].stats, board: out.tribes[t][T].board, sources: out.tribes[t][T].sources}]))])))); process.exit(0); }
 fs.writeFileSync(path.join(__dirname, 'tribe_calc.json'), JSON.stringify(out, null, 1));
 const rows = TRIBES.slice().sort((a, b) => rating[b].overall - rating[a].overall);
 console.log(['Tribe', ...TARGETS.map(T => `T${T}`), ...TARGETS.map(T => `r${T}`), 'overall'].join('\t'));

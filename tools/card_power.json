@@ -1,0 +1,4055 @@
+[
+ {
+  "name": "Dropshipper",
+  "tribe": "Hustler",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 106,
+   "9": 93,
+   "13": 91
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Unpaid Intern",
+  "tribe": "Hustler",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 105,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Grindset Guru",
+  "tribe": "Hustler",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 115,
+   "9": 100,
+   "13": 94
+  },
+  "own": {
+   "6": 8,
+   "9": 0,
+   "13": 72
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Middle Manager",
+  "tribe": "Hustler",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 88,
+   "9": 90,
+   "13": 97
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Sneaker Reseller",
+  "tribe": "Hustler",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 85,
+   "9": 95,
+   "13": 98
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 40
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Side Hustle",
+  "tribe": "Hustler",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 95,
+   "13": 88
+  },
+  "own": {
+   "6": 6,
+   "9": 30,
+   "13": 48
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Thought Leader",
+  "tribe": "Hustler",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 116,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 16,
+   "9": 224,
+   "13": 460
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Crypto Bro",
+  "tribe": "Hustler",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 116,
+   "9": 100,
+   "13": 90
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Golden Parachute Exec",
+  "tribe": "Hustler",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Venture Capitalist",
+  "tribe": "Hustler",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 90,
+   "13": 113
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 24
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Corporate Raider",
+  "tribe": "Hustler",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 91,
+   "13": 90
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Consultant",
+  "tribe": "Hustler",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 96
+  },
+  "own": {
+   "13": 176
+  },
+  "bestTribe": {
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Private Equity",
+  "tribe": "Hustler",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 96,
+   "13": 122
+  },
+  "own": {
+   "9": 0,
+   "13": 1552
+  },
+  "bestTribe": {
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Unicorn Startup",
+  "tribe": "Hustler",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 1932
+  },
+  "bestTribe": {
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Too Big to Fail",
+  "tribe": "Hustler",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 110
+  },
+  "own": {
+   "9": 36,
+   "13": 126
+  },
+  "bestTribe": {
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Performance Review",
+  "tribe": "Hustler",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 12,
+   "9": 50,
+   "13": 110
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Loyalty Card",
+  "tribe": "Hustler",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 12,
+   "9": 78,
+   "13": 360
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Delivery Rider",
+  "tribe": "Hustler",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 95,
+   "13": 83
+  },
+  "own": {
+   "6": 12,
+   "9": 0,
+   "13": 24
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Five-Star Rating",
+  "tribe": "Hustler",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 92,
+   "13": 97
+  },
+  "own": {
+   "6": 24,
+   "9": 32,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Task Rabbit",
+  "tribe": "Hustler",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 90,
+   "13": 90
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Double Shift",
+  "tribe": "Hustler",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 94,
+   "13": 82
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Ghost Kitchen",
+  "tribe": "Hustler",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 93,
+   "13": 82
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Platform Monopoly",
+  "tribe": "Hustler",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 84
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Cashback Card",
+  "tribe": "Hustler",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 94,
+   "13": 82
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Recruitment Agency",
+  "tribe": "Hustler",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 82,
+   "13": 65
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Engagement Bot",
+  "tribe": "Influencer",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 93,
+   "9": 97,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Stan Account",
+  "tribe": "Influencer",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Hype Man",
+  "tribe": "Influencer",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 94,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Personal Brand",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Paparazzi",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 93,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Ring Light Studio",
+  "tribe": "Influencer",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Main Character",
+  "tribe": "Influencer",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Thirst Trap",
+  "tribe": "Influencer",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 94,
+   "9": 100,
+   "13": 95
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Reaction Streamer",
+  "tribe": "Influencer",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 90
+  },
+  "own": {
+   "6": 6,
+   "9": 11,
+   "13": 19
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Donation Goal",
+  "tribe": "Influencer",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 98,
+   "13": 107
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Raid Party",
+  "tribe": "Influencer",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 89,
+   "9": 90,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Subathon",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 93,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Hype Train",
+  "tribe": "Influencer",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 90
+  },
+  "own": {
+   "9": 0,
+   "13": 88
+  },
+  "bestTribe": {
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Streamer House",
+  "tribe": "Influencer",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 98
+  },
+  "own": {
+   "13": 112
+  },
+  "bestTribe": {
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Paid Verification",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 99,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Troll",
+  "tribe": "Influencer",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 97,
+   "9": 99,
+   "13": 90
+  },
+  "own": {
+   "6": 5,
+   "9": 8,
+   "13": 12
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Rage Baiter",
+  "tribe": "Influencer",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 89,
+   "9": 93,
+   "13": 90
+  },
+  "own": {
+   "6": 4,
+   "9": 16,
+   "13": 40
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Prank Vlogger",
+  "tribe": "Influencer",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 91,
+   "9": 94,
+   "13": 86
+  },
+  "own": {
+   "6": 4,
+   "9": 16,
+   "13": 40
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Reality Star",
+  "tribe": "Influencer",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 90,
+   "9": 90,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Apology Video",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 98,
+   "13": 92
+  },
+  "own": {
+   "6": 0,
+   "9": 20,
+   "13": 124
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Shock Jock",
+  "tribe": "Influencer",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 90
+  },
+  "own": {
+   "9": 0,
+   "13": 84
+  },
+  "bestTribe": {
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Crisis PR Firm",
+  "tribe": "Influencer",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 95
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Drama Channel",
+  "tribe": "Influencer",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 86,
+   "9": 90,
+   "13": 90
+  },
+  "own": {
+   "6": 1,
+   "9": 4,
+   "13": 13
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Comments Off",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 93,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Windowsill Succulent",
+  "tribe": "Feral",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 95,
+   "9": 98,
+   "13": 104
+  },
+  "own": {
+   "6": 8,
+   "9": 16,
+   "13": 50
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "City Pigeon",
+  "tribe": "Feral",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 98,
+   "13": 104
+  },
+  "own": {
+   "6": 12,
+   "9": 14,
+   "13": 30
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Trash Panda",
+  "tribe": "Feral",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 96,
+   "9": 100,
+   "13": 104
+  },
+  "own": {
+   "6": 10,
+   "9": 31,
+   "13": 67
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Tree Hugger",
+  "tribe": "Feral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 84,
+   "9": 96,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Compost Heap",
+  "tribe": "Feral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 92,
+   "9": 100,
+   "13": 111
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Plant Parent",
+  "tribe": "Feral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 98,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 24,
+   "13": 92
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Urban Fox",
+  "tribe": "Feral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 99,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 26,
+   "13": 58
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Rooftop Beehive",
+  "tribe": "Feral",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 93,
+   "13": 93
+  },
+  "own": {
+   "6": 0,
+   "9": 32,
+   "13": 168
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Guerrilla Gardener",
+  "tribe": "Feral",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Ancient Oak",
+  "tribe": "Feral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "World Tree",
+  "tribe": "Feral",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 360
+  },
+  "bestTribe": {
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Seagull",
+  "tribe": "Feral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 97,
+   "13": 104
+  },
+  "own": {
+   "6": 12,
+   "9": 8,
+   "13": 30
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Wild Boar",
+  "tribe": "Feral",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 58,
+   "13": 92
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Rat King",
+  "tribe": "Feral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 96,
+   "13": 75
+  },
+  "own": {
+   "9": 0,
+   "13": 378
+  },
+  "bestTribe": {
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Nature Is Healing",
+  "tribe": "Feral",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 98
+  },
+  "own": {
+   "13": 40
+  },
+  "bestTribe": {
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Magpie",
+  "tribe": "Feral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 88,
+   "9": 96,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Allotment",
+  "tribe": "Feral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 104
+  },
+  "own": {
+   "6": 12,
+   "9": 36,
+   "13": 138
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Tulip Bulb",
+  "tribe": "Feral",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 91,
+   "9": 97,
+   "13": 104
+  },
+  "own": {
+   "6": 5,
+   "9": 5,
+   "13": 5
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Hedgehog",
+  "tribe": "Feral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 88,
+   "9": 96,
+   "13": 104
+  },
+  "own": {
+   "6": 4,
+   "9": 4,
+   "13": 4
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Bat Colony",
+  "tribe": "Feral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 104
+  },
+  "own": {
+   "6": 16,
+   "9": 48,
+   "13": 184
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Hibernating Bear",
+  "tribe": "Feral",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 61,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 1490
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Cicada Swarm",
+  "tribe": "Feral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 96,
+   "13": 73
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Seed Vault",
+  "tribe": "Feral",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 324
+  },
+  "bestTribe": {
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Fox Den",
+  "tribe": "Feral",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 91,
+   "13": 92
+  },
+  "own": {
+   "6": 0,
+   "9": 12,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Feral",
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Botanical Garden",
+  "tribe": "Feral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 96,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Busker",
+  "tribe": "Creative",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 97,
+   "9": 100,
+   "13": 90
+  },
+  "own": {
+   "6": 10,
+   "9": 0,
+   "13": 28
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Open Mic Poet",
+  "tribe": "Creative",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 91
+  },
+  "own": {
+   "6": 12,
+   "9": 0,
+   "13": 67
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Art Student",
+  "tribe": "Creative",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 85,
+   "9": 96,
+   "13": 89
+  },
+  "own": {
+   "6": 6,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Struggling Artist",
+  "tribe": "Creative",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 80,
+   "9": 91,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Merch Stand",
+  "tribe": "Creative",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Method Actor",
+  "tribe": "Creative",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 81,
+   "9": 91,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Memorial Mural",
+  "tribe": "Creative",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 92
+  },
+  "own": {
+   "6": 8,
+   "9": 44,
+   "13": 84
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Indie Band",
+  "tribe": "Creative",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 91
+  },
+  "own": {
+   "6": 0,
+   "9": 42,
+   "13": 72
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Conceptual Artist",
+  "tribe": "Creative",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 92,
+   "13": 78
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Art Critic",
+  "tribe": "Creative",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 93
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 108
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Record Label",
+  "tribe": "Creative",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 95,
+   "13": 92
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 78
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Festival Headliner",
+  "tribe": "Creative",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 92,
+   "13": 92
+  },
+  "own": {
+   "9": 0,
+   "13": 144
+  },
+  "bestTribe": {
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Museum Retrospective",
+  "tribe": "Creative",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 72,
+   "13": 384
+  },
+  "bestTribe": {
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Dead Rock Star",
+  "tribe": "Creative",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 1193
+  },
+  "bestTribe": {
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "World Tour",
+  "tribe": "Creative",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 83
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Ghostwriter",
+  "tribe": "Creative",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 98,
+   "13": 91
+  },
+  "own": {
+   "6": 16,
+   "9": 0,
+   "13": 62
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Encore",
+  "tribe": "Creative",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 91,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Wedding Band",
+  "tribe": "Creative",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 85,
+   "9": 96,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Sampler",
+  "tribe": "Creative",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 83,
+   "9": 91,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Tribute Act",
+  "tribe": "Creative",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 91,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Plagiarist",
+  "tribe": "Creative",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 99,
+   "13": 95
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 172
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "AI Art Generator",
+  "tribe": "Creative",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 92,
+   "13": 88
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Mashup Artist",
+  "tribe": "Creative",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 83
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Biopic",
+  "tribe": "Creative",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 176,
+   "13": 1232
+  },
+  "bestTribe": {
+   "6": "Creative",
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Crossover Hit",
+  "tribe": "Creative",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 92,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "Speedrunner",
+  "tribe": "Techie",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 81,
+   "9": 92,
+   "13": 97
+  },
+  "own": {
+   "6": 2,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Smart Plug",
+  "tribe": "Techie",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 81,
+   "9": 84,
+   "13": 93
+  },
+  "own": {
+   "6": 4,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Loot Box",
+  "tribe": "Techie",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 76,
+   "9": 91,
+   "13": 96
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Robot Vacuum",
+  "tribe": "Techie",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 79,
+   "9": 88,
+   "13": 95
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Toxic Teammate",
+  "tribe": "Techie",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 89,
+   "9": 88,
+   "13": 95
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Firmware Update",
+  "tribe": "Techie",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 94,
+   "9": 93,
+   "13": 97
+  },
+  "own": {
+   "6": 6,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Rage Quitter",
+  "tribe": "Techie",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 87,
+   "9": 88,
+   "13": 95
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Smart Fridge",
+  "tribe": "Techie",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 98,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 6,
+   "9": 50,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "E-Sports Coach",
+  "tribe": "Techie",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 97,
+   "9": 92,
+   "13": 96
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Noise-Cancelling Headphones",
+  "tribe": "Techie",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 83,
+   "13": 89
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Leaderboard",
+  "tribe": "Techie",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 110,
+   "13": 398
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Smart Home Hub",
+  "tribe": "Techie",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 89
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Pro Gamer",
+  "tribe": "Techie",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 97,
+   "13": 97
+  },
+  "own": {
+   "9": 0,
+   "13": 120
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Quantum Computer",
+  "tribe": "Techie",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "World Record",
+  "tribe": "Techie",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 72,
+   "13": 856
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Bluetooth Speaker",
+  "tribe": "Techie",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 79,
+   "9": 88,
+   "13": 95
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Clutch Player",
+  "tribe": "Techie",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 95,
+   "9": 92,
+   "13": 96
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Pop-Up Ad",
+  "tribe": "Techie",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Battle Pass",
+  "tribe": "Techie",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 20,
+   "9": 56,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Data Broker",
+  "tribe": "Techie",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Auto-Renewal",
+  "tribe": "Techie",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 156
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "App Store",
+  "tribe": "Techie",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 92
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Data Centre",
+  "tribe": "Techie",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 89
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "LAN Party",
+  "tribe": "Techie",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 90,
+   "13": 92
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Techie",
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Smart Doorbell",
+  "tribe": "Techie",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 97,
+   "13": 94
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Graffiti Kid",
+  "tribe": "Punk",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 72,
+   "9": 99,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Anarchist Barista",
+  "tribe": "Punk",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 74,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Zine Maker",
+  "tribe": "Punk",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 70,
+   "9": 99,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Sellout Frontman",
+  "tribe": "Punk",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 84,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Heckler",
+  "tribe": "Punk",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 84,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Crust Punk",
+  "tribe": "Punk",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Squat Collective",
+  "tribe": "Punk",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 84,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Feedback Loop",
+  "tribe": "Punk",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Pirate Radio",
+  "tribe": "Punk",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Mosh Pit",
+  "tribe": "Punk",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 98,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 25,
+   "13": 52
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Jingle Writer",
+  "tribe": "Punk",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 1296,
+   "13": 8136
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Reunion Tour",
+  "tribe": "Punk",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Stage Diver",
+  "tribe": "Punk",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 92,
+   "13": 97
+  },
+  "own": {
+   "9": 0,
+   "13": 8
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Greatest Hits",
+  "tribe": "Punk",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 228
+  },
+  "bestTribe": {
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "General Strike",
+  "tribe": "Punk",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 99
+  },
+  "own": {
+   "13": 144
+  },
+  "bestTribe": {
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Gig Poster",
+  "tribe": "Punk",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 82,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Banner Drop",
+  "tribe": "Punk",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Pogo Dancer",
+  "tribe": "Punk",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 7,
+   "9": 30,
+   "13": 33
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Circle Pit",
+  "tribe": "Punk",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 14,
+   "9": 40,
+   "13": 64
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Bouncer",
+  "tribe": "Punk",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 99
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Crowd Surfer",
+  "tribe": "Punk",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 60,
+   "13": 135
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Wall of Death",
+  "tribe": "Punk",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 92,
+   "13": 99
+  },
+  "own": {
+   "9": 0,
+   "13": 120
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Festival Pit",
+  "tribe": "Punk",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 99
+  },
+  "own": {
+   "13": 160
+  },
+  "bestTribe": {
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Bootleg Merch",
+  "tribe": "Punk",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Punk",
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Sound System",
+  "tribe": "Punk",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 92,
+   "13": 97
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Shower Thinker",
+  "tribe": "Philosopher",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 86,
+   "9": 99,
+   "13": 106
+  },
+  "own": {
+   "6": 24,
+   "9": 42,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Nihilist",
+  "tribe": "Philosopher",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 89,
+   "9": 98,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Pub Philosopher",
+  "tribe": "Philosopher",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 78,
+   "9": 100,
+   "13": 106
+  },
+  "own": {
+   "6": 12,
+   "9": 42,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Thought Experiment",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 101,
+   "13": 100
+  },
+  "own": {
+   "6": 0,
+   "9": 124,
+   "13": 628
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Keynote Speaker",
+  "tribe": "Philosopher",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 95,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Utilitarian",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 94
+  },
+  "own": {
+   "6": 0,
+   "9": 54,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Bestselling Author",
+  "tribe": "Philosopher",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 1704
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Grand Unified Theory",
+  "tribe": "Philosopher",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Debate Club",
+  "tribe": "Philosopher",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 106
+  },
+  "own": {
+   "6": 0,
+   "9": 48,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Van Lifer",
+  "tribe": "Philosopher",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 105
+  },
+  "own": {
+   "6": 8,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Digital Detox",
+  "tribe": "Philosopher",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 80,
+   "9": 98,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Declutter Coach",
+  "tribe": "Philosopher",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 96,
+   "13": 105
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Silent Retreat",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 86,
+   "13": 90
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Capsule Wardrobe",
+  "tribe": "Philosopher",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "The Void",
+  "tribe": "Philosopher",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 96
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "TED Talk",
+  "tribe": "Philosopher",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 728
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Sophist",
+  "tribe": "Philosopher",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 88,
+   "9": 97,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Epicurean",
+  "tribe": "Philosopher",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 97,
+   "13": 104
+  },
+  "own": {
+   "6": 8,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Peripatetic",
+  "tribe": "Philosopher",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 78,
+   "9": 98,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Pythagorean",
+  "tribe": "Philosopher",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 95,
+   "13": 98
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Hemlock Martyr",
+  "tribe": "Philosopher",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 95,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "The Academy",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 85,
+   "13": 90
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Existentialist",
+  "tribe": "Philosopher",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Philosopher King",
+  "tribe": "Philosopher",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 96
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Mystery Cult",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 85,
+   "13": 90
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Utopian Commune",
+  "tribe": "Philosopher",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Nosy Neighbour",
+  "tribe": "Neutral",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 91,
+   "9": 97,
+   "13": 103
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Wi-Fi Leech",
+  "tribe": "Neutral",
+  "tier": 1,
+  "legendary": false,
+  "power": {
+   "6": 89,
+   "9": 96,
+   "13": 102
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Package Hoarder",
+  "tribe": "Neutral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 88,
+   "9": 91,
+   "13": 103
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Quiet-Hours Enforcer",
+  "tribe": "Neutral",
+  "tier": 2,
+  "legendary": false,
+  "power": {
+   "6": 87,
+   "9": 91,
+   "13": 103
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Caretaker",
+  "tribe": "Neutral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 104
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Helpful Neighbour",
+  "tribe": "Neutral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 90,
+   "13": 103
+  },
+  "own": {
+   "6": 0,
+   "9": 4,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Influencer",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Leaf Blower Guy",
+  "tribe": "Neutral",
+  "tier": 4,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 91,
+   "13": 93
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Influencer",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "DJ Upstairs",
+  "tribe": "Neutral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 93
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Lawyer Next Door",
+  "tribe": "Neutral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "The Landlord",
+  "tribe": "Neutral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 99,
+   "13": 103
+  },
+  "own": {
+   "9": 0,
+   "13": 108
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Block Party Host",
+  "tribe": "Neutral",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 104
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Parcel Locker",
+  "tribe": "Neutral",
+  "tier": 3,
+  "legendary": false,
+  "power": {
+   "6": 100,
+   "9": 90,
+   "13": 103
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Influencer",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Neighbourhood Watch",
+  "tribe": "Neutral",
+  "tier": 5,
+  "legendary": false,
+  "power": {
+   "9": 98,
+   "13": 93
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "New Neighbours",
+  "tribe": "Neutral",
+  "tier": 6,
+  "legendary": false,
+  "power": {
+   "13": 100
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "The Billionaire",
+  "tribe": "Hustler",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 96,
+   "13": 86
+  },
+  "own": {
+   "9": 0,
+   "13": 102
+  },
+  "bestTribe": {
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "The Heretic",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": true,
+  "power": {
+   "6": 100,
+   "9": 73,
+   "13": 66
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Apex Scavenger",
+  "tribe": "Feral",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 608,
+   "13": 17916
+  },
+  "bestTribe": {
+   "9": "Feral",
+   "13": "Feral"
+  }
+ },
+ {
+  "name": "Pop Diva",
+  "tribe": "Creative",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 92,
+   "13": 88
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Creative",
+   "13": "Creative"
+  }
+ },
+ {
+  "name": "The Algorithm",
+  "tribe": "Techie",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 97,
+   "13": 92
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Mohawk Legend",
+  "tribe": "Punk",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 92,
+   "13": 98
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Renaissance Thinker",
+  "tribe": "Philosopher",
+  "tier": 4,
+  "legendary": true,
+  "power": {
+   "6": 100,
+   "9": 93,
+   "13": 69
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Philosopher",
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Tech Founder",
+  "tribe": "Hustler/Techie",
+  "tier": 4,
+  "legendary": true,
+  "power": {
+   "6": 100,
+   "9": 97,
+   "13": 122
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Hustler",
+   "9": "Techie",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Content Creator",
+  "tribe": "Influencer/Creative",
+  "tier": 4,
+  "legendary": true,
+  "power": {
+   "6": 100,
+   "9": 100,
+   "13": 105
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Wise Old Owl",
+  "tribe": "Feral/Philosopher",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 68,
+   "13": 272
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Philosopher"
+  }
+ },
+ {
+  "name": "Punk Philosopher",
+  "tribe": "Punk/Philosopher",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 92,
+   "13": 97
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Sponsored Streamer",
+  "tribe": "Influencer/Techie",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 100,
+   "13": 100
+  },
+  "own": {
+   "9": 0,
+   "13": 76
+  },
+  "bestTribe": {
+   "9": "Techie",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Pension Fund",
+  "tribe": "Hustler/Feral",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 94,
+   "13": 83
+  },
+  "own": {
+   "9": 0,
+   "13": 36
+  },
+  "bestTribe": {
+   "9": "Hustler",
+   "13": "Hustler"
+  }
+ },
+ {
+  "name": "Startup Monk",
+  "tribe": "Techie/Philosopher",
+  "tier": 6,
+  "legendary": true,
+  "power": {
+   "13": 87
+  },
+  "own": {
+   "13": 0
+  },
+  "bestTribe": {
+   "13": "Techie"
+  }
+ },
+ {
+  "name": "Cover Band",
+  "tribe": "Creative/Punk",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 92,
+   "13": 97
+  },
+  "own": {
+   "9": 0,
+   "13": 0
+  },
+  "bestTribe": {
+   "9": "Punk",
+   "13": "Punk"
+  }
+ },
+ {
+  "name": "Housing Co-op",
+  "tribe": "Neutral",
+  "tier": 5,
+  "legendary": true,
+  "power": {
+   "9": 125,
+   "13": 100
+  },
+  "own": {
+   "9": 136,
+   "13": 816
+  },
+  "bestTribe": {
+   "9": "Philosopher",
+   "13": "Influencer"
+  }
+ },
+ {
+  "name": "Controversy Magnet",
+  "tribe": "Influencer",
+  "tier": 4,
+  "legendary": true,
+  "power": {
+   "6": 100,
+   "9": 81,
+   "13": 88
+  },
+  "own": {
+   "6": 0,
+   "9": 0,
+   "13": 24
+  },
+  "bestTribe": {
+   "6": "Influencer",
+   "9": "Influencer",
+   "13": "Influencer"
+  }
+ }
+]

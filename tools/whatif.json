@@ -1,0 +1,4390 @@
+{
+ "VARIANTS": {
+  "apexBase": "Apex Scavenger: X is half the printed Attack of the biggest Feral in the Feed (Feed buffs no longer count), at most twice your tier",
+  "oakPos": "Ancient Oak: only the end-of-turn effects of the two minions next to it give Ferals twice as much",
+  "nnPos": "New Neighbours: only the end-of-turn effect of the minion to its left triggers twice",
+  "jingleTurn": "Jingle Writer: +2/+2 for each Punk you sold this turn (instead of this game, up to +16)",
+  "reunionOnce": "Reunion Tour: the first Punk you sell each turn triggers its When sold twice (no stacking)",
+  "likesCap": "Personal Brand: your Likes give at most +2/+2 more in total; a golden Main Character counts Likes 3 times (not 4)",
+  "techBuff": "Techies: Auto-Renewal gives +3/+3 (was +2/+2), The Algorithm +2/+2 per Connect (was +1/+1)",
+  "philBuff": "Philosophers: TED Talk gives twice as much (+2/+2, plus +2/+2 per Philosopher next to it)"
+ },
+ "res": {
+  "baseline": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18404,
+     "board": [
+      "Guerrilla Gardener 1797/1799",
+      "Hibernating Bear 2528/2560",
+      "★ Botanical Garden 1802/1814",
+      "★ Apex Scavenger 55/61",
+      "★ Ancient Oak 1803/1813",
+      "★ New Neighbours 10/14",
+      "World Tree 1172/1176"
+     ],
+     "sources": [
+      "Apex Scavenger 17916",
+      "Hibernating Bear 1490",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "all changes": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2901,
+     "board": [
+      "Performance Review 485/484",
+      "★ Loyalty Card 315/321",
+      "★ Thought Leader 261/263",
+      "★ Golden Parachute Exec 309/307",
+      "★ Unicorn Startup 64/68",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 2052",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 68"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3122,
+     "board": [
+      "Donation Goal 2/4",
+      "★ Stan Account 140/142",
+      "Personal Brand 4/6",
+      "★ Content Creator 8/12",
+      "★ Ring Light Studio 8/16",
+      "★ Main Character 1376/1380",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 2980"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 498,
+     "board": [
+      "Trash Panda 62/61",
+      "Compost Heap 27/29",
+      "Allotment 28/31",
+      "★ Bat Colony 53/53",
+      "Rooftop Beehive 29/32",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 25/30"
+     ],
+     "sources": [
+      "Apex Scavenger 232",
+      "Bat Colony 80",
+      "Trash Panda 31",
+      "Allotment 30"
+     ]
+    },
+    "13": {
+     "stats": 5405,
+     "board": [
+      "Compost Heap 281/283",
+      "Allotment 290/293",
+      "Urban Fox 290/291",
+      "★ Hibernating Bear 1410/1626",
+      "★ Apex Scavenger 13/19",
+      "★ Ancient Oak 288/298",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Apex Scavenger 2872",
+      "Hibernating Bear 2336",
+      "Allotment 78",
+      "Urban Fox 58"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 463,
+     "board": [
+      "Pop-Up Ad 58/55",
+      "Battle Pass 30/26",
+      "Speedrunner 33/29",
+      "Data Broker 32/27",
+      "Leaderboard 23/25",
+      "★ Auto-Renewal 32/35",
+      "★ World Record 29/29"
+     ],
+     "sources": [
+      "Auto-Renewal 156",
+      "World Record 98",
+      "Leaderboard 77",
+      "Battle Pass 56"
+     ]
+    },
+    "13": {
+     "stats": 2065,
+     "board": [
+      "Pop-Up Ad 232/221",
+      "Battle Pass 146/134",
+      "Data Broker 148/135",
+      "Leaderboard 122/124",
+      "★ Auto-Renewal 146/141",
+      "★ World Record 142/134",
+      "★ Sponsored Streamer 123/117",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Auto-Renewal 468",
+      "Leaderboard 206",
+      "Sponsored Streamer 168"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 717,
+     "board": [
+      "Anarchist Barista 76/58",
+      "Pogo Dancer 60/56",
+      "Circle Pit 73/59",
+      "Bootleg Merch 59/58",
+      "Crowd Surfer 53/53",
+      "Wall of Death 57/55"
+     ],
+     "sources": [
+      "Jingle Writer 504",
+      "Wall of Death 70",
+      "Crowd Surfer 60",
+      "Circle Pit 40"
+     ]
+    },
+    "13": {
+     "stats": 2430,
+     "board": [
+      "Circle Pit 217/209",
+      "★ Bootleg Merch 222/215",
+      "Crowd Surfer 191/191",
+      "Wall of Death 216/207",
+      "Mohawk Legend 216/208",
+      "★ General Strike 170/168"
+     ],
+     "sources": [
+      "Jingle Writer 1368",
+      "General Strike 624",
+      "Wall of Death 250",
+      "Crowd Surfer 235"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 311,
+     "board": [
+      "Declutter Coach 22/29",
+      "Caretaker 12/15",
+      "Utilitarian 26/31",
+      "Thought Experiment 22/20",
+      "Wise Old Owl 23/25",
+      "Bestselling Author 18/20",
+      "★ TED Talk 23/25"
+     ],
+     "sources": [
+      "Bestselling Author 148",
+      "TED Talk 112",
+      "Thought Experiment 70",
+      "Wise Old Owl 48"
+     ]
+    },
+    "13": {
+     "stats": 2128,
+     "board": [
+      "Pub Philosopher 178/177",
+      "★ Debate Club 155/153",
+      "Thought Experiment 182/182",
+      "Bestselling Author 143/146",
+      "★ TED Talk 153/155",
+      "Wise Old Owl 124/128",
+      "★ New Neighbours 124/128"
+     ],
+     "sources": [
+      "Bestselling Author 2084",
+      "TED Talk 1736",
+      "Debate Club 180",
+      "Thought Experiment 134"
+     ]
+    }
+   }
+  },
+  "apexBase": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 511,
+     "board": [
+      "Trash Panda 64/63",
+      "Compost Heap 27/29",
+      "Bat Colony 29/29",
+      "Allotment 44/47",
+      "★ Rooftop Beehive 32/38",
+      "★ Apex Scavenger 26/32",
+      "Ancient Oak 25/30"
+     ],
+     "sources": [
+      "Apex Scavenger 232",
+      "Rooftop Beehive 56",
+      "Bat Colony 48",
+      "Allotment 36"
+     ]
+    },
+    "13": {
+     "stats": 6494,
+     "board": [
+      "Compost Heap 389/391",
+      "Allotment 392/395",
+      "★ Hibernating Bear 1626/1842",
+      "★ Apex Scavenger 121/127",
+      "★ Ancient Oak 387/397",
+      "★ New Neighbours 10/14",
+      "★ Seed Vault 196/208"
+     ],
+     "sources": [
+      "Apex Scavenger 2872",
+      "Hibernating Bear 2484",
+      "Seed Vault 1062",
+      "Allotment 192"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "oakPos": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 839,
+     "board": [
+      "Trash Panda 89/88",
+      "Compost Heap 59/61",
+      "Bat Colony 61/61",
+      "Allotment 60/63",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 40",
+      "Trash Panda 31",
+      "Allotment 30"
+     ]
+    },
+    "13": {
+     "stats": 20421,
+     "board": [
+      "Compost Heap 2168/2170",
+      "★ Guerrilla Gardener 2177/2181",
+      "★ Botanical Garden 2182/2194",
+      "★ Apex Scavenger 64/70",
+      "★ Ancient Oak 2179/2189",
+      "★ New Neighbours 10/14",
+      "World Tree 1410/1414"
+     ],
+     "sources": [
+      "Apex Scavenger 21732",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "nnPos": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2901,
+     "board": [
+      "Performance Review 485/484",
+      "★ Loyalty Card 315/321",
+      "★ Thought Leader 261/263",
+      "★ Golden Parachute Exec 309/307",
+      "★ Unicorn Startup 64/68",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 2052",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 68"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3790,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1730/1734",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3585",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18818,
+     "board": [
+      "★ Compost Heap 1692/1696",
+      "Guerrilla Gardener 1699/1701",
+      "Hibernating Bear 2538/2570",
+      "★ Botanical Garden 1706/1718",
+      "★ Apex Scavenger 27/33",
+      "★ Ancient Oak 1702/1712",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Apex Scavenger 17292",
+      "Hibernating Bear 1706"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1242,
+     "board": [
+      "Utilitarian 87/89",
+      "Thought Experiment 96/92",
+      "Wise Old Owl 97/99",
+      "Bestselling Author 96/94",
+      "★ TED Talk 97/99",
+      "Capsule Wardrobe 77/75",
+      "★ New Neighbours 70/74"
+     ],
+     "sources": [
+      "Bestselling Author 1048",
+      "TED Talk 868",
+      "Thought Experiment 182",
+      "Wise Old Owl 156"
+     ]
+    }
+   }
+  },
+  "jingleTurn": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18404,
+     "board": [
+      "Guerrilla Gardener 1797/1799",
+      "Hibernating Bear 2528/2560",
+      "★ Botanical Garden 1802/1814",
+      "★ Apex Scavenger 55/61",
+      "★ Ancient Oak 1803/1813",
+      "★ New Neighbours 10/14",
+      "World Tree 1172/1176"
+     ],
+     "sources": [
+      "Apex Scavenger 17916",
+      "Hibernating Bear 1490",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1164,
+     "board": [
+      "Anarchist Barista 113/95",
+      "Pogo Dancer 97/93",
+      "Circle Pit 110/96",
+      "Bootleg Merch 96/95",
+      "Crowd Surfer 90/90",
+      "Reunion Tour 93/96"
+     ],
+     "sources": [
+      "Jingle Writer 1008",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 4672,
+     "board": [
+      "Pogo Dancer 390/388",
+      "Circle Pit 423/391",
+      "★ Bootleg Merch 387/389",
+      "★ Reunion Tour 389/397",
+      "Wall of Death 383/382",
+      "Greatest Hits 376/377"
+     ],
+     "sources": [
+      "Jingle Writer 4104",
+      "Greatest Hits 228",
+      "Wall of Death 208",
+      "Circle Pit 66"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "reunionOnce": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18404,
+     "board": [
+      "Guerrilla Gardener 1797/1799",
+      "Hibernating Bear 2528/2560",
+      "★ Botanical Garden 1802/1814",
+      "★ Apex Scavenger 55/61",
+      "★ Ancient Oak 1803/1813",
+      "★ New Neighbours 10/14",
+      "World Tree 1172/1176"
+     ],
+     "sources": [
+      "Apex Scavenger 17916",
+      "Hibernating Bear 1490",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 861,
+     "board": [
+      "Anarchist Barista 88/70",
+      "Pogo Dancer 72/68",
+      "Circle Pit 85/71",
+      "Bootleg Merch 71/70",
+      "Crowd Surfer 65/65",
+      "Wall of Death 69/67"
+     ],
+     "sources": [
+      "Jingle Writer 648",
+      "Wall of Death 70",
+      "Crowd Surfer 60",
+      "Circle Pit 40"
+     ]
+    },
+    "13": {
+     "stats": 3969,
+     "board": [
+      "Circle Pit 349/340",
+      "Crowd Surfer 320/320",
+      "★ Bootleg Merch 354/346",
+      "Wall of Death 344/335",
+      "Mohawk Legend 344/336",
+      "General Strike 292/289"
+     ],
+     "sources": [
+      "Jingle Writer 3192",
+      "General Strike 288",
+      "Crowd Surfer 250",
+      "Wall of Death 240"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "likesCap": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 2978,
+     "board": [
+      "Donation Goal 2/4",
+      "★ Stan Account 140/142",
+      "Personal Brand 4/6",
+      "★ Content Creator 8/12",
+      "★ Ring Light Studio 8/16",
+      "★ Main Character 1304/1308",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 2836"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18404,
+     "board": [
+      "Guerrilla Gardener 1797/1799",
+      "Hibernating Bear 2528/2560",
+      "★ Botanical Garden 1802/1814",
+      "★ Apex Scavenger 55/61",
+      "★ Ancient Oak 1803/1813",
+      "★ New Neighbours 10/14",
+      "World Tree 1172/1176"
+     ],
+     "sources": [
+      "Apex Scavenger 17916",
+      "Hibernating Bear 1490",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "techBuff": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18404,
+     "board": [
+      "Guerrilla Gardener 1797/1799",
+      "Hibernating Bear 2528/2560",
+      "★ Botanical Garden 1802/1814",
+      "★ Apex Scavenger 55/61",
+      "★ Ancient Oak 1803/1813",
+      "★ New Neighbours 10/14",
+      "World Tree 1172/1176"
+     ],
+     "sources": [
+      "Apex Scavenger 17916",
+      "Hibernating Bear 1490",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 463,
+     "board": [
+      "Pop-Up Ad 58/55",
+      "Battle Pass 30/26",
+      "Speedrunner 33/29",
+      "Data Broker 32/27",
+      "Leaderboard 23/25",
+      "★ Auto-Renewal 32/35",
+      "★ World Record 29/29"
+     ],
+     "sources": [
+      "Auto-Renewal 156",
+      "World Record 98",
+      "Leaderboard 77",
+      "Battle Pass 56"
+     ]
+    },
+    "13": {
+     "stats": 2065,
+     "board": [
+      "Pop-Up Ad 232/221",
+      "Battle Pass 146/134",
+      "Data Broker 148/135",
+      "Leaderboard 122/124",
+      "★ Auto-Renewal 146/141",
+      "★ World Record 142/134",
+      "★ Sponsored Streamer 123/117",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Auto-Renewal 468",
+      "Leaderboard 206",
+      "Sponsored Streamer 168"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 257,
+     "board": [
+      "Van Lifer 26/20",
+      "Pub Philosopher 22/22",
+      "Caretaker 5/8",
+      "Debate Club 21/24",
+      "★ Utilitarian 15/19",
+      "★ Wise Old Owl 23/27",
+      "Bestselling Author 12/13"
+     ],
+     "sources": [
+      "Wise Old Owl 68",
+      "Utilitarian 54",
+      "Debate Club 48",
+      "Pub Philosopher 42"
+     ]
+    },
+    "13": {
+     "stats": 1900,
+     "board": [
+      "★ Thought Experiment 146/146",
+      "Wise Old Owl 152/156",
+      "Bestselling Author 140/143",
+      "★ TED Talk 156/158",
+      "Capsule Wardrobe 125/126",
+      "★ New Neighbours 114/118",
+      "★ Grand Unified Theory 106/114"
+     ],
+     "sources": [
+      "Bestselling Author 1704",
+      "TED Talk 728",
+      "Thought Experiment 628",
+      "Wise Old Owl 272"
+     ]
+    }
+   }
+  },
+  "philBuff": {
+   "Hustler": {
+    "3": {
+     "stats": 18,
+     "board": [
+      "Delivery Rider 8/5",
+      "Side Hustle 2/3"
+     ],
+     "sources": [
+      "Side Hustle 6",
+      "Delivery Rider 3"
+     ]
+    },
+    "6": {
+     "stats": 82,
+     "board": [
+      "Delivery Rider 21/15",
+      "Five-Star Rating 4/6",
+      "Performance Review 13/12",
+      "Loyalty Card 4/7"
+     ],
+     "sources": [
+      "Five-Star Rating 24",
+      "Delivery Rider 12",
+      "Loyalty Card 12",
+      "Performance Review 12"
+     ]
+    },
+    "9": {
+     "stats": 455,
+     "board": [
+      "Grindset Guru 51/51",
+      "Performance Review 67/66",
+      "Loyalty Card 32/35",
+      "Crypto Bro 34/35",
+      "★ Thought Leader 15/17",
+      "Too Big to Fail 26/26"
+     ],
+     "sources": [
+      "Thought Leader 224",
+      "Loyalty Card 78",
+      "Performance Review 50",
+      "Too Big to Fail 36"
+     ]
+    },
+    "13": {
+     "stats": 2845,
+     "board": [
+      "Performance Review 473/472",
+      "★ Loyalty Card 308/314",
+      "★ Thought Leader 254/256",
+      "★ Golden Parachute Exec 302/300",
+      "★ Unicorn Startup 69/73",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Unicorn Startup 1932",
+      "Thought Leader 460",
+      "Loyalty Card 360",
+      "Performance Review 110"
+     ]
+    }
+   },
+   "Influencer": {
+    "3": {
+     "stats": 14,
+     "board": [
+      "Reaction Streamer 4/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Reaction Streamer 2"
+     ]
+    },
+    "6": {
+     "stats": 70,
+     "board": [
+      "Reaction Streamer 8/3",
+      "Donation Goal 2/4",
+      "Stan Account 15/18",
+      "Caretaker 2/5",
+      "Personal Brand 5/8"
+     ],
+     "sources": [
+      "Likes 20",
+      "Caretaker 9",
+      "Reaction Streamer 6"
+     ]
+    },
+    "9": {
+     "stats": 367,
+     "board": [
+      "Reaction Streamer 154/145",
+      "Thirst Trap 2/2",
+      "Hype Man 2/4",
+      "★ Stan Account 6/8",
+      "Personal Brand 4/6",
+      "Content Creator 4/6",
+      "★ Ring Light Studio 8/16"
+     ],
+     "sources": [
+      "Likes 283",
+      "Reaction Streamer 11"
+     ]
+    },
+    "13": {
+     "stats": 3598,
+     "board": [
+      "Hype Man 97/99",
+      "★ Stan Account 12/14",
+      "Personal Brand 10/12",
+      "★ Ring Light Studio 14/22",
+      "Sponsored Streamer 11/12",
+      "★ Main Character 1634/1638",
+      "★ New Neighbours 10/14"
+     ],
+     "sources": [
+      "Likes 3393",
+      "Sponsored Streamer 76"
+     ]
+    }
+   },
+   "Feral": {
+    "3": {
+     "stats": 19,
+     "board": [
+      "Tulip Bulb 7/6",
+      "Seagull 3/3"
+     ],
+     "sources": [
+      "Tulip Bulb 5",
+      "Seagull 4"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "City Pigeon 27/29",
+      "Seagull 3/3",
+      "Bat Colony 3/3",
+      "Allotment 2/5"
+     ],
+     "sources": [
+      "Bat Colony 16",
+      "City Pigeon 12",
+      "Seagull 12",
+      "Allotment 12"
+     ]
+    },
+    "9": {
+     "stats": 853,
+     "board": [
+      "Trash Panda 78/77",
+      "Compost Heap 59/61",
+      "Allotment 60/63",
+      "Bat Colony 79/79",
+      "★ Guerrilla Gardener 64/68",
+      "★ Apex Scavenger 18/24",
+      "Ancient Oak 61/66"
+     ],
+     "sources": [
+      "Apex Scavenger 608",
+      "Bat Colony 48",
+      "Allotment 36",
+      "Trash Panda 31"
+     ]
+    },
+    "13": {
+     "stats": 18404,
+     "board": [
+      "Guerrilla Gardener 1797/1799",
+      "Hibernating Bear 2528/2560",
+      "★ Botanical Garden 1802/1814",
+      "★ Apex Scavenger 55/61",
+      "★ Ancient Oak 1803/1813",
+      "★ New Neighbours 10/14",
+      "World Tree 1172/1176"
+     ],
+     "sources": [
+      "Apex Scavenger 17916",
+      "Hibernating Bear 1490",
+      "World Tree 360"
+     ]
+    }
+   },
+   "Creative": {
+    "3": {
+     "stats": 16,
+     "board": [
+      "Busker 6/6",
+      "Art Student 2/2"
+     ],
+     "sources": [
+      "Art Student 6",
+      "Busker 2"
+     ]
+    },
+    "6": {
+     "stats": 75,
+     "board": [
+      "Open Mic Poet 12/10",
+      "Ghostwriter 10/9",
+      "Merch Stand 4/3",
+      "Memorial Mural 4/5",
+      "Conceptual Artist 4/3",
+      "Art Critic 6/5"
+     ],
+     "sources": [
+      "Ghostwriter 16",
+      "Open Mic Poet 12",
+      "Memorial Mural 8"
+     ]
+    },
+    "9": {
+     "stats": 477,
+     "board": [
+      "Open Mic Poet 30/22",
+      "Merch Stand 41/34",
+      "Memorial Mural 30/25",
+      "Indie Band 38/31",
+      "★ Biopic 49/47",
+      "Art Critic 40/33",
+      "★ Museum Retrospective 28/28"
+     ],
+     "sources": [
+      "Biopic 176",
+      "Museum Retrospective 72",
+      "Memorial Mural 44",
+      "Indie Band 42"
+     ]
+    },
+    "13": {
+     "stats": 3323,
+     "board": [
+      "★ Merch Stand 283/285",
+      "★ Biopic 285/291",
+      "Museum Retrospective 239/243",
+      "★ Lawyer Next Door 251/263",
+      "★ Crossover Hit 259/261",
+      "★ Dead Rock Star 137/137",
+      "★ Block Party Host 195/195"
+     ],
+     "sources": [
+      "Biopic 1232",
+      "Dead Rock Star 1193",
+      "Block Party Host 576",
+      "Museum Retrospective 384"
+     ]
+    }
+   },
+   "Techie": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Nosy Neighbour 2/3",
+      "Package Hoarder 2/5"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 63,
+     "board": [
+      "Pop-Up Ad 11/13",
+      "Battle Pass 3/6",
+      "Caretaker 2/5",
+      "Data Broker 5/7",
+      "Leaf Blower Guy 5/6"
+     ],
+     "sources": [
+      "Battle Pass 20",
+      "Caretaker 12"
+     ]
+    },
+    "9": {
+     "stats": 430,
+     "board": [
+      "Pop-Up Ad 65/59",
+      "Battle Pass 35/28",
+      "Data Broker 37/29",
+      "★ Leaderboard 24/28",
+      "Auto-Renewal 32/28",
+      "World Record 26/23",
+      "Sponsored Streamer 8/9",
+      "Smart Fridge (attached)"
+     ],
+     "sources": [
+      "Leaderboard 110",
+      "World Record 72",
+      "Battle Pass 56",
+      "Smart Fridge 50"
+     ]
+    },
+    "13": {
+     "stats": 1946,
+     "board": [
+      "Pop-Up Ad 231/209",
+      "Battle Pass 145/122",
+      "Data Broker 147/123",
+      "★ Leaderboard 102/106",
+      "Auto-Renewal 142/122",
+      "★ World Record 142/124",
+      "★ Sponsored Streamer 123/109",
+      "Smart Fridge (attached)",
+      "Quantum Computer (attached)"
+     ],
+     "sources": [
+      "World Record 856",
+      "Leaderboard 398",
+      "Sponsored Streamer 168",
+      "Auto-Renewal 156"
+     ]
+    }
+   },
+   "Punk": {
+    "3": {
+     "stats": 12,
+     "board": [
+      "Anarchist Barista 2/3",
+      "Circle Pit 3/4"
+     ],
+     "sources": []
+    },
+    "6": {
+     "stats": 61,
+     "board": [
+      "Pogo Dancer 6/4",
+      "Circle Pit 17/13",
+      "Caretaker 3/6",
+      "Helpful Neighbour 5/7"
+     ],
+     "sources": [
+      "Circle Pit 14",
+      "Caretaker 12",
+      "Pogo Dancer 7",
+      "Helpful Neighbour 4"
+     ]
+    },
+    "9": {
+     "stats": 1452,
+     "board": [
+      "Anarchist Barista 137/119",
+      "Pogo Dancer 121/117",
+      "Circle Pit 134/120",
+      "Bootleg Merch 120/119",
+      "Crowd Surfer 114/114",
+      "Reunion Tour 117/120"
+     ],
+     "sources": [
+      "Jingle Writer 1296",
+      "Crowd Surfer 60",
+      "Circle Pit 40",
+      "Pogo Dancer 30"
+     ]
+    },
+    "13": {
+     "stats": 8599,
+     "board": [
+      "Circle Pit 720/716",
+      "★ Bootleg Merch 725/722",
+      "Crowd Surfer 706/706",
+      "Jingle Writer 717/714",
+      "★ Reunion Tour 723/727",
+      "Greatest Hits 712/711"
+     ],
+     "sources": [
+      "Jingle Writer 8136",
+      "Greatest Hits 228",
+      "Crowd Surfer 135",
+      "Circle Pit 64"
+     ]
+    }
+   },
+   "Philosopher": {
+    "3": {
+     "stats": 17,
+     "board": [
+      "Van Lifer 5/5",
+      "Package Hoarder 2/5"
+     ],
+     "sources": [
+      "Van Lifer 6"
+     ]
+    },
+    "6": {
+     "stats": 65,
+     "board": [
+      "Van Lifer 8/8",
+      "Epicurean 3/7",
+      "Caretaker 2/5",
+      "Pythagorean 5/7",
+      "Follower 5/5",
+      "Follower 5/5"
+     ],
+     "sources": [
+      "Caretaker 12",
+      "Van Lifer 8",
+      "Epicurean 8",
+      "Likes 4"
+     ]
+    },
+    "9": {
+     "stats": 311,
+     "board": [
+      "Declutter Coach 22/29",
+      "Caretaker 12/15",
+      "Utilitarian 26/31",
+      "Thought Experiment 22/20",
+      "Wise Old Owl 23/25",
+      "Bestselling Author 18/20",
+      "★ TED Talk 23/25"
+     ],
+     "sources": [
+      "Bestselling Author 148",
+      "TED Talk 112",
+      "Thought Experiment 70",
+      "Wise Old Owl 48"
+     ]
+    },
+    "13": {
+     "stats": 2729,
+     "board": [
+      "Debate Club 200/202",
+      "★ Thought Experiment 235/235",
+      "Bestselling Author 202/205",
+      "★ TED Talk 216/218",
+      "Wise Old Owl 180/184",
+      "★ New Neighbours 170/174",
+      "★ Grand Unified Theory 150/158"
+     ],
+     "sources": [
+      "Bestselling Author 2712",
+      "TED Talk 1568",
+      "Thought Experiment 548",
+      "Grand Unified Theory 336"
+     ]
+    }
+   }
+  }
+ }
+}
